@@ -114,6 +114,26 @@ export const columnProfiles = [
 
 // ── Correlation Analysis ──
 
+// Full correlation matrix for heatmap
+export const correlationMatrix = [
+  { row: 'sepal_length', col: 'sepal_length', r: 1.000 },
+  { row: 'sepal_length', col: 'sepal_width', r: -0.118 },
+  { row: 'sepal_length', col: 'petal_length', r: 0.872 },
+  { row: 'sepal_length', col: 'petal_width', r: 0.818 },
+  { row: 'sepal_width', col: 'sepal_length', r: -0.118 },
+  { row: 'sepal_width', col: 'sepal_width', r: 1.000 },
+  { row: 'sepal_width', col: 'petal_length', r: -0.428 },
+  { row: 'sepal_width', col: 'petal_width', r: -0.366 },
+  { row: 'petal_length', col: 'sepal_length', r: 0.872 },
+  { row: 'petal_length', col: 'sepal_width', r: -0.428 },
+  { row: 'petal_length', col: 'petal_length', r: 1.000 },
+  { row: 'petal_length', col: 'petal_width', r: 0.963 },
+  { row: 'petal_width', col: 'sepal_length', r: 0.818 },
+  { row: 'petal_width', col: 'sepal_width', r: -0.366 },
+  { row: 'petal_width', col: 'petal_length', r: 0.963 },
+  { row: 'petal_width', col: 'petal_width', r: 1.000 },
+];
+
 export const correlationHighPairs = [
   { col_a: 'petal_length', col_b: 'petal_width', r: 0.963, p_value: 0.0001 },
   { col_a: 'sepal_length', col_b: 'petal_length', r: 0.872, p_value: 0.0001 },

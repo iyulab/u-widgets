@@ -95,6 +95,29 @@ describe('u-metric', () => {
       expect(labelEl?.textContent).toBe('Users');
     });
 
+    it('renders string value', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 'Healthy', label: 'System Status' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      expect(valueEl?.textContent).toContain('Healthy');
+      const labelEl = shadow.querySelector('.metric-label');
+      expect(labelEl?.textContent).toBe('System Status');
+    });
+
+    it('renders string value with unit', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 'v2.4.1', unit: 'release', label: 'Version' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      expect(valueEl?.textContent).toContain('v2.4.1');
+      expect(valueEl?.textContent).toContain('release');
+    });
+
     it('hides label when not provided', async () => {
       const el = createElement({
         widget: 'metric',

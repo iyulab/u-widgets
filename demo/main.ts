@@ -129,6 +129,28 @@ const specs = {
     ],
     mapping: { x: 'height', y: 'weight', color: 'group' },
   },
+  chartBox: {
+    widget: 'chart.box',
+    data: [
+      { group: 'Setosa', min: 4.3, q1: 4.8, median: 5.0, q3: 5.2, max: 5.8 },
+      { group: 'Versicolor', min: 4.9, q1: 5.6, median: 5.9, q3: 6.3, max: 7.0 },
+      { group: 'Virginica', min: 4.9, q1: 6.2, median: 6.5, q3: 6.9, max: 7.9 },
+    ],
+  },
+  chartHeatmap: {
+    widget: 'chart.heatmap',
+    data: [
+      { x: 'Mon', y: 'Morning', value: 10 },
+      { x: 'Mon', y: 'Afternoon', value: 25 },
+      { x: 'Mon', y: 'Evening', value: 18 },
+      { x: 'Tue', y: 'Morning', value: 8 },
+      { x: 'Tue', y: 'Afternoon', value: 32 },
+      { x: 'Tue', y: 'Evening', value: 22 },
+      { x: 'Wed', y: 'Morning', value: 15 },
+      { x: 'Wed', y: 'Afternoon', value: 28 },
+      { x: 'Wed', y: 'Evening', value: 12 },
+    ],
+  },
   chartRadar: {
     widget: 'chart.radar',
     data: [
@@ -222,6 +244,8 @@ bind('demo-chart-area', specs.chartArea);
 bind('demo-chart-pie', specs.chartPie);
 bind('demo-chart-donut', specs.chartDonut);
 bind('demo-chart-scatter', specs.chartScatter);
+bind('demo-chart-box', specs.chartBox);
+bind('demo-chart-heatmap', specs.chartHeatmap);
 bind('demo-chart-radar', specs.chartRadar);
 bind('demo-form', specs.form);
 bind('demo-formdown', specs.formdownForm);

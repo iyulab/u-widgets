@@ -6,7 +6,9 @@ export type ChartType =
   | 'chart.area'
   | 'chart.pie'
   | 'chart.scatter'
-  | 'chart.radar';
+  | 'chart.radar'
+  | 'chart.heatmap'
+  | 'chart.box';
 
 export type WidgetType =
   | ChartType

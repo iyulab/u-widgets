@@ -13,6 +13,14 @@ const catalog: Record<string, { label: string; group: string; spec: object }> = 
       data: { value: 1284, unit: 'EA', label: 'Total Users', change: 12.5, trend: 'up' },
     },
   },
+  'metric-string': {
+    label: 'Metric (string)',
+    group: 'Display',
+    spec: {
+      widget: 'metric',
+      data: { value: 'Healthy', label: 'System Status' },
+    },
+  },
   'stat-group': {
     label: 'Stat Group',
     group: 'Display',
@@ -200,6 +208,54 @@ const catalog: Record<string, { label: string; group: string; spec: object }> = 
         { hour: '20:00', requests: 220 },
       ],
       options: { step: 'end' },
+    },
+  },
+  'chart.heatmap': {
+    label: 'Heatmap',
+    group: 'Charts',
+    spec: {
+      widget: 'chart.heatmap',
+      data: [
+        { x: 'Mon', y: 'Morning', value: 10 },
+        { x: 'Mon', y: 'Afternoon', value: 25 },
+        { x: 'Mon', y: 'Evening', value: 18 },
+        { x: 'Tue', y: 'Morning', value: 8 },
+        { x: 'Tue', y: 'Afternoon', value: 32 },
+        { x: 'Tue', y: 'Evening', value: 22 },
+        { x: 'Wed', y: 'Morning', value: 15 },
+        { x: 'Wed', y: 'Afternoon', value: 28 },
+        { x: 'Wed', y: 'Evening', value: 12 },
+      ],
+    },
+  },
+  'chart.histogram': {
+    label: 'Histogram',
+    group: 'Charts',
+    spec: {
+      widget: 'chart.bar',
+      data: [
+        { bin: '0-10', count: 3 },
+        { bin: '10-20', count: 8 },
+        { bin: '20-30', count: 15 },
+        { bin: '30-40', count: 22 },
+        { bin: '40-50', count: 18 },
+        { bin: '50-60', count: 12 },
+        { bin: '60-70', count: 7 },
+        { bin: '70-80', count: 4 },
+      ],
+      options: { histogram: true },
+    },
+  },
+  'chart.box': {
+    label: 'Boxplot',
+    group: 'Charts',
+    spec: {
+      widget: 'chart.box',
+      data: [
+        { group: 'Setosa', min: 4.3, q1: 4.8, median: 5.0, q3: 5.2, max: 5.8 },
+        { group: 'Versicolor', min: 4.9, q1: 5.6, median: 5.9, q3: 6.3, max: 7.0 },
+        { group: 'Virginica', min: 4.9, q1: 6.2, median: 6.5, q3: 6.9, max: 7.9 },
+      ],
     },
   },
   'chart.radar': {

@@ -4,7 +4,7 @@ import '../src/elements/u-chart.ts';
 
 import {
   datasetProfile, columnProfiles,
-  correlationHighPairs, correlationScatter,
+  correlationMatrix, correlationHighPairs, correlationScatter,
   regressionResult, regressionScatter,
   clusteringResult, clusterSilhouetteByK, clusterScatter,
   pcaResult,
@@ -371,7 +371,19 @@ function renderColumns(): void {
     });
   }
 
-  addGap(section, 'G-04', 'Box plot 미지원 — 수치형 컬럼의 min/Q1/median/Q3/max 시각화에 이상적이나 u-widgets에 chart.box 없음');
+  // Boxplot summary of all numeric columns
+  const boxplotData = numericCols.map(col => ({
+    group: col.name,
+    min: col.numeric!.min,
+    q1: col.numeric!.q1,
+    median: col.numeric!.median,
+    q3: col.numeric!.q3,
+    max: col.numeric!.max,
+  }));
+  addWidget(section, 'Numeric Columns — Box Plot', {
+    widget: 'chart.box',
+    data: boxplotData,
+  }, 'widget-card');
 }
 
 // ── Render: Correlation ──
@@ -379,7 +391,12 @@ function renderColumns(): void {
 function renderCorrelation(): void {
   const section = getSection();
 
-  addGap(section, 'G-01', 'Heatmap 미지원 — 상관행렬(n×n)을 시각적으로 표현할 chart.heatmap 위젯 없음');
+  addWidget(section, 'Correlation Matrix', {
+    widget: 'chart.heatmap',
+    data: correlationMatrix,
+    mapping: { x: 'row', y: 'col', value: 'r' },
+    options: { min: -1, max: 1, colorRange: ['#2166ac', '#67a9cf', '#d1e5f0', '#f7f7f7', '#fddbc7', '#ef8a62', '#b2182b'] },
+  }, 'widget-card');
 
   addWidget(section, 'High Correlation Pairs', {
     widget: 'table',
@@ -603,6 +620,7 @@ function renderDistribution(): void {
     widget: 'chart.bar',
     data: d.histogram,
     mapping: { x: 'bin', y: 'count' },
+    options: { histogram: true },
   });
 
   addWidget(grid, 'QQ-Plot (Normal)', {
@@ -641,8 +659,8 @@ function renderDistribution(): void {
     },
   }, 'widget-card');
 
-  addGap(section, 'G-06', 'Step 함수 라인 미지원 — ECDF 시각화에 chart.line의 step 모드 필요');
-  addGap(section, 'G-08', 'Histogram 전용 모드 없음 — bin edges 기반 히스토그램이 chart.bar와 약간 다른 의미');
+  // G-06 resolved: step line now available via options.step
+  // G-08 resolved: histogram mode now available via options.histogram
 }
 
 // ── Render: Features ──

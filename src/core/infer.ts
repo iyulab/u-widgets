@@ -51,6 +51,15 @@ function inferChart(
     return undefined;
   }
 
+  if (widget === 'chart.heatmap') {
+    const stringFields = keys.filter((k) => typeof sample[k] === 'string');
+    const numberField = keys.find((k) => typeof sample[k] === 'number');
+    if (stringFields.length >= 2 && numberField) {
+      return { x: stringFields[0], y: stringFields[1], value: numberField };
+    }
+    return undefined;
+  }
+
   if (widget === 'chart.radar') {
     const axisField = keys.find((k) => typeof sample[k] === 'string');
     const valueField = keys.find((k) => typeof sample[k] === 'number');
@@ -58,6 +67,17 @@ function inferChart(
       return { axis: axisField, value: valueField };
     }
     return undefined;
+  }
+
+  if (widget === 'chart.box') {
+    const numFields = keys.filter((k) => typeof sample[k] === 'number');
+    if (numFields.length < 5) return undefined;
+    const xField = keys.find((k) => typeof sample[k] === 'string');
+    // Try well-known names first, then take first 5 number fields
+    const wellKnown = ['min', 'q1', 'median', 'q3', 'max'];
+    const matched = wellKnown.filter((name) => numFields.includes(name));
+    const statFields = matched.length === 5 ? matched : numFields.slice(0, 5);
+    return { x: xField, y: statFields };
   }
 
   // bar, line, area, scatter → x/y

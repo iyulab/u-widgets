@@ -5,13 +5,14 @@ import { toEChartsOption } from '../renderers/echarts-adapter.js';
 
 // Tree-shakeable ECharts imports
 import * as echarts from 'echarts/core';
-import { BarChart, LineChart, PieChart, ScatterChart, RadarChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart, ScatterChart, RadarChart, HeatmapChart, BoxplotChart } from 'echarts/charts';
 import {
   GridComponent,
   TooltipComponent,
   LegendComponent,
   RadarComponent,
   MarkLineComponent,
+  VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
@@ -21,11 +22,14 @@ echarts.use([
   PieChart,
   ScatterChart,
   RadarChart,
+  HeatmapChart,
+  BoxplotChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
   RadarComponent,
   MarkLineComponent,
+  VisualMapComponent,
   CanvasRenderer,
 ]);
 

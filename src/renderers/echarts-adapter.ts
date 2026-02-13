@@ -46,6 +46,12 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
     case 'chart.radar':
       result = buildRadar(data, mapping, options);
       break;
+    case 'chart.heatmap':
+      result = buildHeatmap(data, mapping, options);
+      break;
+    case 'chart.box':
+      result = buildBoxplot(data, mapping, options);
+      break;
     default:
       return {};
   }
@@ -89,6 +95,12 @@ function buildCartesian(
 
   const catAxis: Record<string, unknown> = { type: 'category', data: categories };
   const valAxis: Record<string, unknown> = { type: 'value' };
+
+  // Histogram mode: remove gaps between bars
+  if (options.histogram) {
+    catAxis.axisTick = { alignWithLabel: true };
+    seriesItems.forEach((s) => { s.barCategoryGap = '0%'; });
+  }
 
   const result: Record<string, unknown> = {
     xAxis: horizontal ? valAxis : catAxis,
@@ -268,6 +280,143 @@ function buildRadar(
       },
     ],
   };
+}
+
+function buildHeatmap(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data)) return {};
+
+  // Determine x, y (category), value (number) fields
+  const first = data[0] ?? {};
+  const keys = Object.keys(first);
+  const stringFields = keys.filter((k) => typeof first[k] === 'string');
+  const numberFields = keys.filter((k) => typeof first[k] === 'number');
+
+  const xField = mapping?.x ?? stringFields[0];
+  // For heatmap, y is a category field (string), not a numeric series
+  const yField = mapping?.y?.[0] ?? stringFields.find((k) => k !== xField);
+  const valueField = mapping?.value ?? numberFields[0];
+
+  if (!xField || !yField || !valueField) return {};
+
+  // Extract unique categories preserving order of appearance
+  const xCats: string[] = [];
+  const yCats: string[] = [];
+  const xSet = new Set<string>();
+  const ySet = new Set<string>();
+
+  for (const row of data) {
+    const x = String(row[xField] ?? '');
+    const y = String(row[yField] ?? '');
+    if (!xSet.has(x)) { xSet.add(x); xCats.push(x); }
+    if (!ySet.has(y)) { ySet.add(y); yCats.push(y); }
+  }
+
+  // Build [xIndex, yIndex, value] data
+  const heatData: (number | null)[][] = [];
+  let minVal = Infinity;
+  let maxVal = -Infinity;
+
+  for (const row of data) {
+    const xi = xCats.indexOf(String(row[xField] ?? ''));
+    const yi = yCats.indexOf(String(row[yField] ?? ''));
+    const v = row[valueField] != null ? Number(row[valueField]) : null;
+    heatData.push([xi, yi, v]);
+    if (v != null) {
+      if (v < minVal) minVal = v;
+      if (v > maxVal) maxVal = v;
+    }
+  }
+
+  // Handle edge case of empty/no-value data
+  if (!isFinite(minVal)) { minVal = 0; maxVal = 1; }
+
+  // Determine color range from options or use defaults
+  const colorRange = (options.colorRange as string[]) ?? ['#313695', '#4575b4', '#74add1', '#abd9e9', '#fee090', '#fdae61', '#f46d43', '#d73027'];
+
+  return {
+    xAxis: { type: 'category', data: xCats, splitArea: { show: true } },
+    yAxis: { type: 'category', data: yCats, splitArea: { show: true } },
+    visualMap: {
+      min: options.min != null ? Number(options.min) : minVal,
+      max: options.max != null ? Number(options.max) : maxVal,
+      calculable: true,
+      orient: 'horizontal',
+      left: 'center',
+      bottom: 0,
+      inRange: { color: colorRange },
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: (params: Record<string, unknown>) => {
+        const d = params.data as number[];
+        if (!d) return '';
+        return `${xCats[d[0]]} × ${yCats[d[1]]}: ${d[2] != null ? d[2] : '-'}`;
+      },
+    },
+    grid: { bottom: 60 },
+    series: [{
+      type: 'heatmap',
+      data: heatData,
+      label: { show: options.showLabel !== false },
+    }],
+  };
+}
+
+function buildBoxplot(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  _options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data) || data.length === 0) return {};
+
+  const first = data[0] ?? {};
+  const keys = Object.keys(first);
+  const stringFields = keys.filter((k) => typeof first[k] === 'string');
+  const numberFields = keys.filter((k) => typeof first[k] === 'number');
+
+  // Category field (x)
+  const xField = mapping?.x ?? stringFields[0];
+
+  // Stat fields: use mapping.y if provided (5 fields: min, q1, median, q3, max)
+  // Otherwise, try well-known names, then fall back to first 5 number fields
+  let statFields: string[];
+  if (mapping?.y && mapping.y.length >= 5) {
+    statFields = mapping.y.slice(0, 5);
+  } else {
+    const wellKnown = ['min', 'q1', 'median', 'q3', 'max'];
+    const matched = wellKnown.filter((name) => numberFields.includes(name));
+    statFields = matched.length === 5 ? matched : numberFields.slice(0, 5);
+  }
+
+  if (statFields.length < 5) return {};
+
+  const categories = xField ? data.map((row) => String(row[xField] ?? '')) : undefined;
+
+  const boxData = data.map((row) =>
+    statFields.map((f) => Number(row[f] ?? 0)),
+  );
+
+  const result: Record<string, unknown> = {
+    tooltip: { trigger: 'item' },
+    series: [{
+      type: 'boxplot',
+      data: boxData,
+    }],
+  };
+
+  if (categories) {
+    result.xAxis = { type: 'category', data: categories };
+    result.yAxis = { type: 'value' };
+  } else {
+    result.xAxis = { type: 'category' };
+    result.yAxis = { type: 'value' };
+  }
+
+  return result;
 }
 
 // ── Helpers ──

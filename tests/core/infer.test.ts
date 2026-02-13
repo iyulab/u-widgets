@@ -73,6 +73,38 @@ describe('infer', () => {
     });
   });
 
+  describe('chart.heatmap', () => {
+    it('infers x, y (string), and value (number)', () => {
+      const data = [{ row: 'A', col: 'B', corr: 0.87 }];
+      const mapping = infer('chart.heatmap', data);
+      expect(mapping).toEqual({ x: 'row', y: 'col', value: 'corr' });
+    });
+
+    it('returns undefined with fewer than 2 string fields', () => {
+      const data = [{ x: 'A', value: 0.5 }];
+      const mapping = infer('chart.heatmap', data);
+      expect(mapping).toBeUndefined();
+    });
+  });
+
+  describe('chart.box', () => {
+    it('infers boxplot with well-known stat names', () => {
+      const data = [{ group: 'A', min: 10, q1: 25, median: 35, q3: 50, max: 65 }];
+      const mapping = infer('chart.box', data);
+      expect(mapping).toEqual({ x: 'group', y: ['min', 'q1', 'median', 'q3', 'max'] });
+    });
+
+    it('falls back to first 5 number fields', () => {
+      const data = [{ label: 'X', a: 1, b: 2, c: 3, d: 4, e: 5 }];
+      const mapping = infer('chart.box', data);
+      expect(mapping).toEqual({ x: 'label', y: ['a', 'b', 'c', 'd', 'e'] });
+    });
+
+    it('returns undefined with fewer than 5 number fields', () => {
+      expect(infer('chart.box', [{ group: 'A', a: 1, b: 2 }])).toBeUndefined();
+    });
+  });
+
   describe('chart.radar', () => {
     it('infers axis and value', () => {
       const data = [{ skill: 'JS', score: 80 }];
