@@ -58,7 +58,11 @@ export class UGauge extends LitElement {
 
     .gauge-svg {
       width: 100%;
-      max-width: 200px;
+      max-width: var(--u-widget-gauge-size, 160px);
+    }
+
+    .gauge-track {
+      stroke: var(--u-widget-border, #e2e8f0);
     }
 
     .gauge-center {
@@ -164,8 +168,8 @@ export class UGauge extends LitElement {
           <div class="gauge-value" part="value">${value}</div>
           ${opts.unit ? html`<div class="gauge-unit" part="unit">${opts.unit}</div>` : nothing}
         </div>
-        <svg class="gauge-svg" viewBox="0 0 200 160" role="presentation" aria-hidden="true">
-          <path class="gauge-track" d="${trackPath}" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"></path>
+        <svg class="gauge-svg" viewBox="0 0 200 195" role="presentation" aria-hidden="true">
+          <path class="gauge-track" d="${trackPath}" fill="none" stroke-width="12" stroke-linecap="round"></path>
           <path class="gauge-fill" d="${fillPath ?? ''}" fill="none" stroke="${fillPath ? color : 'transparent'}" stroke-width="12" stroke-linecap="round"></path>
         </svg>
       </div>

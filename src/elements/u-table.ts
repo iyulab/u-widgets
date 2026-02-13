@@ -16,6 +16,13 @@ export class UTable extends LitElement {
     /* ── table ── */
     .table-wrapper {
       overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--u-widget-border, #e2e8f0) transparent;
+    }
+    .table-wrapper::-webkit-scrollbar { height: 4px; }
+    .table-wrapper::-webkit-scrollbar-thumb {
+      background: var(--u-widget-border, #e2e8f0);
+      border-radius: 2px;
     }
 
     table {

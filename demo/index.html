@@ -4,36 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>u-widgets Demo</title>
+  <link rel="stylesheet" href="./shared.css" />
   <style>
-    :root {
-      --u-widget-text: #1a1a2e;
-      --u-widget-text-secondary: #64748b;
-      --u-widget-primary: #4f46e5;
-      --u-widget-positive: #16a34a;
-      --u-widget-negative: #dc2626;
-      --u-widget-bg: #fff;
-      --u-widget-surface: #f1f5f9;
-      --u-widget-border: #e2e8f0;
-      --u-widget-gap: 16px;
-      --u-widget-chart-height: 260px;
-    }
-
-    .dark {
-      --u-widget-text: #e2e8f0;
-      --u-widget-text-secondary: #94a3b8;
-      --u-widget-primary: #818cf8;
-      --u-widget-positive: #4ade80;
-      --u-widget-negative: #f87171;
-      --u-widget-bg: #1e293b;
-      --u-widget-surface: #334155;
-      --u-widget-border: #475569;
-      --u-widget-chart-color-1: #818cf8;
-      --u-widget-chart-color-2: #34d399;
-      --u-widget-chart-color-3: #fbbf24;
-      --u-widget-chart-color-4: #f87171;
-      --u-widget-chart-color-5: #a78bfa;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -52,6 +24,34 @@
 
     h1 { font-size: 1.5rem; }
     h2 { font-size: 1.125rem; margin: 1.5rem 0 0.75rem; color: var(--u-widget-text-secondary); }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--u-widget-text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .github-link {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .github-link:hover {
+      background: var(--u-widget-surface);
+    }
 
     .theme-toggle {
       padding: 6px 16px;
@@ -130,8 +130,16 @@
 </head>
 <body>
   <div class="header">
-    <h1>u-widgets Demo</h1>
-    <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+    <div>
+      <h1>u-widgets</h1>
+      <p class="subtitle">Declarative, data-driven widget system for visualization and input</p>
+    </div>
+    <div class="header-actions">
+      <a class="github-link" href="./playground.html">Playground</a>
+      <a class="github-link" href="./insight.html">Insight</a>
+      <a class="github-link" href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
+      <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+    </div>
   </div>
 
   <!-- Display Widgets -->
@@ -194,6 +202,14 @@
       <h3>Donut Chart</h3>
       <u-widget id="demo-chart-donut"></u-widget>
     </div>
+    <div class="card">
+      <h3>Scatter Chart</h3>
+      <u-widget id="demo-chart-scatter"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Radar Chart</h3>
+      <u-widget id="demo-chart-radar"></u-widget>
+    </div>
   </div>
 
   <!-- Input Widgets -->
@@ -202,6 +218,10 @@
     <div class="card">
       <h3>Form</h3>
       <u-widget id="demo-form"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Form (formdown)</h3>
+      <u-widget id="demo-formdown"></u-widget>
     </div>
     <div class="card">
       <h3>Confirm</h3>
@@ -222,8 +242,14 @@
   <div class="playground">
     <h2 style="margin-top:0">Playground</h2>
     <textarea id="spec-input">{
-  "widget": "metric",
-  "data": { "value": 1284, "unit": "EA", "label": "Total Users", "change": 12.5, "trend": "up" }
+    "widget": "metric",
+    "data": {
+        "value": 1284,
+        "unit": "EA",
+        "label": "Total Users",
+        "change": 12.5,
+        "trend": "up"
+    }
 }</textarea>
     <br />
     <button id="render-btn">Render</button>

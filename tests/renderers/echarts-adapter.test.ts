@@ -114,15 +114,65 @@ describe('toEChartsOption', () => {
   });
 
   describe('chart.scatter', () => {
-    it('builds scatter chart', () => {
+    it('builds scatter chart with numeric axes', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.scatter',
         data: [
-          { x: 'A', y: 10 },
-          { x: 'B', y: 20 },
+          { x: 1.5, y: 10 },
+          { x: 2.5, y: 20 },
         ],
       }));
       expect((result.series as ObjArray)[0].type).toBe('scatter');
+      expect((result.xAxis as Obj).type).toBe('value');
+      expect((result.yAxis as Obj).type).toBe('value');
+      expect((result.series as ObjArray)[0].data).toEqual([[1.5, 10], [2.5, 20]]);
+    });
+
+    it('uses explicit x/y mapping', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { pc1: -2.68, pc2: 0.32, cluster: 0 },
+          { pc1: 1.28, pc2: -0.69, cluster: 1 },
+        ],
+        mapping: { x: 'pc1', y: 'pc2' },
+      }));
+      expect((result.series as ObjArray)[0].data).toEqual([[-2.68, 0.32], [1.28, -0.69]]);
+    });
+
+    it('supports color mapping — groups into separate series', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { pc1: -2.68, pc2: 0.32, cluster: 0 },
+          { pc1: -2.89, pc2: -0.11, cluster: 0 },
+          { pc1: 1.28, pc2: -0.69, cluster: 1 },
+          { pc1: 2.53, pc2: 0.56, cluster: 1 },
+        ],
+        mapping: { x: 'pc1', y: 'pc2', color: 'cluster' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(2);
+      expect(series[0].name).toBe('0');
+      expect((series[0].data as number[][]).length).toBe(2);
+      expect(series[1].name).toBe('1');
+      expect((series[1].data as number[][]).length).toBe(2);
+      expect(result.legend).toBeDefined();
+    });
+
+    it('supports color mapping with string categories', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 2, label: 'normal' },
+          { x: 3, y: 4, label: 'anomaly' },
+        ],
+        mapping: { x: 'x', y: 'y', color: 'label' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(2);
+      expect(series[0].name).toBe('normal');
+      expect(series[1].name).toBe('anomaly');
     });
   });
 
@@ -263,6 +313,94 @@ describe('toEChartsOption', () => {
       expect((result.legend as Obj).data).toEqual(['v1', 'v2']);
       expect((result.legend as Obj).orient).toBe('horizontal');
       expect((result.legend as Obj).top).toBe('bottom');
+    });
+  });
+
+  describe('options: referenceLines', () => {
+    it('adds markLine to first series for y-axis reference', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { name: 'A', vif: 5 },
+          { name: 'B', vif: 15 },
+        ],
+        mapping: { x: 'name', y: 'vif' },
+        options: {
+          referenceLines: [
+            { axis: 'y', value: 10, label: 'Threshold', color: 'red', style: 'dashed' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const markLine = series[0].markLine as Obj;
+      expect(markLine).toBeDefined();
+      expect(markLine.silent).toBe(true);
+      const mlData = markLine.data as ObjArray;
+      expect(mlData.length).toBe(1);
+      expect(mlData[0].yAxis).toBe(10);
+      expect(mlData[0].name).toBe('Threshold');
+      expect((mlData[0].lineStyle as Obj).color).toBe('red');
+      expect((mlData[0].lineStyle as Obj).type).toBe('dashed');
+    });
+
+    it('supports x-axis reference lines', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 20 },
+        ],
+        options: {
+          referenceLines: [
+            { axis: 'x', value: 'A' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const mlData = (series[0].markLine as Obj).data as ObjArray;
+      expect(mlData[0].xAxis).toBe('A');
+    });
+
+    it('supports multiple reference lines', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+        options: {
+          referenceLines: [
+            { axis: 'y', value: 5 },
+            { axis: 'y', value: 15, color: 'blue' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const mlData = (series[0].markLine as Obj).data as ObjArray;
+      expect(mlData.length).toBe(2);
+    });
+  });
+
+  describe('options: step', () => {
+    it('sets step on line series (boolean true → "end")', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 20 },
+        ],
+        options: { step: true },
+      }));
+      expect((result.series as ObjArray)[0].step).toBe('end');
+    });
+
+    it('passes string step value directly', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 20 },
+        ],
+        options: { step: 'middle' },
+      }));
+      expect((result.series as ObjArray)[0].step).toBe('middle');
     });
   });
 

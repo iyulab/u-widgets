@@ -1,6 +1,14 @@
 import type { UWidgetSpec, NormalizedMapping } from '../core/types.js';
 import { normalizeMapping } from '../core/normalize.js';
 
+interface ReferenceLineOption {
+  axis: 'x' | 'y';
+  value: number | string;
+  label?: string;
+  color?: string;
+  style?: 'solid' | 'dashed' | 'dotted';
+}
+
 /**
  * Translate a u-widget spec into an ECharts option object.
  * This is a pure function with no DOM or ECharts dependency.
@@ -33,7 +41,7 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
       result = buildPie(data, mapping, options);
       break;
     case 'chart.scatter':
-      result = buildCartesian(data, mapping, 'scatter', options);
+      result = buildScatter(data, mapping, options);
       break;
     case 'chart.radar':
       result = buildRadar(data, mapping, options);
@@ -75,6 +83,7 @@ function buildCartesian(
     };
     if (options._area) s.areaStyle = {};
     if (options.smooth) s.smooth = true;
+    if (options.step) s.step = options.step === true ? 'end' : options.step;
     return s;
   });
 
@@ -96,6 +105,96 @@ function buildCartesian(
     (result.series as Record<string, unknown>[]).forEach((s) => {
       s.stack = 'total';
     });
+  }
+
+  // Reference lines → ECharts markLine on first series
+  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  if (Array.isArray(refLines) && refLines.length > 0 && seriesItems.length > 0) {
+    seriesItems[0].markLine = {
+      silent: true,
+      symbol: 'none',
+      data: refLines.map((rl) => {
+        const item: Record<string, unknown> = {};
+        if (rl.axis === 'x') {
+          item.xAxis = rl.value;
+        } else {
+          item.yAxis = rl.value;
+        }
+        if (rl.label) item.name = rl.label;
+        const lineStyle: Record<string, unknown> = {};
+        if (rl.color) lineStyle.color = rl.color;
+        if (rl.style) lineStyle.type = rl.style;
+        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
+        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
+        return item;
+      }),
+    };
+  }
+
+  return result;
+}
+
+function buildScatter(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data)) return {};
+
+  // For scatter, prefer two numeric fields for x/y
+  const numFields = getNumberFields(data);
+  const xField = mapping?.x ?? numFields[0];
+  const yField = (mapping?.y ?? [numFields[1]])[0];
+  const colorField = mapping?.color;
+
+  if (!xField || !yField) return {};
+
+  const result: Record<string, unknown> = {
+    xAxis: { type: 'value' },
+    yAxis: { type: 'value' },
+    tooltip: { trigger: 'item' },
+  };
+
+  if (colorField) {
+    // Group data by color field → separate series per group
+    const groups = new Map<string, number[][]>();
+    for (const row of data) {
+      const key = String(row[colorField] ?? 'unknown');
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push([Number(row[xField] ?? 0), Number(row[yField] ?? 0)]);
+    }
+    const seriesItems: Record<string, unknown>[] = [];
+    for (const [name, points] of groups) {
+      seriesItems.push({ name, type: 'scatter', data: points });
+    }
+    result.series = seriesItems;
+    result.legend = { data: Array.from(groups.keys()) };
+  } else {
+    // Single series — all points same color
+    const points = data.map((row) => [Number(row[xField] ?? 0), Number(row[yField] ?? 0)]);
+    result.series = [{ type: 'scatter', data: points }];
+  }
+
+  // Reference lines
+  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  if (Array.isArray(refLines) && refLines.length > 0) {
+    const firstSeries = (result.series as Record<string, unknown>[])[0];
+    firstSeries.markLine = {
+      silent: true,
+      symbol: 'none',
+      data: refLines.map((rl) => {
+        const item: Record<string, unknown> = {};
+        if (rl.axis === 'x') item.xAxis = rl.value;
+        else item.yAxis = rl.value;
+        if (rl.label) item.name = rl.label;
+        const lineStyle: Record<string, unknown> = {};
+        if (rl.color) lineStyle.color = rl.color;
+        if (rl.style) lineStyle.type = rl.style;
+        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
+        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
+        return item;
+      }),
+    };
   }
 
   return result;
@@ -123,6 +222,7 @@ function buildPie(
     type: 'pie',
     radius,
     data: pieData,
+    label: { overflow: 'truncate', width: 80 },
   };
 
   if (options.showLabel === false) {

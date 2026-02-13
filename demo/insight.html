@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>u-insight × u-widgets</title>
+  <link rel="stylesheet" href="./shared.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      transition: background 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: var(--u-widget-bg);
+      border-bottom: 1px solid var(--u-widget-border);
+      flex-shrink: 0;
+    }
+
+    .header h1 { font-size: 1.25rem; }
+    .header h1 span { color: var(--u-widget-text-secondary); font-weight: 400; }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .header-link {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-link:hover { background: var(--u-widget-surface); }
+
+    .theme-toggle {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Main layout */
+    .main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 180px;
+      flex-shrink: 0;
+      background: var(--u-widget-bg);
+      border-right: 1px solid var(--u-widget-border);
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    .sidebar-group {
+      padding: 0.5rem 1rem 0.25rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--u-widget-text-secondary);
+      font-weight: 600;
+    }
+
+    .sidebar-item {
+      display: block;
+      width: 100%;
+      padding: 0.4rem 1rem;
+      border: none;
+      background: none;
+      color: var(--u-widget-text);
+      font-size: 0.825rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .sidebar-item:hover { background: var(--u-widget-surface); }
+    .sidebar-item.active {
+      background: var(--u-widget-primary);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--u-widget-text);
+    }
+
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--u-widget-text-secondary);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    /* Widget grid */
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .widget-grid-wide {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .widget-card {
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--u-widget-border);
+    }
+
+    .widget-card h3 {
+      margin-bottom: 0.5rem;
+      color: var(--u-widget-text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* GAP notice */
+    .gap-notice {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: #92400e;
+      margin-bottom: 1rem;
+    }
+
+    .dark .gap-notice {
+      background: #451a03;
+      border-color: #b45309;
+      color: #fde68a;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .sidebar {
+        width: 140px;
+      }
+      .widget-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sidebar {
+        width: 120px;
+        font-size: 0.8rem;
+      }
+      .sidebar-item {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+      }
+      .content {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>u-insight <span>× u-widgets</span></h1>
+    <div class="header-actions">
+      <a class="header-link" href="./">Demo</a>
+      <a class="header-link" href="./playground.html">Playground</a>
+      <a class="header-link" href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
+      <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="content" id="content"></div>
+  </div>
+
+  <script type="module" src="./insight.ts"></script>
+</body>
+</html>

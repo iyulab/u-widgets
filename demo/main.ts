@@ -120,6 +120,26 @@ const specs = {
     ],
     options: { donut: true },
   },
+  chartScatter: {
+    widget: 'chart.scatter',
+    data: [
+      { height: 170, weight: 65, group: 'A' }, { height: 175, weight: 72, group: 'A' },
+      { height: 160, weight: 55, group: 'B' }, { height: 180, weight: 80, group: 'B' },
+      { height: 165, weight: 60, group: 'A' }, { height: 185, weight: 90, group: 'B' },
+    ],
+    mapping: { x: 'height', y: 'weight', color: 'group' },
+  },
+  chartRadar: {
+    widget: 'chart.radar',
+    data: [
+      { skill: 'JS', alice: 90, bob: 70 },
+      { skill: 'CSS', alice: 80, bob: 85 },
+      { skill: 'Node', alice: 75, bob: 60 },
+      { skill: 'React', alice: 95, bob: 65 },
+      { skill: 'SQL', alice: 60, bob: 80 },
+    ],
+    mapping: { axis: 'skill', y: ['alice', 'bob'] },
+  },
   form: {
     widget: 'form',
     fields: [
@@ -133,6 +153,18 @@ const specs = {
       { label: 'Cancel', action: 'cancel' },
       { label: 'Save', action: 'submit', style: 'primary' },
     ],
+  },
+  formdownForm: {
+    widget: 'form',
+    formdown: [
+      '@name*(Name): []',
+      '@email*(Email): @[]',
+      '@volume(Volume): R[min=0,max=100,step=5]',
+      '@notify(Notifications): ^[]',
+      '@tags{JS,TS,Rust,Go}(Skills): ms[]',
+      '@[submit "Save"]',
+      '@[cancel "Reset"]',
+    ].join('\n'),
   },
   confirm: {
     widget: 'confirm',
@@ -189,7 +221,10 @@ bind('demo-chart-line', specs.chartLine);
 bind('demo-chart-area', specs.chartArea);
 bind('demo-chart-pie', specs.chartPie);
 bind('demo-chart-donut', specs.chartDonut);
+bind('demo-chart-scatter', specs.chartScatter);
+bind('demo-chart-radar', specs.chartRadar);
 bind('demo-form', specs.form);
+bind('demo-formdown', specs.formdownForm);
 bind('demo-confirm', specs.confirm);
 bind('demo-compose', specs.compose);
 

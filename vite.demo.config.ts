@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   root: 'demo',
@@ -12,6 +13,11 @@ export default defineConfig({
       // package.json "sideEffects": false + Lit decorator /*#__PURE__*/ annotations
       // cause custom element registrations to be removed otherwise.
       treeshake: false,
+      input: {
+        main: resolve(__dirname, 'demo/index.html'),
+        playground: resolve(__dirname, 'demo/playground.html'),
+        insight: resolve(__dirname, 'demo/insight.html'),
+      },
     },
   },
 });

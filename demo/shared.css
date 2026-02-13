@@ -1,0 +1,34 @@
+/* Shared CSS variables for u-widgets demo pages */
+:root {
+  --u-widget-text: #1a1a2e;
+  --u-widget-text-secondary: #64748b;
+  --u-widget-primary: #4f46e5;
+  --u-widget-positive: #16a34a;
+  --u-widget-negative: #dc2626;
+  --u-widget-bg: #fff;
+  --u-widget-surface: #f1f5f9;
+  --u-widget-border: #e2e8f0;
+  --u-widget-gap: 16px;
+  --u-widget-chart-height: 260px;
+  --u-widget-chart-color-1: #4f46e5;
+  --u-widget-chart-color-2: #16a34a;
+  --u-widget-chart-color-3: #f59e0b;
+  --u-widget-chart-color-4: #dc2626;
+  --u-widget-chart-color-5: #8b5cf6;
+}
+
+.dark {
+  --u-widget-text: #e2e8f0;
+  --u-widget-text-secondary: #94a3b8;
+  --u-widget-primary: #818cf8;
+  --u-widget-positive: #4ade80;
+  --u-widget-negative: #f87171;
+  --u-widget-bg: #1e293b;
+  --u-widget-surface: #334155;
+  --u-widget-border: #475569;
+  --u-widget-chart-color-1: #818cf8;
+  --u-widget-chart-color-2: #34d399;
+  --u-widget-chart-color-3: #fbbf24;
+  --u-widget-chart-color-4: #f87171;
+  --u-widget-chart-color-5: #a78bfa;
+}

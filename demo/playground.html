@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>u-widgets Playground</title>
+  <link rel="stylesheet" href="./shared.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      transition: background 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: var(--u-widget-bg);
+      border-bottom: 1px solid var(--u-widget-border);
+      flex-shrink: 0;
+    }
+
+    .header h1 { font-size: 1.25rem; }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .header-link {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-link:hover {
+      background: var(--u-widget-surface);
+    }
+
+    .theme-toggle {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Main layout: sidebar fixed, content scrolls */
+    .main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 180px;
+      flex-shrink: 0;
+      background: var(--u-widget-bg);
+      border-right: 1px solid var(--u-widget-border);
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    .sidebar-group {
+      padding: 0.5rem 1rem 0.25rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--u-widget-text-secondary);
+      font-weight: 600;
+    }
+
+    .sidebar-item {
+      display: block;
+      width: 100%;
+      padding: 0.4rem 1rem;
+      border: none;
+      background: none;
+      color: var(--u-widget-text);
+      font-size: 0.825rem;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .sidebar-item:hover {
+      background: var(--u-widget-surface);
+    }
+
+    .sidebar-item.active {
+      background: var(--u-widget-primary);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* Content — scrollable column */
+    .content {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Shared panel label */
+    .panel-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--u-widget-text-secondary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Preview ── resizable, widget fills available space */
+    .preview-panel {
+      height: 320px;
+      min-height: 120px;
+      flex-shrink: 0;
+      resize: vertical;
+      overflow: hidden;
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      border: 1px solid var(--u-widget-border);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-area {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: safe center;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    .preview-area > u-widget {
+      width: 100%;
+    }
+
+    /* ── Editor ── fixed height, internal scroll */
+    .editor-panel {
+      flex-shrink: 0;
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      border: 1px solid var(--u-widget-border);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-textarea {
+      width: 100%;
+      height: 280px;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      border: 1px solid var(--u-widget-border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      resize: vertical;
+      tab-size: 2;
+      overflow-y: auto;
+    }
+
+    .editor-textarea:focus {
+      outline: 2px solid var(--u-widget-primary);
+      outline-offset: -1px;
+    }
+
+    .editor-error {
+      color: var(--u-widget-negative);
+      font-size: 0.8rem;
+      margin-top: 0.4rem;
+      min-height: 1.2em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ── Event log ── */
+    .event-log-panel {
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      border: 1px solid var(--u-widget-border);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .event-log {
+      padding: 0.5rem;
+      background: var(--u-widget-surface);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      height: 80px;
+      overflow-y: auto;
+      color: var(--u-widget-text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>u-widgets Playground</h1>
+    <div class="header-actions">
+      <a class="header-link" href="./">Demo</a>
+      <a class="header-link" href="./insight.html">Insight</a>
+      <a class="header-link" href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
+      <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="content">
+      <div class="preview-panel" id="preview-panel">
+        <div class="panel-label">Preview</div>
+        <div class="preview-area">
+          <u-widget id="preview-widget"></u-widget>
+        </div>
+      </div>
+
+      <div class="editor-panel">
+        <div class="panel-label">JSON Spec</div>
+        <textarea class="editor-textarea" id="editor" spellcheck="false"></textarea>
+        <div class="editor-error" id="editor-error"></div>
+      </div>
+
+      <div class="event-log-panel">
+        <div class="panel-label">Event Log</div>
+        <div class="event-log" id="event-log">Events will appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./playground.ts"></script>
+</body>
+</html>
