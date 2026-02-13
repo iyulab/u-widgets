@@ -1,0 +1,147 @@
+import { LitElement, html, css, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import type { UWidgetSpec } from '../core/types.js';
+
+interface MetricData {
+  value: number | string;
+  label?: string;
+  unit?: string;
+  prefix?: string;
+  suffix?: string;
+  change?: number;
+  trend?: 'up' | 'down' | 'flat';
+}
+
+function toMetricData(data: Record<string, unknown>): MetricData {
+  return {
+    value: (data.value as number | string) ?? 0,
+    label: data.label as string | undefined,
+    unit: data.unit as string | undefined,
+    prefix: data.prefix as string | undefined,
+    suffix: data.suffix as string | undefined,
+    change: data.change as number | undefined,
+    trend: data.trend as MetricData['trend'],
+  };
+}
+
+@customElement('u-metric')
+export class UMetric extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── metric (single) ── */
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--u-widget-text, #1a1a2e);
+    }
+
+    .metric-unit {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--u-widget-text-secondary, #64748b);
+      margin-left: 4px;
+    }
+
+    .metric-change {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .metric-change[data-trend='up'] {
+      color: var(--u-widget-positive, #16a34a);
+    }
+
+    .metric-change[data-trend='down'] {
+      color: var(--u-widget-negative, #dc2626);
+    }
+
+    .metric-change[data-trend='flat'] {
+      color: var(--u-widget-text-secondary, #64748b);
+    }
+
+    .metric-label {
+      font-size: 0.8125rem;
+      color: var(--u-widget-text-secondary, #64748b);
+      font-weight: 500;
+    }
+
+    /* ── stat-group ── */
+    .stat-group {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-group .metric {
+      flex: 1;
+      min-width: 100px;
+    }
+  `;
+
+  @property({ type: Object })
+  spec: UWidgetSpec | null = null;
+
+  render() {
+    if (!this.spec?.data) return nothing;
+
+    if (this.spec.widget === 'stat-group') {
+      return this.renderStatGroup();
+    }
+
+    return this.renderMetric(toMetricData(this.spec.data as Record<string, unknown>));
+  }
+
+  private renderStatGroup() {
+    const items = this.spec!.data as Record<string, unknown>[];
+    if (!Array.isArray(items)) return nothing;
+
+    return html`
+      <div class="stat-group" part="stat-group">
+        ${items.map((item) => this.renderMetric(toMetricData(item)))}
+      </div>
+    `;
+  }
+
+  private renderMetric(m: MetricData) {
+    const trendArrow =
+      m.trend === 'up' ? '\u2191' : m.trend === 'down' ? '\u2193' : m.trend === 'flat' ? '\u2192' : '';
+
+    const ariaLabel = m.label
+      ? `${m.label}: ${m.prefix ?? ''}${m.value}${m.unit ?? ''}${m.suffix ?? ''}`
+      : undefined;
+
+    return html`
+      <div class="metric" part="metric" aria-label=${ariaLabel ?? nothing}>
+        ${m.label ? html`<div class="metric-label" part="label">${m.label}</div>` : nothing}
+        <div class="metric-value" part="value">
+          ${m.prefix ?? ''}${m.value}${m.unit ? html`<span class="metric-unit">${m.unit}</span>` : ''}${m.suffix ?? ''}
+        </div>
+        ${m.change != null
+          ? html`<span class="metric-change" data-trend=${m.trend ?? 'flat'} part="change"
+              >${trendArrow} ${m.change > 0 ? '+' : ''}${m.change}%</span
+            >`
+          : nothing}
+      </div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'u-metric': UMetric;
+  }
+}

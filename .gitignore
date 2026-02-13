@@ -1,0 +1,28 @@
+# Local
+claudedocs/
+dev-docs/
+CLAUDE.md
+nul
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+
+# Env
+.env
+.env.local

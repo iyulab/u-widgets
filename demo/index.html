@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>u-widgets Demo</title>
+  <style>
+    :root {
+      --u-widget-text: #1a1a2e;
+      --u-widget-text-secondary: #64748b;
+      --u-widget-primary: #4f46e5;
+      --u-widget-positive: #16a34a;
+      --u-widget-negative: #dc2626;
+      --u-widget-bg: #fff;
+      --u-widget-surface: #f1f5f9;
+      --u-widget-border: #e2e8f0;
+      --u-widget-gap: 16px;
+      --u-widget-chart-height: 260px;
+    }
+
+    .dark {
+      --u-widget-text: #e2e8f0;
+      --u-widget-text-secondary: #94a3b8;
+      --u-widget-primary: #818cf8;
+      --u-widget-positive: #4ade80;
+      --u-widget-negative: #f87171;
+      --u-widget-bg: #1e293b;
+      --u-widget-surface: #334155;
+      --u-widget-border: #475569;
+      --u-widget-chart-color-1: #818cf8;
+      --u-widget-chart-color-2: #34d399;
+      --u-widget-chart-color-3: #fbbf24;
+      --u-widget-chart-color-4: #f87171;
+      --u-widget-chart-color-5: #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 2rem;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.125rem; margin: 1.5rem 0 0.75rem; color: var(--u-widget-text-secondary); }
+
+    .theme-toggle {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    .grid-wide { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
+    .card {
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid var(--u-widget-border);
+    }
+
+    .card h3 {
+      margin-bottom: 0.5rem;
+      color: var(--u-widget-text-secondary);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .playground {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      border: 1px solid var(--u-widget-border);
+    }
+
+    textarea {
+      width: 100%;
+      height: 140px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      border: 1px solid var(--u-widget-border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      resize: vertical;
+    }
+
+    .playground button {
+      margin-top: 0.5rem;
+      padding: 8px 20px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      background: var(--u-widget-primary);
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .event-log {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--u-widget-surface);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      max-height: 120px;
+      overflow-y: auto;
+      color: var(--u-widget-text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>u-widgets Demo</h1>
+    <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+  </div>
+
+  <!-- Display Widgets -->
+  <h2>Display Widgets</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Metric</h3>
+      <u-widget id="demo-metric"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Stat Group</h3>
+      <u-widget id="demo-stat-group"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Gauge</h3>
+      <u-widget id="demo-gauge"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Progress</h3>
+      <u-widget id="demo-progress"></u-widget>
+    </div>
+  </div>
+
+  <h2>Data Widgets</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Table</h3>
+      <u-widget id="demo-table"></u-widget>
+    </div>
+    <div class="card">
+      <h3>List</h3>
+      <u-widget id="demo-list"></u-widget>
+    </div>
+  </div>
+
+  <!-- Chart Widgets -->
+  <h2>Chart Widgets</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Bar Chart</h3>
+      <u-widget id="demo-chart-bar"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Horizontal Bar</h3>
+      <u-widget id="demo-chart-hbar"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Line Chart (smooth)</h3>
+      <u-widget id="demo-chart-line"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Area Chart</h3>
+      <u-widget id="demo-chart-area"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Pie Chart</h3>
+      <u-widget id="demo-chart-pie"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Donut Chart</h3>
+      <u-widget id="demo-chart-donut"></u-widget>
+    </div>
+  </div>
+
+  <!-- Input Widgets -->
+  <h2>Input Widgets</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Form</h3>
+      <u-widget id="demo-form"></u-widget>
+    </div>
+    <div class="card">
+      <h3>Confirm</h3>
+      <u-widget id="demo-confirm"></u-widget>
+    </div>
+  </div>
+
+  <!-- Compose -->
+  <h2>Compose</h2>
+  <div class="grid-wide">
+    <div class="card">
+      <h3>Dashboard (compose)</h3>
+      <u-widget id="demo-compose"></u-widget>
+    </div>
+  </div>
+
+  <!-- Playground -->
+  <div class="playground">
+    <h2 style="margin-top:0">Playground</h2>
+    <textarea id="spec-input">{
+  "widget": "metric",
+  "data": { "value": 1284, "unit": "EA", "label": "Total Users", "change": 12.5, "trend": "up" }
+}</textarea>
+    <br />
+    <button id="render-btn">Render</button>
+    <div style="margin-top: 1rem;">
+      <u-widget id="demo-custom"></u-widget>
+    </div>
+    <div class="event-log" id="event-log">Events will appear here...</div>
+  </div>
+
+  <script type="module">
+    import '../src/index.ts';
+    import '../src/charts.ts';
+
+    // ── Demo Specs ──
+
+    const specs = {
+      metric: {
+        widget: 'metric',
+        data: { value: 1284, unit: 'EA', label: 'Total Users', change: 12.5, trend: 'up' },
+      },
+      statGroup: {
+        widget: 'stat-group',
+        data: [
+          { value: 42, label: 'Active', change: 5, trend: 'up' },
+          { value: 18, label: 'Pending', change: -3, trend: 'down' },
+          { value: 7, label: 'Errors', trend: 'flat' },
+        ],
+      },
+      gauge: {
+        widget: 'gauge',
+        data: { value: 73 },
+        options: {
+          min: 0, max: 100, unit: '%',
+          thresholds: [
+            { to: 50, color: 'green' },
+            { to: 80, color: 'yellow' },
+            { to: 100, color: 'red' },
+          ],
+        },
+      },
+      progress: {
+        widget: 'progress',
+        data: { value: 680, max: 1000 },
+        options: { label: '{value} / 1000 ({percent}%)' },
+      },
+      table: {
+        widget: 'table',
+        data: [
+          { name: 'Alice', role: 'Engineer', status: 'Active', salary: 95000 },
+          { name: 'Bob', role: 'Designer', status: 'Away', salary: 82000 },
+          { name: 'Carol', role: 'PM', status: 'Active', salary: 105000 },
+        ],
+        mapping: {
+          columns: [
+            { field: 'name', label: 'Name' },
+            { field: 'role', label: 'Role' },
+            { field: 'status', label: 'Status' },
+            { field: 'salary', label: 'Salary', format: 'currency', align: 'right' },
+          ],
+        },
+      },
+      list: {
+        widget: 'list',
+        data: [
+          { name: 'Deploy to production', category: 'DevOps', status: 'Done' },
+          { name: 'Fix login bug', category: 'Backend', status: 'In Progress' },
+          { name: 'Update docs', category: 'Docs', status: 'Todo' },
+        ],
+        mapping: { primary: 'name', secondary: 'status', icon: 'category' },
+      },
+      chartBar: {
+        widget: 'chart.bar',
+        data: [
+          { month: 'Jan', sales: 120, returns: 15 },
+          { month: 'Feb', sales: 200, returns: 20 },
+          { month: 'Mar', sales: 150, returns: 10 },
+          { month: 'Apr', sales: 280, returns: 30 },
+        ],
+        mapping: { x: 'month', y: ['sales', 'returns'] },
+      },
+      chartHBar: {
+        widget: 'chart.bar',
+        data: [
+          { lang: 'JavaScript', pct: 65 },
+          { lang: 'Python', pct: 48 },
+          { lang: 'TypeScript', pct: 35 },
+          { lang: 'Rust', pct: 15 },
+        ],
+        options: { horizontal: true },
+      },
+      chartLine: {
+        widget: 'chart.line',
+        data: [
+          { day: 'Mon', cpu: 45, mem: 62 },
+          { day: 'Tue', cpu: 52, mem: 58 },
+          { day: 'Wed', cpu: 68, mem: 71 },
+          { day: 'Thu', cpu: 42, mem: 65 },
+          { day: 'Fri', cpu: 55, mem: 60 },
+        ],
+        mapping: { x: 'day', y: ['cpu', 'mem'] },
+        options: { smooth: true },
+      },
+      chartArea: {
+        widget: 'chart.area',
+        data: [
+          { hour: '00:00', traffic: 120 },
+          { hour: '06:00', traffic: 80 },
+          { hour: '12:00', traffic: 350 },
+          { hour: '18:00', traffic: 410 },
+          { hour: '23:00', traffic: 180 },
+        ],
+        options: { smooth: true },
+      },
+      chartPie: {
+        widget: 'chart.pie',
+        data: [
+          { browser: 'Chrome', share: 65 },
+          { browser: 'Firefox', share: 15 },
+          { browser: 'Safari', share: 12 },
+          { browser: 'Edge', share: 8 },
+        ],
+      },
+      chartDonut: {
+        widget: 'chart.pie',
+        data: [
+          { category: 'Completed', count: 42 },
+          { category: 'In Progress', count: 18 },
+          { category: 'Blocked', count: 5 },
+        ],
+        options: { donut: true },
+      },
+      form: {
+        widget: 'form',
+        fields: [
+          { field: 'name', label: 'Name', type: 'text', required: true, placeholder: 'Enter your name' },
+          { field: 'email', label: 'Email', type: 'text', placeholder: 'user@example.com' },
+          { field: 'role', label: 'Role', type: 'select', options: ['Engineer', 'Designer', 'PM'] },
+          { field: 'notify', label: 'Email notifications', type: 'toggle' },
+        ],
+        data: { name: '', email: '', role: '', notify: true },
+        actions: [
+          { label: 'Cancel', action: 'cancel' },
+          { label: 'Save', action: 'submit', style: 'primary' },
+        ],
+      },
+      confirm: {
+        widget: 'confirm',
+        title: 'Delete Project',
+        description: 'Are you sure you want to delete this project? This action cannot be undone.',
+        actions: [
+          { label: 'Cancel', action: 'cancel' },
+          { label: 'Delete', action: 'submit', style: 'danger' },
+        ],
+      },
+      compose: {
+        widget: 'compose',
+        title: 'System Overview',
+        layout: 'grid',
+        columns: 3,
+        children: [
+          {
+            widget: 'metric',
+            data: { value: 99.9, unit: '%', label: 'Uptime', change: 0.1, trend: 'up' },
+          },
+          {
+            widget: 'metric',
+            data: { value: 142, label: 'Requests/s', change: -5, trend: 'down' },
+          },
+          {
+            widget: 'gauge',
+            data: { value: 45 },
+            options: { min: 0, max: 100, unit: '%',
+              thresholds: [{ to: 60, color: 'green' }, { to: 80, color: 'yellow' }, { to: 100, color: 'red' }],
+            },
+          },
+        ],
+      },
+    };
+
+    // ── Bind Widgets ──
+
+    const bind = (id, spec) => {
+      const el = document.getElementById(id);
+      if (el) el.spec = spec;
+    };
+
+    bind('demo-metric', specs.metric);
+    bind('demo-stat-group', specs.statGroup);
+    bind('demo-gauge', specs.gauge);
+    bind('demo-progress', specs.progress);
+    bind('demo-table', specs.table);
+    bind('demo-list', specs.list);
+    bind('demo-chart-bar', specs.chartBar);
+    bind('demo-chart-hbar', specs.chartHBar);
+    bind('demo-chart-line', specs.chartLine);
+    bind('demo-chart-area', specs.chartArea);
+    bind('demo-chart-pie', specs.chartPie);
+    bind('demo-chart-donut', specs.chartDonut);
+    bind('demo-form', specs.form);
+    bind('demo-confirm', specs.confirm);
+    bind('demo-compose', specs.compose);
+
+    // ── Theme Toggle ──
+
+    const btn = document.getElementById('theme-btn');
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      btn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+    });
+
+    // ── Playground ──
+
+    document.getElementById('render-btn').addEventListener('click', () => {
+      try {
+        const json = JSON.parse(document.getElementById('spec-input').value);
+        document.getElementById('demo-custom').spec = json;
+      } catch (e) {
+        alert('Invalid JSON: ' + e.message);
+      }
+    });
+
+    // ── Event Log ──
+
+    const log = document.getElementById('event-log');
+    document.addEventListener('u-widget-event', (e) => {
+      const line = document.createElement('div');
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${JSON.stringify(e.detail)}`;
+      log.prepend(line);
+    });
+  </script>
+</body>
+</html>
