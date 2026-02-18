@@ -20,37 +20,63 @@ export interface WidgetInfo {
   mappingKeys: string[];
   /** Expected data shape. */
   dataShape: 'object' | 'array' | 'none';
+  /** Data fields description (what keys to include in `data`). */
+  dataFields?: string;
+  /** Supported `options` keys with descriptions. */
+  optionsDocs?: string;
 }
 
 const CATALOG: readonly WidgetInfo[] = [
   // Charts
-  { widget: 'chart.bar', category: 'chart', description: 'Bar chart for category × value comparison', mappingKeys: ['x', 'y'], dataShape: 'array' },
-  { widget: 'chart.line', category: 'chart', description: 'Line chart for trends over a category axis', mappingKeys: ['x', 'y'], dataShape: 'array' },
-  { widget: 'chart.area', category: 'chart', description: 'Area chart (filled line chart)', mappingKeys: ['x', 'y'], dataShape: 'array' },
-  { widget: 'chart.pie', category: 'chart', description: 'Pie or donut chart for proportions', mappingKeys: ['label', 'value'], dataShape: 'array' },
+  { widget: 'chart.bar', category: 'chart', description: 'Bar chart for category × value comparison', mappingKeys: ['x', 'y'], dataShape: 'array',
+    optionsDocs: 'stacked (boolean), horizontal (boolean)' },
+  { widget: 'chart.line', category: 'chart', description: 'Line chart for trends over a category axis', mappingKeys: ['x', 'y'], dataShape: 'array',
+    optionsDocs: 'smooth (boolean), stacked (boolean)' },
+  { widget: 'chart.area', category: 'chart', description: 'Area chart (filled line chart)', mappingKeys: ['x', 'y'], dataShape: 'array',
+    optionsDocs: 'smooth (boolean), stacked (boolean)' },
+  { widget: 'chart.pie', category: 'chart', description: 'Pie or donut chart for proportions', mappingKeys: ['label', 'value'], dataShape: 'array',
+    optionsDocs: 'donut (boolean)' },
   { widget: 'chart.scatter', category: 'chart', description: 'Scatter plot for two numeric dimensions', mappingKeys: ['x', 'y', 'color', 'size'], dataShape: 'array' },
-  { widget: 'chart.radar', category: 'chart', description: 'Radar chart for multi-axis comparison', mappingKeys: ['axis', 'value'], dataShape: 'array' },
-  { widget: 'chart.heatmap', category: 'chart', description: 'Heatmap for matrix data visualization', mappingKeys: ['x', 'y', 'value'], dataShape: 'array' },
-  { widget: 'chart.box', category: 'chart', description: 'Box plot for statistical distribution', mappingKeys: ['x', 'y'], dataShape: 'array' },
+  { widget: 'chart.radar', category: 'chart', description: 'Radar chart for multi-axis comparison', mappingKeys: ['axis', 'value'], dataShape: 'array',
+    dataFields: 'axis (string): indicator label; value fields (number): one per series' },
+  { widget: 'chart.heatmap', category: 'chart', description: 'Heatmap for matrix data visualization', mappingKeys: ['x', 'y', 'value'], dataShape: 'array',
+    dataFields: 'x (string): column category; y (string): row category; value (number): cell intensity' },
+  { widget: 'chart.box', category: 'chart', description: 'Box plot for statistical distribution', mappingKeys: ['x', 'y'], dataShape: 'array',
+    dataFields: 'x (string): group name; min, q1, median, q3, max (number): five-number summary' },
   { widget: 'chart.funnel', category: 'chart', description: 'Funnel chart for sequential stages', mappingKeys: ['label', 'value'], dataShape: 'array' },
   { widget: 'chart.waterfall', category: 'chart', description: 'Waterfall chart for cumulative values', mappingKeys: ['x', 'y'], dataShape: 'array' },
-  { widget: 'chart.treemap', category: 'chart', description: 'Treemap for hierarchical data', mappingKeys: [], dataShape: 'array' },
+  { widget: 'chart.treemap', category: 'chart', description: 'Treemap for hierarchical data', mappingKeys: [], dataShape: 'array',
+    dataFields: 'name (string): node label; value (number): node size; children (array, optional): nested nodes' },
   // Display
-  { widget: 'metric', category: 'display', description: 'Single KPI value with optional trend', mappingKeys: [], dataShape: 'object' },
-  { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array' },
-  { widget: 'gauge', category: 'display', description: 'Arc gauge for a value within a range', mappingKeys: [], dataShape: 'object' },
-  { widget: 'progress', category: 'display', description: 'Progress bar for a value within a range', mappingKeys: [], dataShape: 'object' },
-  { widget: 'table', category: 'display', description: 'Sortable data table with auto-inferred columns', mappingKeys: ['columns'], dataShape: 'array' },
-  { widget: 'list', category: 'display', description: 'Structured list with avatars and trailing values', mappingKeys: ['primary', 'secondary', 'avatar', 'icon', 'trailing'], dataShape: 'array' },
+  { widget: 'metric', category: 'display', description: 'Single KPI value with optional trend', mappingKeys: [], dataShape: 'object',
+    dataFields: 'value (number): the KPI number; unit (string?): display unit; change (number?): delta; trend ("up"|"down"?)' },
+  { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array',
+    dataFields: 'label (string): stat name; value (number): stat value; suffix (string?): unit suffix' },
+  { widget: 'gauge', category: 'display', description: 'Arc gauge for a value within a range', mappingKeys: [], dataShape: 'object',
+    dataFields: 'value (number): current value',
+    optionsDocs: 'min (number), max (number), unit (string), thresholds (array of {value,color})' },
+  { widget: 'progress', category: 'display', description: 'Progress bar for a value within a range', mappingKeys: [], dataShape: 'object',
+    dataFields: 'value (number): current value',
+    optionsDocs: 'min (number), max (number), unit (string)' },
+  { widget: 'table', category: 'display', description: 'Sortable data table with auto-inferred columns', mappingKeys: ['columns'], dataShape: 'array',
+    optionsDocs: 'pageSize (number), compact (boolean), locale (string)' },
+  { widget: 'list', category: 'display', description: 'Structured list with avatars and trailing values', mappingKeys: ['primary', 'secondary', 'avatar', 'icon', 'trailing'], dataShape: 'array',
+    optionsDocs: 'compact (boolean)' },
   // Input
-  { widget: 'form', category: 'input', description: 'Data entry form with typed fields', mappingKeys: [], dataShape: 'object' },
+  { widget: 'form', category: 'input', description: 'Data entry form with typed fields', mappingKeys: [], dataShape: 'object',
+    dataFields: 'data provides default values for fields',
+    optionsDocs: 'locale (string): validation message language' },
   { widget: 'confirm', category: 'input', description: 'Yes/no confirmation dialog', mappingKeys: [], dataShape: 'object' },
   // Content
-  { widget: 'markdown', category: 'content', description: 'Render markdown text', mappingKeys: [], dataShape: 'object' },
-  { widget: 'image', category: 'content', description: 'Display an image', mappingKeys: [], dataShape: 'object' },
-  { widget: 'callout', category: 'content', description: 'Callout/alert banner', mappingKeys: [], dataShape: 'object' },
+  { widget: 'markdown', category: 'content', description: 'Render markdown text (headers, bold, italic, code, links, lists, tables)', mappingKeys: [], dataShape: 'object',
+    dataFields: 'content (string): markdown text, or pass string directly as data' },
+  { widget: 'image', category: 'content', description: 'Display an image', mappingKeys: [], dataShape: 'object',
+    dataFields: 'src (string): image URL; alt (string): alt text; caption (string?): caption text' },
+  { widget: 'callout', category: 'content', description: 'Callout/alert banner', mappingKeys: [], dataShape: 'object',
+    dataFields: 'message (string): body text; level ("info"|"warning"|"error"|"success"); title (string?): optional heading' },
   // Composition
-  { widget: 'compose', category: 'composition', description: 'Combine multiple widgets with layout hints', mappingKeys: [], dataShape: 'none' },
+  { widget: 'compose', category: 'composition', description: 'Combine multiple widgets with layout hints', mappingKeys: [], dataShape: 'none',
+    optionsDocs: 'layout ("stack"|"row"|"grid"), columns (number, for grid), children (array of widget specs)' },
 ];
 
 /**

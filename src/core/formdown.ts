@@ -94,7 +94,10 @@ export function parseFormdown(input: string, _data?: Record<string, unknown>): F
 
     // Try field line
     const fieldMatch = FIELD_RE.exec(line);
-    if (!fieldMatch) continue;
+    if (!fieldMatch) {
+      console.debug(`[u-widget:formdown] Skipping unrecognized line: "${line}"`);
+      continue;
+    }
 
     const fieldName = fieldMatch[1];
     const required = fieldMatch[2] === '*';
@@ -155,11 +158,20 @@ function parseInlineAttrs(attrs: string, field: UWidgetFieldDefinition): void {
       case 'step':
         field.step = Number(val);
         break;
+      case 'minlength':
+        field.minLength = Number(val);
+        break;
       case 'maxlength':
         field.maxLength = Number(val);
         break;
+      case 'pattern':
+        field.pattern = val;
+        break;
       case 'placeholder':
         field.placeholder = val;
+        break;
+      default:
+        console.debug(`[u-widget:formdown] Unknown inline attribute "${key}" on field "${field.field}"`);
         break;
     }
   }

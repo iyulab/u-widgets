@@ -23,10 +23,13 @@ export interface UWidgetLocaleStrings {
 
   // Validation messages — form (templates with {label}, {min}, {max})
   required: string;
+  minLength: string;
   maxLength: string;
   minValue: string;
   maxValue: string;
   invalidEmail: string;
+  invalidUrl: string;
+  invalidPattern: string;
 }
 
 const EN: UWidgetLocaleStrings = {
@@ -44,10 +47,13 @@ const EN: UWidgetLocaleStrings = {
 
   // Validation
   required: '{label} is required',
+  minLength: '{label} must be at least {min} characters',
   maxLength: '{label} must be at most {max} characters',
   minValue: '{label} must be at least {min}',
   maxValue: '{label} must be at most {max}',
   invalidEmail: '{label} must be a valid email address',
+  invalidUrl: '{label} must be a valid URL',
+  invalidPattern: '{label} format is invalid',
 };
 
 const registry = new Map<string, UWidgetLocaleStrings>();

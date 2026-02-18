@@ -7,6 +7,7 @@
 
 import type { UWidgetSpec, UWidgetMapping } from './types.js';
 import { infer } from './infer.js';
+import { isDateLikeString } from './utils.js';
 
 /** A widget + mapping recommendation. */
 export interface MappingSuggestion {
@@ -96,6 +97,21 @@ export function suggestMapping(
     });
   }
 
+  // Array with date-like strings + numbers → chart.area (time-series)
+  if (isArray && stringKeys.length >= 1 && numberKeys.length >= 1) {
+    const hasDateField = stringKeys.some((k) =>
+      isDateLikeString(String(records[0][k])));
+    if (hasDateField) {
+      const mapping = infer('chart.area', data);
+      suggestions.push({
+        widget: 'chart.area',
+        mapping,
+        confidence: 0.75,
+        reason: 'Date-like category field detected — suitable for time-series area chart',
+      });
+    }
+  }
+
   // Array with label+value → chart.pie
   if (isArray && stringKeys.length >= 1 && numberKeys.length === 1) {
     const mapping = infer('chart.pie', data);
@@ -139,13 +155,100 @@ export function suggestMapping(
     });
   }
 
-  // Single object without 'value' but with numbers → gauge
-  if (!isArray && numberKeys.length >= 1 && numberKeys.includes('value')) {
+  // Single object with value + min/max → progress
+  if (!isArray && numberKeys.includes('value') && (numberKeys.includes('min') || numberKeys.includes('max'))) {
+    suggestions.push({
+      widget: 'progress',
+      confidence: 0.85,
+      reason: 'Object with "value" and "min"/"max" is ideal for a progress bar',
+    });
+  }
+
+  // Single object with value → gauge (lower priority than metric/progress)
+  if (!isArray && numberKeys.includes('value')) {
     suggestions.push({
       widget: 'gauge',
       confidence: 0.7,
       reason: 'Object with "value" can display as a gauge',
     });
+  }
+
+  // Array with 2+ numbers and a string → chart.radar
+  if (isArray && stringKeys.length >= 1 && numberKeys.length >= 2) {
+    const mapping = infer('chart.radar', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.radar',
+        mapping,
+        confidence: 0.6,
+        reason: 'Category × multiple values can display as a radar chart',
+      });
+    }
+  }
+
+  // Array with 2 string + 1 number → chart.heatmap
+  if (isArray && stringKeys.length >= 2 && numberKeys.length >= 1) {
+    const mapping = infer('chart.heatmap', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.heatmap',
+        mapping,
+        confidence: 0.65,
+        reason: 'Two categories × value pattern suits a heatmap',
+      });
+    }
+  }
+
+  // Array with 5+ numbers → chart.box
+  if (isArray && numberKeys.length >= 5) {
+    const mapping = infer('chart.box', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.box',
+        mapping,
+        confidence: 0.7,
+        reason: 'Five or more numeric fields fit a box plot (min/q1/median/q3/max)',
+      });
+    }
+  }
+
+  // Array with label+value (same as pie) → chart.funnel
+  if (isArray && stringKeys.length >= 1 && numberKeys.length === 1) {
+    const mapping = infer('chart.funnel', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.funnel',
+        mapping,
+        confidence: 0.45,
+        reason: 'Label + value pattern can display as a funnel',
+      });
+    }
+  }
+
+  // Array with label+value → chart.waterfall
+  if (isArray && stringKeys.length >= 1 && numberKeys.length >= 1) {
+    const mapping = infer('chart.waterfall', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.waterfall',
+        mapping,
+        confidence: 0.4,
+        reason: 'Category × value pattern can display as a waterfall chart',
+      });
+    }
+  }
+
+  // Array with label+value → chart.treemap
+  if (isArray && stringKeys.length >= 1 && numberKeys.length >= 1) {
+    const mapping = infer('chart.treemap', data);
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.treemap',
+        mapping,
+        confidence: 0.35,
+        reason: 'Category × value pattern can display as a treemap',
+      });
+    }
   }
 
   // Array of objects with label/value/suffix → stat-group
@@ -171,6 +274,7 @@ export function suggestMapping(
  * @param data - The data to analyze.
  * @returns A complete spec, or `undefined` if no suggestion could be made.
  */
+
 export function autoSpec(data: Record<string, unknown> | Record<string, unknown>[]): UWidgetSpec | undefined {
   const suggestions = suggestMapping(data);
   if (suggestions.length === 0) return undefined;

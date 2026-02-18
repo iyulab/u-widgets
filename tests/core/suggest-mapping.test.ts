@@ -78,6 +78,59 @@ describe('suggestMapping', () => {
     const suggestions = suggestMapping(data);
     expect(suggestions.some((s) => s.widget === 'chart.line')).toBe(true);
   });
+
+  it('suggests chart.radar for category with multiple numeric fields', () => {
+    const data = [
+      { axis: 'Speed', player1: 80, player2: 90 },
+      { axis: 'Power', player1: 70, player2: 60 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.radar')).toBe(true);
+  });
+
+  it('suggests chart.heatmap for 2 string + 1 number pattern', () => {
+    const data = [
+      { day: 'Mon', hour: '9am', temp: 22 },
+      { day: 'Tue', hour: '10am', temp: 25 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.heatmap')).toBe(true);
+  });
+
+  it('suggests chart.box for 5+ numeric fields', () => {
+    const data = [
+      { group: 'A', min: 10, q1: 25, median: 50, q3: 75, max: 90 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.box')).toBe(true);
+  });
+
+  it('suggests chart.funnel for label + single value', () => {
+    const data = [
+      { stage: 'Visit', count: 1000 },
+      { stage: 'Signup', count: 500 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.funnel')).toBe(true);
+  });
+
+  it('suggests chart.waterfall for category + value', () => {
+    const data = [
+      { item: 'Revenue', amount: 100 },
+      { item: 'Cost', amount: -60 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.waterfall')).toBe(true);
+  });
+
+  it('suggests chart.treemap for category + value', () => {
+    const data = [
+      { category: 'Tech', size: 300 },
+      { category: 'Health', size: 200 },
+    ];
+    const suggestions = suggestMapping(data);
+    expect(suggestions.some((s) => s.widget === 'chart.treemap')).toBe(true);
+  });
 });
 
 describe('autoSpec', () => {
@@ -99,5 +152,43 @@ describe('autoSpec', () => {
 
   it('returns undefined for empty data', () => {
     expect(autoSpec([])).toBeUndefined();
+  });
+});
+
+describe('non-chart suggestions', () => {
+  it('suggests progress for object with value + max', () => {
+    const data = { value: 75, max: 100 };
+    const suggestions = suggestMapping(data);
+    const progress = suggestions.find((s) => s.widget === 'progress');
+    expect(progress).toBeDefined();
+    expect(progress!.confidence).toBeGreaterThanOrEqual(0.8);
+  });
+
+  it('suggests gauge for object with value only', () => {
+    const data = { value: 42 };
+    const suggestions = suggestMapping(data);
+    const gauge = suggestions.find((s) => s.widget === 'gauge');
+    expect(gauge).toBeDefined();
+  });
+
+  it('suggests chart.area for date-like time-series data', () => {
+    const data = [
+      { date: '2024-01-01', sales: 100 },
+      { date: '2024-02-01', sales: 200 },
+    ];
+    const suggestions = suggestMapping(data);
+    const area = suggestions.find((s) => s.widget === 'chart.area');
+    expect(area).toBeDefined();
+    expect(area!.reason).toContain('Date-like');
+  });
+
+  it('does not suggest chart.area for non-date strings', () => {
+    const data = [
+      { name: 'Alice', score: 90 },
+      { name: 'Bob', score: 85 },
+    ];
+    const suggestions = suggestMapping(data);
+    const area = suggestions.find((s) => s.widget === 'chart.area');
+    expect(area).toBeUndefined();
   });
 });

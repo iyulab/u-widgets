@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.3] - 2026-02-18
+
+### Added
+
+- **Accessibility:** `aria-invalid` for select, radio, checkbox, multiselect in forms
+- **Accessibility:** `scope="col"` on markdown-generated table `<th>` elements
+- **Accessibility:** `aria-live="polite"` on callout widgets
+- **Accessibility:** `role="radiogroup"` / `role="group"` on form radio/checkbox/multiselect groups
+- **Accessibility:** `role="region"` with `aria-label` on compose widget (when title present)
+- **Accessibility:** Sortable table headers now keyboard-operable (`tabindex`, Enter/Space)
+- **Theme:** CSS theme tokens (`--u-widget-*`) propagated to all 8 elements via shared `themeStyles`
+- **i18n:** Intl API locale-aware formatting for percent, date, datetime values
+- **Responsive:** Container query for `u-form` (compact layout at narrow widths)
+- **DRY:** Common `isDateLikeString` utility extracted to `core/utils.ts`
+- **Tests:** Bundle size budget regression tests (6 tests)
+- **Tests:** Theme token verification tests (20 tests)
+
+### Changed
+
+- Bundle budget tests enforce: core < 5 KB, charts < 5 KB, tools < 5 KB, forms < 2 KB, shared < 4 KB (all gzip)
+
+## [0.3.2] - 2026-02-18
+
+### Added
+
+- **Tests:** u-chart direct tests, pipeline integration tests, entry point tests
+- **Form:** Textarea `minLength`/`maxLength` validation
+- **Inference:** Date string detection (`isDateLikeString`) for auto x-axis mapping
+- **Suggest:** Non-chart widget suggestions (progress, chart.area recommendations)
+- **Image:** Lazy loading optimization (`loading="lazy"`)
+- **Schema:** JSON schema `minLength`/`pattern` support
+- **Catalog:** Enhanced `help()` with field type details
+- **Inference:** Smart `inferPrimaryKey` for table/list
+- **Suggest:** Mapping suggestions for all chart types
+
 ## [0.3.1] - 2026-02-18
 
 ### Fixed

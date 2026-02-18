@@ -157,8 +157,12 @@ export interface UWidgetFieldDefinition {
   placeholder?: string;
   /** Options for select, multiselect, radio, and checkbox types. */
   options?: string[];
+  /** Minimum character length for text inputs. */
+  minLength?: number;
   /** Maximum character length for text inputs. */
   maxLength?: number;
+  /** Custom regex pattern for validation (e.g. `"^[A-Z]{3}$"`). */
+  pattern?: string;
   /** Number of visible rows for textarea type. */
   rows?: number;
   /** Minimum value (number) or date string. */

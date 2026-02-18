@@ -320,6 +320,67 @@ describe('u-table', () => {
       await el.updateComplete;
       expect(th.getAttribute('aria-sort')).toBe('ascending');
     });
+
+    it('sortable headers have tabindex="0"', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [{ name: 'Alice', age: 30 }],
+      });
+      const shadow = await render(el);
+      const ths = shadow.querySelectorAll('th');
+      ths.forEach((th) => {
+        expect(th.getAttribute('tabindex')).toBe('0');
+      });
+    });
+
+    it('Enter key triggers sort on header', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [
+          { name: 'Charlie' },
+          { name: 'Alice' },
+          { name: 'Bob' },
+        ],
+      });
+      const shadow = await render(el);
+
+      const th = shadow.querySelectorAll('th')[0] as HTMLElement;
+      th.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await el.updateComplete;
+
+      const rows = shadow.querySelectorAll('tbody tr');
+      expect(rows[0].querySelectorAll('td')[0].textContent).toBe('Alice');
+    });
+
+    it('Space key triggers sort on header', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [
+          { name: 'Charlie' },
+          { name: 'Alice' },
+          { name: 'Bob' },
+        ],
+      });
+      const shadow = await render(el);
+
+      const th = shadow.querySelectorAll('th')[0] as HTMLElement;
+      th.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      await el.updateComplete;
+
+      const rows = shadow.querySelectorAll('tbody tr');
+      expect(rows[0].querySelectorAll('td')[0].textContent).toBe('Alice');
+    });
+
+    it('non-sortable headers have no tabindex', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [{ name: 'Alice' }],
+        options: { sortable: false },
+      });
+      const shadow = await render(el);
+      const th = shadow.querySelectorAll('th')[0] as HTMLElement;
+      expect(th.hasAttribute('tabindex')).toBe(false);
+    });
   });
 
   describe('pagination', () => {
@@ -671,6 +732,26 @@ describe('u-table', () => {
       const primary = shadow.querySelector('.list-primary');
       expect(primary?.textContent).toBe('First item');
     });
+
+    it('prefers name over other keys for primary', async () => {
+      const el = createElement({
+        widget: 'list',
+        data: [{ score: 95, name: 'Alice', role: 'Engineer' }],
+      });
+      const shadow = await render(el);
+      const primary = shadow.querySelector('.list-primary');
+      expect(primary?.textContent).toBe('Alice');
+    });
+
+    it('falls back to first string field when no well-known key', async () => {
+      const el = createElement({
+        widget: 'list',
+        data: [{ count: 5, description: 'Hello', code: 'ABC' }],
+      });
+      const shadow = await render(el);
+      const primary = shadow.querySelector('.list-primary');
+      expect(primary?.textContent).toBe('Hello');
+    });
   });
 
   describe('keyboard navigation', () => {
@@ -893,9 +974,11 @@ describe('u-table', () => {
   describe('container query', () => {
     it('has container-type declared in styles', () => {
       const styles = (customElements.get('u-table') as any).styles;
-      const cssText = styles?.cssText ?? '';
-      expect(cssText).toContain('container');
-      expect(cssText).toContain('u-table');
+      const allCss = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(allCss).toContain('container');
+      expect(allCss).toContain('u-table');
     });
   });
 

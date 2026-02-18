@@ -187,4 +187,49 @@ describe('infer', () => {
       expect(infer('form', { name: 'test' })).toBeUndefined();
     });
   });
+
+  describe('date string detection', () => {
+    it('prefers date-like field as x-axis for chart.line', () => {
+      const data = [
+        { category: 'Sales', date: '2024-01-15', amount: 100 },
+        { category: 'Sales', date: '2024-02-15', amount: 200 },
+      ];
+      const mapping = infer('chart.line', data);
+      expect(mapping).toBeDefined();
+      // Should pick 'date' over 'category' as x because it's date-like
+      expect(mapping!.x).toBe('date');
+    });
+
+    it('prefers date-like field for chart.bar', () => {
+      const data = [
+        { label: 'Q1', month: '2024-03-01', revenue: 500 },
+      ];
+      const mapping = infer('chart.bar', data);
+      expect(mapping!.x).toBe('month');
+    });
+
+    it('falls back to first string when no date-like field', () => {
+      const data = [
+        { name: 'A', value: 10 },
+      ];
+      const mapping = infer('chart.bar', data);
+      expect(mapping!.x).toBe('name');
+    });
+
+    it('detects MM/DD/YYYY date format', () => {
+      const data = [
+        { label: 'Product', sold: '01/15/2024', qty: 10 },
+      ];
+      const mapping = infer('chart.bar', data);
+      expect(mapping!.x).toBe('sold');
+    });
+
+    it('detects month name date format', () => {
+      const data = [
+        { type: 'Revenue', period: 'January 2024', amount: 100 },
+      ];
+      const mapping = infer('chart.bar', data);
+      expect(mapping!.x).toBe('period');
+    });
+  });
 });

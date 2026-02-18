@@ -180,4 +180,26 @@ describe('parseFormdown', () => {
     const result = parseFormdown('@name: []', { name: 'test' });
     expect(result.fields[0].field).toBe('name');
   });
+
+  it('parses inline minlength attribute', () => {
+    const result = parseFormdown('@code: [minlength=3]');
+    expect(result.fields[0].minLength).toBe(3);
+  });
+
+  it('parses inline pattern attribute', () => {
+    const result = parseFormdown('@zip: [pattern=^\\d{5}$]');
+    expect(result.fields[0].pattern).toBe('^\\d{5}$');
+  });
+
+  it('parses inline placeholder attribute', () => {
+    const result = parseFormdown('@name: [placeholder=Enter name]');
+    expect(result.fields[0].placeholder).toBe('Enter name');
+  });
+
+  it('parses multiple inline attributes together', () => {
+    const result = parseFormdown('@code: [minlength=2,maxlength=10,pattern=^\\w+$]');
+    expect(result.fields[0].minLength).toBe(2);
+    expect(result.fields[0].maxLength).toBe(10);
+    expect(result.fields[0].pattern).toBe('^\\w+$');
+  });
 });

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/iyulab/u-widgets/schema/u-widget.schema.json",
   "title": "u-widget",
-  "description": "Declarative, data-driven widget specification for u-widgets v0.2",
+  "description": "Declarative, data-driven widget specification for u-widgets v0.3",
   "oneOf": [
     { "$ref": "#/$defs/widget" },
     { "$ref": "#/$defs/composeWidget" }
@@ -295,8 +295,16 @@
           "items": { "type": "string" },
           "description": "Choices for select/multiselect/radio/checkbox"
         },
+        "minLength": {
+          "type": "integer",
+          "description": "Minimum character length for text inputs"
+        },
         "maxLength": {
           "type": "integer"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Custom regex pattern for validation"
         },
         "rows": {
           "type": "integer",

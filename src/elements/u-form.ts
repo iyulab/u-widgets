@@ -2,13 +2,15 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
 import { getLocaleStrings, formatTemplate } from '../core/locale.js';
+import { themeStyles } from '../styles/tokens.js';
 
 @customElement('u-form')
 export class UForm extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
+      container: u-form / inline-size;
     }
 
     .form-container {
@@ -102,8 +104,20 @@ export class UForm extends LitElement {
       gap: 6px;
     }
 
+    .multiselect-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      border-radius: 6px;
+      padding: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
     .checkbox-group label,
-    .radio-group label {
+    .radio-group label,
+    .multiselect-group label {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -180,7 +194,22 @@ export class UForm extends LitElement {
       color: var(--u-widget-text, #1a1a2e);
       line-height: 1.5;
     }
-  `;
+
+    @container u-form (max-width: 20rem) {
+      .form-container {
+        gap: 12px;
+      }
+
+      .field-label {
+        font-size: 0.75rem;
+      }
+
+      input, textarea, select {
+        font-size: 0.8125rem;
+        padding: 6px 8px;
+      }
+    }
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
@@ -268,6 +297,8 @@ export class UForm extends LitElement {
           placeholder=${field.placeholder ?? ''}
           rows=${field.rows ?? 3}
           ?required=${field.required}
+          minlength=${field.minLength ?? ''}
+          maxlength=${field.maxLength ?? ''}
           aria-invalid=${hasError ? 'true' : 'false'}
           aria-describedby=${errorId ?? nothing}
           ?aria-required=${field.required}
@@ -281,6 +312,7 @@ export class UForm extends LitElement {
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
           ?required=${field.required}
+          aria-invalid=${hasError ? 'true' : 'false'}
           aria-describedby=${errorId ?? nothing}
           @change=${(e: Event) => this._onChange(field.field, (e.target as HTMLSelectElement).value)}
           part="input"
@@ -292,21 +324,28 @@ export class UForm extends LitElement {
         </select>`;
 
       case 'multiselect':
-        return html`<select
-          multiple
-          ?required=${field.required}
-          @change=${(e: Event) => {
-            const sel = e.target as HTMLSelectElement;
-            const vals = Array.from(sel.selectedOptions).map((o) => o.value);
-            this._onChange(field.field, vals);
-          }}
-          part="input"
-        >
+        return html`<div class="multiselect-group" part="multiselect-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
-            (opt) =>
-              html`<option value=${opt} ?selected=${Array.isArray(value) && value.includes(opt)}>${opt}</option>`,
+            (opt) => html`
+              <label>
+                <input
+                  type="checkbox"
+                  value=${opt}
+                  ?checked=${Array.isArray(value) && value.includes(opt)}
+                  @change=${(e: Event) => {
+                    const checked = (e.target as HTMLInputElement).checked;
+                    const current = Array.isArray(value) ? [...value] : [];
+                    this._onChange(
+                      field.field,
+                      checked ? [...current, opt] : current.filter((v) => v !== opt),
+                    );
+                  }}
+                />
+                ${opt}
+              </label>
+            `,
           )}
-        </select>`;
+        </div>`;
 
       case 'toggle':
         return html`<div class="toggle-wrapper">
@@ -331,7 +370,7 @@ export class UForm extends LitElement {
         </div>`;
 
       case 'radio':
-        return html`<div class="radio-group" part="radio-group">
+        return html`<div class="radio-group" part="radio-group" role="radiogroup" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
             (opt) => html`
               <label>
@@ -349,7 +388,7 @@ export class UForm extends LitElement {
         </div>`;
 
       case 'checkbox':
-        return html`<div class="checkbox-group" part="checkbox-group">
+        return html`<div class="checkbox-group" part="checkbox-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
             (opt) => html`
               <label>
@@ -388,7 +427,9 @@ export class UForm extends LitElement {
           min=${field.min ?? ''}
           max=${field.max ?? ''}
           step=${field.step ?? ''}
+          minlength=${field.minLength ?? ''}
           maxlength=${field.maxLength ?? ''}
+          pattern=${field.pattern ?? ''}
           @input=${(e: Event) => {
             const raw = (e.target as HTMLInputElement).value;
             const coerced = (type === 'number' || type === 'range') && raw !== ''
@@ -464,7 +505,8 @@ export class UForm extends LitElement {
   }
 
   private get _locale() {
-    return getLocaleStrings(this.spec?.options?.locale as string);
+    const locale = this.spec?.options?.locale;
+    return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
   private _validate(): boolean {
@@ -500,10 +542,36 @@ export class UForm extends LitElement {
         errors[field.field] = field.message ?? formatTemplate(locale.maxValue, { label, max: field.max });
       }
 
+      // minLength check (text, textarea)
+      if (field.minLength != null && typeof value === 'string' && value.length < field.minLength) {
+        errors[field.field] = field.message ?? formatTemplate(locale.minLength, { label, min: field.minLength });
+        continue;
+      }
+
       // Email pattern check
       if (field.type === 'email' && typeof value === 'string') {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           errors[field.field] = field.message ?? formatTemplate(locale.invalidEmail, { label });
+          continue;
+        }
+      }
+
+      // URL pattern check
+      if (field.type === 'url' && typeof value === 'string') {
+        if (!/^https?:\/\/.+/.test(value)) {
+          errors[field.field] = field.message ?? formatTemplate(locale.invalidUrl, { label });
+          continue;
+        }
+      }
+
+      // Custom pattern check
+      if (field.pattern && typeof value === 'string') {
+        try {
+          if (!new RegExp(field.pattern).test(value)) {
+            errors[field.field] = field.message ?? formatTemplate(locale.invalidPattern, { label });
+          }
+        } catch {
+          // Invalid regex pattern — skip validation
         }
       }
     }

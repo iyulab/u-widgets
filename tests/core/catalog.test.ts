@@ -58,6 +58,25 @@ describe('help', () => {
       expect(['object', 'array', 'none']).toContain(w.dataShape);
     }
   });
+
+  it('display widgets have dataFields or optionsDocs', () => {
+    const display = help('display');
+    for (const w of display) {
+      const hasExtra = w.dataFields != null || w.optionsDocs != null;
+      expect(hasExtra).toBe(true);
+    }
+  });
+
+  it('gauge includes thresholds in optionsDocs', () => {
+    const gauge = help('gauge');
+    expect(gauge[0].optionsDocs).toContain('thresholds');
+  });
+
+  it('metric includes dataFields', () => {
+    const metric = help('metric');
+    expect(metric[0].dataFields).toContain('value');
+    expect(metric[0].dataFields).toContain('unit');
+  });
 });
 
 describe('template', () => {

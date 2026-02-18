@@ -287,8 +287,8 @@ const specs = {
     widget: 'callout',
     data: {
       message: 'This is an informational callout. Use it to highlight important notices to users.',
+      level: 'info',
     },
-    options: { variant: 'info' },
   },
 };
 

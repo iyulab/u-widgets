@@ -197,4 +197,141 @@ describe('u-chart', () => {
     // but backgroundColor should still be set (transparent or not present)
     expect(option).toBeDefined();
   });
+
+  it('calls setOption again when spec changes', async () => {
+    const el = createElement({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    const callsBefore = mockSetOption.mock.calls.length;
+
+    el.spec = { widget: 'chart.bar', data: [{ name: 'B', value: 20 }] } as UWidgetSpecType;
+    await el.updateComplete;
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(mockSetOption.mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+
+  it('registers click handler via on()', async () => {
+    createElement({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(mockOn).toHaveBeenCalledWith('click', expect.any(Function));
+  });
+
+  it('emits u-widget-internal event on chart click', async () => {
+    const el = createElement({
+      widget: 'chart.bar',
+      id: 'test-chart',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Extract the click handler registered via mockOn
+    const clickCall = mockOn.mock.calls.find((c) => c[0] === 'click');
+    expect(clickCall).toBeDefined();
+    const clickHandler = clickCall![1] as (params: Record<string, unknown>) => void;
+
+    const events: CustomEvent[] = [];
+    el.addEventListener('u-widget-internal', ((e: CustomEvent) => events.push(e)) as EventListener);
+
+    // Simulate ECharts click callback
+    clickHandler({ name: 'A', seriesName: 'value', value: 10, dataIndex: 0 });
+
+    expect(events.length).toBe(1);
+    expect(events[0].detail.type).toBe('select');
+    expect(events[0].detail.widget).toBe('chart.bar');
+    expect(events[0].detail.id).toBe('test-chart');
+    expect(events[0].detail.data.name).toBe('A');
+    expect(events[0].detail.data.dataIndex).toBe(0);
+  });
+
+  it('renders container for chart.line type', async () => {
+    const el = createElement({
+      widget: 'chart.line',
+      data: [{ x: 'Jan', y: 100 }, { x: 'Feb', y: 200 }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.chart-container')).not.toBeNull();
+  });
+
+  it('renders container for chart.pie type', async () => {
+    const el = createElement({
+      widget: 'chart.pie',
+      data: [{ cat: 'A', val: 30 }, { cat: 'B', val: 70 }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.chart-container')).not.toBeNull();
+  });
+
+  it('renders container for chart.scatter type', async () => {
+    const el = createElement({
+      widget: 'chart.scatter',
+      data: [{ x: 1, y: 2 }, { x: 3, y: 4 }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.chart-container')).not.toBeNull();
+  });
+
+  it('renders container for chart.radar type', async () => {
+    const el = createElement({
+      widget: 'chart.radar',
+      data: [
+        { axis: 'Speed', score: 80 },
+        { axis: 'Power', score: 90 },
+        { axis: 'Defense', score: 70 },
+      ],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.chart-container')).not.toBeNull();
+  });
+
+  it('warns on init failure', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { init } = await import('echarts/core');
+    (init as ReturnType<typeof vi.fn>).mockImplementationOnce(() => {
+      throw new Error('Canvas not supported');
+    });
+
+    createElement({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[u-chart] Failed to initialize ECharts:',
+      'Canvas not supported',
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('disposes chart and disconnects ResizeObserver on removal', async () => {
+    const el = createElement({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+
+    mockDispose.mockClear();
+    el.remove();
+
+    expect(mockDispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('setOption is called with second arg true (replace mode)', async () => {
+    createElement({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 10 }],
+    });
+    await new Promise((r) => setTimeout(r, 50));
+
+    const calls = mockSetOption.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    // Second argument should be true (notMerge)
+    expect(calls[0][1]).toBe(true);
+  });
 });

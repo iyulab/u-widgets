@@ -33,11 +33,11 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
     case 'currency':
       return formatCurrency(value, param, locale);
     case 'percent':
-      return formatPercent(value);
+      return formatPercent(value, locale);
     case 'date':
-      return formatDate(value);
+      return formatDate(value, locale);
     case 'datetime':
-      return formatDatetime(value);
+      return formatDatetime(value, locale);
     case 'bytes':
       return formatBytes(value);
     default:
@@ -68,21 +68,61 @@ function formatCurrency(value: unknown, currencyCode?: string, locale?: string):
   }
 }
 
-function formatPercent(value: unknown): string {
+function formatPercent(value: unknown, locale?: string): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
+  if (locale) {
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: 'percent',
+        maximumFractionDigits: 2,
+      }).format(num / 100);
+    } catch {
+      // Invalid locale fallback
+    }
+  }
   return num + '%';
 }
 
-function formatDate(value: unknown): string {
+function formatDate(value: unknown, locale?: string): string {
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    if (locale) {
+      try {
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) {
+          return new Intl.DateTimeFormat(locale, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(d);
+        }
+      } catch {
+        // Invalid locale fallback
+      }
+    }
     return value.slice(0, 10);
   }
   return String(value);
 }
 
-function formatDatetime(value: unknown): string {
+function formatDatetime(value: unknown, locale?: string): string {
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    if (locale) {
+      try {
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) {
+          return new Intl.DateTimeFormat(locale, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          }).format(d);
+        }
+      } catch {
+        // Invalid locale fallback
+      }
+    }
     return value.slice(0, 16).replace('T', ' ');
   }
   return String(value);

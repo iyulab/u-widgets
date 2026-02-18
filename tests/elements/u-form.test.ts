@@ -114,6 +114,62 @@ describe('u-form', () => {
       expect(checkboxes.length).toBe(3);
     });
 
+    it('renders multiselect as checkbox list', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust', 'Go'] },
+        ],
+      });
+      const shadow = await render(el);
+      const container = shadow.querySelector('.multiselect-group');
+      expect(container).not.toBeNull();
+      const checkboxes = container!.querySelectorAll('input[type="checkbox"]');
+      expect(checkboxes.length).toBe(4);
+    });
+
+    it('multiselect pre-checks selected values', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { langs: ['TS', 'Rust'] },
+        fields: [
+          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust', 'Go'] },
+        ],
+      });
+      const shadow = await render(el);
+      const checkboxes = shadow.querySelectorAll('.multiselect-group input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+      expect(checkboxes[0].checked).toBe(false); // JS
+      expect(checkboxes[1].checked).toBe(true);  // TS
+      expect(checkboxes[2].checked).toBe(true);  // Rust
+      expect(checkboxes[3].checked).toBe(false); // Go
+    });
+
+    it('multiselect toggles values via checkbox change', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { langs: ['TS'] },
+        fields: [
+          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust'] },
+        ],
+      });
+      const shadow = await render(el);
+
+      const listener = vi.fn();
+      el.addEventListener('u-widget-internal', listener);
+
+      const checkboxes = shadow.querySelectorAll('.multiselect-group input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+      // Check JS (index 0) to add it
+      checkboxes[0].checked = true;
+      checkboxes[0].dispatchEvent(new Event('change', { bubbles: true }));
+      await el.updateComplete;
+
+      expect(listener).toHaveBeenCalledOnce();
+      const detail = listener.mock.calls[0][0].detail;
+      expect(detail.type).toBe('change');
+      expect(detail.data.field).toBe('langs');
+      expect(detail.data.value).toEqual(['TS', 'JS']);
+    });
+
     it('pre-fills from data defaults', async () => {
       const el = createElement({
         widget: 'form',
@@ -811,6 +867,151 @@ describe('u-form', () => {
       expect(shadow.querySelector('.field-error')?.textContent).toBe('18세 이상이어야 합니다');
     });
 
+    it('validates minLength for text fields', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { code: 'AB' },
+        fields: [
+          { field: 'code', label: 'Code', type: 'text', minLength: 3 },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')?.textContent).toBe('Code must be at least 3 characters');
+    });
+
+    it('passes minLength when value is long enough', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { code: 'ABCD' },
+        fields: [
+          { field: 'code', label: 'Code', type: 'text', minLength: 3 },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')).toBeNull();
+    });
+
+    it('validates URL field rejects non-http URLs', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { site: 'not-a-url' },
+        fields: [
+          { field: 'site', label: 'Website', type: 'url' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')?.textContent).toBe('Website must be a valid URL');
+    });
+
+    it('validates URL field accepts valid URLs', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { site: 'https://example.com' },
+        fields: [
+          { field: 'site', label: 'Website', type: 'url' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')).toBeNull();
+    });
+
+    it('validates custom pattern rejects non-matching value', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { zip: 'abc' },
+        fields: [
+          { field: 'zip', label: 'ZIP', type: 'text', pattern: '^\\d{5}$' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')?.textContent).toBe('ZIP format is invalid');
+    });
+
+    it('validates custom pattern accepts matching value', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { zip: '12345' },
+        fields: [
+          { field: 'zip', label: 'ZIP', type: 'text', pattern: '^\\d{5}$' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')).toBeNull();
+    });
+
+    it('skips pattern validation for invalid regex', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { code: 'test' },
+        fields: [
+          { field: 'code', label: 'Code', type: 'text', pattern: '[invalid(' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      // Invalid regex should be silently skipped, no error
+      expect(shadow.querySelector('.field-error')).toBeNull();
+    });
+
+    it('field.message overrides URL validation message', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { site: 'bad' },
+        fields: [
+          { field: 'site', label: 'Site', type: 'url', message: '올바른 URL을 입력하세요' },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      expect(shadow.querySelector('.field-error')?.textContent).toBe('올바른 URL을 입력하세요');
+    });
+
     it('falls back to English when locale not registered', async () => {
       const el = createElement({
         widget: 'form',
@@ -827,6 +1028,284 @@ describe('u-form', () => {
       await el.updateComplete;
 
       expect(shadow.querySelector('.field-error')?.textContent).toBe('Name is required');
+    });
+  });
+
+  describe('textarea attributes', () => {
+    it('renders textarea with maxlength attribute', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'bio', type: 'textarea', label: 'Bio', maxLength: 200 },
+        ],
+      });
+      const shadow = await render(el);
+      const textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
+      expect(textarea).not.toBeNull();
+      expect(textarea.getAttribute('maxlength')).toBe('200');
+    });
+
+    it('renders textarea with minlength attribute', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'comment', type: 'textarea', label: 'Comment', minLength: 10 },
+        ],
+      });
+      const shadow = await render(el);
+      const textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
+      expect(textarea.getAttribute('minlength')).toBe('10');
+    });
+
+    it('validates textarea maxLength on submit', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'bio', type: 'textarea', label: 'Bio', maxLength: 5 },
+        ],
+        data: { bio: 'too long text' },
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      const error = shadow.querySelector('.field-error');
+      expect(error).not.toBeNull();
+      expect(error?.textContent).toContain('5');
+    });
+
+    it('validates textarea minLength on submit', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'bio', type: 'textarea', label: 'Bio', minLength: 50 },
+        ],
+        data: { bio: 'short' },
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+
+      const btn = shadow.querySelector('button') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      const error = shadow.querySelector('.field-error');
+      expect(error).not.toBeNull();
+      expect(error?.textContent).toContain('50');
+    });
+  });
+
+  describe('ARIA group roles', () => {
+    it('radio group has role="radiogroup" and aria-label', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'size', label: 'Size', type: 'radio', options: ['S', 'M', 'L'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.radio-group');
+      expect(group?.getAttribute('role')).toBe('radiogroup');
+      expect(group?.getAttribute('aria-label')).toBe('Size');
+    });
+
+    it('checkbox group has role="group" and aria-label', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.checkbox-group');
+      expect(group?.getAttribute('role')).toBe('group');
+      expect(group?.getAttribute('aria-label')).toBe('Skills');
+    });
+
+    it('multiselect group has role="group" and aria-label', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'langs', label: 'Languages', type: 'multiselect', options: ['JS', 'TS'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.multiselect-group');
+      expect(group?.getAttribute('role')).toBe('group');
+      expect(group?.getAttribute('aria-label')).toBe('Languages');
+    });
+
+    it('falls back to field name when label is missing', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'priority', type: 'radio', options: ['Low', 'High'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.radio-group');
+      expect(group?.getAttribute('aria-label')).toBe('priority');
+    });
+  });
+
+  describe('aria-invalid on all field types', () => {
+    it('select has aria-invalid="false" by default', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'color', label: 'Color', type: 'select', options: ['red', 'blue'] },
+        ],
+      });
+      const shadow = await render(el);
+      const select = shadow.querySelector('select');
+      expect(select?.getAttribute('aria-invalid')).toBe('false');
+    });
+
+    it('radio group has aria-invalid="false" by default', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'size', label: 'Size', type: 'radio', options: ['S', 'M'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.radio-group');
+      expect(group?.getAttribute('aria-invalid')).toBe('false');
+    });
+
+    it('checkbox group has aria-invalid="false" by default', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.checkbox-group');
+      expect(group?.getAttribute('aria-invalid')).toBe('false');
+    });
+
+    it('multiselect group has aria-invalid="false" by default', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'langs', label: 'Langs', type: 'multiselect', options: ['JS', 'TS'] },
+        ],
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.multiselect-group');
+      expect(group?.getAttribute('aria-invalid')).toBe('false');
+    });
+
+    it('radio group has aria-describedby linking to error', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'color', label: 'Color', type: 'radio', options: ['Red', 'Blue'], required: true },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      const group = shadow.querySelector('.radio-group');
+      const errorId = group?.getAttribute('aria-describedby');
+      expect(errorId).toBe('err-color');
+      expect(shadow.getElementById(errorId!)?.textContent).toBe('Color is required');
+    });
+
+    it('checkbox group has aria-describedby linking to error', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'], required: true },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      const group = shadow.querySelector('.checkbox-group');
+      const errorId = group?.getAttribute('aria-describedby');
+      expect(errorId).toBe('err-skills');
+      expect(shadow.getElementById(errorId!)?.textContent).toBe('Skills is required');
+    });
+
+    it('multiselect group has aria-describedby linking to error', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [
+          { field: 'langs', label: 'Langs', type: 'multiselect', options: ['JS', 'TS'], required: true },
+        ],
+        actions: [{ label: 'Submit', action: 'submit' }],
+      });
+      const shadow = await render(el);
+      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
+      btn.click();
+      await el.updateComplete;
+
+      const group = shadow.querySelector('.multiselect-group');
+      const errorId = group?.getAttribute('aria-describedby');
+      expect(errorId).toBe('err-langs');
+      expect(shadow.getElementById(errorId!)?.textContent).toBe('Langs is required');
+    });
+  });
+
+  describe('container query', () => {
+    it('has container-type declared in styles', () => {
+      const styles = (customElements.get('u-form') as any).styles;
+      const allCss = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(allCss).toContain('container');
+      expect(allCss).toContain('u-form');
+    });
+
+    it('has responsive rules for narrow containers', () => {
+      const styles = (customElements.get('u-form') as any).styles;
+      const allCss = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(allCss).toContain('@container');
+    });
+  });
+
+  describe('keyboard navigation', () => {
+    it('toggle switch responds to Enter key', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { active: false },
+        fields: [{ field: 'active', label: 'Active', type: 'toggle' }],
+      });
+      const shadow = await render(el);
+      const toggle = shadow.querySelector('.toggle-track') as HTMLElement;
+
+      toggle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await el.updateComplete;
+
+      expect(toggle.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('toggle switch responds to Space key', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { active: false },
+        fields: [{ field: 'active', label: 'Active', type: 'toggle' }],
+      });
+      const shadow = await render(el);
+      const toggle = shadow.querySelector('.toggle-track') as HTMLElement;
+
+      toggle.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+      await el.updateComplete;
+
+      expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
   });
 });

@@ -3,12 +3,13 @@ import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core/types.js';
 import { formatValue } from '../core/format.js';
 import { getLocaleStrings } from '../core/locale.js';
+import { themeStyles } from '../styles/tokens.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
 @customElement('u-table')
 export class UTable extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
@@ -50,8 +51,11 @@ export class UTable extends LitElement {
       user-select: none;
     }
 
-    th[data-sortable]:hover {
+    th[data-sortable]:hover,
+    th[data-sortable]:focus-visible {
       color: var(--u-widget-text, #1a1a2e);
+      outline: 2px solid var(--u-widget-primary, #4f46e5);
+      outline-offset: -2px;
     }
 
     .sort-arrow {
@@ -300,7 +304,7 @@ export class UTable extends LitElement {
         font-size: 0.6875rem;
       }
     }
-  `;
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
@@ -341,7 +345,8 @@ export class UTable extends LitElement {
   }
 
   private get _locale() {
-    return getLocaleStrings(this.spec?.options?.locale as string);
+    const locale = this.spec?.options?.locale;
+    return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
   private renderTable() {
@@ -392,7 +397,14 @@ export class UTable extends LitElement {
                   scope="col"
                   data-align=${col.align ?? 'left'}
                   ?data-sortable=${sortable}
+                  tabindex=${sortable ? '0' : nothing}
                   @click=${sortable ? () => this._onSort(col.field) : undefined}
+                  @keydown=${sortable ? (e: KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      this._onSort(col.field);
+                    }
+                  } : undefined}
                   aria-sort=${this._sortField === col.field && this._sortDir
                     ? this._sortDir === 'asc' ? 'ascending' : 'descending'
                     : 'none'}
@@ -419,7 +431,7 @@ export class UTable extends LitElement {
                   ${columns.map(
                     (col) =>
                       html`<td data-align=${col.align ?? 'left'} part="td"
-                        >${formatValue(row[col.field], col.format, this.spec!.options?.locale as string)}</td
+                        >${formatValue(row[col.field], col.format, typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined)}</td
                       >`,
                   )}
                 </tr>
@@ -643,7 +655,16 @@ export class UTable extends LitElement {
 
   private inferPrimaryKey(data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
-    return Object.keys(data[0])[0] ?? '';
+    const keys = Object.keys(data[0]);
+    // Prefer well-known primary key names
+    const primaryCandidates = ['name', 'title', 'label', 'id', 'key'];
+    for (const candidate of primaryCandidates) {
+      if (keys.includes(candidate)) return candidate;
+    }
+    // Fallback: first string field
+    const sample = data[0];
+    const stringKey = keys.find((k) => typeof sample[k] === 'string');
+    return stringKey ?? keys[0] ?? '';
   }
 
   private getIconLetter(value: unknown): string {

@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { themeStyles } from '../styles/tokens.js';
 
 interface MetricData {
   value: number | string;
@@ -26,7 +27,7 @@ function toMetricData(data: Record<string, unknown>): MetricData {
 
 @customElement('u-metric')
 export class UMetric extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
@@ -109,7 +110,7 @@ export class UMetric extends LitElement {
         min-width: 100px;
       }
     }
-  `;
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;

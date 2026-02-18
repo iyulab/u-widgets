@@ -1,10 +1,11 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { themeStyles } from '../styles/tokens.js';
 
 @customElement('u-content')
 export class UContent extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
@@ -80,6 +81,25 @@ export class UContent extends LitElement {
 
     .markdown a:hover {
       text-decoration: underline;
+    }
+
+    .markdown table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5em 0;
+      font-size: 0.8125rem;
+    }
+
+    .markdown th,
+    .markdown td {
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      padding: 6px 10px;
+    }
+
+    .markdown th {
+      background: var(--u-widget-surface, #f1f5f9);
+      font-weight: 600;
+      text-align: left;
     }
 
     .markdown hr {
@@ -161,7 +181,7 @@ export class UContent extends LitElement {
         font-size: 0.75rem;
       }
     }
-  `;
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
@@ -206,7 +226,7 @@ export class UContent extends LitElement {
     if (!src) return nothing;
 
     return html`<div class="image-container" part="image">
-      <img src=${src} alt=${alt} />
+      <img src=${src} alt=${alt} loading="lazy" />
       ${caption ? html`<div class="image-caption" part="caption">${caption}</div>` : nothing}
     </div>`;
   }
@@ -221,7 +241,7 @@ export class UContent extends LitElement {
     const validLevels = ['info', 'warning', 'error', 'success'];
     const cls = validLevels.includes(level) ? level : 'info';
 
-    return html`<div class="callout callout-${cls}" part="callout" role="alert">
+    return html`<div class="callout callout-${cls}" part="callout" role="alert" aria-live="polite">
       ${title ? html`<div class="callout-title" part="callout-title">${title}</div>` : nothing}
       <div part="callout-message">${message}</div>
     </div>`;
@@ -248,6 +268,30 @@ export class UContent extends LitElement {
       const inner = match.slice(3, -3).replace(/^\w*\n/, ''); // Remove language hint
       return `<pre><code>${inner}</code></pre>`;
     });
+
+    // Tables (must be before inline formatting)
+    result = result.replace(
+      /^(\|.+\|)\n(\|[\s:|-]+\|)\n((?:\|.+\|\n?)+)/gm,
+      (_match, headerLine: string, sepLine: string, bodyBlock: string) => {
+        const parseCells = (line: string) =>
+          line.split('|').slice(1, -1).map(c => c.trim());
+        const headers = parseCells(headerLine);
+        const aligns = parseCells(sepLine).map(s => {
+          if (s.startsWith(':') && s.endsWith(':')) return 'center';
+          if (s.endsWith(':')) return 'right';
+          return 'left';
+        });
+        const rows = bodyBlock.trim().split('\n').map(parseCells);
+
+        const ths = headers.map((h, i) =>
+          `<th scope="col" style="text-align:${aligns[i] ?? 'left'}">${h}</th>`).join('');
+        const trs = rows.map(row =>
+          '<tr>' + row.map((c, i) =>
+            `<td style="text-align:${aligns[i] ?? 'left'}">${c}</td>`).join('') + '</tr>').join('');
+
+        return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+      },
+    );
 
     // Inline code
     result = result.replace(/`([^`]+)`/g, '<code>$1</code>');

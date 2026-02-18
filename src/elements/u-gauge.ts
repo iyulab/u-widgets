@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { themeStyles } from '../styles/tokens.js';
 
 interface GaugeOptions {
   min: number;
@@ -43,7 +44,7 @@ function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg
 
 @customElement('u-gauge')
 export class UGauge extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
@@ -131,7 +132,7 @@ export class UGauge extends LitElement {
         height: 6px;
       }
     }
-  `;
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
@@ -171,7 +172,7 @@ export class UGauge extends LitElement {
     const trackPath = describeArc(cx, cy, r, startAngle, startAngle + totalAngle);
     const fillPath = pct > 0 ? describeArc(cx, cy, r, startAngle, endAngle) : null;
 
-    const label = (this.spec!.title as string) ?? 'Gauge';
+    const label = typeof this.spec!.title === 'string' ? this.spec!.title : 'Gauge';
     const valueText = `${value}${opts.unit}`;
 
     return html`
@@ -204,7 +205,7 @@ export class UGauge extends LitElement {
     const color = this.getThresholdColor(value, opts);
     const label = this.formatLabel(value, pct);
 
-    const ariaLabel = (this.spec!.title as string) ?? 'Progress';
+    const ariaLabel = typeof this.spec!.title === 'string' ? this.spec!.title : 'Progress';
 
     return html`
       <div class="progress-container" part="progress"

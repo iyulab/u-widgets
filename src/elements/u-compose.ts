@@ -1,10 +1,11 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetChildSpec } from '../core/types.js';
+import { themeStyles } from '../styles/tokens.js';
 
 @customElement('u-compose')
 export class UCompose extends LitElement {
-  static styles = css`
+  static styles = [themeStyles, css`
     :host {
       display: block;
       container: u-compose / inline-size;
@@ -54,7 +55,7 @@ export class UCompose extends LitElement {
         grid-template-columns: 1fr !important;
       }
     }
-  `;
+  `];
 
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
@@ -68,15 +69,17 @@ export class UCompose extends LitElement {
     const title = this.spec.title;
     const items = children.map((c: UWidgetChildSpec) => this._child(c));
 
+    const roleAttr = title ? 'region' : undefined;
+
     if (layout === 'row') {
-      return html`<div class="compose-container" part="compose">${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-row" part="layout">${items}</div></div>`;
+      return html`<div class="compose-container" part="compose" role=${roleAttr ?? nothing} aria-label=${title ?? nothing}>${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-row" part="layout">${items}</div></div>`;
     }
 
     if (layout === 'grid') {
-      return html`<div class="compose-container" part="compose">${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-grid" part="layout" style="grid-template-columns: repeat(${columns}, 1fr)">${items}</div></div>`;
+      return html`<div class="compose-container" part="compose" role=${roleAttr ?? nothing} aria-label=${title ?? nothing}>${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-grid" part="layout" style="grid-template-columns: repeat(${columns}, 1fr)">${items}</div></div>`;
     }
 
-    return html`<div class="compose-container" part="compose">${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-stack" part="layout">${items}</div></div>`;
+    return html`<div class="compose-container" part="compose" role=${roleAttr ?? nothing} aria-label=${title ?? nothing}>${title ? html`<div class="compose-title" part="title">${title}</div>` : nothing}<div class="layout-stack" part="layout">${items}</div></div>`;
   }
 
   private _child(child: UWidgetChildSpec) {

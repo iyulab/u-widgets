@@ -1,4 +1,5 @@
 import type { UWidgetMapping } from './types.js';
+import { isDateLikeString } from './utils.js';
 
 /**
  * Auto-infer a mapping from data shape and widget type.
@@ -57,6 +58,13 @@ export function infer(
   return undefined;
 }
 
+// Debug logging helper — only logs in development builds
+function debugInfer(widget: string, message: string): void {
+  if (typeof console !== 'undefined' && console.debug) {
+    console.debug(`[u-widget:infer] ${widget}: ${message}`);
+  }
+}
+
 function inferChart(
   widget: string,
   sample: Record<string, unknown>,
@@ -68,6 +76,7 @@ function inferChart(
     if (labelField && valueField) {
       return { label: labelField, value: valueField };
     }
+    debugInfer(widget, 'needs 1 string + 1 number field');
     return undefined;
   }
 
@@ -77,6 +86,7 @@ function inferChart(
     if (stringFields.length >= 2 && numberField) {
       return { x: stringFields[0], y: stringFields[1], value: numberField };
     }
+    debugInfer(widget, 'needs 2 string + 1 number field');
     return undefined;
   }
 
@@ -86,6 +96,7 @@ function inferChart(
     if (axisField && numFields.length > 0) {
       return { axis: axisField, y: numFields.length === 1 ? numFields[0] : numFields };
     }
+    debugInfer(widget, 'needs 1 string (axis) + 1+ number field');
     return undefined;
   }
 
@@ -101,7 +112,10 @@ function inferChart(
   }
 
   // bar, line, area, scatter → x/y
-  const xField = keys.find((k) => typeof sample[k] === 'string');
+  // Prefer date-like string fields as x-axis (common time-series pattern)
+  const stringFields = keys.filter((k) => typeof sample[k] === 'string');
+  const dateField = stringFields.find((k) => isDateLikeString(String(sample[k])));
+  const xField = dateField ?? stringFields[0];
   const numFields = keys.filter((k) => typeof sample[k] === 'number');
 
   if (xField && numFields.length > 0) {
@@ -114,6 +128,7 @@ function inferChart(
     return { x: xNum, y: yNums.length === 1 ? yNums[0] : yNums };
   }
 
+  debugInfer(widget, `no suitable fields found (strings: ${keys.filter(k => typeof sample[k] === 'string').length}, numbers: ${numFields.length})`);
   return undefined;
 }
 
@@ -134,3 +149,4 @@ function inferList(
     secondary: stringKeys.length > 1 ? stringKeys[1] : undefined,
   };
 }
+

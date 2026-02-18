@@ -207,4 +207,32 @@ describe('u-compose', () => {
     expect(cssText).toContain('container');
     expect(cssText).toContain('u-compose');
   });
+
+  describe('ARIA', () => {
+    it('has role="region" and aria-label when title is set', async () => {
+      const el = createElement({
+        widget: 'compose',
+        title: 'Dashboard',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      const shadow = await render(el);
+      const container = shadow.querySelector('.compose-container');
+      expect(container?.getAttribute('role')).toBe('region');
+      expect(container?.getAttribute('aria-label')).toBe('Dashboard');
+    });
+
+    it('has no role when title is absent', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      const shadow = await render(el);
+      const container = shadow.querySelector('.compose-container');
+      expect(container?.hasAttribute('role')).toBe(false);
+    });
+  });
 });

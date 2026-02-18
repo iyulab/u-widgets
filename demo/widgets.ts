@@ -14,6 +14,20 @@ interface WidgetDoc {
   variants: Record<string, object>;
 }
 
+// ── Event type mapping ──
+
+const WIDGET_EVENTS: Record<string, string[]> = {
+  chart: ['select'],
+  table: ['select'],
+  list: ['select'],
+  form: ['submit', 'change', 'action'],
+  confirm: ['submit', 'action'],
+};
+
+function getWidgetEvents(w: string): string[] {
+  return WIDGET_EVENTS[w] ?? WIDGET_EVENTS[w.split('.')[0]] ?? [];
+}
+
 // ── Build catalog from CATALOG metadata + variant specs ──
 
 function meta(widget: string) {
@@ -749,19 +763,19 @@ const catalog: Record<string, WidgetDoc> = {
     variants: {
       'Info': {
         widget: 'callout',
-        data: { content: 'This is an informational callout with helpful context for the user.', variant: 'info' },
+        data: { message: 'This is an informational callout with helpful context for the user.', level: 'info' },
       },
       'Warning': {
         widget: 'callout',
-        data: { content: 'Be careful! This action may have unexpected side effects.', variant: 'warning' },
+        data: { message: 'Be careful! This action may have unexpected side effects.', level: 'warning' },
       },
       'Error': {
         widget: 'callout',
-        data: { content: 'Something went wrong. Please check your configuration and try again.', variant: 'error' },
+        data: { message: 'Something went wrong. Please check your configuration and try again.', level: 'error' },
       },
       'Success': {
         widget: 'callout',
-        data: { content: 'Operation completed successfully! All changes have been saved.', variant: 'success' },
+        data: { message: 'Operation completed successfully! All changes have been saved.', level: 'success' },
       },
     },
   },
@@ -875,7 +889,7 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'compose',
         layout: 'stack',
         children: [
-          { widget: 'callout', data: { content: 'System update completed.', variant: 'success' } },
+          { widget: 'callout', data: { message: 'System update completed.', level: 'success' } },
           { widget: 'metric', data: { value: 100, unit: '%', label: 'Deployment' } },
           { widget: 'progress', data: { value: 100, max: 100 } },
         ],
@@ -893,17 +907,21 @@ const editor = document.getElementById('editor') as HTMLTextAreaElement;
 const editorError = document.getElementById('editor-error')!;
 const previewWidget = document.getElementById('preview-widget') as WidgetElement;
 const eventLog = document.getElementById('event-log')!;
+const eventCount = document.getElementById('event-count')!;
 const themeBtn = document.getElementById('theme-btn')!;
 const docTitle = document.getElementById('doc-title')!;
 const docDesc = document.getElementById('doc-desc')!;
 const docBadges = document.getElementById('doc-badges')!;
-const variantBar = document.getElementById('variant-bar')!;
-const previewPanel = document.getElementById('preview-panel')!;
+const variantSelect = document.getElementById('variant-select') as HTMLSelectElement;
+const panelPreview = document.getElementById('panel-preview')!;
+const propsPanel = document.getElementById('props-panel')!;
+const clearLogBtn = document.getElementById('clear-log-btn')!;
 
 // ── State ──
 
 let activeKey = '';
 let activeVariantIdx = 0;
+let logCount = 0;
 
 // ── Build Sidebar ──
 
@@ -953,24 +971,123 @@ function updateDocHeader(entry: WidgetDoc, widgetType: string) {
   docBadges.innerHTML = badges;
 }
 
-// ── Variant Bar ──
+// ── Variant Select ──
 
-function buildVariantBar(entry: WidgetDoc) {
+function buildVariantSelect(entry: WidgetDoc) {
   const names = Object.keys(entry.variants);
-  variantBar.innerHTML = '';
+  variantSelect.innerHTML = '';
   names.forEach((name, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'variant-btn';
-    btn.textContent = name;
-    btn.addEventListener('click', () => selectVariant(idx));
-    variantBar.appendChild(btn);
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = name;
+    variantSelect.appendChild(opt);
   });
 }
 
-function updateVariantActive(idx: number) {
-  variantBar.querySelectorAll('.variant-btn').forEach((el, i) => {
-    (el as HTMLElement).classList.toggle('active', i === idx);
-  });
+variantSelect.addEventListener('change', () => {
+  selectVariant(Number(variantSelect.value));
+});
+
+// ── Props Panel ──
+
+interface DocField {
+  key: string;
+  type: string;
+  desc: string;
+}
+
+function parseDocString(docStr: string): DocField[] {
+  if (!docStr) return [];
+  return docStr.split(';').map((seg) => {
+    const s = seg.trim();
+    if (!s) return null;
+    // Match: "key (type): description" or "key (type?, optional): desc"
+    const m = s.match(/^(\S+)\s*\(([^)]+)\)\s*[:\-]?\s*(.*)/);
+    if (m) return { key: m[1], type: m[2].trim(), desc: m[3].trim() };
+    // Fallback: plain text
+    return { key: '', type: '', desc: s };
+  }).filter(Boolean) as DocField[];
+}
+
+function updatePropsPanel(widgetType: string) {
+  const info = help(widgetType)[0];
+  if (!info) {
+    propsPanel.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+
+  // Data Shape
+  html += `<div class="props-section">`;
+  html += `<div class="props-section-title">Data Shape</div>`;
+  html += `<ul class="props-list"><li><span class="prop-type">${info.dataShape}</span></li></ul>`;
+  html += `</div>`;
+
+  // Mapping Keys
+  if (info.mappingKeys.length > 0) {
+    html += `<div class="props-section">`;
+    html += `<div class="props-section-title">Mapping Keys</div>`;
+    html += `<div class="props-badges">`;
+    for (const k of info.mappingKeys) {
+      html += `<span class="doc-badge key">${k}</span>`;
+    }
+    html += `</div></div>`;
+  }
+
+  // Data Fields
+  if (info.dataFields) {
+    const fields = parseDocString(info.dataFields);
+    if (fields.length > 0) {
+      html += `<div class="props-section">`;
+      html += `<div class="props-section-title">Data Fields</div>`;
+      html += `<ul class="props-list">`;
+      for (const f of fields) {
+        if (f.key) {
+          html += `<li><span class="prop-key">${f.key}</span> <span class="prop-type">(${f.type})</span>`;
+          if (f.desc) html += ` <span class="prop-desc">${f.desc}</span>`;
+          html += `</li>`;
+        } else {
+          html += `<li><span class="prop-desc">${f.desc}</span></li>`;
+        }
+      }
+      html += `</ul></div>`;
+    }
+  }
+
+  // Options
+  if (info.optionsDocs) {
+    const opts = parseDocString(info.optionsDocs);
+    if (opts.length > 0) {
+      html += `<div class="props-section">`;
+      html += `<div class="props-section-title">Options</div>`;
+      html += `<ul class="props-list">`;
+      for (const o of opts) {
+        if (o.key) {
+          html += `<li><span class="prop-key">${o.key}</span> <span class="prop-type">(${o.type})</span>`;
+          if (o.desc) html += ` <span class="prop-desc">${o.desc}</span>`;
+          html += `</li>`;
+        } else {
+          html += `<li><span class="prop-desc">${o.desc}</span></li>`;
+        }
+      }
+      html += `</ul></div>`;
+    }
+  }
+
+  // Events
+  const events = getWidgetEvents(widgetType);
+  if (events.length > 0) {
+    html += `<div class="props-section">`;
+    html += `<div class="props-section-title">Events</div>`;
+    html += `<div class="props-badges">`;
+    for (const ev of events) {
+      html += `<span class="props-badge">${ev}</span>`;
+    }
+    html += `</div></div>`;
+  }
+
+  propsPanel.innerHTML = html;
 }
 
 // ── Widget Selection ──
@@ -982,7 +1099,8 @@ function selectWidget(key: string) {
 
   updateSidebarActive(key);
   updateDocHeader(entry, key);
-  buildVariantBar(entry);
+  buildVariantSelect(entry);
+  updatePropsPanel(key);
   selectVariant(0);
 
   // Update URL hash
@@ -998,7 +1116,7 @@ function selectVariant(idx: number) {
   const spec = entry.variants[variantNames[idx]];
   if (!spec) return;
 
-  updateVariantActive(idx);
+  variantSelect.value = String(idx);
   const json = JSON.stringify(spec, null, 2);
   editor.value = json;
   editorError.textContent = '';
@@ -1008,27 +1126,23 @@ function selectVariant(idx: number) {
 function applySpec(spec: Record<string, unknown>) {
   previewWidget.spec = spec;
   syncPreviewSize();
-
-  requestAnimationFrame(() => {
-    previewPanel.scrollIntoView({ behavior: 'instant', block: 'start' });
-  });
 }
 
 // ── Dynamic Size Sync ──
 
 function syncPreviewSize() {
-  const previewArea = previewPanel.querySelector('.preview-area') as HTMLElement;
+  const previewArea = panelPreview.querySelector('.preview-area') as HTMLElement;
   if (!previewArea) return;
   const innerH = previewArea.clientHeight;
   const innerW = previewArea.clientWidth;
   if (innerH <= 0) return;
 
-  previewPanel.style.setProperty('--u-widget-chart-height', `${innerH}px`);
+  panelPreview.style.setProperty('--u-widget-chart-height', `${innerH}px`);
 
   const gaugeFromH = (innerH - 8) / 0.975;
   const gaugeFromW = innerW * 0.6;
   const gaugeSize = Math.max(120, Math.min(gaugeFromH, gaugeFromW, 500));
-  previewPanel.style.setProperty('--u-widget-gauge-size', `${gaugeSize}px`);
+  panelPreview.style.setProperty('--u-widget-gauge-size', `${gaugeSize}px`);
 
   requestAnimationFrame(() => {
     const chart = previewWidget.shadowRoot?.querySelector('u-chart') as HTMLElement & { resize?: () => void } | null;
@@ -1037,7 +1151,7 @@ function syncPreviewSize() {
 }
 
 const previewRO = new ResizeObserver(() => syncPreviewSize());
-previewRO.observe(previewPanel);
+previewRO.observe(panelPreview);
 
 // ── Real-time Editing (debounced) ──
 
@@ -1082,6 +1196,16 @@ document.addEventListener('u-widget-event', (e) => {
   const line = document.createElement('div');
   line.textContent = `[${new Date().toLocaleTimeString()}] ${JSON.stringify((e as CustomEvent).detail)}`;
   eventLog.prepend(line);
+
+  logCount++;
+  eventCount.textContent = String(logCount);
+  eventCount.style.display = '';
+});
+
+clearLogBtn.addEventListener('click', () => {
+  eventLog.innerHTML = 'Waiting for events...';
+  logCount = 0;
+  eventCount.style.display = 'none';
 });
 
 // ── URL Hash Routing ──

@@ -273,6 +273,78 @@ describe('validate', () => {
     expect(result.valid).toBe(true);
     expect(result.warnings.some((w) => w.includes('title'))).toBe(true);
   });
+
+  // ── Field type validation (6.5-D) ──
+
+  it('warns on unrecognized field.type', () => {
+    const result = validate({
+      widget: 'form',
+      fields: [{ field: 'x', type: 'foobar' }],
+    });
+    expect(result.valid).toBe(true); // warning, not error
+    expect(result.warnings.some((w) => w.includes('foobar'))).toBe(true);
+  });
+
+  it('no warning for valid field types', () => {
+    const result = validate({
+      widget: 'form',
+      fields: [
+        { field: 'a', type: 'text' },
+        { field: 'b', type: 'email' },
+        { field: 'c', type: 'number' },
+        { field: 'd', type: 'toggle' },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('no warning when field.type is omitted', () => {
+    const result = validate({
+      widget: 'form',
+      fields: [{ field: 'name' }],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  // ── Compose recursion depth (6.5-D) ──
+
+  it('rejects deeply nested compose children', () => {
+    // Build 12-level deep compose
+    let spec: Record<string, unknown> = { widget: 'metric', data: { value: 1 } };
+    for (let i = 0; i < 12; i++) {
+      spec = { widget: 'compose', children: [spec] };
+    }
+    const result = validate(spec);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('nesting depth'))).toBe(true);
+  });
+
+  it('accepts moderately nested compose children', () => {
+    const result = validate({
+      widget: 'compose',
+      children: [{
+        widget: 'compose',
+        children: [{ widget: 'metric', data: { value: 1 } }],
+      }],
+    });
+    expect(result.valid).toBe(true);
+  });
+
+  // ── Compose child validation propagation (6.5-D) ──
+
+  it('propagates child validation errors', () => {
+    const result = validate({
+      widget: 'compose',
+      children: [{
+        widget: 'metric',
+        data: [1, 2, 3], // object expected, not array
+      }],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('children[0]'))).toBe(true);
+  });
 });
 
 describe('isWidgetSpec', () => {

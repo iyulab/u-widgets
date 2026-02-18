@@ -1,4 +1,5 @@
-import type { UWidgetSpec } from './types.js';
+import type { UWidgetSpec, FieldType } from './types.js';
+import { getFormdownParser } from './formdown.js';
 
 /** Result of spec validation via {@link validate}. */
 export interface ValidationResult {
@@ -9,6 +10,16 @@ export interface ValidationResult {
   /** Warning messages — non-fatal issues or recommendations. */
   warnings: string[];
 }
+
+/** Valid field types for form fields. */
+const VALID_FIELD_TYPES = new Set<string>([
+  'text', 'email', 'password', 'tel', 'url', 'textarea',
+  'number', 'select', 'multiselect', 'date', 'datetime',
+  'time', 'toggle', 'range', 'radio', 'checkbox',
+] satisfies FieldType[]);
+
+/** Maximum recursion depth for compose children. */
+const MAX_COMPOSE_DEPTH = 10;
 
 /** Widgets that expect an array for `data`. */
 const ARRAY_DATA = new Set([
@@ -37,9 +48,13 @@ const OBJECT_DATA = new Set(['metric', 'gauge', 'progress']);
  * console.log(result.valid); // true
  * ```
  */
-export function validate(spec: unknown): ValidationResult {
+export function validate(spec: unknown, _depth = 0): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+
+  if (_depth > MAX_COMPOSE_DEPTH) {
+    return { valid: false, errors: ['compose children exceed maximum nesting depth (' + MAX_COMPOSE_DEPTH + ')'], warnings };
+  }
 
   if (spec == null || typeof spec !== 'object') {
     return { valid: false, errors: ['Spec must be a non-null object'], warnings };
@@ -80,6 +95,13 @@ export function validate(spec: unknown): ValidationResult {
         const child = obj.children[i];
         if (child == null || typeof child !== 'object' || typeof (child as Record<string, unknown>).widget !== 'string') {
           errors.push(`children[${i}] must be an object with a "widget" field`);
+        } else {
+          // Recursively validate children with depth tracking
+          const childResult = validate(child, _depth + 1);
+          if (!childResult.valid) {
+            errors.push(...childResult.errors.map(e => `children[${i}]: ${e}`));
+          }
+          warnings.push(...childResult.warnings.map(w => `children[${i}]: ${w}`));
         }
       }
     }
@@ -98,7 +120,18 @@ export function validate(spec: unknown): ValidationResult {
       const f = (obj.fields as unknown[])[i] as Record<string, unknown> | null;
       if (f == null || typeof f !== 'object' || typeof f.field !== 'string') {
         errors.push(`fields[${i}] must have a "field" string property`);
+      } else if (f.type != null && !VALID_FIELD_TYPES.has(f.type as string)) {
+        warnings.push(`fields[${i}].type "${f.type}" is not a recognized field type`);
       }
+    }
+  }
+
+  // Validate formdown string is parseable
+  if (typeof obj.formdown === 'string' && obj.formdown.length > 0 && !obj.fields) {
+    try {
+      getFormdownParser()(obj.formdown);
+    } catch {
+      warnings.push('formdown string could not be parsed — check syntax');
     }
   }
 

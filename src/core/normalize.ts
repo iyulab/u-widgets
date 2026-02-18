@@ -27,11 +27,15 @@ export function normalize(spec: UWidgetSpec): UWidgetSpec {
 
   // Normalize formdown → fields + actions
   if (result.formdown && !result.fields) {
-    const parser = getFormdownParser();
-    const parsed = parser(result.formdown, result.data as Record<string, unknown> | undefined);
-    result.fields = parsed.fields;
-    if (parsed.actions.length > 0 && !result.actions) {
-      result.actions = parsed.actions;
+    try {
+      const parser = getFormdownParser();
+      const parsed = parser(result.formdown, result.data as Record<string, unknown> | undefined);
+      result.fields = parsed.fields;
+      if (parsed.actions.length > 0 && !result.actions) {
+        result.actions = parsed.actions;
+      }
+    } catch (e) {
+      console.warn('[u-widget:normalize] Failed to parse formdown:', (e as Error).message);
     }
   }
 

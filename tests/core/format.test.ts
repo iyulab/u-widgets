@@ -109,9 +109,31 @@ describe('formatValue', () => {
       expect(result).toBeTruthy();
     });
 
-    it('non-Intl formats ignore locale parameter', () => {
-      expect(formatValue(73, 'percent', 'de-DE')).toBe('73%');
-      expect(formatValue('2025-01-15T14:30:00', 'date', 'de-DE')).toBe('2025-01-15');
+    it('percent uses Intl when locale is provided', () => {
+      // 73 → 73% → Intl formats as 73/100 = 0.73 → "73 %"
+      const result = formatValue(73, 'percent', 'de-DE');
+      expect(result).toContain('73');
+      expect(result).toContain('%');
+    });
+
+    it('date uses Intl.DateTimeFormat when locale is provided', () => {
+      const result = formatValue('2025-01-15T14:30:00', 'date', 'de-DE');
+      // German format: DD.MM.YYYY
+      expect(result).toContain('15');
+      expect(result).toContain('01');
+      expect(result).toContain('2025');
+    });
+
+    it('datetime uses Intl.DateTimeFormat when locale is provided', () => {
+      const result = formatValue('2025-01-15T14:30:00', 'datetime', 'de-DE');
+      expect(result).toContain('15');
+      expect(result).toContain('01');
+      expect(result).toContain('2025');
+      expect(result).toContain('14');
+      expect(result).toContain('30');
+    });
+
+    it('bytes ignores locale parameter', () => {
       expect(formatValue(1536, 'bytes', 'de-DE')).toBe('1.5 KB');
     });
   });
@@ -151,6 +173,18 @@ describe('formatValue', () => {
 
     it('formats negative bytes with correct unit', () => {
       expect(formatValue(-1536, 'bytes')).toBe('-1.5 KB');
+    });
+
+    it('percent without locale falls back to simple format', () => {
+      expect(formatValue(73, 'percent')).toBe('73%');
+    });
+
+    it('date without locale falls back to ISO slice', () => {
+      expect(formatValue('2025-01-15T14:30:00', 'date')).toBe('2025-01-15');
+    });
+
+    it('datetime without locale falls back to string replace', () => {
+      expect(formatValue('2025-01-15T14:30:00', 'datetime')).toBe('2025-01-15 14:30');
     });
   });
 });

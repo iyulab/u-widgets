@@ -184,6 +184,47 @@ describe('u-content', () => {
       expect(md.innerHTML).toContain('<li>Third</li>');
     });
 
+    it('renders markdown table', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '| Name | Score |\n|------|-------|\n| Alice | 90 |\n| Bob | 85 |',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('<table>');
+      expect(md.innerHTML).toContain('<th');
+      expect(md.innerHTML).toContain('Name');
+      expect(md.innerHTML).toContain('Score');
+      expect(md.innerHTML).toContain('<td');
+      expect(md.innerHTML).toContain('Alice');
+      expect(md.innerHTML).toContain('90');
+    });
+
+    it('markdown table th has scope="col" for accessibility', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '| Name | Score |\n|------|-------|\n| Alice | 90 |',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      const ths = md.querySelectorAll('th');
+      ths.forEach((th) => {
+        expect(th.getAttribute('scope')).toBe('col');
+      });
+    });
+
+    it('renders markdown table with alignment', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '| Left | Center | Right |\n|:-----|:------:|------:|\n| A | B | C |',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('text-align:left');
+      expect(md.innerHTML).toContain('text-align:center');
+      expect(md.innerHTML).toContain('text-align:right');
+    });
+
     it('has part="markdown" attribute', async () => {
       const el = createElement({
         widget: 'markdown',
@@ -205,6 +246,16 @@ describe('u-content', () => {
       expect(img).not.toBeNull();
       expect(img.src).toContain('img.png');
       expect(img.alt).toBe('Test image');
+    });
+
+    it('has loading="lazy" attribute for performance', async () => {
+      const el = createElement({
+        widget: 'image',
+        data: { src: 'https://example.com/img.png', alt: 'Lazy test' },
+      });
+      const shadow = await render(el);
+      const img = shadow.querySelector('img') as HTMLImageElement;
+      expect(img.getAttribute('loading')).toBe('lazy');
     });
 
     it('renders caption when provided', async () => {
@@ -329,6 +380,72 @@ describe('u-content', () => {
       });
       const shadow = await render(el);
       expect(shadow.querySelector('.callout')?.getAttribute('role')).toBe('alert');
+    });
+
+    it('has aria-live="polite" for screen reader announcements', async () => {
+      const el = createElement({
+        widget: 'callout',
+        data: { message: 'Dynamic alert' },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.callout')?.getAttribute('aria-live')).toBe('polite');
+    });
+  });
+
+  describe('markdown edge cases', () => {
+    it('renders blockquote', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '> This is a quote',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('<blockquote>');
+      expect(md.innerHTML).toContain('This is a quote');
+    });
+
+    it('renders horizontal rule', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: 'Before\n\n---\n\nAfter',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('<hr>');
+    });
+
+    it('renders unordered list', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '- Apple\n- Banana\n- Cherry',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('<ul>');
+      expect(md.innerHTML).toContain('<li>Apple</li>');
+      expect(md.innerHTML).toContain('<li>Cherry</li>');
+    });
+
+    it('renders bold+italic combined', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '***bold and italic***',
+      });
+      const shadow = await render(el);
+      const md = shadow.querySelector('.markdown')!;
+      expect(md.innerHTML).toContain('<strong><em>bold and italic</em></strong>');
+    });
+
+    it('handles empty input gracefully', async () => {
+      const el = createElement({
+        widget: 'markdown',
+        data: '   ',
+      });
+      const shadow = await render(el);
+      // Whitespace-only should still render (not empty)
+      const md = shadow.querySelector('.markdown');
+      // It renders because '   ' is truthy
+      expect(md).not.toBeNull();
     });
   });
 
