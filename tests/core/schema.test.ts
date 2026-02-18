@@ -139,6 +139,140 @@ describe('validate', () => {
     });
     expect(result.valid).toBe(true);
   });
+
+  // ── Data type validation ──
+
+  it('rejects array data for metric', () => {
+    const result = validate({ widget: 'metric', data: [{ value: 1 }] });
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('object');
+  });
+
+  it('rejects object data for table', () => {
+    const result = validate({ widget: 'table', data: { name: 'Alice' } });
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('array');
+  });
+
+  it('rejects object data for chart.bar', () => {
+    const result = validate({ widget: 'chart.bar', data: { x: 1, y: 2 } });
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('array');
+  });
+
+  it('accepts array data for table', () => {
+    const result = validate({ widget: 'table', data: [{ name: 'Alice' }] });
+    expect(result.valid).toBe(true);
+  });
+
+  it('accepts object data for metric', () => {
+    const result = validate({ widget: 'metric', data: { value: 42 } });
+    expect(result.valid).toBe(true);
+  });
+
+  it('allows missing data (not required)', () => {
+    const result = validate({ widget: 'table' });
+    expect(result.valid).toBe(true);
+  });
+
+  it('does not false-positive on substring widget names', () => {
+    // "bar" is a substring of "chart.bar" — should NOT trigger array check
+    const result = validate({ widget: 'bar', data: { value: 1 } });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('does not false-positive on "line" substring', () => {
+    const result = validate({ widget: 'line', data: { value: 1 } });
+    expect(result.valid).toBe(true);
+  });
+
+  it('does not false-positive on "ist" substring of "list"', () => {
+    const result = validate({ widget: 'ist', data: { value: 1 } });
+    expect(result.valid).toBe(true);
+  });
+
+  // ── Warnings field ──
+
+  it('no warnings for valid spec', () => {
+    const result = validate({ widget: 'gauge' });
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  // ── Warnings field always present ──
+
+  it('includes warnings field even when empty', () => {
+    const result = validate({ widget: 'metric' });
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('includes warnings field on invalid spec', () => {
+    const result = validate(null);
+    expect(result.warnings).toEqual([]);
+  });
+
+  // ── Mapping field validation ──
+
+  it('warns when mapping.x references missing field', () => {
+    const result = validate({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 30 }],
+      mapping: { x: 'category', y: 'value' },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings.length).toBeGreaterThan(0);
+    expect(result.warnings[0]).toContain('category');
+  });
+
+  it('warns when mapping.y references missing field', () => {
+    const result = validate({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 30 }],
+      mapping: { x: 'name', y: 'amount' },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings.some((w) => w.includes('amount'))).toBe(true);
+  });
+
+  it('warns when mapping.y array references missing field', () => {
+    const result = validate({
+      widget: 'chart.line',
+      data: [{ month: 'Jan', sales: 100, cost: 60 }],
+      mapping: { x: 'month', y: ['sales', 'revenue'] },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings.some((w) => w.includes('"revenue"'))).toBe(true);
+    // only 1 warning for 'revenue', not for 'sales'
+    expect(result.warnings).toHaveLength(1);
+  });
+
+  it('no warnings when mapping fields match data', () => {
+    const result = validate({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 30 }],
+      mapping: { x: 'name', y: 'value' },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('no warnings when mapping is omitted', () => {
+    const result = validate({
+      widget: 'chart.bar',
+      data: [{ name: 'A', value: 30 }],
+    });
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('warns for list mapping referencing missing fields', () => {
+    const result = validate({
+      widget: 'list',
+      data: [{ name: 'Alice', role: 'Dev' }],
+      mapping: { primary: 'name', secondary: 'title' },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings.some((w) => w.includes('title'))).toBe(true);
+  });
 });
 
 describe('isWidgetSpec', () => {

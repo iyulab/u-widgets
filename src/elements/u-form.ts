@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
+import { getLocaleStrings, formatTemplate } from '../core/locale.js';
 
 @customElement('u-form')
 export class UForm extends LitElement {
@@ -212,10 +213,10 @@ export class UForm extends LitElement {
     const actions = this.spec!.actions ?? [];
 
     return html`
-      <div class="form-container" part="form">
+      <form class="form-container" part="form" @submit=${this._onFormSubmit}>
         ${fields.map((f) => this.renderField(f))}
         ${actions.length > 0 ? this.renderActions(actions) : nothing}
-      </div>
+      </form>
     `;
   }
 
@@ -224,7 +225,7 @@ export class UForm extends LitElement {
     const actions = this.spec!.actions ?? [];
 
     return html`
-      <div class="confirm-container" part="confirm">
+      <div class="confirm-container" part="confirm" @keydown=${this._onConfirmKeydown}>
         ${desc ? html`<div class="confirm-description" part="description">${desc}</div>` : nothing}
         ${actions.length > 0 ? this.renderActions(actions) : nothing}
       </div>
@@ -235,16 +236,17 @@ export class UForm extends LitElement {
     const value = this._formData[field.field];
     const type = field.type ?? 'text';
     const error = this._errors[field.field];
+    const errorId = `err-${field.field}`;
 
     return html`
       <div class="field" part="field">
         ${field.label
-          ? html`<label class="field-label" part="label"
+          ? html`<label class="field-label" for=${`input-${field.field}`} part="label"
               >${field.label}${field.required ? html`<span class="required">*</span>` : nothing}</label
             >`
           : nothing}
-        ${this.renderInput(field, type, value)}
-        ${error ? html`<div class="field-error" part="field-error">${error}</div>` : nothing}
+        ${this.renderInput(field, type, value, error ? errorId : undefined)}
+        ${error ? html`<div class="field-error" id=${errorId} role="alert" part="field-error">${error}</div>` : nothing}
       </div>
     `;
   }
@@ -253,32 +255,39 @@ export class UForm extends LitElement {
     field: UWidgetFieldDefinition,
     type: string,
     value: unknown,
+    errorId?: string,
   ) {
     const hasError = !!this._errors[field.field];
 
     switch (type) {
       case 'textarea':
         return html`<textarea
+          id=${`input-${field.field}`}
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
           placeholder=${field.placeholder ?? ''}
           rows=${field.rows ?? 3}
           ?required=${field.required}
+          aria-invalid=${hasError ? 'true' : 'false'}
+          aria-describedby=${errorId ?? nothing}
+          ?aria-required=${field.required}
           @input=${(e: Event) => this._onChange(field.field, (e.target as HTMLTextAreaElement).value)}
           part="input"
         ></textarea>`;
 
       case 'select':
         return html`<select
+          id=${`input-${field.field}`}
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
           ?required=${field.required}
+          aria-describedby=${errorId ?? nothing}
           @change=${(e: Event) => this._onChange(field.field, (e.target as HTMLSelectElement).value)}
           part="input"
         >
           <option value="">--</option>
           ${(field.options ?? []).map(
-            (opt) => html`<option value=${opt} ?selected=${value === opt}>${opt}</option>`,
+            (opt) => html`<option value=${opt}>${opt}</option>`,
           )}
         </select>`;
 
@@ -363,20 +372,31 @@ export class UForm extends LitElement {
           )}
         </div>`;
 
-      default:
+      default: {
+        // Map deprecated 'datetime' to the valid HTML input type
+        const htmlType = type === 'datetime' ? 'datetime-local' : type;
         return html`<input
-          type=${type}
+          type=${htmlType}
+          id=${`input-${field.field}`}
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
           placeholder=${field.placeholder ?? ''}
           ?required=${field.required}
+          aria-invalid=${hasError ? 'true' : 'false'}
+          aria-describedby=${errorId ?? nothing}
+          ?aria-required=${field.required}
           min=${field.min ?? ''}
           max=${field.max ?? ''}
           step=${field.step ?? ''}
           maxlength=${field.maxLength ?? ''}
-          @input=${(e: Event) => this._onChange(field.field, (e.target as HTMLInputElement).value)}
+          @input=${(e: Event) => {
+            const raw = (e.target as HTMLInputElement).value;
+            const coerced = (type === 'number' || type === 'range') && raw !== ''
+              ? Number(raw) : raw;
+            this._onChange(field.field, coerced);
+          }}
           part="input"
-        />`;
+        />`;}
     }
   }
 
@@ -386,9 +406,13 @@ export class UForm extends LitElement {
         ${actions.map(
           (a) => html`
             <button
+              type=${a.action === 'submit' ? 'submit' : 'button'}
               data-style=${a.style ?? 'default'}
               ?disabled=${a.disabled}
-              @click=${() => this._onAction(a)}
+              @click=${(e: Event) => {
+                if (a.action === 'submit') e.preventDefault();
+                this._onAction(a);
+              }}
               part="action-btn"
             >
               ${a.label}
@@ -398,6 +422,30 @@ export class UForm extends LitElement {
       </div>
     `;
   }
+
+  private _onFormSubmit = (e: Event) => {
+    e.preventDefault();
+    const submitAction = (this.spec?.actions ?? []).find((a) => a.action === 'submit');
+    if (submitAction) {
+      this._onAction(submitAction);
+    } else if (this._validate()) {
+      this._emitEvent({
+        type: 'submit',
+        widget: this.spec!.widget,
+        id: this.spec!.id,
+        data: { ...this._formData },
+      });
+    }
+  };
+
+  private _onConfirmKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      const cancelAction = (this.spec?.actions ?? []).find((a) => a.action === 'cancel');
+      if (cancelAction) {
+        this._onAction(cancelAction);
+      }
+    }
+  };
 
   private _onChange(field: string, value: unknown) {
     this._formData = { ...this._formData, [field]: value };
@@ -415,15 +463,47 @@ export class UForm extends LitElement {
     });
   }
 
+  private get _locale() {
+    return getLocaleStrings(this.spec?.options?.locale as string);
+  }
+
   private _validate(): boolean {
     const fields = this.spec?.fields ?? [];
     const errors: Record<string, string> = {};
+    const locale = this._locale;
 
     for (const field of fields) {
+      const value = this._formData[field.field];
+      const label = field.label ?? field.field;
+
+      // Required check
       if (field.required) {
-        const value = this._formData[field.field];
         if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
-          errors[field.field] = `${field.label ?? field.field} is required`;
+          errors[field.field] = field.message ?? formatTemplate(locale.required, { label });
+          continue; // Skip further checks if empty
+        }
+      }
+
+      // Skip further checks if value is empty and not required
+      if (value == null || value === '') continue;
+
+      // maxLength check (text, textarea)
+      if (field.maxLength != null && typeof value === 'string' && value.length > field.maxLength) {
+        errors[field.field] = field.message ?? formatTemplate(locale.maxLength, { label, max: field.maxLength });
+      }
+
+      // min/max check (number, range)
+      if (field.min != null && typeof value === 'number' && value < Number(field.min)) {
+        errors[field.field] = field.message ?? formatTemplate(locale.minValue, { label, min: field.min });
+      }
+      if (field.max != null && typeof value === 'number' && value > Number(field.max)) {
+        errors[field.field] = field.message ?? formatTemplate(locale.maxValue, { label, max: field.max });
+      }
+
+      // Email pattern check
+      if (field.type === 'email' && typeof value === 'string') {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors[field.field] = field.message ?? formatTemplate(locale.invalidEmail, { label });
         }
       }
     }

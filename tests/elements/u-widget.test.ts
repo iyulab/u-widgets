@@ -37,12 +37,28 @@ describe('u-widget', () => {
     expect(shadow.querySelector('[part="error"]')).not.toBeNull();
   });
 
-  it('renders error messages', async () => {
+  it('renders error card with styled structure', async () => {
+    const el = createElement({ widget: '' });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.error-card')).not.toBeNull();
+    expect(shadow.querySelector('.error-header')).not.toBeNull();
+    expect(shadow.querySelector('.error-list')).not.toBeNull();
+  });
+
+  it('renders error messages as list items', async () => {
     const el = createElement({ data: { value: 1 } } as Record<string, unknown>);
+    const shadow = await render(el);
+    const items = shadow.querySelectorAll('.error-list li');
+    expect(items.length).toBeGreaterThan(0);
+    expect(items[0].textContent).toContain('widget');
+  });
+
+  it('renders data type error for wrong data shape', async () => {
+    const el = createElement({ widget: 'table', data: { name: 'Alice' } });
     const shadow = await render(el);
     const errorDiv = shadow.querySelector('[part="error"]');
     expect(errorDiv).not.toBeNull();
-    expect(errorDiv!.textContent).toContain('widget');
+    expect(errorDiv!.textContent).toContain('array');
   });
 
   // ── Routing ──
@@ -139,9 +155,17 @@ describe('u-widget', () => {
   it('renders title in fallback when provided', async () => {
     const el = createElement({ widget: 'unknown-type', title: 'My Widget' });
     const shadow = await render(el);
-    const title = shadow.querySelector('[part="title"]');
-    expect(title).not.toBeNull();
-    expect(title!.textContent).toBe('My Widget');
+    const label = shadow.querySelector('.fallback-label');
+    expect(label).not.toBeNull();
+    expect(label!.textContent).toBe('My Widget');
+  });
+
+  it('renders widget type in fallback when no title', async () => {
+    const el = createElement({ widget: 'unknown-type', data: { foo: 1 } });
+    const shadow = await render(el);
+    const label = shadow.querySelector('.fallback-label');
+    expect(label).not.toBeNull();
+    expect(label!.textContent).toContain('unknown-type');
   });
 
   // ── chart.* fallback (u-chart not loaded in core tests) ──
@@ -216,5 +240,67 @@ describe('u-widget', () => {
     // Internal event should not reach document.body
     expect(internalSpy).not.toHaveBeenCalled();
     document.body.removeEventListener('u-widget-internal', internalSpy);
+  });
+
+  it('accepts theme="dark" attribute', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42, label: 'Test' },
+    });
+    el.setAttribute('theme', 'dark');
+    await el.updateComplete;
+    expect(el.getAttribute('theme')).toBe('dark');
+  });
+
+  it('accepts theme="light" attribute', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42, label: 'Test' },
+    });
+    el.setAttribute('theme', 'light');
+    await el.updateComplete;
+    expect(el.getAttribute('theme')).toBe('light');
+  });
+
+  it('has themeStyles in static styles', () => {
+    // Verify the styles array includes theme tokens
+    const styles = (customElements.get('u-widget') as any).styles;
+    expect(Array.isArray(styles)).toBe(true);
+    expect(styles.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('propagates locale attribute to sub-component spec', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42, label: 'Test' },
+    });
+    el.locale = 'ko';
+    await el.updateComplete;
+
+    const metric = el.shadowRoot!.querySelector('u-metric') as any;
+    expect(metric.spec.options?.locale).toBe('ko');
+  });
+
+  it('does not override spec-level locale with attribute', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42, label: 'Test' },
+      options: { locale: 'ja' },
+    });
+    el.locale = 'ko';
+    await el.updateComplete;
+
+    const metric = el.shadowRoot!.querySelector('u-metric') as any;
+    expect(metric.spec.options?.locale).toBe('ja');
+  });
+
+  it('reflects locale attribute', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42, label: 'Test' },
+    });
+    el.locale = 'de';
+    await el.updateComplete;
+    expect(el.getAttribute('locale')).toBe('de');
   });
 });

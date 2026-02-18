@@ -106,10 +106,16 @@ describe('infer', () => {
   });
 
   describe('chart.radar', () => {
-    it('infers axis and value', () => {
+    it('infers axis and y fields', () => {
       const data = [{ skill: 'JS', score: 80 }];
       const mapping = infer('chart.radar', data);
-      expect(mapping).toEqual({ axis: 'skill', value: 'score' });
+      expect(mapping).toEqual({ axis: 'skill', y: 'score' });
+    });
+
+    it('infers multiple y fields for radar', () => {
+      const data = [{ skill: 'JS', score: 80, rating: 90 }];
+      const mapping = infer('chart.radar', data);
+      expect(mapping).toEqual({ axis: 'skill', y: ['score', 'rating'] });
     });
   });
 

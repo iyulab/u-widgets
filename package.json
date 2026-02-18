@@ -1,22 +1,28 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/u-widgets.d.ts",
+  "unpkg": "./dist/u-widgets.global.js",
+  "jsdelivr": "./dist/u-widgets.global.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/u-widgets.d.ts",
       "import": "./dist/u-widgets.js"
     },
     "./charts": {
-      "types": "./dist/charts.d.ts",
+      "types": "./dist/u-widgets-charts.d.ts",
       "import": "./dist/u-widgets-charts.js"
     },
     "./forms": {
-      "types": "./dist/forms.d.ts",
+      "types": "./dist/u-widgets-forms.d.ts",
       "import": "./dist/u-widgets-forms.js"
+    },
+    "./tools": {
+      "types": "./dist/u-widgets-tools.d.ts",
+      "import": "./dist/u-widgets-tools.js"
     }
   },
   "sideEffects": false,
@@ -27,13 +33,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:cdn": "vite build --config vite.cdn.config.ts",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "keywords": [
     "widgets",
@@ -57,8 +65,8 @@
     "lit": "^3.2.0"
   },
   "peerDependencies": {
-    "echarts": "^5.5.0 || ^6.0.0",
-    "@formdown/core": "^0.4.0"
+    "@formdown/core": "^0.4.0",
+    "echarts": "^5.5.0 || ^6.0.0"
   },
   "peerDependenciesMeta": {
     "echarts": {
@@ -70,6 +78,8 @@
   },
   "devDependencies": {
     "@open-wc/testing": "^4.0.0",
+    "@playwright/test": "^1.58.2",
+    "echarts": "^6.0.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "happy-dom": "^15.0.0",

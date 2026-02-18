@@ -7,6 +7,7 @@ export class UCompose extends LitElement {
   static styles = css`
     :host {
       display: block;
+      container: u-compose / inline-size;
     }
 
     .compose-container {
@@ -42,6 +43,17 @@ export class UCompose extends LitElement {
       display: grid;
       gap: var(--u-widget-gap, 16px);
     }
+
+    /* ── container-query responsive ── */
+    @container u-compose (max-width: 30rem) {
+      .layout-row {
+        flex-direction: column;
+      }
+
+      .layout-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
   `;
 
   @property({ type: Object })
@@ -68,8 +80,9 @@ export class UCompose extends LitElement {
   }
 
   private _child(child: UWidgetChildSpec) {
-    if (child.span) {
-      return html`<div class="child" style="grid-column: span ${child.span}" part="child"><u-widget .spec=${child as UWidgetSpec}></u-widget></div>`;
+    const span = child.span ? Math.max(1, Math.floor(Number(child.span) || 1)) : 0;
+    if (span > 1) {
+      return html`<div class="child" style="grid-column: span ${span}" part="child"><u-widget .spec=${child as UWidgetSpec}></u-widget></div>`;
     }
     return html`<div class="child" part="child"><u-widget .spec=${child as UWidgetSpec}></u-widget></div>`;
   }

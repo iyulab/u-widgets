@@ -31,20 +31,18 @@ That's a complete bar chart.
 ## Installation
 
 ```bash
-npm install u-widgets
+npm install @iyulab/u-widgets
 ```
 
-### Usage
+### Usage (ES Modules)
 
 ```html
-<!-- Import the library -->
 <script type="module">
-  import 'u-widgets';
+  import '@iyulab/u-widgets';
   // For chart support (requires echarts peer dependency):
-  // import 'u-widgets/charts';
+  // import '@iyulab/u-widgets/charts';
 </script>
 
-<!-- Use the widget -->
 <u-widget id="my-widget"></u-widget>
 
 <script>
@@ -52,6 +50,28 @@ npm install u-widgets
     widget: 'metric',
     data: { value: 42, unit: 'users', change: 12.5, trend: 'up' }
   };
+</script>
+```
+
+### Usage (CDN)
+
+No bundler required — load directly via `<script>` tag:
+
+```html
+<!-- Core (includes all non-chart widgets) -->
+<script src="https://cdn.jsdelivr.net/npm/@iyulab/u-widgets/dist/u-widgets.global.js"></script>
+
+<!-- For chart support, load echarts first -->
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@iyulab/u-widgets/dist/u-widgets.global.js"></script>
+```
+
+The CDN bundle auto-registers the `<u-widget>` element. Utility functions are available on the global `UWidgets` object:
+
+```html
+<script>
+  const result = UWidgets.validate({ widget: 'metric', data: { value: 42 } });
+  console.log(result.valid); // true
 </script>
 ```
 
@@ -489,6 +509,32 @@ For advanced customization, pass raw ECharts options via `options.echarts`. Thes
 | `sortable` | `boolean` | `true` | Enable column sorting (click headers to sort) |
 
 Sorting cycles through: ascending → descending → original order.
+
+## Developer Tools
+
+For programmatic widget management (e.g., MCP servers, CLI tools), import from `u-widgets/tools`:
+
+```ts
+import { help, template, suggestMapping, autoSpec } from '@iyulab/u-widgets/tools';
+
+// List all widget types
+help();                    // → [{ widget: 'chart.bar', category: 'chart', ... }, ...]
+
+// Get info for a specific widget or category
+help('chart.bar');         // → [{ widget: 'chart.bar', description: '...', mappingKeys: ['x', 'y'] }]
+help('chart');             // → all chart types
+
+// Generate a minimal template spec
+template('metric');        // → { widget: 'metric', data: { value: 1284, unit: 'users', ... } }
+
+// Suggest widget + mapping from data
+suggestMapping([{ name: 'A', value: 30 }]);
+// → [{ widget: 'chart.bar', mapping: { x: 'name', y: 'value' }, confidence: 0.9 }, ...]
+
+// One-call auto spec from data
+autoSpec([{ name: 'A', value: 30 }, { name: 'B', value: 70 }]);
+// → { widget: 'chart.bar', data: [...], mapping: { x: 'name', y: 'value' } }
+```
 
 ## Renderer Contract
 

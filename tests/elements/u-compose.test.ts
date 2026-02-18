@@ -135,6 +135,39 @@ describe('u-compose', () => {
     expect(children[0].style.gridColumn).toBe('span 2');
   });
 
+  it('clamps invalid span to 1 (no grid-column applied)', async () => {
+    const el = createElement({
+      widget: 'compose',
+      layout: 'grid',
+      columns: 3,
+      children: [
+        { widget: 'metric', data: { value: 1 }, span: -5 },
+        { widget: 'metric', data: { value: 2 }, span: 'abc' },
+        { widget: 'metric', data: { value: 3 }, span: 0 },
+      ],
+    });
+    const shadow = await render(el);
+    const children = shadow.querySelectorAll('.child') as NodeListOf<HTMLElement>;
+    // All invalid spans should be treated as default (no grid-column)
+    expect(children[0].style.gridColumn).toBe('');
+    expect(children[1].style.gridColumn).toBe('');
+    expect(children[2].style.gridColumn).toBe('');
+  });
+
+  it('floors fractional span values', async () => {
+    const el = createElement({
+      widget: 'compose',
+      layout: 'grid',
+      columns: 3,
+      children: [
+        { widget: 'metric', data: { value: 1 }, span: 2.7 },
+      ],
+    });
+    const shadow = await render(el);
+    const children = shadow.querySelectorAll('.child') as NodeListOf<HTMLElement>;
+    expect(children[0].style.gridColumn).toBe('span 2');
+  });
+
   it('renders nothing when spec is null', async () => {
     const el = document.createElement('u-compose') as UCompose;
     document.body.appendChild(el);
@@ -164,5 +197,14 @@ describe('u-compose', () => {
     const shadow = await render(el);
     const uWidgets = shadow.querySelectorAll('u-widget');
     expect(uWidgets.length).toBe(2);
+  });
+
+  it('has container-type declared in styles', () => {
+    const styles = (customElements.get('u-compose') as any).styles;
+    const cssText = Array.isArray(styles)
+      ? styles.map((s: any) => s.cssText ?? '').join(' ')
+      : styles?.cssText ?? '';
+    expect(cssText).toContain('container');
+    expect(cssText).toContain('u-compose');
   });
 });

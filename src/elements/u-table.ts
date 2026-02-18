@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core/types.js';
 import { formatValue } from '../core/format.js';
+import { getLocaleStrings } from '../core/locale.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
@@ -11,6 +12,7 @@ export class UTable extends LitElement {
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
+      container: u-table / inline-size;
     }
 
     /* ── table ── */
@@ -65,10 +67,19 @@ export class UTable extends LitElement {
 
     tbody tr {
       cursor: pointer;
+      outline: none;
     }
 
     tbody tr:hover td {
       background: var(--u-widget-surface, #f1f5f9);
+    }
+
+    tbody tr:focus td {
+      background: var(--u-widget-surface, #f1f5f9);
+    }
+
+    tbody tr:focus {
+      box-shadow: inset 3px 0 0 var(--u-widget-primary, #4f46e5);
     }
 
     tr:last-child td {
@@ -98,10 +109,16 @@ export class UTable extends LitElement {
       padding: 10px 0;
       border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
       cursor: pointer;
+      outline: none;
     }
 
     .list-item:hover {
       background: var(--u-widget-surface, #f1f5f9);
+    }
+
+    .list-item:focus {
+      background: var(--u-widget-surface, #f1f5f9);
+      box-shadow: inset 3px 0 0 var(--u-widget-primary, #4f46e5);
     }
 
     .list-item:last-child {
@@ -152,6 +169,137 @@ export class UTable extends LitElement {
       font-weight: 500;
       color: var(--u-widget-text-secondary, #64748b);
     }
+
+    /* ── search ── */
+    .search-box {
+      margin-bottom: 8px;
+    }
+
+    .search-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 10px;
+      font-size: 0.8125rem;
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      border-radius: 4px;
+      outline: none;
+      font-family: inherit;
+      color: var(--u-widget-text, #1a1a2e);
+      background: var(--u-widget-bg, #fff);
+    }
+
+    .search-input:focus {
+      border-color: var(--u-widget-primary, #4f46e5);
+    }
+
+    /* ── pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 0.8125rem;
+      color: var(--u-widget-text-secondary, #64748b);
+    }
+
+    .pagination button {
+      padding: 4px 10px;
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      border-radius: 4px;
+      background: var(--u-widget-bg, #fff);
+      color: var(--u-widget-text, #1a1a2e);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: var(--u-widget-surface, #f1f5f9);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* ── compact ── */
+    .compact table {
+      font-size: 0.75rem;
+    }
+
+    .compact th {
+      padding: 4px 8px;
+      font-size: 0.6875rem;
+    }
+
+    .compact td {
+      padding: 4px 8px;
+    }
+
+    .compact .list-item {
+      padding: 6px 0;
+      gap: 8px;
+    }
+
+    .compact .list-icon {
+      width: 24px;
+      height: 24px;
+      font-size: 0.625rem;
+    }
+
+    .compact .list-avatar {
+      width: 24px;
+      height: 24px;
+    }
+
+    .compact .list-primary {
+      font-size: 0.75rem;
+    }
+
+    .compact .list-secondary {
+      font-size: 0.6875rem;
+    }
+
+    .compact .list-trailing {
+      font-size: 0.6875rem;
+    }
+
+    /* ── container-query responsive ── */
+    @container u-table (max-width: 30rem) {
+      table {
+        font-size: 0.75rem;
+      }
+
+      th {
+        padding: 4px 8px;
+        font-size: 0.6875rem;
+      }
+
+      td {
+        padding: 4px 8px;
+      }
+
+      .list-item {
+        padding: 6px 0;
+        gap: 8px;
+      }
+
+      .list-icon,
+      .list-avatar {
+        width: 24px;
+        height: 24px;
+      }
+
+      .list-primary {
+        font-size: 0.75rem;
+      }
+
+      .list-secondary,
+      .list-trailing {
+        font-size: 0.6875rem;
+      }
+    }
   `;
 
   @property({ type: Object })
@@ -163,10 +311,22 @@ export class UTable extends LitElement {
   @state()
   private _sortDir: SortDir = null;
 
+  @state()
+  private _page = 0;
+
+  @state()
+  private _searchQuery = '';
+
+  @state()
+  private _focusedIdx = 0;
+
   willUpdate(changed: Map<string, unknown>) {
     if (changed.has('spec')) {
       this._sortField = null;
       this._sortDir = null;
+      this._page = 0;
+      this._searchQuery = '';
+      this._focusedIdx = 0;
     }
   }
 
@@ -180,15 +340,51 @@ export class UTable extends LitElement {
     return this.renderTable();
   }
 
+  private get _locale() {
+    return getLocaleStrings(this.spec?.options?.locale as string);
+  }
+
   private renderTable() {
     const data = this.spec!.data as Record<string, unknown>[];
     const columns = this.getColumns(data);
+    const locale = this._locale;
     const sortable = this.spec!.options?.sortable !== false;
-    const sorted = this._sortField && this._sortDir ? this.sortData(data) : data;
+    const searchable = !!this.spec!.options?.searchable;
+    const compact = !!this.spec!.options?.compact;
+    const pageSize = Number(this.spec!.options?.pageSize) || 0;
 
-    return html`
+    // Pipeline: filter → sort → paginate
+    const filtered = this._searchQuery ? this.filterData(data, columns) : data;
+    const sorted = this._sortField && this._sortDir ? this.sortData(filtered) : filtered;
+    const totalPages = pageSize > 0 ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
+    const page = Math.min(this._page, totalPages - 1);
+    const visible = pageSize > 0 ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted;
+
+    const searchBox = searchable ? html`
+      <div class="search-box" part="search">
+        <input
+          class="search-input"
+          type="text"
+          placeholder=${locale.searchPlaceholder}
+          aria-label=${locale.searchTable}
+          .value=${this._searchQuery}
+          @input=${this._onSearch}
+        />
+      </div>
+    ` : nothing;
+
+    const paginationBar = pageSize > 0 && totalPages > 1 ? html`
+      <nav class="pagination" part="pagination" aria-label=${locale.tablePagination}>
+        <button aria-label=${locale.previousPage} ?disabled=${page === 0} @click=${() => this._onPageChange(page - 1)}>${locale.prev}</button>
+        <span aria-live="polite">${page + 1} / ${totalPages}</span>
+        <button aria-label=${locale.nextPage} ?disabled=${page >= totalPages - 1} @click=${() => this._onPageChange(page + 1)}>${locale.next}</button>
+      </nav>
+    ` : nothing;
+
+    return html`<div class="table-container${compact ? ' compact' : ''}">
+      ${searchBox}
       <div class="table-wrapper" part="table">
-        <table aria-label=${this.spec!.title ?? 'Data table'}>
+        <table aria-label=${this.spec!.title ?? locale.dataTable}>
           <thead>
             <tr>
               ${columns.map(
@@ -207,14 +403,23 @@ export class UTable extends LitElement {
               )}
             </tr>
           </thead>
-          <tbody>
-            ${sorted.map(
+          <tbody @keydown=${this._onTableKeydown}>
+            ${visible.map(
               (row, idx) => html`
-                <tr part="tr" @click=${() => this._onRowClick(row, idx)}>
+                <tr part="tr"
+                  tabindex=${idx === this._focusedIdx ? '0' : '-1'}
+                  @click=${() => this._onRowClick(row, pageSize > 0 ? page * pageSize + idx : idx)}
+                  @keydown=${(e: KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      this._onRowClick(row, pageSize > 0 ? page * pageSize + idx : idx);
+                    }
+                  }}
+                >
                   ${columns.map(
                     (col) =>
                       html`<td data-align=${col.align ?? 'left'} part="td"
-                        >${formatValue(row[col.field], col.format)}</td
+                        >${formatValue(row[col.field], col.format, this.spec!.options?.locale as string)}</td
                       >`,
                   )}
                 </tr>
@@ -223,7 +428,108 @@ export class UTable extends LitElement {
           </tbody>
         </table>
       </div>
-    `;
+      ${paginationBar}
+    </div>`;
+  }
+
+  private _onTableKeydown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    const row = target.closest('tr');
+    if (!row) return;
+
+    const tbody = row.parentElement;
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const idx = rows.indexOf(row);
+    let nextIdx = -1;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        nextIdx = Math.min(idx + 1, rows.length - 1);
+        break;
+      case 'ArrowUp':
+        nextIdx = Math.max(idx - 1, 0);
+        break;
+      case 'Home':
+        nextIdx = 0;
+        break;
+      case 'End':
+        nextIdx = rows.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    if (nextIdx !== idx && nextIdx >= 0) {
+      this._focusedIdx = nextIdx;
+      this.updateComplete.then(() => {
+        const newRows = this.shadowRoot?.querySelectorAll('tbody tr');
+        (newRows?.[nextIdx] as HTMLElement)?.focus();
+      });
+    }
+  };
+
+  private _onListKeydown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    const item = target.closest('.list-item') as HTMLElement | null;
+    if (!item) return;
+
+    const container = item.parentElement;
+    if (!container) return;
+
+    const items = Array.from(container.querySelectorAll('.list-item')) as HTMLElement[];
+    const idx = items.indexOf(item);
+    let nextIdx = -1;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        nextIdx = Math.min(idx + 1, items.length - 1);
+        break;
+      case 'ArrowUp':
+        nextIdx = Math.max(idx - 1, 0);
+        break;
+      case 'Home':
+        nextIdx = 0;
+        break;
+      case 'End':
+        nextIdx = items.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    if (nextIdx !== idx && nextIdx >= 0) {
+      this._focusedIdx = nextIdx;
+      this.updateComplete.then(() => {
+        const newItems = this.shadowRoot?.querySelectorAll('.list-item');
+        (newItems?.[nextIdx] as HTMLElement)?.focus();
+      });
+    }
+  };
+
+  private _onPageChange(newPage: number) {
+    this._page = newPage;
+    this._focusedIdx = 0;
+    this.updateComplete.then(() => {
+      const firstRow = this.shadowRoot?.querySelector('tbody tr[tabindex="0"]') as HTMLElement | null;
+      firstRow?.focus();
+    });
+  }
+
+  private _onSearch = (e: Event) => {
+    this._searchQuery = (e.target as HTMLInputElement).value;
+    this._page = 0;
+  };
+
+  private filterData(data: Record<string, unknown>[], columns: UWidgetColumnDefinition[]): Record<string, unknown>[] {
+    const q = this._searchQuery.toLowerCase();
+    const fields = columns.map((c) => c.field);
+    return data.filter((row) =>
+      fields.some((f) => String(row[f] ?? '').toLowerCase().includes(q)),
+    );
   }
 
   private _onSort(field: string) {
@@ -255,7 +561,11 @@ export class UTable extends LitElement {
       if (typeof av === 'number' && typeof bv === 'number') {
         cmp = av - bv;
       } else {
-        cmp = String(av).localeCompare(String(bv));
+        // Try numeric comparison for string values that look like numbers
+        const an = Number(av), bn = Number(bv);
+        cmp = (String(av) !== '' && String(bv) !== '' && !isNaN(an) && !isNaN(bn))
+          ? an - bn
+          : String(av).localeCompare(String(bv));
       }
       return dir === 'asc' ? cmp : -cmp;
     });
@@ -264,6 +574,7 @@ export class UTable extends LitElement {
   private renderList() {
     const data = this.spec!.data as Record<string, unknown>[];
     const mapping = this.spec!.mapping;
+    const compact = !!this.spec!.options?.compact;
     const primaryKey = mapping?.primary ?? this.inferPrimaryKey(data);
     const secondaryKey = mapping?.secondary;
     const iconKey = mapping?.icon;
@@ -271,10 +582,19 @@ export class UTable extends LitElement {
     const trailingKey = mapping?.trailing;
 
     return html`
-      <div class="list-container" part="list">
+      <div class="list-container${compact ? ' compact' : ''}" part="list" @keydown=${this._onListKeydown}>
         ${data.map(
           (item, idx) => html`
-            <div class="list-item" part="list-item" @click=${() => this._onRowClick(item, idx)}>
+            <div class="list-item" part="list-item"
+              tabindex=${idx === this._focusedIdx ? '0' : '-1'}
+              @click=${() => this._onRowClick(item, idx)}
+              @keydown=${(e: KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  this._onRowClick(item, idx);
+                }
+              }}
+            >
               ${avatarKey && item[avatarKey]
                 ? html`<img class="list-avatar" src=${String(item[avatarKey])} alt="" part="avatar" />`
                 : iconKey

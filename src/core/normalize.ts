@@ -2,10 +2,16 @@ import type { UWidgetSpec, NormalizedMapping, UWidgetMapping } from './types.js'
 import { getFormdownParser } from './formdown.js';
 
 /**
- * Normalize a spec for internal processing:
- * - mapping.y: string → string[]
- * - mapping.fields (deprecated) → top-level fields
- * - formdown string → fields + actions
+ * Normalize a spec for internal processing.
+ *
+ * Transformations applied:
+ * 1. Deprecated `mapping.fields` → top-level `fields`
+ * 2. `formdown` string → parsed `fields` + `actions`
+ *
+ * Returns a shallow copy; the original spec is not mutated.
+ *
+ * @param spec - The widget spec to normalize.
+ * @returns A normalized copy of the spec.
  */
 export function normalize(spec: UWidgetSpec): UWidgetSpec {
   const result = { ...spec };
@@ -32,7 +38,14 @@ export function normalize(spec: UWidgetSpec): UWidgetSpec {
   return result;
 }
 
-/** Normalize mapping.y to always be string[]. */
+/**
+ * Normalize `mapping.y` to always be `string[]`.
+ *
+ * Converts `y: "field"` → `y: ["field"]` and passes arrays through unchanged.
+ *
+ * @param mapping - The original mapping from a widget spec.
+ * @returns A new mapping object with `y` guaranteed to be `string[]` or `undefined`.
+ */
 export function normalizeMapping(mapping: UWidgetMapping): NormalizedMapping {
   const { y, ...rest } = mapping;
   return {

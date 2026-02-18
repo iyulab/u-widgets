@@ -174,6 +174,63 @@ describe('toEChartsOption', () => {
       expect(series[0].name).toBe('normal');
       expect(series[1].name).toBe('anomaly');
     });
+
+    it('supports size mapping — adds third dimension to data points', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, pop: 100 },
+          { x: 2, y: 20, pop: 400 },
+        ],
+        mapping: { x: 'x', y: 'y', size: 'pop' },
+      }));
+      const series = result.series as ObjArray;
+      expect((series[0].data as number[][])[0]).toEqual([1, 10, 100]);
+      expect((series[0].data as number[][])[1]).toEqual([2, 20, 400]);
+      expect(series[0].symbolSize).toBeDefined();
+    });
+
+    it('size mapping symbolSize scales correctly', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, pop: 100 },
+        ],
+        mapping: { x: 'x', y: 'y', size: 'pop' },
+      }));
+      const series = result.series as ObjArray;
+      const sizeFn = series[0].symbolSize as (val: number[]) => number;
+      // sqrt(100) * 4 = 40
+      expect(sizeFn([1, 10, 100])).toBe(40);
+    });
+
+    it('size + color mapping works together', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, pop: 100, cat: 'A' },
+          { x: 2, y: 20, pop: 400, cat: 'B' },
+        ],
+        mapping: { x: 'x', y: 'y', size: 'pop', color: 'cat' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(2);
+      expect((series[0].data as number[][])[0]).toEqual([1, 10, 100]);
+      expect(series[0].symbolSize).toBeDefined();
+      expect(series[1].symbolSize).toBeDefined();
+    });
+
+    it('without size mapping, data points are 2D and no symbolSize', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10 },
+        ],
+      }));
+      const series = result.series as ObjArray;
+      expect((series[0].data as number[][])[0]).toEqual([1, 10]);
+      expect(series[0].symbolSize).toBeUndefined();
+    });
   });
 
   describe('chart.radar', () => {
@@ -314,6 +371,57 @@ describe('toEChartsOption', () => {
       expect((result.legend as Obj).orient).toBe('horizontal');
       expect((result.legend as Obj).top).toBe('bottom');
     });
+
+    it('deep-merges nested objects (not just one level)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { month: 'Jan', sales: 100 },
+        ],
+        options: {
+          echarts: {
+            xAxis: { axisLabel: { color: 'red' } },
+          },
+        },
+      }));
+      // xAxis base has type + data; axisLabel is new, should be added
+      expect((result.xAxis as Obj).type).toBe('category');
+      expect((result.xAxis as Obj).data).toEqual(['Jan']);
+      expect(((result.xAxis as Obj).axisLabel as Obj).color).toBe('red');
+    });
+
+    it('preserves nested base properties when deep-merging', () => {
+      // Simulate a scenario where base has nested object, override adds to it
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', y: 10 }],
+        options: {
+          echarts: {
+            tooltip: { trigger: 'item', axisPointer: { type: 'shadow' } },
+          },
+        },
+      }));
+      // base tooltip is { trigger: 'axis' }
+      // override tooltip is { trigger: 'item', axisPointer: { type: 'shadow' } }
+      // deep merge: trigger overridden to 'item', axisPointer added
+      expect((result.tooltip as Obj).trigger).toBe('item');
+      expect(((result.tooltip as Obj).axisPointer as Obj).type).toBe('shadow');
+    });
+
+    it('replaces arrays (does not merge them)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ month: 'Jan', sales: 100 }],
+        options: {
+          echarts: {
+            xAxis: { data: ['Override'] },
+          },
+        },
+      }));
+      // Array should be replaced, not concatenated
+      expect((result.xAxis as Obj).data).toEqual(['Override']);
+      expect((result.xAxis as Obj).type).toBe('category');
+    });
   });
 
   describe('chart.heatmap', () => {
@@ -377,6 +485,32 @@ describe('toEChartsOption', () => {
       expect(vm.min).toBe(-1);
       expect(vm.max).toBe(1);
       expect((vm.inRange as Obj).color).toEqual(['blue', 'white', 'red']);
+    });
+
+    it('produces correct indices for large datasets', () => {
+      // Verify Map-based lookup produces correct index mapping
+      const cats = ['X', 'Y', 'Z'];
+      const rows = ['P', 'Q'];
+      const data = [];
+      for (const x of cats) {
+        for (const y of rows) {
+          data.push({ x, y, value: cats.indexOf(x) * 10 + rows.indexOf(y) });
+        }
+      }
+      const result = toEChartsOption(spec({
+        widget: 'chart.heatmap',
+        data,
+      }));
+      expect((result.xAxis as Obj).data).toEqual(['X', 'Y', 'Z']);
+      expect((result.yAxis as Obj).data).toEqual(['P', 'Q']);
+      const heatData = (result.series as ObjArray)[0].data as number[][];
+      // X=0,P=0 → value=0; X=0,Q=1 → value=1; X=1,P=0 → value=10; etc.
+      expect(heatData[0]).toEqual([0, 0, 0]);
+      expect(heatData[1]).toEqual([0, 1, 1]);
+      expect(heatData[2]).toEqual([1, 0, 10]);
+      expect(heatData[3]).toEqual([1, 1, 11]);
+      expect(heatData[4]).toEqual([2, 0, 20]);
+      expect(heatData[5]).toEqual([2, 1, 21]);
     });
   });
 
@@ -573,6 +707,206 @@ describe('toEChartsOption', () => {
         data: [{ x: 1 }],
       }));
       expect(result).toEqual({});
+    });
+  });
+
+  describe('chart.funnel', () => {
+    it('builds funnel chart from label/value data', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.funnel',
+        data: [
+          { stage: 'Visit', count: 10000 },
+          { stage: 'Signup', count: 3000 },
+          { stage: 'Purchase', count: 800 },
+        ],
+        mapping: { label: 'stage', value: 'count' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('funnel');
+      expect((series[0].data as ObjArray).length).toBe(3);
+      expect((series[0].data as ObjArray)[0].name).toBe('Visit');
+      expect((series[0].data as ObjArray)[0].value).toBe(10000);
+    });
+
+    it('auto-infers label and value fields', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.funnel',
+        data: [
+          { name: 'A', val: 100 },
+          { name: 'B', val: 50 },
+        ],
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('funnel');
+      expect((series[0].data as ObjArray).length).toBe(2);
+    });
+
+    it('has legend', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.funnel',
+        data: [{ stage: 'A', count: 100 }],
+        mapping: { label: 'stage', value: 'count' },
+      }));
+      expect(result.legend).toBeDefined();
+    });
+  });
+
+  describe('chart.waterfall', () => {
+    it('builds waterfall chart with stacked bars', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'Revenue', value: 500 },
+          { item: 'Cost', value: -200 },
+          { item: 'Marketing', value: -80 },
+          { item: 'Profit', value: 220 },
+        ],
+        mapping: { x: 'item', y: ['value'] },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(3); // Base, Positive, Negative
+      expect(series[0].name).toBe('Base');
+      expect(series[1].name).toBe('Positive');
+      expect(series[2].name).toBe('Negative');
+      expect(series[0].stack).toBe('waterfall');
+    });
+
+    it('calculates base values correctly', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'A', value: 100 },
+          { item: 'B', value: -30 },
+          { item: 'C', value: 50 },
+        ],
+        mapping: { x: 'item', y: ['value'] },
+      }));
+      const series = result.series as ObjArray;
+      // A: +100 → base=0, running=100
+      // B: -30  → base=70 (100-30), running=70
+      // C: +50  → base=70, running=120
+      expect(series[0].data).toEqual([0, 70, 70]);
+      expect(series[1].data).toEqual([100, null, 50]);
+      expect(series[2].data).toEqual([null, 30, null]);
+    });
+
+    it('has category x-axis', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'Revenue', value: 500 },
+          { item: 'Cost', value: -200 },
+        ],
+        mapping: { x: 'item', y: ['value'] },
+      }));
+      expect((result.xAxis as Obj).type).toBe('category');
+      expect((result.xAxis as Obj).data).toEqual(['Revenue', 'Cost']);
+    });
+
+    it('has transparent base series', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [{ item: 'A', value: 100 }],
+        mapping: { x: 'item', y: ['value'] },
+      }));
+      const base = (result.series as ObjArray)[0];
+      expect((base.itemStyle as Obj).color).toBe('transparent');
+    });
+  });
+
+  describe('chart.treemap', () => {
+    it('builds treemap from name/value data', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.treemap',
+        data: [
+          { name: 'Electronics', value: 50 },
+          { name: 'Clothing', value: 35 },
+        ],
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('treemap');
+      expect((series[0].data as ObjArray).length).toBe(2);
+      expect((series[0].data as ObjArray)[0].name).toBe('Electronics');
+      expect((series[0].data as ObjArray)[0].value).toBe(50);
+    });
+
+    it('supports hierarchical data with children', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.treemap',
+        data: [
+          {
+            name: 'Electronics', value: 50, children: [
+              { name: 'Phones', value: 30 },
+              { name: 'Laptops', value: 20 },
+            ],
+          },
+          { name: 'Clothing', value: 35 },
+        ],
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as ObjArray;
+      expect(data[0].children).toBeDefined();
+      expect((data[0].children as ObjArray).length).toBe(2);
+      expect((data[0].children as ObjArray)[0].name).toBe('Phones');
+    });
+
+    it('has tooltip', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.treemap',
+        data: [{ name: 'A', value: 10 }],
+      }));
+      expect(result.tooltip).toBeDefined();
+    });
+  });
+
+  describe('chart-level options', () => {
+    it('hides legend when options.legend is false', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { cat: 'A', v1: 10, v2: 20 },
+        ],
+        mapping: { x: 'cat', y: ['v1', 'v2'] },
+        options: { legend: false },
+      }));
+      expect((result.legend as Obj).show).toBe(false);
+    });
+
+    it('hides grid lines when options.grid is false', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+        options: { grid: false },
+      }));
+      expect(((result.xAxis as Obj).splitLine as Obj)?.show).toBe(false);
+      expect(((result.yAxis as Obj).splitLine as Obj)?.show).toBe(false);
+    });
+
+    it('disables animation when options.animate is false', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+        options: { animate: false },
+      }));
+      expect(result.animation).toBe(false);
+    });
+
+    it('applies custom colors from options.colors', () => {
+      const colors = ['#ff0000', '#00ff00', '#0000ff'];
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+        options: { colors },
+      }));
+      expect(result.color).toEqual(colors);
+    });
+
+    it('does not set animation when animate is not false', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+      }));
+      expect(result.animation).toBeUndefined();
     });
   });
 });

@@ -245,4 +245,14 @@ describe('u-gauge', () => {
       expect(container?.getAttribute('aria-label')).toBe('Upload');
     });
   });
+
+  describe('container query', () => {
+    it('declares container: u-gauge / inline-size on :host', () => {
+      const styles = (customElements.get('u-gauge') as unknown as { styles: { cssText: string } }).styles;
+      const text = typeof styles === 'string' ? styles : Array.isArray(styles) ? styles.map((s: { cssText: string }) => s.cssText).join('') : styles.cssText;
+      expect(text).toContain('container:');
+      expect(text).toContain('u-gauge');
+      expect(text).toContain('inline-size');
+    });
+  });
 });

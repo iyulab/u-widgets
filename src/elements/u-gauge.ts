@@ -47,6 +47,7 @@ export class UGauge extends LitElement {
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
+      container: u-gauge / inline-size;
     }
 
     .gauge-container {
@@ -111,6 +112,24 @@ export class UGauge extends LitElement {
       justify-content: space-between;
       font-size: 0.8125rem;
       color: var(--u-widget-text-secondary, #64748b);
+    }
+
+    @container u-gauge (max-width: 10rem) {
+      .gauge-value {
+        font-size: 1.25rem;
+      }
+
+      .gauge-unit {
+        font-size: 0.625rem;
+      }
+
+      .progress-info {
+        font-size: 0.75rem;
+      }
+
+      .progress-bar-track {
+        height: 6px;
+      }
     }
   `;
 

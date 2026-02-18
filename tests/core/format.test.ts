@@ -24,8 +24,18 @@ describe('formatValue', () => {
   });
 
   describe('currency', () => {
-    it('adds won sign and formats', () => {
-      expect(formatValue(1234, 'currency')).toBe('\u20A91,234');
+    it('formats as USD by default', () => {
+      expect(formatValue(1234, 'currency')).toBe('$1,234.00');
+    });
+
+    it('supports currency code via colon syntax', () => {
+      expect(formatValue(1234, 'currency:EUR')).toBe('\u20AC1,234.00');
+      expect(formatValue(1234, 'currency:KRW')).toBe('\u20A91,234');
+      expect(formatValue(1234, 'currency:JPY')).toBe('\u00A51,234');
+    });
+
+    it('falls back to USD for invalid currency code', () => {
+      expect(formatValue(1234, 'currency:INVALID')).toBe('$1,234.00');
     });
   });
 
@@ -81,6 +91,31 @@ describe('formatValue', () => {
     });
   });
 
+  describe('locale support', () => {
+    it('formats number with explicit locale', () => {
+      expect(formatValue(1234.5, 'number', 'de-DE')).toBe('1.234,5');
+    });
+
+    it('formats currency with explicit locale', () => {
+      const result = formatValue(1234, 'currency:EUR', 'de-DE');
+      // German locale: 1.234,00 €
+      expect(result).toContain('1.234');
+      expect(result).toContain('€');
+    });
+
+    it('uses browser default when locale is undefined', () => {
+      // Should not throw; uses Intl default
+      const result = formatValue(1234, 'number');
+      expect(result).toBeTruthy();
+    });
+
+    it('non-Intl formats ignore locale parameter', () => {
+      expect(formatValue(73, 'percent', 'de-DE')).toBe('73%');
+      expect(formatValue('2025-01-15T14:30:00', 'date', 'de-DE')).toBe('2025-01-15');
+      expect(formatValue(1536, 'bytes', 'de-DE')).toBe('1.5 KB');
+    });
+  });
+
   describe('edge cases', () => {
     it('handles unknown format type as String()', () => {
       expect(formatValue(42, 'unknown')).toBe('42');
@@ -92,6 +127,10 @@ describe('formatValue', () => {
 
     it('handles non-numeric currency', () => {
       expect(formatValue('abc', 'currency')).toBe('abc');
+    });
+
+    it('handles non-numeric currency with code', () => {
+      expect(formatValue('abc', 'currency:EUR')).toBe('abc');
     });
 
     it('formats date-only string', () => {

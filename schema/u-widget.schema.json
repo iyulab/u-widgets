@@ -2,12 +2,25 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/iyulab/u-widgets/schema/u-widget.schema.json",
   "title": "u-widget",
-  "description": "Declarative, data-driven widget specification for u-widgets v0.1",
+  "description": "Declarative, data-driven widget specification for u-widgets v0.2",
   "oneOf": [
     { "$ref": "#/$defs/widget" },
     { "$ref": "#/$defs/composeWidget" }
   ],
   "$defs": {
+    "widgetType": {
+      "type": "string",
+      "enum": [
+        "metric", "stat-group", "gauge", "progress",
+        "table", "list",
+        "chart.bar", "chart.line", "chart.area", "chart.pie",
+        "chart.scatter", "chart.radar", "chart.heatmap", "chart.box",
+        "chart.funnel", "chart.waterfall", "chart.treemap",
+        "form", "confirm",
+        "markdown", "image", "callout"
+      ],
+      "description": "Widget type identifier"
+    },
     "widget": {
       "type": "object",
       "properties": {
@@ -19,8 +32,7 @@
           "type": "string"
         },
         "widget": {
-          "type": "string",
-          "description": "Widget type identifier (e.g. chart.bar, metric, form)"
+          "$ref": "#/$defs/widgetType"
         },
         "id": {
           "type": "string",
@@ -215,11 +227,13 @@
           "type": "string",
           "description": "Icon field (list)"
         },
-        "fields": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/fieldDefinition" },
-          "description": "Deprecated: use top-level fields instead",
-          "deprecated": true
+        "avatar": {
+          "type": "string",
+          "description": "Avatar image URL field (list)"
+        },
+        "trailing": {
+          "type": "string",
+          "description": "Trailing text field (list)"
         }
       },
       "additionalProperties": false
@@ -263,8 +277,10 @@
         "type": {
           "type": "string",
           "enum": [
-            "text", "textarea", "number", "select", "multiselect",
-            "date", "datetime", "toggle", "range", "radio", "checkbox"
+            "text", "email", "password", "tel", "url",
+            "textarea", "number", "select", "multiselect",
+            "date", "datetime", "time",
+            "toggle", "range", "radio", "checkbox"
           ],
           "description": "Input type"
         },
@@ -286,10 +302,18 @@
           "type": "integer",
           "description": "Number of rows for textarea"
         },
-        "min": {},
-        "max": {},
+        "min": {
+          "description": "Minimum value (number or date string)"
+        },
+        "max": {
+          "description": "Maximum value (number or date string)"
+        },
         "step": {
           "type": "number"
+        },
+        "message": {
+          "type": "string",
+          "description": "Custom validation error message (overrides locale default)"
         }
       },
       "required": ["field"],

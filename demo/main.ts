@@ -220,6 +220,76 @@ const specs = {
       },
     ],
   },
+  chartFunnel: {
+    widget: 'chart.funnel',
+    data: [
+      { stage: 'Visit', count: 10000 },
+      { stage: 'Click', count: 4200 },
+      { stage: 'Sign Up', count: 1800 },
+      { stage: 'Purchase', count: 620 },
+    ],
+  },
+  chartWaterfall: {
+    widget: 'chart.waterfall',
+    data: [
+      { item: 'Revenue', value: 500 },
+      { item: 'COGS', value: -120 },
+      { item: 'OpEx', value: -200 },
+      { item: 'Tax', value: -45 },
+      { item: 'Net Profit', value: 135 },
+    ],
+  },
+  chartTreemap: {
+    widget: 'chart.treemap',
+    data: [
+      { name: 'Engineering', children: [
+        { name: 'Frontend', value: 12 },
+        { name: 'Backend', value: 18 },
+        { name: 'Infra', value: 8 },
+      ]},
+      { name: 'Design', children: [
+        { name: 'Product', value: 6 },
+        { name: 'Brand', value: 4 },
+      ]},
+      { name: 'Marketing', children: [
+        { name: 'Growth', value: 10 },
+        { name: 'Content', value: 7 },
+      ]},
+    ],
+  },
+  markdown: {
+    widget: 'markdown',
+    data: {
+      content: [
+        '## Hello, u-widgets!',
+        '',
+        'This is a **markdown** widget. It supports:',
+        '',
+        '1. **Bold** and *italic* text',
+        '2. [Links](https://github.com/iyulab/u-widgets)',
+        '3. Inline `code` and code blocks',
+        '',
+        '```js',
+        'const greeting = "Hello World";',
+        'console.log(greeting);',
+        '```',
+      ].join('\n'),
+    },
+  },
+  image: {
+    widget: 'image',
+    data: {
+      src: 'https://placehold.co/600x200/2563eb/white?text=u-widgets',
+      alt: 'u-widgets placeholder image',
+    },
+  },
+  callout: {
+    widget: 'callout',
+    data: {
+      message: 'This is an informational callout. Use it to highlight important notices to users.',
+    },
+    options: { variant: 'info' },
+  },
 };
 
 // ── Bind Widgets ──
@@ -251,6 +321,12 @@ bind('demo-form', specs.form);
 bind('demo-formdown', specs.formdownForm);
 bind('demo-confirm', specs.confirm);
 bind('demo-compose', specs.compose);
+bind('demo-chart-funnel', specs.chartFunnel);
+bind('demo-chart-waterfall', specs.chartWaterfall);
+bind('demo-chart-treemap', specs.chartTreemap);
+bind('demo-markdown', specs.markdown);
+bind('demo-image', specs.image);
+bind('demo-callout', specs.callout);
 
 // ── Theme Toggle ──
 

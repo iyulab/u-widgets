@@ -2,14 +2,36 @@ type FormatType = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'byt
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-export function formatValue(value: unknown, format?: string): string {
+/**
+ * Format a value according to a format hint string.
+ *
+ * Supported formats: `"number"`, `"currency"`, `"currency:EUR"`, `"percent"`,
+ * `"date"`, `"datetime"`, `"bytes"`. Returns `String(value)` for unknown formats.
+ *
+ * @param value - The value to format (coerced to number where needed).
+ * @param format - Format hint, optionally with a parameter after `:` (e.g., `"currency:USD"`).
+ * @param locale - BCP 47 locale tag for number/currency formatting. Falls back to browser default.
+ * @returns Formatted string, or empty string if value is null/undefined.
+ *
+ * @example
+ * ```ts
+ * formatValue(1234.5, 'number')       // "1,234.5"
+ * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
+ * formatValue(73, 'percent')          // "73%"
+ * formatValue(1536000, 'bytes')       // "1.5 MB"
+ * ```
+ */
+export function formatValue(value: unknown, format?: string, locale?: string): string {
   if (value == null) return '';
 
-  switch (format as FormatType) {
+  // Parse format string: 'currency:USD' → type='currency', param='USD'
+  const [type, param] = format?.split(':') ?? [];
+
+  switch (type as FormatType) {
     case 'number':
-      return formatNumber(value);
+      return formatNumber(value, locale);
     case 'currency':
-      return formatCurrency(value);
+      return formatCurrency(value, param, locale);
     case 'percent':
       return formatPercent(value);
     case 'date':
@@ -23,16 +45,27 @@ export function formatValue(value: unknown, format?: string): string {
   }
 }
 
-function formatNumber(value: unknown): string {
+function formatNumber(value: unknown, locale?: string): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  return num.toLocaleString('en-US');
+  return new Intl.NumberFormat(locale).format(num);
 }
 
-function formatCurrency(value: unknown): string {
+function formatCurrency(value: unknown, currencyCode?: string, locale?: string): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  return '\u20A9' + num.toLocaleString('en-US');
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode || 'USD',
+    }).format(num);
+  } catch {
+    // Invalid currency code fallback
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'USD',
+    }).format(num);
+  }
 }
 
 function formatPercent(value: unknown): string {

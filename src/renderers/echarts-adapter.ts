@@ -52,14 +52,46 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
     case 'chart.box':
       result = buildBoxplot(data, mapping, options);
       break;
+    case 'chart.funnel':
+      result = buildFunnel(data, mapping, options);
+      break;
+    case 'chart.waterfall':
+      result = buildWaterfall(data, mapping, options);
+      break;
+    case 'chart.treemap':
+      result = buildTreemap(data, options);
+      break;
     default:
       return {};
   }
 
-  // Apply echarts passthrough: deep-merge one level
+  // Apply chart-level options
+  if (options.legend === false && result.legend) {
+    result.legend = { ...result.legend as Record<string, unknown>, show: false };
+  }
+
+  if (options.grid === false) {
+    // Hide grid lines on axes
+    if (result.xAxis && typeof result.xAxis === 'object') {
+      result.xAxis = { ...result.xAxis as Record<string, unknown>, splitLine: { show: false } };
+    }
+    if (result.yAxis && typeof result.yAxis === 'object') {
+      result.yAxis = { ...result.yAxis as Record<string, unknown>, splitLine: { show: false } };
+    }
+  }
+
+  if (options.animate === false) {
+    result.animation = false;
+  }
+
+  if (Array.isArray(options.colors) && options.colors.length > 0) {
+    result.color = options.colors;
+  }
+
+  // Apply echarts passthrough: deep-merge
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
-    result = mergeOneLevel(result, passthrough);
+    result = deepMerge(result, passthrough);
   }
 
   return result;
@@ -158,6 +190,7 @@ function buildScatter(
   const xField = mapping?.x ?? numFields[0];
   const yField = (mapping?.y ?? [numFields[1]])[0];
   const colorField = mapping?.color;
+  const sizeField = mapping?.size;
 
   if (!xField || !yField) return {};
 
@@ -167,24 +200,44 @@ function buildScatter(
     tooltip: { trigger: 'item' },
   };
 
+  // Helper: build a data point (2D or 3D if size mapping)
+  const toPoint = (row: Record<string, unknown>): number[] => {
+    const pt = [Number(row[xField] ?? 0), Number(row[yField] ?? 0)];
+    if (sizeField) pt.push(Number(row[sizeField] ?? 0));
+    return pt;
+  };
+
+  // symbolSize function that maps the third value to pixel radius
+  const symbolSizeFn = sizeField
+    ? (val: number[]) => {
+        const raw = val[2] ?? 0;
+        // Clamp to [4, 60] range — square root scale for area perception
+        return Math.max(4, Math.min(60, Math.sqrt(raw) * 4));
+      }
+    : undefined;
+
   if (colorField) {
     // Group data by color field → separate series per group
     const groups = new Map<string, number[][]>();
     for (const row of data) {
       const key = String(row[colorField] ?? 'unknown');
       if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push([Number(row[xField] ?? 0), Number(row[yField] ?? 0)]);
+      groups.get(key)!.push(toPoint(row));
     }
     const seriesItems: Record<string, unknown>[] = [];
     for (const [name, points] of groups) {
-      seriesItems.push({ name, type: 'scatter', data: points });
+      const series: Record<string, unknown> = { name, type: 'scatter', data: points };
+      if (symbolSizeFn) series.symbolSize = symbolSizeFn;
+      seriesItems.push(series);
     }
     result.series = seriesItems;
     result.legend = { data: Array.from(groups.keys()) };
   } else {
     // Single series — all points same color
-    const points = data.map((row) => [Number(row[xField] ?? 0), Number(row[yField] ?? 0)]);
-    result.series = [{ type: 'scatter', data: points }];
+    const points = data.map((row) => toPoint(row));
+    const series: Record<string, unknown> = { type: 'scatter', data: points };
+    if (symbolSizeFn) series.symbolSize = symbolSizeFn;
+    result.series = [series];
   }
 
   // Reference lines
@@ -315,14 +368,20 @@ function buildHeatmap(
     if (!ySet.has(y)) { ySet.add(y); yCats.push(y); }
   }
 
+  // Build index maps for O(1) lookup
+  const xIndex = new Map<string, number>();
+  xCats.forEach((v, i) => xIndex.set(v, i));
+  const yIndex = new Map<string, number>();
+  yCats.forEach((v, i) => yIndex.set(v, i));
+
   // Build [xIndex, yIndex, value] data
   const heatData: (number | null)[][] = [];
   let minVal = Infinity;
   let maxVal = -Infinity;
 
   for (const row of data) {
-    const xi = xCats.indexOf(String(row[xField] ?? ''));
-    const yi = yCats.indexOf(String(row[yField] ?? ''));
+    const xi = xIndex.get(String(row[xField] ?? '')) ?? 0;
+    const yi = yIndex.get(String(row[yField] ?? '')) ?? 0;
     const v = row[valueField] != null ? Number(row[valueField]) : null;
     heatData.push([xi, yi, v]);
     if (v != null) {
@@ -433,6 +492,133 @@ function guessNumberField(data: Record<string, unknown>[]): string | undefined {
   return Object.keys(first).find((k) => typeof first[k] === 'number');
 }
 
+function buildFunnel(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  _options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data)) return {};
+
+  const labelField = mapping?.label ?? guessStringField(data as Record<string, unknown>[]);
+  const valueField = (mapping?.value ?? guessNumberField(data as Record<string, unknown>[]));
+
+  if (!labelField || !valueField) return {};
+
+  const seriesData = (data as Record<string, unknown>[]).map((row) => ({
+    name: String(row[labelField] ?? ''),
+    value: Number(row[valueField] ?? 0),
+  }));
+
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+    legend: { orient: 'vertical', left: 'left' },
+    series: [{
+      type: 'funnel',
+      data: seriesData,
+      sort: 'descending',
+      gap: 2,
+      label: { show: true, position: 'inside' },
+    }],
+  };
+}
+
+function buildWaterfall(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  _options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data)) return {};
+
+  const records = data as Record<string, unknown>[];
+  const xField = mapping?.x ?? guessStringField(records);
+  const yField = (mapping?.y ?? [guessNumberField(records)])[0];
+
+  if (!xField || !yField) return {};
+
+  const categories: string[] = [];
+  const baseValues: number[] = [];
+  const positiveValues: (number | null)[] = [];
+  const negativeValues: (number | null)[] = [];
+
+  let running = 0;
+  for (const row of records) {
+    const label = String(row[xField] ?? '');
+    const value = Number(row[yField] ?? 0);
+    categories.push(label);
+
+    if (value >= 0) {
+      baseValues.push(running);
+      positiveValues.push(value);
+      negativeValues.push(null);
+    } else {
+      baseValues.push(running + value);
+      positiveValues.push(null);
+      negativeValues.push(Math.abs(value));
+    }
+    running += value;
+  }
+
+  return {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: { type: 'category', data: categories },
+    yAxis: { type: 'value' },
+    series: [
+      {
+        name: 'Base',
+        type: 'bar',
+        stack: 'waterfall',
+        itemStyle: { borderColor: 'transparent', color: 'transparent' },
+        emphasis: { itemStyle: { borderColor: 'transparent', color: 'transparent' } },
+        data: baseValues,
+      },
+      {
+        name: 'Positive',
+        type: 'bar',
+        stack: 'waterfall',
+        data: positiveValues,
+      },
+      {
+        name: 'Negative',
+        type: 'bar',
+        stack: 'waterfall',
+        data: negativeValues,
+      },
+    ],
+  };
+}
+
+function buildTreemap(
+  data: unknown,
+  _options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data)) return {};
+
+  // Treemap data uses name/value/children directly — pass through to ECharts
+  const seriesData = (data as Record<string, unknown>[]).map((item) => toTreeNode(item));
+
+  return {
+    tooltip: { trigger: 'item' },
+    series: [{
+      type: 'treemap',
+      data: seriesData,
+      leafDepth: 1,
+      roam: false,
+      label: { show: true, formatter: '{b}' },
+    }],
+  };
+}
+
+function toTreeNode(item: Record<string, unknown>): Record<string, unknown> {
+  const node: Record<string, unknown> = {
+    name: String(item.name ?? ''),
+    value: Number(item.value ?? 0),
+  };
+  if (Array.isArray(item.children)) {
+    node.children = (item.children as Record<string, unknown>[]).map((child) => toTreeNode(child));
+  }
+  return node;
+}
+
 function getNumberFields(data: Record<string, unknown>[]): string[] {
   if (data.length === 0) return [];
   const first = data[0];
@@ -440,11 +626,11 @@ function getNumberFields(data: Record<string, unknown>[]): string[] {
 }
 
 /**
- * Merge `overrides` into `base` one level deep.
- * If both base[key] and overrides[key] are plain objects, merge their properties.
- * Otherwise, overrides[key] wins.
+ * Deep-merge `overrides` into `base` recursively.
+ * If both base[key] and overrides[key] are plain objects, merge recursively.
+ * Arrays and other values: overrides[key] wins.
  */
-function mergeOneLevel(
+function deepMerge(
   base: Record<string, unknown>,
   overrides: Record<string, unknown>,
 ): Record<string, unknown> {
@@ -453,7 +639,7 @@ function mergeOneLevel(
     const bv = base[key];
     const ov = overrides[key];
     if (isPlainObject(bv) && isPlainObject(ov)) {
-      result[key] = { ...(bv as Record<string, unknown>), ...(ov as Record<string, unknown>) };
+      result[key] = deepMerge(bv as Record<string, unknown>, ov as Record<string, unknown>);
     } else {
       result[key] = ov;
     }

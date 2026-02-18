@@ -1,8 +1,28 @@
 import type { UWidgetMapping } from './types.js';
 
 /**
- * Auto-infer mapping from data shape and widget type.
- * Returns inferred mapping, or undefined if inference is not applicable.
+ * Auto-infer a mapping from data shape and widget type.
+ *
+ * Inference rules:
+ * - **chart.bar/line/area:** first string field → `x`, number fields → `y`
+ * - **chart.pie/funnel:** first string → `label`, first number → `value`
+ * - **chart.scatter:** first two number fields → `x`, `y`
+ * - **chart.radar:** first string → `axis`, number fields → `y`
+ * - **chart.heatmap:** two string fields + number → `x`, `y`, `value`
+ * - **chart.box:** string → `x`, five number fields (min/q1/median/q3/max) → `y`
+ * - **table:** all keys → `columns`
+ * - **list:** first string → `primary`, second string → `secondary`
+ * - **metric/gauge/progress/form:** no mapping needed (returns `undefined`)
+ *
+ * @param widget - Widget type identifier.
+ * @param data - The spec's `data` field (object or array of records).
+ * @returns Inferred mapping, or `undefined` if not applicable.
+ *
+ * @example
+ * ```ts
+ * infer('chart.bar', [{ name: 'A', value: 30 }]);
+ * // → { x: 'name', y: 'value' }
+ * ```
  */
 export function infer(
   widget: string,
@@ -42,7 +62,7 @@ function inferChart(
   sample: Record<string, unknown>,
   keys: string[],
 ): UWidgetMapping | undefined {
-  if (widget === 'chart.pie') {
+  if (widget === 'chart.pie' || widget === 'chart.funnel') {
     const labelField = keys.find((k) => typeof sample[k] === 'string');
     const valueField = keys.find((k) => typeof sample[k] === 'number');
     if (labelField && valueField) {
@@ -62,9 +82,9 @@ function inferChart(
 
   if (widget === 'chart.radar') {
     const axisField = keys.find((k) => typeof sample[k] === 'string');
-    const valueField = keys.find((k) => typeof sample[k] === 'number');
-    if (axisField && valueField) {
-      return { axis: axisField, value: valueField };
+    const numFields = keys.filter((k) => typeof sample[k] === 'number');
+    if (axisField && numFields.length > 0) {
+      return { axis: axisField, y: numFields.length === 1 ? numFields[0] : numFields };
     }
     return undefined;
   }

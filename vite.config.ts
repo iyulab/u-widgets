@@ -9,6 +9,7 @@ export default defineConfig({
         'u-widgets': resolve(__dirname, 'src/index.ts'),
         'u-widgets-charts': resolve(__dirname, 'src/charts.ts'),
         'u-widgets-forms': resolve(__dirname, 'src/forms.ts'),
+        'u-widgets-tools': resolve(__dirname, 'src/tools.ts'),
       },
       formats: ['es'],
     },

@@ -175,4 +175,15 @@ describe('u-metric', () => {
       expect(shadow.querySelector('.stat-group')).not.toBeNull();
     });
   });
+
+  describe('container query', () => {
+    it('has container-type declared in styles', () => {
+      const styles = (customElements.get('u-metric') as any).styles;
+      const cssText = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(cssText).toContain('container');
+      expect(cssText).toContain('u-metric');
+    });
+  });
 });

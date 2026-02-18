@@ -30,6 +30,7 @@ export class UMetric extends LitElement {
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
+      container: u-metric / inline-size;
     }
 
     /* ── metric (single) ── */
@@ -40,10 +41,16 @@ export class UMetric extends LitElement {
     }
 
     .metric-value {
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 700;
       line-height: 1.1;
       color: var(--u-widget-text, #1a1a2e);
+    }
+
+    @container u-metric (min-width: 20rem) {
+      .metric-value {
+        font-size: 2rem;
+      }
     }
 
     .metric-unit {
@@ -82,13 +89,25 @@ export class UMetric extends LitElement {
     /* ── stat-group ── */
     .stat-group {
       display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     .stat-group .metric {
-      flex: 1;
-      min-width: 100px;
+      min-width: 0;
+    }
+
+    @container u-metric (min-width: 20rem) {
+      .stat-group {
+        flex-direction: row;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .stat-group .metric {
+        flex: 1;
+        min-width: 100px;
+      }
     }
   `;
 

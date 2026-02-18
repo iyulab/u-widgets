@@ -1,5 +1,18 @@
-// u-widgets/forms — @formdown/core integration entry point.
-// Import this to enable rich formdown parsing with @formdown/core.
+/**
+ * @module u-widgets/forms
+ *
+ * Integration entry point for `@formdown/core`. Import this module to replace
+ * the built-in formdown parser with the full `@formdown/core` parser, enabling
+ * richer form syntax support.
+ *
+ * @example
+ * ```ts
+ * import 'u-widgets';
+ * import 'u-widgets/forms';
+ *
+ * el.spec = { widget: 'form', formdown: '@name*(Name): []\\n@email: @[]' };
+ * ```
+ */
 
 import { FormManager } from '@formdown/core/form-manager';
 import { registerFormdownParser } from './core/formdown.js';
