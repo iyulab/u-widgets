@@ -11,15 +11,6 @@ import { css } from 'lit';
  * Host applications can override any `--u-widget-*` variable at any ancestor.
  */
 export const themeStyles = css`
-  :host {
-    --u-widget-bg: #fff;
-    --u-widget-surface: #f1f5f9;
-    --u-widget-text: #1a1a2e;
-    --u-widget-text-secondary: #64748b;
-    --u-widget-border: #e2e8f0;
-    --u-widget-primary: #4f46e5;
-  }
-
   @media (prefers-color-scheme: dark) {
     :host(:not([theme="light"])) {
       --u-widget-bg: #1e1e2e;

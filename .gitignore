@@ -3,6 +3,7 @@ claudedocs/
 dev-docs/
 CLAUDE.md
 nul
+.playwright-mcp/
 
 # Dependencies
 node_modules/

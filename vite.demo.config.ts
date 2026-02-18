@@ -15,7 +15,7 @@ export default defineConfig({
       treeshake: false,
       input: {
         main: resolve(__dirname, 'demo/index.html'),
-        playground: resolve(__dirname, 'demo/playground.html'),
+        widgets: resolve(__dirname, 'demo/widgets.html'),
         insight: resolve(__dirname, 'demo/insight.html'),
       },
     },

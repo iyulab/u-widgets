@@ -115,27 +115,27 @@ export class UContent extends LitElement {
     }
 
     .callout-info {
-      background: #eff6ff;
+      background: color-mix(in srgb, #3b82f6 12%, var(--u-widget-bg, #fff));
       border-left-color: #3b82f6;
-      color: #1e40af;
+      color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-warning {
-      background: #fffbeb;
+      background: color-mix(in srgb, #f59e0b 12%, var(--u-widget-bg, #fff));
       border-left-color: #f59e0b;
-      color: #92400e;
+      color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-error {
-      background: #fef2f2;
+      background: color-mix(in srgb, #ef4444 12%, var(--u-widget-bg, #fff));
       border-left-color: #ef4444;
-      color: #991b1b;
+      color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-success {
-      background: #f0fdf4;
+      background: color-mix(in srgb, #22c55e 12%, var(--u-widget-bg, #fff));
       border-left-color: #22c55e;
-      color: #166534;
+      color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-title {

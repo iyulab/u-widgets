@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>u-widgets Playground</title>
+  <title>u-widgets Reference</title>
   <link rel="stylesheet" href="./shared.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -71,7 +71,7 @@
 
     /* Sidebar */
     .sidebar {
-      width: 180px;
+      width: 200px;
       flex-shrink: 0;
       background: var(--u-widget-bg);
       border-right: 1px solid var(--u-widget-border);
@@ -80,12 +80,25 @@
     }
 
     .sidebar-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 0.5rem 1rem 0.25rem;
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--u-widget-text-secondary);
       font-weight: 600;
+    }
+
+    .sidebar-group .badge {
+      font-size: 0.6rem;
+      background: var(--u-widget-surface);
+      border: 1px solid var(--u-widget-border);
+      border-radius: 8px;
+      padding: 0 5px;
+      line-height: 1.4;
+      font-weight: 500;
     }
 
     .sidebar-item {
@@ -123,6 +136,99 @@
       gap: 0.75rem;
     }
 
+    /* Doc Header */
+    .doc-header {
+      background: var(--u-widget-bg);
+      border-radius: 8px;
+      border: 1px solid var(--u-widget-border);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .doc-header-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: var(--u-widget-text);
+      margin-bottom: 0.35rem;
+    }
+
+    .doc-header-desc {
+      font-size: 0.875rem;
+      color: var(--u-widget-text-secondary);
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .doc-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .doc-badge.shape {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .doc-badge.key {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .dark .doc-badge.shape {
+      background: #1e3a5f;
+      color: #93c5fd;
+    }
+
+    .dark .doc-badge.key {
+      background: #14532d;
+      color: #86efac;
+    }
+
+    /* Variant Bar */
+    .variant-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .variant-bar:empty {
+      display: none;
+    }
+
+    .variant-btn {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--u-widget-border);
+      background: var(--u-widget-bg);
+      color: var(--u-widget-text);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: inherit;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .variant-btn:hover {
+      background: var(--u-widget-surface);
+    }
+
+    .variant-btn.active {
+      background: var(--u-widget-primary);
+      border-color: var(--u-widget-primary);
+      color: #fff;
+    }
+
     /* Shared panel label */
     .panel-label {
       font-size: 0.7rem;
@@ -133,7 +239,7 @@
       margin-bottom: 0.5rem;
     }
 
-    /* ── Preview ── resizable, widget fills available space */
+    /* Preview — resizable, widget fills available space */
     .preview-panel {
       height: 320px;
       min-height: 120px;
@@ -162,7 +268,7 @@
       width: 100%;
     }
 
-    /* ── Editor ── fixed height, internal scroll */
+    /* Editor — fixed height, internal scroll */
     .editor-panel {
       flex-shrink: 0;
       background: var(--u-widget-bg);
@@ -203,7 +309,7 @@
       font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
-    /* ── Event log ── */
+    /* Event log */
     .event-log-panel {
       background: var(--u-widget-bg);
       border-radius: 8px;
@@ -226,7 +332,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>u-widgets Playground</h1>
+    <h1>u-widgets Reference</h1>
     <div class="header-actions">
       <a class="header-link" href="./">Demo</a>
       <a class="header-link" href="./insight.html">Insight</a>
@@ -239,6 +345,14 @@
     <aside class="sidebar" id="sidebar"></aside>
 
     <div class="content">
+      <div class="doc-header" id="doc-header">
+        <div class="doc-header-title" id="doc-title"></div>
+        <div class="doc-header-desc" id="doc-desc"></div>
+        <div class="doc-badges" id="doc-badges"></div>
+      </div>
+
+      <div class="variant-bar" id="variant-bar"></div>
+
       <div class="preview-panel" id="preview-panel">
         <div class="panel-label">Preview</div>
         <div class="preview-area">
@@ -259,6 +373,6 @@
     </div>
   </div>
 
-  <script type="module" src="./playground.ts"></script>
+  <script type="module" src="./widgets.ts"></script>
 </body>
 </html>
