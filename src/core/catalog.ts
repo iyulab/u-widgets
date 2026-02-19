@@ -246,7 +246,7 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   },
   'image': {
     widget: 'image',
-    data: { src: 'https://via.placeholder.com/300x200', alt: 'Placeholder image' },
+    data: { src: 'https://placehold.co/300x200', alt: 'Placeholder image' },
   },
   'callout': {
     widget: 'callout',
@@ -288,9 +288,9 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   'gallery': {
     widget: 'gallery',
     data: [
-      { src: 'https://via.placeholder.com/300x200', alt: 'Image 1' },
-      { src: 'https://via.placeholder.com/300x200', alt: 'Image 2' },
-      { src: 'https://via.placeholder.com/300x200', alt: 'Image 3' },
+      { src: 'https://placehold.co/300x200', alt: 'Image 1' },
+      { src: 'https://placehold.co/300x200', alt: 'Image 2' },
+      { src: 'https://placehold.co/300x200', alt: 'Image 3' },
     ],
   },
   'kv': {
@@ -630,7 +630,7 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
       label: 'With caption',
       spec: {
         widget: 'image',
-        data: { src: 'https://via.placeholder.com/400x200', alt: 'Banner', caption: 'Declarative widget system' },
+        data: { src: 'https://placehold.co/400x200', alt: 'Banner', caption: 'Declarative widget system' },
       },
     },
   ],
@@ -764,10 +764,10 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
       spec: {
         widget: 'gallery',
         data: [
-          { src: 'https://via.placeholder.com/200', alt: 'A', caption: 'Product A' },
-          { src: 'https://via.placeholder.com/200', alt: 'B', caption: 'Product B' },
-          { src: 'https://via.placeholder.com/200', alt: 'C', caption: 'Product C' },
-          { src: 'https://via.placeholder.com/200', alt: 'D', caption: 'Product D' },
+          { src: 'https://placehold.co/200', alt: 'A', caption: 'Product A' },
+          { src: 'https://placehold.co/200', alt: 'B', caption: 'Product B' },
+          { src: 'https://placehold.co/200', alt: 'C', caption: 'Product C' },
+          { src: 'https://placehold.co/200', alt: 'D', caption: 'Product D' },
         ],
         options: { columns: 2, aspectRatio: '1:1' },
       },

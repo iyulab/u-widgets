@@ -774,7 +774,7 @@ const catalog: Record<string, WidgetDoc> = {
       'With caption': {
         widget: 'image',
         data: {
-          src: 'https://via.placeholder.com/400x200/4f46e5/ffffff?text=u-widgets',
+          src: 'https://placehold.co/400x200/4f46e5/ffffff?text=u-widgets',
           alt: 'u-widgets banner',
           caption: 'Declarative widget system for data visualization',
         },
@@ -782,14 +782,14 @@ const catalog: Record<string, WidgetDoc> = {
       'Simple': {
         widget: 'image',
         data: {
-          src: 'https://via.placeholder.com/300x200/10b981/ffffff?text=Image',
+          src: 'https://placehold.co/300x200/10b981/ffffff?text=Image',
           alt: 'Sample image',
         },
       },
       'Placeholder': {
         widget: 'image',
         data: {
-          src: 'https://via.placeholder.com/320x180/64748b/ffffff?text=No+Image',
+          src: 'https://placehold.co/320x180/64748b/ffffff?text=No+Image',
           alt: 'Placeholder',
         },
       },
@@ -950,7 +950,7 @@ const catalog: Record<string, WidgetDoc> = {
     variants: {
       'Basic video': {
         widget: 'video',
-        data: { src: 'https://www.w3schools.com/html/mov_bbb.mp4', poster: 'https://via.placeholder.com/640x360', caption: 'Big Buck Bunny' },
+        data: { src: 'https://www.w3schools.com/html/mov_bbb.mp4', poster: 'https://placehold.co/640x360', caption: 'Big Buck Bunny' },
       },
       'Autoplay muted loop': {
         widget: 'video',
@@ -972,19 +972,19 @@ const catalog: Record<string, WidgetDoc> = {
       'Auto grid': {
         widget: 'gallery',
         data: [
-          { src: 'https://via.placeholder.com/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
-          { src: 'https://via.placeholder.com/300x200/22c55e/fff?text=2', alt: 'Image 2' },
-          { src: 'https://via.placeholder.com/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
-          { src: 'https://via.placeholder.com/300x200/ef4444/fff?text=4', alt: 'Image 4' },
+          { src: 'https://placehold.co/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
+          { src: 'https://placehold.co/300x200/22c55e/fff?text=2', alt: 'Image 2' },
+          { src: 'https://placehold.co/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
+          { src: 'https://placehold.co/300x200/ef4444/fff?text=4', alt: 'Image 4' },
         ],
       },
       'Square 2-column': {
         widget: 'gallery',
         data: [
-          { src: 'https://via.placeholder.com/200/4f46e5/fff?text=A', caption: 'Product A' },
-          { src: 'https://via.placeholder.com/200/22c55e/fff?text=B', caption: 'Product B' },
-          { src: 'https://via.placeholder.com/200/f59e0b/fff?text=C', caption: 'Product C' },
-          { src: 'https://via.placeholder.com/200/ef4444/fff?text=D', caption: 'Product D' },
+          { src: 'https://placehold.co/200/4f46e5/fff?text=A', caption: 'Product A' },
+          { src: 'https://placehold.co/200/22c55e/fff?text=B', caption: 'Product B' },
+          { src: 'https://placehold.co/200/f59e0b/fff?text=C', caption: 'Product C' },
+          { src: 'https://placehold.co/200/ef4444/fff?text=D', caption: 'Product D' },
         ],
         options: { columns: 2, aspectRatio: '1:1' },
       },
@@ -992,9 +992,9 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'gallery',
         title: 'Screenshots',
         data: [
-          { src: 'https://via.placeholder.com/640x360/4f46e5/fff?text=Screenshot+1', alt: 'Screenshot 1' },
-          { src: 'https://via.placeholder.com/640x360/22c55e/fff?text=Screenshot+2', alt: 'Screenshot 2' },
-          { src: 'https://via.placeholder.com/640x360/f59e0b/fff?text=Screenshot+3', alt: 'Screenshot 3' },
+          { src: 'https://placehold.co/640x360/4f46e5/fff?text=Screenshot+1', alt: 'Screenshot 1' },
+          { src: 'https://placehold.co/640x360/22c55e/fff?text=Screenshot+2', alt: 'Screenshot 2' },
+          { src: 'https://placehold.co/640x360/f59e0b/fff?text=Screenshot+3', alt: 'Screenshot 3' },
         ],
         options: { columns: 3, aspectRatio: '16:9' },
       },

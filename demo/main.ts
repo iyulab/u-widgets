@@ -294,17 +294,17 @@ const specs = {
     widget: 'video',
     data: {
       src: 'https://www.w3schools.com/html/mov_bbb.mp4',
-      poster: 'https://via.placeholder.com/640x360/4f46e5/fff?text=Video',
+      poster: 'https://placehold.co/640x360/4f46e5/fff?text=Video',
       caption: 'Big Buck Bunny',
     },
   },
   gallery: {
     widget: 'gallery',
     data: [
-      { src: 'https://via.placeholder.com/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
-      { src: 'https://via.placeholder.com/300x200/22c55e/fff?text=2', alt: 'Image 2' },
-      { src: 'https://via.placeholder.com/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
-      { src: 'https://via.placeholder.com/300x200/ef4444/fff?text=4', alt: 'Image 4' },
+      { src: 'https://placehold.co/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
+      { src: 'https://placehold.co/300x200/22c55e/fff?text=2', alt: 'Image 2' },
+      { src: 'https://placehold.co/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
+      { src: 'https://placehold.co/300x200/ef4444/fff?text=4', alt: 'Image 4' },
     ],
   },
   code: {

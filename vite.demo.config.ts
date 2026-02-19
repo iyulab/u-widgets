@@ -15,8 +15,10 @@ export default defineConfig({
       treeshake: false,
       input: {
         main: resolve(__dirname, 'demo/index.html'),
+        chat: resolve(__dirname, 'demo/chat.html'),
         widgets: resolve(__dirname, 'demo/widgets.html'),
         insight: resolve(__dirname, 'demo/insight.html'),
+        mcp: resolve(__dirname, 'demo/mcp.html'),
       },
     },
   },
