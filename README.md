@@ -1,5 +1,10 @@
 # u-widgets
 
+[![npm](https://img.shields.io/npm/v/@iyulab/u-widgets)](https://www.npmjs.com/package/@iyulab/u-widgets)
+[![npm MCP](https://img.shields.io/npm/v/@iyulab/u-widgets-mcp?label=mcp)](https://www.npmjs.com/package/@iyulab/u-widgets-mcp)
+[![license](https://img.shields.io/npm/l/@iyulab/u-widgets)](LICENSE)
+[![jsdelivr](https://data.jsdelivr.com/v1/package/npm/@iyulab/u-widgets/badge)](https://www.jsdelivr.com/package/npm/@iyulab/u-widgets)
+
 Declarative, data-driven widget system for visualization and input.
 
 Define your data. Map it to visual channels. The renderer does the rest.
