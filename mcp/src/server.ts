@@ -29,7 +29,7 @@ export function createServer(): McpServer {
     { widget: z.string().max(100).optional().describe('Widget type or category to filter (e.g. "chart.bar", "chart", "display"). Omit for full catalog.') },
     async ({ widget }) => {
       try {
-        const result = help(widget);
+        const result = widget ? help(widget) : help();
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       } catch (err) {
         return errorResult(err);
