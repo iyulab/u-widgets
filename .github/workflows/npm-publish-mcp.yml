@@ -1,0 +1,72 @@
+name: Publish MCP Server to npm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - mcp/package.json
+  workflow_dispatch:
+
+concurrency:
+  group: npm-publish-mcp
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mcp/package-lock.json
+          registry-url: https://registry.npmjs.org
+
+      - name: Get package version
+        id: pkg
+        run: echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Check if version already published
+        id: check
+        run: |
+          PACKAGE_NAME=$(node -p 'require("./package.json").name')
+          VERSION=${{ steps.pkg.outputs.version }}
+          if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️ ${PACKAGE_NAME}@${VERSION} already published, skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "🚀 ${PACKAGE_NAME}@${VERSION} not found on npm, will publish."
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        if: steps.check.outputs.exists == 'false'
+        run: npm ci
+
+      - name: Build
+        if: steps.check.outputs.exists == 'false'
+        run: npm run build
+
+      - name: Publish
+        if: steps.check.outputs.exists == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        run: |
+          VERSION=${{ steps.pkg.outputs.version }}
+          if [ "${{ steps.check.outputs.exists }}" == "true" ]; then
+            echo "### ⏭️ Skipped — v${VERSION} already published" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ✅ Published @iyulab/u-widgets-mcp v${VERSION} to npm" >> "$GITHUB_STEP_SUMMARY"
+          fi
