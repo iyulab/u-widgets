@@ -145,7 +145,7 @@ function buildCartesian(
     result.legend = { data: yFields };
   }
 
-  if (options.stacked) {
+  if (options.stack) {
     (result.series as Record<string, unknown>[]).forEach((s) => {
       s.stack = 'total';
     });
@@ -191,6 +191,7 @@ function buildScatter(
   const yField = (mapping?.y ?? [numFields[1]])[0];
   const colorField = mapping?.color;
   const sizeField = mapping?.size;
+  const opacityField = mapping?.opacity;
 
   if (!xField || !yField) return {};
 
@@ -200,17 +201,36 @@ function buildScatter(
     tooltip: { trigger: 'item' },
   };
 
-  // Helper: build a data point (2D or 3D if size mapping)
-  const toPoint = (row: Record<string, unknown>): number[] => {
+  // Pre-compute opacity normalization range if needed
+  let opacityMin = Infinity;
+  let opacityMax = -Infinity;
+  if (opacityField) {
+    for (const row of data) {
+      const v = Number(row[opacityField] ?? 0);
+      if (v < opacityMin) opacityMin = v;
+      if (v > opacityMax) opacityMax = v;
+    }
+  }
+  const opacityRange = opacityMax - opacityMin || 1;
+
+  // Helper: build a data point — plain array or object with itemStyle for opacity
+  const toPoint = (row: Record<string, unknown>): unknown => {
     const pt = [Number(row[xField] ?? 0), Number(row[yField] ?? 0)];
     if (sizeField) pt.push(Number(row[sizeField] ?? 0));
+
+    if (opacityField) {
+      const raw = Number(row[opacityField] ?? 0);
+      const norm = 0.1 + 0.9 * ((raw - opacityMin) / opacityRange);
+      return { value: pt, itemStyle: { opacity: Math.round(norm * 100) / 100 } };
+    }
     return pt;
   };
 
   // symbolSize function that maps the third value to pixel radius
   const symbolSizeFn = sizeField
-    ? (val: number[]) => {
-        const raw = val[2] ?? 0;
+    ? (val: number[] | { value: number[] }) => {
+        const arr = Array.isArray(val) ? val : val.value;
+        const raw = arr[2] ?? 0;
         // Clamp to [4, 60] range — square root scale for area perception
         return Math.max(4, Math.min(60, Math.sqrt(raw) * 4));
       }
@@ -218,7 +238,7 @@ function buildScatter(
 
   if (colorField) {
     // Group data by color field → separate series per group
-    const groups = new Map<string, number[][]>();
+    const groups = new Map<string, unknown[]>();
     for (const row of data) {
       const key = String(row[colorField] ?? 'unknown');
       if (!groups.has(key)) groups.set(key, []);

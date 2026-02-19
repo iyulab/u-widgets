@@ -23,14 +23,14 @@ const MAX_COMPOSE_DEPTH = 10;
 
 /** Widgets that expect an array for `data`. */
 const ARRAY_DATA = new Set([
-  'stat-group', 'table', 'list',
+  'stat-group', 'table', 'list', 'steps', 'gallery',
   'chart.bar', 'chart.line', 'chart.area', 'chart.pie',
   'chart.scatter', 'chart.radar', 'chart.heatmap', 'chart.box',
   'chart.funnel', 'chart.waterfall', 'chart.treemap',
 ]);
 
 /** Widgets that expect an object for `data`. */
-const OBJECT_DATA = new Set(['metric', 'gauge', 'progress']);
+const OBJECT_DATA = new Set(['metric', 'gauge', 'progress', 'header', 'code', 'rating', 'video']);
 
 /**
  * Validate a u-widget spec.

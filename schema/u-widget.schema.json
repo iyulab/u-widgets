@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/iyulab/u-widgets/schema/u-widget.schema.json",
   "title": "u-widget",
-  "description": "Declarative, data-driven widget specification for u-widgets v0.3",
+  "description": "Declarative, data-driven widget specification for u-widgets v0.4",
   "oneOf": [
     { "$ref": "#/$defs/widget" },
     { "$ref": "#/$defs/composeWidget" }
@@ -17,7 +17,10 @@
         "chart.scatter", "chart.radar", "chart.heatmap", "chart.box",
         "chart.funnel", "chart.waterfall", "chart.treemap",
         "form", "confirm",
-        "markdown", "image", "callout"
+        "markdown", "image", "callout",
+        "kv", "code", "citation", "status", "steps",
+        "rating", "video", "gallery",
+        "actions", "divider", "header"
       ],
       "description": "Widget type identifier"
     },
@@ -147,6 +150,11 @@
           "minimum": 1,
           "description": "Grid span width"
         },
+        "collapsed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the child widget is initially collapsed (rendered in a details/summary element)"
+        },
         "data": {
           "oneOf": [
             { "type": "object" },
@@ -206,6 +214,10 @@
           "type": "string",
           "description": "Size encoding field (scatter)"
         },
+        "opacity": {
+          "type": "string",
+          "description": "Opacity encoding field (scatter, maps values to 0.1-1.0)"
+        },
         "axis": {
           "type": "string",
           "description": "Axis field (radar)"
@@ -234,6 +246,10 @@
         "trailing": {
           "type": "string",
           "description": "Trailing text field (list)"
+        },
+        "badge": {
+          "type": "string",
+          "description": "Badge/tag field (list)"
         }
       },
       "additionalProperties": false

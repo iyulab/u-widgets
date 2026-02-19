@@ -168,9 +168,9 @@ No mapping needed — columns are inferred from data keys. Click column headers 
 
 The `data` object provides default values — `priority` will be pre-filled with `"medium"`. Form fields are defined in top-level `fields` (not inside `mapping`).
 
-### Input: Form (formdown shorthand)
+### Input: Form ([formdown](https://github.com/iyulab/formdown) shorthand)
 
-The same form can be expressed in ~70% fewer tokens using formdown syntax:
+The same form can be expressed in ~70% fewer tokens using [formdown](https://github.com/iyulab/formdown) syntax:
 
 ```json
 {
@@ -244,6 +244,14 @@ Widget types use dot notation (`category.variant`) for extensibility.
 | `progress` | Progress bar | — (uses `data.value`) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
 | `list` | Structured list | `primary`, `secondary`, `avatar`, `trailing` |
+| `code` | Syntax-highlighted code | — (uses `data.content`) |
+| `citation` | Source/reference cards | — (uses data array) |
+| `status` | Inline status badge | — (uses `data.label`, `data.variant`) |
+| `steps` | Multi-step progress | — (uses data array) |
+| `rating` | Star/heart/thumb rating | — (uses `data.value`) |
+| `video` | HTML5 video player | — (uses `data.src`) |
+| `gallery` | Image gallery grid | — (uses data array) |
+| `kv` | Key-value pairs | — (uses data object) |
 
 #### Input
 
@@ -402,6 +410,14 @@ The compact form IS the default — only declare what deviates:
 | Proportions | `chart.pie` |
 | Two numeric dimensions | `chart.scatter` |
 | Record list | `table` |
+| Source code snippet | `code` |
+| References / sources | `citation` |
+| Status indicator | `status` |
+| Multi-step process | `steps` |
+| User rating | `rating` |
+| Video content | `video` |
+| Image collection | `gallery` |
+| Key-value data | `kv` |
 | User input needed | `form` |
 | Yes/no confirmation | `confirm` |
 | Multiple widgets | `compose` |

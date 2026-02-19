@@ -45,7 +45,7 @@ describe('toEChartsOption', () => {
         widget: 'chart.bar',
         data: [{ cat: 'A', v1: 10, v2: 20 }],
         mapping: { x: 'cat', y: ['v1', 'v2'] },
-        options: { stacked: true },
+        options: { stack: true },
       }));
       const series = result.series as ObjArray;
       expect(series[0].stack).toBe('total');
@@ -231,6 +231,59 @@ describe('toEChartsOption', () => {
       expect((series[0].data as number[][])[0]).toEqual([1, 10]);
       expect(series[0].symbolSize).toBeUndefined();
     });
+
+    it('supports opacity mapping — normalizes values to 0.1–1.0 range', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, score: 0 },
+          { x: 2, y: 20, score: 50 },
+          { x: 3, y: 30, score: 100 },
+        ],
+        mapping: { x: 'x', y: 'y', opacity: 'score' },
+      }));
+      const series = result.series as ObjArray;
+      const points = series[0].data as { value: number[]; itemStyle: { opacity: number } }[];
+      // min score=0 → opacity 0.1, max score=100 → opacity 1.0
+      expect(points[0].itemStyle.opacity).toBeCloseTo(0.1, 1);
+      expect(points[1].itemStyle.opacity).toBeCloseTo(0.55, 1);
+      expect(points[2].itemStyle.opacity).toBeCloseTo(1.0, 1);
+    });
+
+    it('opacity + size mapping work together', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, sz: 25, sc: 0 },
+          { x: 2, y: 20, sz: 100, sc: 100 },
+        ],
+        mapping: { x: 'x', y: 'y', size: 'sz', opacity: 'sc' },
+      }));
+      const series = result.series as ObjArray;
+      const points = series[0].data as { value: number[]; itemStyle: { opacity: number } }[];
+      // Each point should have 3D value (x, y, size) and itemStyle.opacity
+      expect(points[0].value).toEqual([1, 10, 25]);
+      expect(points[0].itemStyle.opacity).toBeCloseTo(0.1, 1);
+      expect(points[1].value).toEqual([2, 20, 100]);
+      expect(points[1].itemStyle.opacity).toBeCloseTo(1.0, 1);
+      // symbolSize should be defined for size mapping
+      expect(series[0].symbolSize).toBeDefined();
+    });
+
+    it('opacity + color mapping work together', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, cat: 'A', sc: 0 },
+          { x: 2, y: 20, cat: 'B', sc: 100 },
+        ],
+        mapping: { x: 'x', y: 'y', color: 'cat', opacity: 'sc' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(2);
+      const ptA = (series[0].data as { value: number[]; itemStyle: { opacity: number } }[])[0];
+      expect(ptA.itemStyle.opacity).toBeCloseTo(0.1, 1);
+    });
   });
 
   describe('chart.radar', () => {
@@ -358,7 +411,7 @@ describe('toEChartsOption', () => {
         data: [{ cat: 'A', v1: 10, v2: 20 }],
         mapping: { x: 'cat', y: ['v1', 'v2'] },
         options: {
-          stacked: true,
+          stack: true,
           echarts: {
             legend: { orient: 'horizontal', top: 'bottom' },
           },
@@ -589,7 +642,7 @@ describe('toEChartsOption', () => {
           { bin: '10-20', male: 12, female: 8 },
         ],
         mapping: { x: 'bin', y: ['male', 'female'] },
-        options: { histogram: true, stacked: true },
+        options: { histogram: true, stack: true },
       }));
       const series = result.series as ObjArray;
       expect(series[0].barCategoryGap).toBe('0%');

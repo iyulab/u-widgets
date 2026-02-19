@@ -135,26 +135,26 @@ export class UContent extends LitElement {
     }
 
     .callout-info {
-      background: color-mix(in srgb, #3b82f6 12%, var(--u-widget-bg, #fff));
-      border-left-color: #3b82f6;
+      background: color-mix(in srgb, var(--u-widget-primary, #3b82f6) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-primary, #3b82f6);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-warning {
-      background: color-mix(in srgb, #f59e0b 12%, var(--u-widget-bg, #fff));
-      border-left-color: #f59e0b;
+      background: color-mix(in srgb, var(--u-widget-warning, #f59e0b) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-warning, #f59e0b);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-error {
-      background: color-mix(in srgb, #ef4444 12%, var(--u-widget-bg, #fff));
-      border-left-color: #ef4444;
+      background: color-mix(in srgb, var(--u-widget-negative, #ef4444) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-negative, #ef4444);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-success {
-      background: color-mix(in srgb, #22c55e 12%, var(--u-widget-bg, #fff));
-      border-left-color: #22c55e;
+      background: color-mix(in srgb, var(--u-widget-positive, #22c55e) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-positive, #22c55e);
       color: var(--u-widget-text, #1a1a2e);
     }
 
@@ -241,7 +241,8 @@ export class UContent extends LitElement {
     const validLevels = ['info', 'warning', 'error', 'success'];
     const cls = validLevels.includes(level) ? level : 'info';
 
-    return html`<div class="callout callout-${cls}" part="callout" role="alert" aria-live="polite">
+    const isUrgent = cls === 'warning' || cls === 'error';
+    return html`<div class="callout callout-${cls}" part="callout" role=${isUrgent ? 'alert' : 'note'} aria-live=${isUrgent ? 'assertive' : 'polite'}>
       ${title ? html`<div class="callout-title" part="callout-title">${title}</div>` : nothing}
       <div part="callout-message">${message}</div>
     </div>`;

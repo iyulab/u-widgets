@@ -174,6 +174,54 @@ describe('u-metric', () => {
       const shadow = await render(el);
       expect(shadow.querySelector('.stat-group')).not.toBeNull();
     });
+
+    it('renders icon when provided', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Revenue', value: 42000, icon: '\uD83D\uDCB0' },
+        ],
+      });
+      const shadow = await render(el);
+      const icon = shadow.querySelector('.metric-icon');
+      expect(icon).not.toBeNull();
+      expect(icon?.textContent).toContain('\uD83D\uDCB0');
+    });
+
+    it('renders description when provided', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Users', value: 1200, description: 'Active in last 30 days' },
+        ],
+      });
+      const shadow = await render(el);
+      const desc = shadow.querySelector('.metric-description');
+      expect(desc).not.toBeNull();
+      expect(desc?.textContent).toBe('Active in last 30 days');
+    });
+
+    it('hides icon when not provided', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Users', value: 1200 },
+        ],
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.metric-icon')).toBeNull();
+    });
+
+    it('hides description when not provided', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Users', value: 1200 },
+        ],
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.metric-description')).toBeNull();
+    });
   });
 
   describe('container query', () => {

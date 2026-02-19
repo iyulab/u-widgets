@@ -5,6 +5,7 @@
   --u-widget-primary: #4f46e5;
   --u-widget-positive: #16a34a;
   --u-widget-negative: #dc2626;
+  --u-widget-warning: #f59e0b;
   --u-widget-bg: #fff;
   --u-widget-surface: #f1f5f9;
   --u-widget-border: #e2e8f0;
@@ -23,6 +24,7 @@
   --u-widget-primary: #818cf8;
   --u-widget-positive: #4ade80;
   --u-widget-negative: #f87171;
+  --u-widget-warning: #fbbf24;
   --u-widget-bg: #1e293b;
   --u-widget-surface: #334155;
   --u-widget-border: #475569;
@@ -31,4 +33,68 @@
   --u-widget-chart-color-3: #fbbf24;
   --u-widget-chart-color-4: #f87171;
   --u-widget-chart-color-5: #a78bfa;
+}
+
+/* ── Shared Top Bar ── */
+.demo-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: var(--u-widget-bg);
+  border-bottom: 1px solid var(--u-widget-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.demo-topbar-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--u-widget-text);
+  text-decoration: none;
+}
+
+.demo-topbar-title:hover {
+  opacity: 0.8;
+}
+
+.demo-topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.demo-topbar-nav a,
+.demo-topbar-nav button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--u-widget-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.demo-topbar-nav a:hover,
+.demo-topbar-nav button:hover {
+  background: var(--u-widget-surface);
+  color: var(--u-widget-text);
+}
+
+.demo-topbar-nav a[aria-current="page"] {
+  background: var(--u-widget-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+.demo-topbar-nav .demo-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--u-widget-border);
+  margin: 0 4px;
 }

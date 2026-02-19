@@ -13,7 +13,7 @@ describe('u-widget.schema.json', () => {
 
   it('has correct title and version', () => {
     expect(schema.title).toBe('u-widget');
-    expect(schema.description).toContain('v0.3');
+    expect(schema.description).toContain('v0.4');
   });
 
   it('defines widgetType enum with all known types', () => {

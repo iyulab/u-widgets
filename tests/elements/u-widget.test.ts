@@ -168,6 +168,20 @@ describe('u-widget', () => {
     expect(label!.textContent).toContain('unknown-type');
   });
 
+  it('renders "Did you mean" hint for typos', async () => {
+    const el = createElement({ widget: 'metrc', data: { value: 42 } });
+    const shadow = await render(el);
+    const hint = shadow.querySelector('.fallback-hint');
+    expect(hint).not.toBeNull();
+    expect(hint!.textContent).toContain('metric');
+  });
+
+  it('does not render hint for unrecognizable widget names', async () => {
+    const el = createElement({ widget: 'xyzxyzxyz', data: { foo: 1 } });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.fallback-hint')).toBeNull();
+  });
+
   // ── chart.* fallback (u-chart not loaded in core tests) ──
 
   it('renders fallback for chart.* when u-chart is not loaded', async () => {
@@ -302,5 +316,322 @@ describe('u-widget', () => {
     el.locale = 'de';
     await el.updateComplete;
     expect(el.getAttribute('locale')).toBe('de');
+  });
+
+  // ── KV Routing ──
+
+  it('routes kv to u-kv', async () => {
+    const el = createElement({
+      widget: 'kv',
+      data: { status: 'Active', plan: 'Pro' },
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-kv')).not.toBeNull();
+  });
+
+  // ── Code Routing ──
+
+  it('routes code to u-code', async () => {
+    const el = createElement({
+      widget: 'code',
+      data: { content: 'const x = 42;', language: 'javascript' },
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-code')).not.toBeNull();
+  });
+
+  // ── Citation Routing ──
+
+  it('routes citation to u-citation', async () => {
+    const el = createElement({
+      widget: 'citation',
+      data: [{ title: 'Test Source', url: 'https://example.com' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-citation')).not.toBeNull();
+  });
+
+  // ── Status Routing ──
+
+  it('routes status to u-status', async () => {
+    const el = createElement({
+      widget: 'status',
+      data: [{ label: 'API', value: 'Up', level: 'success' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-status')).not.toBeNull();
+  });
+
+  // ── Steps Routing ──
+
+  it('routes steps to u-steps', async () => {
+    const el = createElement({
+      widget: 'steps',
+      data: [{ label: 'Step 1', status: 'done' }, { label: 'Step 2', status: 'active' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-steps')).not.toBeNull();
+  });
+
+  // ── Rating Routing ──
+
+  it('routes rating to u-rating', async () => {
+    const el = createElement({
+      widget: 'rating',
+      data: { value: 4.5 },
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-rating')).not.toBeNull();
+  });
+
+  it('routes video to u-video', async () => {
+    const el = createElement({
+      widget: 'video',
+      data: { src: 'https://example.com/video.mp4' },
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-video')).not.toBeNull();
+  });
+
+  it('routes gallery to u-gallery', async () => {
+    const el = createElement({
+      widget: 'gallery',
+      data: [{ src: 'https://example.com/1.jpg' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('u-gallery')).not.toBeNull();
+  });
+
+  // ── Actions Widget ──
+
+  it('renders actions widget as button group', async () => {
+    const el = createElement({
+      widget: 'actions',
+      actions: [
+        { label: 'Analyze', action: 'analyze' },
+        { label: 'Export', action: 'export', style: 'primary' },
+      ],
+    });
+    const shadow = await render(el);
+    const group = shadow.querySelector('.actions-widget');
+    expect(group).not.toBeNull();
+    const buttons = shadow.querySelectorAll('.actions-widget button');
+    expect(buttons).toHaveLength(2);
+    expect(buttons[0].textContent).toBe('Analyze');
+    expect(buttons[1].textContent).toBe('Export');
+    expect(buttons[1].getAttribute('data-style')).toBe('primary');
+  });
+
+  it('actions widget has role="group" and aria-label', async () => {
+    const el = createElement({
+      widget: 'actions',
+      title: 'Quick Actions',
+      actions: [{ label: 'Go', action: 'go' }],
+    });
+    const shadow = await render(el);
+    const group = shadow.querySelector('.actions-widget');
+    expect(group?.getAttribute('role')).toBe('group');
+    expect(group?.getAttribute('aria-label')).toBe('Quick Actions');
+  });
+
+  it('actions widget dispatches u-widget-event on click', async () => {
+    const el = createElement({
+      widget: 'actions',
+      actions: [{ label: 'Run', action: 'run_report' }],
+    });
+    const shadow = await render(el);
+
+    const received: UWidgetEvent[] = [];
+    el.addEventListener('u-widget-event', ((e: CustomEvent<UWidgetEvent>) => {
+      received.push(e.detail);
+    }) as EventListener);
+
+    const btn = shadow.querySelector('.actions-widget button') as HTMLButtonElement;
+    btn.click();
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('action');
+    expect(received[0].action).toBe('run_report');
+    expect(received[0].widget).toBe('actions');
+  });
+
+  it('actions widget renders nothing with empty actions', async () => {
+    const el = createElement({
+      widget: 'actions',
+      actions: [],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.actions-widget')).toBeNull();
+  });
+
+  // ── Divider Widget ──
+
+  it('renders divider with separator role', async () => {
+    const el = createElement({ widget: 'divider' });
+    const shadow = await render(el);
+    const divider = shadow.querySelector('[role="separator"]');
+    expect(divider).not.toBeNull();
+    expect(divider?.classList.contains('divider')).toBe(true);
+  });
+
+  it('renders divider with label', async () => {
+    const el = createElement({
+      widget: 'divider',
+      options: { label: 'Section' },
+    });
+    const shadow = await render(el);
+    const divider = shadow.querySelector('[role="separator"]');
+    expect(divider?.textContent?.trim()).toBe('Section');
+  });
+
+  it('renders divider with spacing class', async () => {
+    const el = createElement({
+      widget: 'divider',
+      options: { spacing: 'large' },
+    });
+    const shadow = await render(el);
+    const divider = shadow.querySelector('.divider');
+    expect(divider?.classList.contains('divider-spacing-large')).toBe(true);
+  });
+
+  // ── Header Widget ──
+
+  it('renders header with heading role', async () => {
+    const el = createElement({
+      widget: 'header',
+      data: { text: 'Dashboard' },
+    });
+    const shadow = await render(el);
+    const header = shadow.querySelector('[role="heading"]');
+    expect(header).not.toBeNull();
+    expect(header?.textContent?.trim()).toBe('Dashboard');
+  });
+
+  it('renders header with correct level attribute', async () => {
+    const el = createElement({
+      widget: 'header',
+      data: { text: 'Title', level: 1 },
+    });
+    const shadow = await render(el);
+    const header = shadow.querySelector('[role="heading"]');
+    expect(header?.getAttribute('aria-level')).toBe('1');
+    expect(header?.getAttribute('data-level')).toBe('1');
+  });
+
+  it('header defaults to level 2', async () => {
+    const el = createElement({
+      widget: 'header',
+      data: { text: 'Subtitle' },
+    });
+    const shadow = await render(el);
+    const header = shadow.querySelector('[role="heading"]');
+    expect(header?.getAttribute('aria-level')).toBe('2');
+  });
+
+  it('header renders nothing when no text', async () => {
+    const el = createElement({
+      widget: 'header',
+      data: {},
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('[role="heading"]')).toBeNull();
+  });
+
+  it('header falls back to title when no data.text', async () => {
+    const el = createElement({
+      widget: 'header',
+      title: 'From Title',
+      data: {},
+    });
+    const shadow = await render(el);
+    const header = shadow.querySelector('[role="heading"]');
+    expect(header?.textContent?.trim()).toBe('From Title');
+  });
+
+  // ── Global Actions ──
+
+  it('renders global actions for non-form widgets', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42 },
+      actions: [
+        { label: 'Refresh', action: 'refresh' },
+        { label: 'Export', action: 'export', style: 'primary' },
+      ],
+    });
+    const shadow = await render(el);
+    const actionBar = shadow.querySelector('.global-actions');
+    expect(actionBar).not.toBeNull();
+    const buttons = shadow.querySelectorAll('.global-actions button');
+    expect(buttons).toHaveLength(2);
+  });
+
+  it('does not render global actions for form widgets', async () => {
+    const el = createElement({
+      widget: 'form',
+      fields: [{ field: 'name' }],
+      actions: [{ label: 'Submit', action: 'submit', style: 'primary' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.global-actions')).toBeNull();
+  });
+
+  it('does not render global actions for confirm widgets', async () => {
+    const el = createElement({
+      widget: 'confirm',
+      description: 'Sure?',
+      actions: [{ label: 'Yes', action: 'submit' }],
+    });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.global-actions')).toBeNull();
+  });
+
+  it('global action click dispatches u-widget-event', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42 },
+      actions: [{ label: 'Refresh', action: 'refresh' }],
+    });
+    const shadow = await render(el);
+
+    const received: UWidgetEvent[] = [];
+    el.addEventListener('u-widget-event', ((e: CustomEvent<UWidgetEvent>) => {
+      received.push(e.detail);
+    }) as EventListener);
+
+    const btn = shadow.querySelector('.global-actions button') as HTMLButtonElement;
+    btn.click();
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('action');
+    expect(received[0].action).toBe('refresh');
+    expect(received[0].widget).toBe('metric');
+  });
+
+  it('global action with navigate opens new window', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42 },
+      actions: [{ label: 'Docs', action: 'navigate', url: 'https://example.com' }],
+    });
+    const shadow = await render(el);
+
+    const btn = shadow.querySelector('.global-actions button') as HTMLButtonElement;
+    btn.click();
+
+    expect(openSpy).toHaveBeenCalledWith('https://example.com', '_blank', 'noopener');
+    openSpy.mockRestore();
+  });
+
+  it('disabled action button has disabled attribute', async () => {
+    const el = createElement({
+      widget: 'metric',
+      data: { value: 42 },
+      actions: [{ label: 'Disabled', action: 'noop', disabled: true }],
+    });
+    const shadow = await render(el);
+    const btn = shadow.querySelector('.global-actions button') as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
   });
 });

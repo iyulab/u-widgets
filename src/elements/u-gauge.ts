@@ -58,9 +58,15 @@ export class UGauge extends LitElement {
       align-items: center;
     }
 
-    .gauge-svg {
+    .gauge-wrapper {
+      position: relative;
       width: 100%;
       max-width: var(--u-widget-gauge-size, 160px);
+    }
+
+    .gauge-svg {
+      display: block;
+      width: 100%;
     }
 
     .gauge-track {
@@ -69,9 +75,10 @@ export class UGauge extends LitElement {
 
     .gauge-center {
       position: absolute;
-      top: 50%;
+      /* Arc center (100,100) in viewBox 200×195 → 50% x, 51.3% y */
+      top: 51.3%;
       left: 50%;
-      transform: translate(-50%, -10%);
+      transform: translate(-50%, -50%);
       text-align: center;
     }
 
@@ -184,14 +191,16 @@ export class UGauge extends LitElement {
         aria-label=${label}
         aria-valuetext=${valueText}
       >
-        <div class="gauge-center">
-          <div class="gauge-value" part="value">${value}</div>
-          ${opts.unit ? html`<div class="gauge-unit" part="unit">${opts.unit}</div>` : nothing}
+        <div class="gauge-wrapper">
+          <div class="gauge-center">
+            <div class="gauge-value" part="value">${value}</div>
+            ${opts.unit ? html`<div class="gauge-unit" part="unit">${opts.unit}</div>` : nothing}
+          </div>
+          <svg class="gauge-svg" viewBox="0 0 200 195" role="presentation" aria-hidden="true">
+            <path class="gauge-track" d="${trackPath}" fill="none" stroke-width="12" stroke-linecap="round"></path>
+            <path class="gauge-fill" d="${fillPath ?? 'M0 0'}" fill="none" stroke="${fillPath ? color : 'none'}" stroke-width="12" stroke-linecap="round"></path>
+          </svg>
         </div>
-        <svg class="gauge-svg" viewBox="0 0 200 195" role="presentation" aria-hidden="true">
-          <path class="gauge-track" d="${trackPath}" fill="none" stroke-width="12" stroke-linecap="round"></path>
-          <path class="gauge-fill" d="${fillPath ?? ''}" fill="none" stroke="${fillPath ? color : 'transparent'}" stroke-width="12" stroke-linecap="round"></path>
-        </svg>
       </div>
     `;
   }

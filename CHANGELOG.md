@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-02-18
+
+### Added
+
+- **Widget: `code`** — Syntax-highlighted code display with built-in mini highlighter (12 languages), line numbers, line highlighting, copy button, scroll containment
+- **Widget: `citation`** — Source/reference cards with title, URL, snippet, source; compact and numbered modes
+- **Widget: `status`** — Inline status badges with 7 semantic variants (success, warning, error, info, pending, neutral, custom)
+- **Widget: `steps`** — Multi-step progress indicator with vertical/horizontal layouts, 4 statuses (done, active, pending, error), compact mode
+- **Widget: `rating`** — Star/heart/thumb rating with display-only and interactive modes, fractional values, hover preview
+- **Widget: `video`** — HTML5 video player wrapper with controls, poster, autoplay (muted), loop, playsinline
+- **Widget: `gallery`** — CSS Grid image gallery with lazy loading, figure/figcaption semantics, auto-fill responsive grid
+- **Widget: `kv`** — Key-value pair display for structured data
+- **Widget: `divider`** — Visual separator for compose layouts
+- **Widget: `header`** — Section header for compose layouts
+- **Compose:** `options.widths` for proportional grid column widths (fr/auto/stretch values)
+- **Compose:** `collapsed` property on child specs for progressive disclosure via native `<details>/<summary>`
+- **Metric:** Global `actions` support for display widgets
+- **MCP Tools:** Full catalog, templates, and examples for all new widgets
+
+### Fixed
+
+- **Security:** `u-citation` now uses sanitized URL in `window.open` and event data
+- **Code:** Fixed `highlightJSON` double-advance bug for `true`/`false`/`null` tokens
+- **Rating:** Fixed thumb icon half-star rendering (rounds to nearest full/empty)
+- **Steps:** Fixed horizontal layout ignoring `compact` option
+
+### Changed
+
+- Tools bundle budget raised from 10 KB to 12 KB (MCP-only, not in core budget)
+
 ## [0.3.3] - 2026-02-18
 
 ### Added

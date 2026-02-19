@@ -17,51 +17,6 @@
       flex-direction: column;
     }
 
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      background: var(--u-widget-bg);
-      border-bottom: 1px solid var(--u-widget-border);
-      flex-shrink: 0;
-    }
-
-    .header h1 { font-size: 1.25rem; }
-
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .header-link {
-      padding: 6px 16px;
-      border-radius: 6px;
-      border: 1px solid var(--u-widget-border);
-      background: var(--u-widget-bg);
-      color: var(--u-widget-text);
-      cursor: pointer;
-      font-size: 0.85rem;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .header-link:hover {
-      background: var(--u-widget-surface);
-    }
-
-    .theme-toggle {
-      padding: 6px 16px;
-      border-radius: 6px;
-      border: 1px solid var(--u-widget-border);
-      background: var(--u-widget-bg);
-      color: var(--u-widget-text);
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-
     /* Main layout: sidebar fixed, content scrolls */
     .main {
       display: flex;
@@ -450,15 +405,19 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>u-widgets Reference</h1>
-    <div class="header-actions">
-      <a class="header-link" href="./">Demo</a>
-      <a class="header-link" href="./insight.html">Insight</a>
-      <a class="header-link" href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
-      <button class="theme-toggle" id="theme-btn">Dark Mode</button>
+  <nav class="demo-topbar">
+    <a class="demo-topbar-title" href="./">U-Widget</a>
+    <div class="demo-topbar-nav">
+      <a href="./">Demo</a>
+      <a href="./chat.html">Chat</a>
+      <a href="./widgets.html" aria-current="page">Reference</a>
+      <a href="./insight.html">Insight</a>
+      <a href="./mcp.html">MCP</a>
+      <span class="demo-sep"></span>
+      <a href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
+      <button id="theme-btn">Dark Mode</button>
     </div>
-  </div>
+  </nav>
 
   <div class="main">
     <aside class="sidebar" id="sidebar"></aside>

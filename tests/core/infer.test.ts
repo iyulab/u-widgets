@@ -136,10 +136,31 @@ describe('infer', () => {
       expect(mapping).toEqual({ primary: 'text', secondary: 'status' });
     });
 
-    it('infers only primary when one string field', () => {
+    it('infers only primary when one string field (with trailing from well-known name)', () => {
       const data = [{ text: 'Task 1', count: 5 }];
       const mapping = infer('list', data);
-      expect(mapping).toEqual({ primary: 'text', secondary: undefined });
+      expect(mapping).toEqual({ primary: 'text', secondary: undefined, trailing: 'count' });
+    });
+
+    it('infers badge from well-known badge field name', () => {
+      const data = [{ name: 'Task A', status: 'Active', badge: 'Bug' }];
+      const mapping = infer('list', data);
+      expect(mapping).toBeDefined();
+      expect(mapping!.badge).toBe('badge');
+    });
+
+    it('infers badge from "category" field name', () => {
+      const data = [{ name: 'Task A', status: 'Active', category: 'Feature' }];
+      const mapping = infer('list', data);
+      expect(mapping).toBeDefined();
+      expect(mapping!.badge).toBe('category');
+    });
+
+    it('infers badge from "tag" field name', () => {
+      const data = [{ name: 'Item', description: 'A thing', tag: 'Important' }];
+      const mapping = infer('list', data);
+      expect(mapping).toBeDefined();
+      expect(mapping!.badge).toBe('tag');
     });
   });
 

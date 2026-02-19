@@ -290,6 +290,95 @@ const specs = {
       level: 'info',
     },
   },
+  video: {
+    widget: 'video',
+    data: {
+      src: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      poster: 'https://via.placeholder.com/640x360/4f46e5/fff?text=Video',
+      caption: 'Big Buck Bunny',
+    },
+  },
+  gallery: {
+    widget: 'gallery',
+    data: [
+      { src: 'https://via.placeholder.com/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
+      { src: 'https://via.placeholder.com/300x200/22c55e/fff?text=2', alt: 'Image 2' },
+      { src: 'https://via.placeholder.com/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
+      { src: 'https://via.placeholder.com/300x200/ef4444/fff?text=4', alt: 'Image 4' },
+    ],
+  },
+  code: {
+    widget: 'code',
+    data: {
+      content: 'const greeting = "Hello, World!";\n\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));',
+      language: 'javascript',
+    },
+  },
+  kv: {
+    widget: 'kv',
+    data: { status: 'Active', plan: 'Pro', region: 'US-East', expires: '2026-03-15' },
+  },
+  steps: {
+    widget: 'steps',
+    data: [
+      { label: 'Data collection', status: 'done', description: '2M records processed' },
+      { label: 'Running analysis', status: 'active', description: 'Estimated 30s remaining' },
+      { label: 'Report generation', status: 'pending' },
+    ],
+  },
+  rating: {
+    widget: 'rating',
+    data: { value: 4.2, count: 128 },
+  },
+  citation: {
+    widget: 'citation',
+    data: [
+      { title: 'Web Components MDN', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_components', snippet: 'Web Components is a suite of technologies allowing you to create reusable custom elements.', source: 'MDN' },
+      { title: 'Lit Documentation', url: 'https://lit.dev/docs/', snippet: 'Lit is a simple library for building fast, lightweight web components.', source: 'lit.dev' },
+      { title: 'ECharts Examples', url: 'https://echarts.apache.org/examples/', snippet: 'Apache ECharts provides rich visualization types and interaction.', source: 'Apache' },
+    ],
+  },
+  status: {
+    widget: 'status',
+    title: 'System Status',
+    data: [
+      { label: 'API Gateway', value: 'Operational', level: 'success' },
+      { label: 'Database', value: 'Degraded', level: 'warning' },
+      { label: 'CDN', value: 'Operational', level: 'success' },
+      { label: 'Auth Service', value: 'Down', level: 'error' },
+    ],
+  },
+  actions: {
+    widget: 'actions',
+    actions: [
+      { label: 'Revenue analysis', action: 'analyze_revenue' },
+      { label: 'Customer status', action: 'customer_status' },
+      { label: 'Inventory check', action: 'check_inventory' },
+    ],
+  },
+  divider: {
+    widget: 'divider',
+    options: { label: 'Related items' },
+  },
+  header: {
+    widget: 'header',
+    data: { text: 'Dashboard Overview', level: 1 },
+  },
+  composeAdvanced: {
+    widget: 'compose',
+    title: 'Service Details',
+    layout: 'grid',
+    columns: 2,
+    options: { widths: [1, 3] },
+    children: [
+      { widget: 'kv', data: { Plan: 'Pro', Status: 'Active', Expires: '2026-12' } },
+      { widget: 'table', data: [
+        { name: 'Alice', role: 'Engineer', hours: 32 },
+        { name: 'Bob', role: 'Designer', hours: 28 },
+      ]},
+      { widget: 'code', title: 'Raw Output', collapsed: true, data: { content: '{"status":"ok","uptime":99.9}', language: 'json' }, span: 2 },
+    ],
+  },
 };
 
 // ── Bind Widgets ──
@@ -321,19 +410,35 @@ bind('demo-form', specs.form);
 bind('demo-formdown', specs.formdownForm);
 bind('demo-confirm', specs.confirm);
 bind('demo-compose', specs.compose);
+bind('demo-compose-advanced', specs.composeAdvanced);
 bind('demo-chart-funnel', specs.chartFunnel);
 bind('demo-chart-waterfall', specs.chartWaterfall);
 bind('demo-chart-treemap', specs.chartTreemap);
 bind('demo-markdown', specs.markdown);
 bind('demo-image', specs.image);
 bind('demo-callout', specs.callout);
+bind('demo-video', specs.video);
+bind('demo-gallery', specs.gallery);
+bind('demo-code', specs.code);
+bind('demo-kv', specs.kv);
+bind('demo-steps', specs.steps);
+bind('demo-rating', specs.rating);
+bind('demo-citation', specs.citation);
+bind('demo-status', specs.status);
+bind('demo-actions', specs.actions);
+bind('demo-divider', specs.divider);
+bind('demo-header', specs.header);
 
 // ── Theme Toggle ──
 
 const btn = document.getElementById('theme-btn')!;
 btn.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  btn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+  const isDark = document.body.classList.toggle('dark');
+  btn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  document.querySelectorAll('u-widget').forEach(el => {
+    if (isDark) el.setAttribute('theme', 'dark');
+    else el.removeAttribute('theme');
+  });
 });
 
 // ── Playground ──

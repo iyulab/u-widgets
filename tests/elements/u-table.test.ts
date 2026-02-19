@@ -885,6 +885,36 @@ describe('u-table', () => {
     });
   });
 
+  describe('list badge', () => {
+    it('renders badge when mapping.badge is set', async () => {
+      const el = createElement({
+        widget: 'list',
+        data: [
+          { name: 'Task A', category: 'Bug' },
+          { name: 'Task B', category: 'Feature' },
+        ],
+        mapping: { primary: 'name', badge: 'category' },
+      });
+      const shadow = await render(el);
+      const badges = shadow.querySelectorAll('.list-badge');
+      expect(badges.length).toBe(2);
+      expect(badges[0].textContent).toBe('Bug');
+      expect(badges[1].textContent).toBe('Feature');
+    });
+
+    it('does not render badge when mapping.badge is not set', async () => {
+      const el = createElement({
+        widget: 'list',
+        data: [
+          { name: 'Task A', category: 'Bug' },
+        ],
+        mapping: { primary: 'name' },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.list-badge')).toBeNull();
+    });
+  });
+
   describe('list keyboard navigation', () => {
     it('first list item has tabindex 0, others have -1', async () => {
       const el = createElement({

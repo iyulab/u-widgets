@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>u-widgets — Chat Demo</title>
+  <link rel="stylesheet" href="./shared.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--u-widget-surface);
+      color: var(--u-widget-text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── Layout ── */
+    .page {
+      max-width: 768px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Chat Area ── */
+    .chat {
+      flex: 1;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ── Separator ── */
+    .chat-sep {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0 16px;
+      color: var(--u-widget-text-secondary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .chat-sep::before,
+    .chat-sep::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--u-widget-border);
+    }
+
+    .chat-sep:first-child {
+      margin-top: 0;
+    }
+
+    /* ── Messages ── */
+    .msg {
+      display: flex;
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    .msg + .msg {
+      margin-top: 2px;
+    }
+
+    .msg-user {
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .msg-ai .msg-avatar {
+      background: var(--u-widget-primary);
+    }
+
+    .msg-user .msg-avatar {
+      background: #64748b;
+    }
+
+    .msg-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+      max-width: calc(100% - 40px);
+    }
+
+    .msg-bubble {
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.875rem;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .msg-ai .msg-bubble {
+      background: var(--u-widget-bg);
+      border: 1px solid var(--u-widget-border);
+      border-radius: 14px 14px 14px 4px;
+    }
+
+    .msg-user .msg-bubble {
+      background: var(--u-widget-primary);
+      color: #fff;
+      border-radius: 14px 14px 4px 14px;
+    }
+
+    /* Consecutive messages from same sender: hide avatar, tighten spacing */
+    .msg-cont {
+      margin-top: -2px;
+    }
+
+    .msg-cont .msg-avatar {
+      visibility: hidden;
+    }
+
+    .msg-ai.msg-cont .msg-bubble {
+      border-radius: 14px 14px 14px 4px;
+    }
+
+    /* ── Widget inside message ── */
+    .msg-widget {
+      background: var(--u-widget-bg);
+      border: 1px solid var(--u-widget-border);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .msg-widget u-widget {
+      display: block;
+    }
+
+    /* ── Event Toast ── */
+    .event-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--u-widget-text);
+      color: var(--u-widget-bg);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .event-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <nav class="demo-topbar">
+      <a class="demo-topbar-title" href="./">U-Widget</a>
+      <div class="demo-topbar-nav">
+        <a href="./">Demo</a>
+        <a href="./chat.html" aria-current="page">Chat</a>
+        <a href="./widgets.html">Reference</a>
+        <a href="./insight.html">Insight</a>
+        <a href="./mcp.html">MCP</a>
+        <span class="demo-sep"></span>
+        <a href="https://github.com/iyulab/u-widgets" target="_blank">GitHub</a>
+        <button id="theme-btn">Dark Mode</button>
+      </div>
+    </nav>
+
+    <!-- Chat Messages -->
+    <div class="chat">
+
+      <!-- ── Scenario 1: Sales ── -->
+      <div class="chat-sep">Sales Analysis</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Show me last quarter's revenue breakdown</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Here's the Q1 revenue summary. Total revenue grew <strong>12.5%</strong> quarter-over-quarter, with March being the strongest month.</div>
+          <div class="msg-widget">
+            <u-widget id="w-metric-revenue"></u-widget>
+          </div>
+          <div class="msg-widget">
+            <u-widget id="w-chart-sales"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 2: Account Info ── -->
+      <div class="chat-sep">Account Lookup</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Show me my account details</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Here's your current account information.</div>
+          <div class="msg-widget">
+            <u-widget id="w-kv-account"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 3: Project Progress ── -->
+      <div class="chat-sep">Project Status</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">What's the current progress on the team project?</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">The project is currently in the frontend development phase — step 3 of 5 total stages.</div>
+          <div class="msg-widget">
+            <u-widget id="w-steps-project"></u-widget>
+          </div>
+          <div class="msg-widget">
+            <u-widget id="w-progress-dev"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 4: Server Status ── -->
+      <div class="chat-sep">Infrastructure Monitoring</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Check the server status for me</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">There's an outage on the Worker Queue. DB Replica has some latency but it's not affecting production. CPU usage is at 67%, entering the caution zone.</div>
+          <div class="msg-widget">
+            <u-widget id="w-status-server"></u-widget>
+          </div>
+          <div class="msg-widget">
+            <u-widget id="w-gauge-cpu"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 5: Code ── -->
+      <div class="chat-sep">Code Assistance</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Write a function to deduplicate an array by a specific key. In TypeScript.</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Here's a generic function using a <code>Set</code>. It keeps the first occurrence of each key.</div>
+          <div class="msg-widget">
+            <u-widget id="w-code-dedup"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 6: Data Analysis ── -->
+      <div class="chat-sep">Data Analysis</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Analyze our browser usage statistics</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Here's the browser share breakdown for the last 30 days. Chrome dominates with 64%, followed by Safari which is primarily driven by mobile traffic.</div>
+          <div class="msg-widget">
+            <u-widget id="w-stat-browser"></u-widget>
+          </div>
+          <div class="msg-widget">
+            <u-widget id="w-chart-browser"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 7: Citation / Search ── -->
+      <div class="chat-sep">Search &amp; References</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Tell me about Web Components. Include references.</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Web Components is a web standard built on three technologies: Shadow DOM, Custom Elements, and HTML Templates. It lets you create reusable UI components without framework dependencies.</div>
+          <div class="msg-widget">
+            <u-widget id="w-citation-search"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 8: Form ── -->
+      <div class="chat-sep">Project Creation</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">I'd like to create a new project</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Please fill out the form below.</div>
+          <div class="msg-widget">
+            <u-widget id="w-form-project"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 9: Confirm ── -->
+      <div class="chat-sep">Destructive Action</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Delete the my-old-project repo</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">This action requires confirmation before proceeding.</div>
+          <div class="msg-widget">
+            <u-widget id="w-confirm-delete"></u-widget>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Scenario 10: Dashboard Compose ── -->
+      <div class="chat-sep">Dashboard Summary</div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">You</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Give me a service dashboard summary</div>
+        </div>
+      </div>
+
+      <div class="msg msg-ai">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-body">
+          <div class="msg-bubble">Here are the key service metrics. Uptime is at 99.97% and average latency is 42ms — both looking healthy.</div>
+          <div class="msg-widget">
+            <u-widget id="w-compose-dashboard"></u-widget>
+          </div>
+          <div class="msg-widget">
+            <u-widget id="w-chart-traffic"></u-widget>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.chat -->
+  </div><!-- /.page -->
+
+  <script type="module" src="./chat.ts"></script>
+</body>
+</html>

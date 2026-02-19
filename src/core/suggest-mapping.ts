@@ -75,6 +75,30 @@ export function suggestMapping(
     });
   }
 
+  // Flat object with all primitive values (no 'value' key) → kv
+  if (!isArray && !numberKeys.includes('value') && keys.length >= 2) {
+    const allPrimitive = keys.every((k) => {
+      const v = sample[k];
+      return typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+    });
+    if (allPrimitive) {
+      suggestions.push({
+        widget: 'kv',
+        confidence: 0.9,
+        reason: 'Flat object with all primitive values is ideal for key-value display',
+      });
+    }
+  }
+
+  // Array of { key, value } objects → kv
+  if (isArray && keys.includes('key') && keys.includes('value') && keys.length <= 3) {
+    suggestions.push({
+      widget: 'kv',
+      confidence: 0.88,
+      reason: 'Array with "key" and "value" fields matches key-value pair pattern',
+    });
+  }
+
   // Array with 1 string + 1 number → chart.bar
   if (isArray && stringKeys.length >= 1 && numberKeys.length >= 1) {
     const mapping = infer('chart.bar', data);
@@ -280,6 +304,9 @@ export function autoSpec(data: Record<string, unknown> | Record<string, unknown>
   if (suggestions.length === 0) return undefined;
 
   const top = suggestions[0];
+  // Only recommend if confidence meets threshold — avoid low-confidence mismatches
+  if (top.confidence < 0.7) return undefined;
+
   const spec: UWidgetSpec = { widget: top.widget, data };
   if (top.mapping) spec.mapping = top.mapping;
   return spec;

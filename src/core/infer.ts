@@ -138,15 +138,67 @@ function inferTable(keys: string[]): UWidgetMapping {
   };
 }
 
+// Well-known field name sets for list auto-inference
+const AVATAR_NAMES = new Set(['avatar', 'image', 'photo', 'picture', 'thumbnail', 'img', 'profileimage', 'profileImage']);
+const ICON_NAMES = new Set(['icon', 'emoji', 'symbol']);
+const BADGE_NAMES = new Set(['badge', 'tag', 'category']);
+const TRAILING_NAMES = new Set(['trailing', 'amount', 'count', 'price', 'status', 'date', 'time']);
+
+function looksLikeUrl(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  return /^https?:\/\/.+/i.test(value);
+}
+
 function inferList(
   sample: Record<string, unknown>,
   keys: string[],
 ): UWidgetMapping | undefined {
   const stringKeys = keys.filter((k) => typeof sample[k] === 'string');
   if (stringKeys.length === 0) return undefined;
-  return {
+
+  const mapping: UWidgetMapping = {
     primary: stringKeys[0],
     secondary: stringKeys.length > 1 ? stringKeys[1] : undefined,
   };
+
+  // Detect avatar field — well-known name OR URL-like string value
+  const usedKeys = new Set([mapping.primary, mapping.secondary].filter(Boolean));
+  const avatarKey = keys.find((k) =>
+    !usedKeys.has(k) && (AVATAR_NAMES.has(k.toLowerCase()) || (typeof sample[k] === 'string' && AVATAR_NAMES.has(k.toLowerCase())))
+  );
+  // Also check URL pattern for avatar candidates
+  const avatarByUrl = !avatarKey ? keys.find((k) =>
+    !usedKeys.has(k) && AVATAR_NAMES.has(k.toLowerCase()) && looksLikeUrl(sample[k])
+  ) : undefined;
+  const resolvedAvatar = avatarKey ?? avatarByUrl;
+
+  if (resolvedAvatar) {
+    mapping.avatar = resolvedAvatar;
+    usedKeys.add(resolvedAvatar);
+  }
+
+  // Detect icon field — well-known name, mutually exclusive with avatar
+  if (!resolvedAvatar) {
+    const iconKey = keys.find((k) => !usedKeys.has(k) && ICON_NAMES.has(k.toLowerCase()));
+    if (iconKey) {
+      mapping.icon = iconKey;
+      usedKeys.add(iconKey);
+    }
+  }
+
+  // Detect trailing field — well-known name, mutually exclusive with primary/secondary
+  const trailingKey = keys.find((k) => !usedKeys.has(k) && TRAILING_NAMES.has(k.toLowerCase()));
+  if (trailingKey) {
+    mapping.trailing = trailingKey;
+    usedKeys.add(trailingKey);
+  }
+
+  // Detect badge field — well-known name
+  const badgeKey = keys.find((k) => !usedKeys.has(k) && BADGE_NAMES.has(k.toLowerCase()));
+  if (badgeKey) {
+    mapping.badge = badgeKey;
+  }
+
+  return mapping;
 }
 

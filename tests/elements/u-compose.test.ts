@@ -208,6 +208,282 @@ describe('u-compose', () => {
     expect(cssText).toContain('u-compose');
   });
 
+  describe('column widths', () => {
+    it('applies proportional widths from options.widths', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 3,
+        options: { widths: [1, 2, 1] },
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 } },
+          { widget: 'metric', data: { value: 3 } },
+        ],
+      });
+      const shadow = await render(el);
+      const grid = shadow.querySelector('.layout-grid') as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe('1fr 2fr 1fr');
+    });
+
+    it('supports "auto" and "stretch" width values', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 3,
+        options: { widths: ['auto', 2, 'stretch'] },
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 } },
+          { widget: 'metric', data: { value: 3 } },
+        ],
+      });
+      const shadow = await render(el);
+      const grid = shadow.querySelector('.layout-grid') as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe('auto 2fr 1fr');
+    });
+
+    it('falls back to equal columns when widths is empty', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        options: { widths: [] },
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 } },
+        ],
+      });
+      const shadow = await render(el);
+      const grid = shadow.querySelector('.layout-grid') as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe('repeat(2, 1fr)');
+    });
+
+    it('falls back to 1fr for invalid width values', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        options: { widths: ['invalid', -5] },
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 } },
+        ],
+      });
+      const shadow = await render(el);
+      const grid = shadow.querySelector('.layout-grid') as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe('1fr 1fr');
+    });
+
+    it('falls back to repeat when widths is not an array', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        options: { widths: 'invalid' },
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 } },
+        ],
+      });
+      const shadow = await render(el);
+      const grid = shadow.querySelector('.layout-grid') as HTMLElement;
+      expect(grid.style.gridTemplateColumns).toBe('repeat(2, 1fr)');
+    });
+  });
+
+  describe('card option', () => {
+    it('applies child-card class when options.card is true', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        options: { card: true },
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+          { widget: 'metric', data: { value: 100 } },
+        ],
+      });
+      const shadow = await render(el);
+      const children = shadow.querySelectorAll('.child-card');
+      expect(children.length).toBe(2);
+    });
+
+    it('does not apply child-card class by default', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.child-card')).toBeNull();
+    });
+  });
+
+  describe('collapsed sections', () => {
+    it('renders collapsed child as details element', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, title: 'More', collapsed: true },
+        ],
+      });
+      const shadow = await render(el);
+      const details = shadow.querySelector('details.child-collapsed');
+      expect(details).not.toBeNull();
+    });
+
+    it('uses child title as summary text', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, title: 'Show metrics', collapsed: true },
+        ],
+      });
+      const shadow = await render(el);
+      const summary = shadow.querySelector('summary');
+      expect(summary?.textContent?.trim()).toBe('Show metrics');
+    });
+
+    it('defaults summary to "Details" when no title', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, collapsed: true },
+        ],
+      });
+      const shadow = await render(el);
+      const summary = shadow.querySelector('summary');
+      expect(summary?.textContent?.trim()).toBe('Details');
+    });
+
+    it('renders widget inside collapsed content', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, title: 'More', collapsed: true },
+        ],
+      });
+      const shadow = await render(el);
+      const content = shadow.querySelector('.collapsed-content');
+      expect(content?.querySelector('u-widget')).not.toBeNull();
+    });
+
+    it('non-collapsed children render as regular divs', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('details')).toBeNull();
+      expect(shadow.querySelector('.child')).not.toBeNull();
+    });
+
+    it('collapsed child in grid applies span', async () => {
+      const el = createElement({
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        children: [
+          { widget: 'metric', data: { value: 1 } },
+          { widget: 'metric', data: { value: 2 }, title: 'More', collapsed: true, span: 2 },
+        ],
+      });
+      const shadow = await render(el);
+      const details = shadow.querySelector('details.child-collapsed') as HTMLElement;
+      expect(details.style.gridColumn).toBe('span 2');
+    });
+
+    it('exposes collapsed-summary part', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, title: 'More', collapsed: true },
+        ],
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('[part="collapsed-summary"]')).not.toBeNull();
+    });
+  });
+
+  describe('theme propagation', () => {
+    it('propagates theme="dark" to child u-widget elements', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+          { widget: 'metric', data: { value: 100 } },
+        ],
+      });
+      el.theme = 'dark';
+      const shadow = await render(el);
+      const widgets = shadow.querySelectorAll('u-widget');
+      expect(widgets.length).toBe(2);
+      for (const w of widgets) {
+        expect(w.getAttribute('theme')).toBe('dark');
+      }
+    });
+
+    it('propagates theme="light" to child u-widget elements', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      el.theme = 'light';
+      const shadow = await render(el);
+      const widget = shadow.querySelector('u-widget');
+      expect(widget?.getAttribute('theme')).toBe('light');
+    });
+
+    it('does not set theme on children when theme is null', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      const shadow = await render(el);
+      const widget = shadow.querySelector('u-widget');
+      expect(widget?.hasAttribute('theme')).toBe(false);
+    });
+
+    it('propagates theme to collapsed children', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 }, title: 'More', collapsed: true },
+        ],
+      });
+      el.theme = 'dark';
+      const shadow = await render(el);
+      const widget = shadow.querySelector('.collapsed-content u-widget');
+      expect(widget?.getAttribute('theme')).toBe('dark');
+    });
+
+    it('updates children when theme changes', async () => {
+      const el = createElement({
+        widget: 'compose',
+        children: [
+          { widget: 'metric', data: { value: 42 } },
+        ],
+      });
+      el.theme = 'dark';
+      await el.updateComplete;
+      let widget = el.shadowRoot!.querySelector('u-widget');
+      expect(widget?.getAttribute('theme')).toBe('dark');
+
+      el.theme = 'light';
+      await el.updateComplete;
+      widget = el.shadowRoot!.querySelector('u-widget');
+      expect(widget?.getAttribute('theme')).toBe('light');
+    });
+  });
+
   describe('ARIA', () => {
     it('has role="region" and aria-label when title is set', async () => {
       const el = createElement({

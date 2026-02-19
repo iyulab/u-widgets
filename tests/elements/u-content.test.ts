@@ -373,13 +373,22 @@ describe('u-content', () => {
       expect(shadow.querySelector('.callout-title')?.textContent).toBe('Important');
     });
 
-    it('has role="alert"', async () => {
-      const el = createElement({
+    it('has role="alert" for error/warning and role="note" for info/success', async () => {
+      // Default level (info) → role="note"
+      const elInfo = createElement({
         widget: 'callout',
-        data: { message: 'Alert' },
+        data: { message: 'Info' },
       });
-      const shadow = await render(el);
-      expect(shadow.querySelector('.callout')?.getAttribute('role')).toBe('alert');
+      const shadowInfo = await render(elInfo);
+      expect(shadowInfo.querySelector('.callout')?.getAttribute('role')).toBe('note');
+
+      // Error level → role="alert"
+      const elError = createElement({
+        widget: 'callout',
+        data: { message: 'Error', level: 'error' },
+      });
+      const shadowError = await render(elError);
+      expect(shadowError.querySelector('.callout')?.getAttribute('role')).toBe('alert');
     });
 
     it('has aria-live="polite" for screen reader announcements', async () => {

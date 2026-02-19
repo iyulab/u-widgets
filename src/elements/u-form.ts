@@ -208,6 +208,20 @@ export class UForm extends LitElement {
         font-size: 0.8125rem;
         padding: 6px 8px;
       }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .actions button {
+        width: 100%;
+        text-align: center;
+      }
+
+      button {
+        padding: 8px 14px;
+        font-size: 0.8125rem;
+      }
     }
   `];
 

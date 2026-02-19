@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { help, template } from '../../src/core/catalog.js';
+import type { WidgetDetail } from '../../src/core/catalog.js';
 import { validate } from '../../src/core/schema.js';
 
 describe('help', () => {
@@ -12,29 +13,38 @@ describe('help', () => {
     expect(all.some((w) => w.widget === 'compose')).toBe(true);
   });
 
-  it('returns exact match for specific widget', () => {
+  it('returns WidgetDetail for exact widget match', () => {
     const result = help('chart.bar');
-    expect(result).toHaveLength(1);
-    expect(result[0].widget).toBe('chart.bar');
-    expect(result[0].category).toBe('chart');
-    expect(result[0].mappingKeys).toContain('x');
-    expect(result[0].mappingKeys).toContain('y');
+    // Exact match returns WidgetDetail (not array)
+    expect(Array.isArray(result)).toBe(false);
+    const detail = result as WidgetDetail;
+    expect(detail.widget).toBe('chart.bar');
+    expect(detail.category).toBe('chart');
+    expect(detail.mappingKeys).toContain('x');
+    expect(detail.mappingKeys).toContain('y');
+    // WidgetDetail-specific fields
+    expect(detail.autoInference).toBeTruthy();
+    expect(detail.optionDocs).toBeDefined();
+    expect(detail.events).toBeDefined();
+    expect(detail.examples.length).toBeGreaterThan(0);
   });
 
-  it('returns category match', () => {
+  it('returns category match as array', () => {
     const charts = help('chart');
-    expect(charts.length).toBeGreaterThanOrEqual(10);
-    expect(charts.every((w) => w.category === 'chart')).toBe(true);
+    expect(Array.isArray(charts)).toBe(true);
+    const arr = charts as ReturnType<typeof help>;
+    expect((arr as any[]).length).toBeGreaterThanOrEqual(10);
+    expect((arr as any[]).every((w: any) => w.category === 'chart')).toBe(true);
   });
 
   it('returns display category', () => {
-    const display = help('display');
+    const display = help('display') as any[];
     expect(display.some((w) => w.widget === 'metric')).toBe(true);
     expect(display.some((w) => w.widget === 'table')).toBe(true);
   });
 
   it('returns input category', () => {
-    const input = help('input');
+    const input = help('input') as any[];
     expect(input.some((w) => w.widget === 'form')).toBe(true);
     expect(input.some((w) => w.widget === 'confirm')).toBe(true);
   });
@@ -44,7 +54,7 @@ describe('help', () => {
   });
 
   it('returns prefix match for "chart."', () => {
-    const result = help('chart.');
+    const result = help('chart.') as any[];
     expect(result.length).toBeGreaterThanOrEqual(10);
   });
 
@@ -59,23 +69,92 @@ describe('help', () => {
     }
   });
 
-  it('display widgets have dataFields or optionsDocs', () => {
-    const display = help('display');
+  it('display widgets have description and dataShape', () => {
+    const display = help('display') as any[];
     for (const w of display) {
-      const hasExtra = w.dataFields != null || w.optionsDocs != null;
-      expect(hasExtra).toBe(true);
+      expect(w.description).toBeTruthy();
+      expect(['object', 'array', 'none']).toContain(w.dataShape);
+    }
+  });
+});
+
+describe('help → WidgetDetail', () => {
+  it('chart.bar optionDocs includes stack but not donut', () => {
+    const detail = help('chart.bar') as WidgetDetail;
+    expect(detail.optionDocs).toHaveProperty('stack');
+    expect(detail.optionDocs).not.toHaveProperty('donut');
+  });
+
+  it('metric dataFields includes value', () => {
+    const detail = help('metric') as WidgetDetail;
+    expect(detail.dataFields.some((f) => f.key === 'value')).toBe(true);
+  });
+
+  it('gauge dataFields has required value field', () => {
+    const detail = help('gauge') as WidgetDetail;
+    const valueField = detail.dataFields.find((f) => f.key === 'value');
+    expect(valueField).toBeDefined();
+    expect(valueField!.required).toBe(true);
+  });
+
+  it('form has fieldDocs and actionDocs', () => {
+    const detail = help('form') as WidgetDetail;
+    expect(detail.fieldDocs).toBeDefined();
+    expect(detail.actionDocs).toBeDefined();
+    expect(detail.fieldDocs!.field).toBeTruthy();
+    expect(detail.actionDocs!.label).toBeTruthy();
+  });
+
+  it('confirm has fieldDocs and actionDocs', () => {
+    const detail = help('confirm') as WidgetDetail;
+    expect(detail.fieldDocs).toBeDefined();
+    expect(detail.actionDocs).toBeDefined();
+  });
+
+  it('non-input widgets omit fieldDocs/actionDocs', () => {
+    const detail = help('chart.bar') as WidgetDetail;
+    expect(detail.fieldDocs).toBeUndefined();
+    expect(detail.actionDocs).toBeUndefined();
+  });
+
+  it('chart.bar has select event', () => {
+    const detail = help('chart.bar') as WidgetDetail;
+    expect(detail.events).toContain('select');
+  });
+
+  it('every widget can produce a WidgetDetail', () => {
+    const all = help();
+    for (const info of all) {
+      const detail = help(info.widget) as WidgetDetail;
+      expect(detail.widget).toBe(info.widget);
+      expect(typeof detail.autoInference).toBe('string');
+      expect(Array.isArray(detail.dataFields)).toBe(true);
+      expect(typeof detail.mappingDocs).toBe('object');
+      expect(typeof detail.optionDocs).toBe('object');
+      expect(Array.isArray(detail.events)).toBe(true);
+      expect(Array.isArray(detail.examples)).toBe(true);
+      expect(detail.examples.length).toBeGreaterThan(0);
     }
   });
 
-  it('gauge includes thresholds in optionsDocs', () => {
-    const gauge = help('gauge');
-    expect(gauge[0].optionsDocs).toContain('thresholds');
+  it('all examples pass validation', () => {
+    const all = help();
+    for (const info of all) {
+      const detail = help(info.widget) as WidgetDetail;
+      for (const ex of detail.examples) {
+        const result = validate(ex.spec);
+        expect(result.valid, `${info.widget} example "${ex.label}" failed: ${JSON.stringify(result.errors)}`).toBe(true);
+      }
+    }
   });
 
-  it('metric includes dataFields', () => {
-    const metric = help('metric');
-    expect(metric[0].dataFields).toContain('value');
-    expect(metric[0].dataFields).toContain('unit');
+  it('mappingDocs matches mappingKeys', () => {
+    const detail = help('chart.scatter') as WidgetDetail;
+    // scatter has x, y, color, size
+    expect(Object.keys(detail.mappingDocs)).toContain('x');
+    expect(Object.keys(detail.mappingDocs)).toContain('y');
+    expect(Object.keys(detail.mappingDocs)).toContain('color');
+    expect(Object.keys(detail.mappingDocs)).toContain('size');
   });
 });
 

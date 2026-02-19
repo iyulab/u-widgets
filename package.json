@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.3.3",
+  "version": "0.4.1",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
@@ -25,7 +25,12 @@
       "import": "./dist/u-widgets-tools.js"
     }
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/elements/*.ts",
+    "./dist/u-widgets.js",
+    "./dist/u-widgets-charts.js",
+    "./dist/u-widgets-forms.js"
+  ],
   "files": [
     "dist",
     "schema"

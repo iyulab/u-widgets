@@ -2,6 +2,8 @@
 import '../src/elements/u-widget.ts';
 import '../src/elements/u-chart.ts';
 import { help } from '../src/core/catalog.ts';
+import { specSurface, type SpecSurface, type PropInfo } from '../src/core/spec-surface.ts';
+import { getWidgetEvents } from '../src/core/widget-meta.ts';
 
 // ── Types ──
 
@@ -14,24 +16,11 @@ interface WidgetDoc {
   variants: Record<string, object>;
 }
 
-// ── Event type mapping ──
-
-const WIDGET_EVENTS: Record<string, string[]> = {
-  chart: ['select'],
-  table: ['select'],
-  list: ['select'],
-  form: ['submit', 'change', 'action'],
-  confirm: ['submit', 'action'],
-};
-
-function getWidgetEvents(w: string): string[] {
-  return WIDGET_EVENTS[w] ?? WIDGET_EVENTS[w.split('.')[0]] ?? [];
-}
-
 // ── Build catalog from CATALOG metadata + variant specs ──
 
 function meta(widget: string) {
-  const info = help(widget)[0];
+  const result = help(widget);
+  const info = Array.isArray(result) ? result[0] : result;
   return {
     description: info?.description ?? '',
     dataShape: info?.dataShape ?? 'object',
@@ -73,11 +62,11 @@ const catalog: Record<string, WidgetDoc> = {
           { value: 7, label: 'Errors', trend: 'flat' },
         ],
       },
-      '2 KPIs (minimal)': {
+      'With prefix/suffix': {
         widget: 'stat-group',
         data: [
-          { value: 128, label: 'Users' },
-          { value: 42, label: 'Projects' },
+          { value: 4250, label: 'Revenue', prefix: '$', suffix: '/mo' },
+          { value: 128, label: 'Users', suffix: ' active' },
         ],
       },
       'With all trends': {
@@ -86,6 +75,14 @@ const catalog: Record<string, WidgetDoc> = {
           { value: 99.9, unit: '%', label: 'Uptime', change: 0.1, trend: 'up' },
           { value: 142, label: 'Requests/s', change: -5, trend: 'down' },
           { value: 3, label: 'Incidents', change: 0, trend: 'flat' },
+        ],
+      },
+      'With icons': {
+        widget: 'stat-group',
+        data: [
+          { value: 42000, label: 'Revenue', prefix: '$', icon: '\uD83D\uDCB0', description: 'Monthly recurring revenue', change: 12.5, trend: 'up' },
+          { value: 1284, label: 'Users', icon: '\uD83D\uDC65', description: 'Active in last 30 days', change: 5.2, trend: 'up' },
+          { value: 3, label: 'Incidents', icon: '\u26A0\uFE0F', description: 'Requires attention', change: -1, trend: 'down' },
         ],
       },
     },
@@ -140,10 +137,17 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'progress',
         data: { value: 65, max: 100 },
       },
-      'Low value (warning)': {
+      'With thresholds': {
         widget: 'progress',
-        data: { value: 15, max: 100 },
-        options: { label: '{percent}% complete' },
+        data: { value: 35, max: 100 },
+        options: {
+          label: '{percent}% complete',
+          thresholds: [
+            { to: 30, color: 'red' },
+            { to: 60, color: 'yellow' },
+            { to: 100, color: 'green' },
+          ],
+        },
       },
     },
   },
@@ -170,28 +174,33 @@ const catalog: Record<string, WidgetDoc> = {
           ],
         },
       },
-      'Auto-inferred': {
+      'Searchable + paginated': {
         widget: 'table',
         data: [
           { name: 'Alice', role: 'Engineer', status: 'Active' },
           { name: 'Bob', role: 'Designer', status: 'Away' },
           { name: 'Carol', role: 'PM', status: 'Active' },
+          { name: 'Dave', role: 'QA', status: 'Active' },
+          { name: 'Eve', role: 'DevOps', status: 'Away' },
         ],
+        options: { searchable: true, pageSize: 3 },
       },
-      'With format (currency)': {
+      'Compact + formats': {
         widget: 'table',
         data: [
-          { product: 'Widget A', price: 29.99, quantity: 150 },
-          { product: 'Widget B', price: 49.99, quantity: 80 },
-          { product: 'Widget C', price: 9.99, quantity: 500 },
+          { file: 'report.pdf', size: 2048000, modified: '2025-12-01', progress: 0.95 },
+          { file: 'data.csv', size: 512000, modified: '2025-11-20', progress: 0.6 },
+          { file: 'image.png', size: 8192000, modified: '2025-10-15', progress: 1.0 },
         ],
         mapping: {
           columns: [
-            { field: 'product', label: 'Product' },
-            { field: 'price', label: 'Price', format: 'currency', align: 'right' },
-            { field: 'quantity', label: 'Qty', align: 'right' },
+            { field: 'file', label: 'File' },
+            { field: 'size', label: 'Size', format: 'bytes', align: 'right' },
+            { field: 'modified', label: 'Modified', format: 'date' },
+            { field: 'progress', label: 'Done', format: 'percent', align: 'right' },
           ],
         },
+        options: { compact: true },
       },
     },
   },
@@ -218,14 +227,34 @@ const catalog: Record<string, WidgetDoc> = {
         ],
         mapping: { primary: 'name', secondary: 'role', avatar: 'avatar', trailing: 'hours' },
       },
-      'Minimal (primary only)': {
+      'Auto-inferred (no mapping)': {
         widget: 'list',
         data: [
-          { item: 'Buy groceries' },
-          { item: 'Walk the dog' },
-          { item: 'Read a book' },
+          { title: 'Alice Kim', description: 'Senior Engineer', avatar: 'https://i.pravatar.cc/40?u=alice', amount: '$12,500' },
+          { title: 'Bob Park', description: 'Designer', avatar: 'https://i.pravatar.cc/40?u=bob', amount: '$9,800' },
+          { title: 'Carol Lee', description: 'PM', avatar: 'https://i.pravatar.cc/40?u=carol', amount: '$11,200' },
         ],
-        mapping: { primary: 'item' },
+      },
+      'Compact mode': {
+        widget: 'list',
+        data: [
+          { task: 'Buy groceries', due: 'Today' },
+          { task: 'Walk the dog', due: 'Today' },
+          { task: 'Read a book', due: 'Tomorrow' },
+          { task: 'Write report', due: 'Friday' },
+        ],
+        mapping: { primary: 'task', trailing: 'due' },
+        options: { compact: true },
+      },
+      'With badge': {
+        widget: 'list',
+        data: [
+          { name: 'Fix login bug', status: 'In Progress', category: 'Bug' },
+          { name: 'Add dark mode', status: 'Todo', category: 'Feature' },
+          { name: 'Update docs', status: 'Done', category: 'Docs' },
+          { name: 'Refactor auth', status: 'In Progress', category: 'Tech Debt' },
+        ],
+        mapping: { primary: 'name', secondary: 'status', badge: 'category' },
       },
     },
   },
@@ -272,7 +301,7 @@ const catalog: Record<string, WidgetDoc> = {
         mapping: { x: 'quarter', y: ['product', 'service'] },
         options: { stack: true },
       },
-      'Histogram': {
+      'Histogram + colors': {
         widget: 'chart.bar',
         data: [
           { bin: '0-10', count: 3 },
@@ -284,7 +313,7 @@ const catalog: Record<string, WidgetDoc> = {
           { bin: '60-70', count: 7 },
           { bin: '70-80', count: 4 },
         ],
-        options: { histogram: true },
+        options: { histogram: true, colors: ['#6366f1', '#8b5cf6'] },
       },
     },
   },
@@ -305,7 +334,7 @@ const catalog: Record<string, WidgetDoc> = {
         mapping: { x: 'day', y: ['cpu', 'mem'] },
         options: { smooth: true },
       },
-      'Step': {
+      'Step + referenceLines': {
         widget: 'chart.line',
         data: [
           { hour: '00:00', requests: 120 },
@@ -315,7 +344,12 @@ const catalog: Record<string, WidgetDoc> = {
           { hour: '16:00', requests: 310 },
           { hour: '20:00', requests: 220 },
         ],
-        options: { step: 'end' },
+        options: {
+          step: 'end',
+          referenceLines: [
+            { axis: 'y', value: 300, label: 'Capacity', color: '#dc2626', style: 'dashed' },
+          ],
+        },
       },
       'Multi-series': {
         widget: 'chart.line',
@@ -382,14 +416,14 @@ const catalog: Record<string, WidgetDoc> = {
           { browser: 'Edge', share: 8 },
         ],
       },
-      'Donut': {
+      'Donut + custom colors': {
         widget: 'chart.pie',
         data: [
           { category: 'Completed', count: 42 },
           { category: 'In Progress', count: 18 },
           { category: 'Blocked', count: 5 },
         ],
-        options: { donut: true },
+        options: { donut: true, colors: ['#22c55e', '#f59e0b', '#ef4444'] },
       },
       'Minimal (2 segments)': {
         widget: 'chart.pie',
@@ -415,12 +449,16 @@ const catalog: Record<string, WidgetDoc> = {
         ],
         mapping: { x: 'height', y: 'weight', color: 'group' },
       },
-      'Simple 2D': {
+      'Bubble (size mapping)': {
         widget: 'chart.scatter',
         data: [
-          { x: 10, y: 20 }, { x: 30, y: 40 }, { x: 50, y: 15 },
-          { x: 25, y: 35 }, { x: 45, y: 28 }, { x: 60, y: 50 },
+          { revenue: 10, profit: 20, employees: 50 },
+          { revenue: 30, profit: 40, employees: 120 },
+          { revenue: 50, profit: 15, employees: 200 },
+          { revenue: 25, profit: 35, employees: 80 },
+          { revenue: 45, profit: 28, employees: 300 },
         ],
+        mapping: { x: 'revenue', y: 'profit', size: 'employees' },
       },
       'Large dataset': {
         widget: 'chart.scatter',
@@ -502,7 +540,7 @@ const catalog: Record<string, WidgetDoc> = {
           { x: 'B', y: '2', value: 8 },
         ],
       },
-      'Wide matrix': {
+      'Custom colorRange': {
         widget: 'chart.heatmap',
         data: [
           { x: 'Mon', y: '9am', value: 5 }, { x: 'Mon', y: '12pm', value: 20 }, { x: 'Mon', y: '3pm', value: 18 }, { x: 'Mon', y: '6pm', value: 10 },
@@ -511,6 +549,7 @@ const catalog: Record<string, WidgetDoc> = {
           { x: 'Thu', y: '9am', value: 6 }, { x: 'Thu', y: '12pm', value: 18 }, { x: 'Thu', y: '3pm', value: 15 }, { x: 'Thu', y: '6pm', value: 8 },
           { x: 'Fri', y: '9am', value: 10 }, { x: 'Fri', y: '12pm', value: 22 }, { x: 'Fri', y: '3pm', value: 20 }, { x: 'Fri', y: '6pm', value: 14 },
         ],
+        options: { colorRange: ['#eff6ff', '#3b82f6', '#1e3a5f'] },
       },
     },
   },
@@ -761,9 +800,9 @@ const catalog: Record<string, WidgetDoc> = {
     group: 'Content',
     ...meta('callout'),
     variants: {
-      'Info': {
+      'Info + title': {
         widget: 'callout',
-        data: { message: 'This is an informational callout with helpful context for the user.', level: 'info' },
+        data: { title: 'Did you know?', message: 'This is an informational callout with helpful context for the user.', level: 'info' },
       },
       'Warning': {
         widget: 'callout',
@@ -786,15 +825,18 @@ const catalog: Record<string, WidgetDoc> = {
     group: 'Input',
     ...meta('form'),
     variants: {
-      'Full form (fields)': {
+      'All field types': {
         widget: 'form',
         fields: [
           { field: 'name', label: 'Name', type: 'text', required: true, placeholder: 'Enter your name' },
-          { field: 'email', label: 'Email', type: 'text', placeholder: 'user@example.com' },
+          { field: 'email', label: 'Email', type: 'email', placeholder: 'user@example.com' },
+          { field: 'bio', label: 'Bio', type: 'textarea', rows: 3, placeholder: 'Tell us about yourself' },
           { field: 'role', label: 'Role', type: 'select', options: ['Engineer', 'Designer', 'PM'] },
+          { field: 'volume', label: 'Volume', type: 'range', min: 0, max: 100, step: 10 },
+          { field: 'birthday', label: 'Birthday', type: 'date' },
           { field: 'notify', label: 'Email notifications', type: 'toggle' },
         ],
-        data: { name: '', email: '', role: '', notify: true },
+        data: { name: '', email: '', bio: '', role: '', volume: 50, birthday: '', notify: true },
         actions: [
           { label: 'Cancel', action: 'cancel' },
           { label: 'Save', action: 'submit', style: 'primary' },
@@ -812,12 +854,14 @@ const catalog: Record<string, WidgetDoc> = {
           '@[cancel "Reset"]',
         ].join('\n'),
       },
-      'Validation demo': {
+      'Validation + pattern': {
         widget: 'form',
         fields: [
-          { field: 'username', label: 'Username', type: 'text', required: true, placeholder: 'min 3 chars' },
-          { field: 'password', label: 'Password', type: 'text', required: true, placeholder: 'min 8 chars' },
-          { field: 'agree', label: 'I agree to the terms', type: 'toggle' },
+          { field: 'username', label: 'Username', type: 'text', required: true, minLength: 3, maxLength: 20, placeholder: '3-20 chars' },
+          { field: 'password', label: 'Password', type: 'password', required: true, minLength: 8, placeholder: 'min 8 chars' },
+          { field: 'code', label: 'Invite Code', type: 'text', pattern: '^[A-Z]{3}-\\d{4}$', message: 'Format: ABC-1234', placeholder: 'ABC-1234' },
+          { field: 'plan', label: 'Plan', type: 'radio', options: ['Free', 'Pro', 'Enterprise'] },
+          { field: 'agree', label: 'I agree to the terms', type: 'checkbox' },
         ],
         actions: [
           { label: 'Register', action: 'submit', style: 'primary' },
@@ -860,13 +904,356 @@ const catalog: Record<string, WidgetDoc> = {
     },
   },
 
+  // ── Chat / Interaction ──
+  code: {
+    label: 'Code',
+    group: 'Chat',
+    ...meta('code'),
+    variants: {
+      'JavaScript': {
+        widget: 'code',
+        data: { content: 'const greeting = "Hello, World!";\n\nfunction fibonacci(n) {\n  if (n <= 1) return n;\n  return fibonacci(n - 1) + fibonacci(n - 2);\n}\n\nconsole.log(fibonacci(10));', language: 'javascript' },
+      },
+      'Python': {
+        widget: 'code',
+        data: { content: 'import numpy as np\n\n# Generate random data\ndata = np.random.randn(1000)\nmean = np.mean(data)\nstd = np.std(data)\n\nprint(f"Mean: {mean:.4f}, Std: {std:.4f}")', language: 'python' },
+      },
+      'SQL': {
+        widget: 'code',
+        data: { content: 'SELECT u.name, COUNT(o.id) AS orders\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE u.active = TRUE\nGROUP BY u.name\nORDER BY orders DESC\nLIMIT 10;', language: 'sql' },
+      },
+      'JSON': {
+        widget: 'code',
+        data: { content: '{\n  "widget": "metric",\n  "data": {\n    "value": 1523,\n    "label": "Active Users",\n    "trend": "up",\n    "change": 12.5\n  }\n}', language: 'json' },
+      },
+      'Line highlights': {
+        widget: 'code',
+        data: { content: 'function add(a, b) {\n  return a + b;\n}\n\nconst result = add(1, 2);\nconsole.log(result);', language: 'javascript' },
+        options: { highlight: [2, 5] },
+      },
+      'No line numbers': {
+        widget: 'code',
+        data: { content: 'echo "Hello, World!"\nls -la /tmp\ngrep -r "pattern" .', language: 'bash' },
+        options: { lineNumbers: false },
+      },
+      'Max height + wrap': {
+        widget: 'code',
+        data: { content: '// This is a very long line of code that should wrap when the wrap option is enabled to demonstrate word wrapping behavior in the code widget\nconst x = 1;\nconst y = 2;\nconst z = 3;\nconst a = 4;\nconst b = 5;\nconst c = 6;\nconst d = 7;\nconst e = 8;\nconst f = 9;\nconst g = 10;', language: 'javascript' },
+        options: { maxHeight: '150px', wrap: true },
+      },
+    },
+  },
+  video: {
+    label: 'Video',
+    group: 'Content',
+    ...meta('video'),
+    variants: {
+      'Basic video': {
+        widget: 'video',
+        data: { src: 'https://www.w3schools.com/html/mov_bbb.mp4', poster: 'https://via.placeholder.com/640x360', caption: 'Big Buck Bunny' },
+      },
+      'Autoplay muted loop': {
+        widget: 'video',
+        data: { src: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        options: { autoplay: true, loop: true, muted: true },
+      },
+      'No controls': {
+        widget: 'video',
+        data: { src: 'https://www.w3schools.com/html/mov_bbb.mp4', alt: 'Sample video without controls' },
+        options: { controls: false },
+      },
+    },
+  },
+  gallery: {
+    label: 'Gallery',
+    group: 'Content',
+    ...meta('gallery'),
+    variants: {
+      'Auto grid': {
+        widget: 'gallery',
+        data: [
+          { src: 'https://via.placeholder.com/300x200/4f46e5/fff?text=1', alt: 'Image 1' },
+          { src: 'https://via.placeholder.com/300x200/22c55e/fff?text=2', alt: 'Image 2' },
+          { src: 'https://via.placeholder.com/300x200/f59e0b/fff?text=3', alt: 'Image 3' },
+          { src: 'https://via.placeholder.com/300x200/ef4444/fff?text=4', alt: 'Image 4' },
+        ],
+      },
+      'Square 2-column': {
+        widget: 'gallery',
+        data: [
+          { src: 'https://via.placeholder.com/200/4f46e5/fff?text=A', caption: 'Product A' },
+          { src: 'https://via.placeholder.com/200/22c55e/fff?text=B', caption: 'Product B' },
+          { src: 'https://via.placeholder.com/200/f59e0b/fff?text=C', caption: 'Product C' },
+          { src: 'https://via.placeholder.com/200/ef4444/fff?text=D', caption: 'Product D' },
+        ],
+        options: { columns: 2, aspectRatio: '1:1' },
+      },
+      '16:9 widescreen': {
+        widget: 'gallery',
+        title: 'Screenshots',
+        data: [
+          { src: 'https://via.placeholder.com/640x360/4f46e5/fff?text=Screenshot+1', alt: 'Screenshot 1' },
+          { src: 'https://via.placeholder.com/640x360/22c55e/fff?text=Screenshot+2', alt: 'Screenshot 2' },
+          { src: 'https://via.placeholder.com/640x360/f59e0b/fff?text=Screenshot+3', alt: 'Screenshot 3' },
+        ],
+        options: { columns: 3, aspectRatio: '16:9' },
+      },
+    },
+  },
+  kv: {
+    label: 'Key-Value',
+    group: 'Chat',
+    ...meta('kv'),
+    variants: {
+      'Object data': {
+        widget: 'kv',
+        data: { status: 'Active', plan: 'Pro', region: 'US-East', expires: '2026-03-15' },
+      },
+      'Array form (ordered)': {
+        widget: 'kv',
+        data: [
+          { key: 'Name', value: 'Alice Kim' },
+          { key: 'Email', value: 'alice@example.com' },
+          { key: 'Role', value: 'Senior Engineer' },
+          { key: 'Team', value: 'Platform' },
+        ],
+      },
+      'Horizontal layout': {
+        widget: 'kv',
+        data: { CPU: '72%', Memory: '4.2 GB', Disk: '85%', Network: '120 Mbps' },
+        options: { layout: 'horizontal' },
+      },
+      'Grid layout': {
+        widget: 'kv',
+        data: { Model: 'GPT-4', Tokens: '128K', Temperature: '0.7', 'Top P': '0.9', 'Max Tokens': '4096', Provider: 'OpenAI' },
+        options: { layout: 'grid', columns: 3 },
+      },
+    },
+  },
+  steps: {
+    label: 'Steps',
+    group: 'Chat',
+    ...meta('steps'),
+    variants: {
+      'Vertical (default)': {
+        widget: 'steps',
+        data: [
+          { label: 'Data collection', status: 'done', description: '2M records processed' },
+          { label: 'Running analysis', status: 'active', description: 'Estimated 30s remaining' },
+          { label: 'Report generation', status: 'pending' },
+        ],
+      },
+      'Horizontal': {
+        widget: 'steps',
+        data: [
+          { label: 'Upload', status: 'done' },
+          { label: 'Process', status: 'done' },
+          { label: 'Review', status: 'active' },
+          { label: 'Deploy', status: 'pending' },
+        ],
+        options: { layout: 'horizontal' },
+      },
+      'With error': {
+        widget: 'steps',
+        data: [
+          { label: 'Initialize', status: 'done' },
+          { label: 'Build', status: 'error', description: 'Build failed: missing dependency' },
+          { label: 'Deploy', status: 'pending' },
+        ],
+      },
+      'Compact mode': {
+        widget: 'steps',
+        data: [
+          { label: 'Step 1', status: 'done', description: 'hidden in compact' },
+          { label: 'Step 2', status: 'active', description: 'hidden in compact' },
+          { label: 'Step 3', status: 'pending' },
+        ],
+        options: { compact: true },
+      },
+      'With custom icons': {
+        widget: 'steps',
+        data: [
+          { label: 'Order placed', status: 'done', icon: '\uD83D\uDED2', description: 'Order #12345 confirmed' },
+          { label: 'Shipped', status: 'active', icon: '\uD83D\uDE9A', description: 'In transit via FedEx' },
+          { label: 'Delivered', status: 'pending', icon: '\uD83D\uDCE6' },
+        ],
+      },
+    },
+  },
+  rating: {
+    label: 'Rating',
+    group: 'Chat',
+    ...meta('rating'),
+    variants: {
+      'Star rating (display)': {
+        widget: 'rating',
+        data: { value: 4.2, count: 128 },
+      },
+      'Heart rating': {
+        widget: 'rating',
+        data: { value: 3 },
+        options: { icon: 'heart' },
+      },
+      'Interactive star': {
+        widget: 'rating',
+        options: { interactive: true, label: 'Rate this answer:' },
+      },
+      'Half star': {
+        widget: 'rating',
+        data: { value: 3.5 },
+      },
+      '10-point scale': {
+        widget: 'rating',
+        data: { value: 7 },
+        options: { max: 10 },
+      },
+    },
+  },
+  citation: {
+    label: 'Citation',
+    group: 'Chat',
+    ...meta('citation'),
+    variants: {
+      'Multiple sources': {
+        widget: 'citation',
+        data: [
+          { title: 'Web Components MDN', url: 'https://developer.mozilla.org/en-US/docs/Web/API/Web_components', snippet: 'Web Components is a suite of technologies allowing you to create reusable custom elements.', source: 'MDN' },
+          { title: 'Lit Documentation', url: 'https://lit.dev/docs/', snippet: 'Lit is a simple library for building fast, lightweight web components.', source: 'lit.dev' },
+          { title: 'ECharts Examples', url: 'https://echarts.apache.org/examples/', snippet: 'Apache ECharts provides rich visualization types and interaction.', source: 'Apache' },
+        ],
+      },
+      'Compact mode': {
+        widget: 'citation',
+        data: [
+          { title: 'Source A', url: 'https://example.com/a' },
+          { title: 'Source B', url: 'https://example.com/b' },
+          { title: 'Source C', url: 'https://example.com/c' },
+        ],
+        options: { compact: true },
+      },
+      'No numbers': {
+        widget: 'citation',
+        data: [
+          { title: 'Design Patterns', snippet: 'Reusable solutions to common software design problems.' },
+          { title: 'Clean Architecture', snippet: 'A guide to separation of concerns in software systems.' },
+        ],
+        options: { numbered: false },
+      },
+      'Single citation': {
+        widget: 'citation',
+        data: { title: 'u-widgets GitHub', url: 'https://github.com/iyulab/u-widgets', snippet: 'Declarative, data-driven widget system for AI chat interfaces.', source: 'GitHub' },
+      },
+    },
+  },
+  status: {
+    label: 'Status',
+    group: 'Chat',
+    ...meta('status'),
+    variants: {
+      'System health': {
+        widget: 'status',
+        title: 'System Status',
+        data: [
+          { label: 'API Gateway', value: 'Operational', level: 'success' },
+          { label: 'Database', value: 'Degraded', level: 'warning' },
+          { label: 'CDN', value: 'Operational', level: 'success' },
+          { label: 'Auth Service', value: 'Down', level: 'error' },
+          { label: 'Backup', value: 'Scheduled', level: 'info' },
+        ],
+      },
+      'All levels': {
+        widget: 'status',
+        data: [
+          { label: 'Info', value: 'Informational', level: 'info' },
+          { label: 'Success', value: 'All good', level: 'success' },
+          { label: 'Warning', value: 'Caution', level: 'warning' },
+          { label: 'Error', value: 'Failed', level: 'error' },
+          { label: 'Neutral', value: 'N/A', level: 'neutral' },
+        ],
+      },
+      'Single status': {
+        widget: 'status',
+        data: { label: 'Build', value: 'Passing', level: 'success' },
+      },
+    },
+  },
+  actions: {
+    label: 'Actions',
+    group: 'Chat',
+    ...meta('actions'),
+    variants: {
+      'Quick replies': {
+        widget: 'actions',
+        actions: [
+          { label: 'Revenue analysis', action: 'analyze_revenue' },
+          { label: 'Customer status', action: 'customer_status' },
+          { label: 'Inventory check', action: 'check_inventory' },
+        ],
+      },
+      'With styles': {
+        widget: 'actions',
+        actions: [
+          { label: 'Approve', action: 'approve', style: 'primary' },
+          { label: 'Reject', action: 'reject', style: 'danger' },
+          { label: 'Skip', action: 'skip' },
+        ],
+      },
+      'Column layout': {
+        widget: 'actions',
+        options: { layout: 'column' },
+        actions: [
+          { label: 'Option A: Restart service', action: 'restart' },
+          { label: 'Option B: Scale up instances', action: 'scale_up' },
+          { label: 'Option C: Investigate logs', action: 'investigate' },
+        ],
+      },
+    },
+  },
+  divider: {
+    label: 'Divider',
+    group: 'Chat',
+    ...meta('divider'),
+    variants: {
+      'Simple': {
+        widget: 'divider',
+      },
+      'With label': {
+        widget: 'divider',
+        options: { label: 'Related items' },
+      },
+      'Large spacing': {
+        widget: 'divider',
+        options: { spacing: 'large', label: 'Section break' },
+      },
+    },
+  },
+  header: {
+    label: 'Header',
+    group: 'Chat',
+    ...meta('header'),
+    variants: {
+      'Level 1': {
+        widget: 'header',
+        data: { text: 'Dashboard Overview', level: 1 },
+      },
+      'Level 2 (default)': {
+        widget: 'header',
+        data: { text: 'Recent Activity' },
+      },
+      'Level 3': {
+        widget: 'header',
+        data: { text: 'Subsection Details', level: 3 },
+      },
+    },
+  },
+
   // ── Layout ──
   compose: {
     label: 'Compose',
     group: 'Layout',
     ...meta('compose'),
     variants: {
-      'Grid 3-col': {
+      'Grid + span': {
         widget: 'compose',
         title: 'System Overview',
         layout: 'grid',
@@ -875,6 +1262,7 @@ const catalog: Record<string, WidgetDoc> = {
           { widget: 'metric', data: { value: 99.9, unit: '%', label: 'Uptime', change: 0.1, trend: 'up' } },
           { widget: 'metric', data: { value: 142, label: 'Requests/s', change: -5, trend: 'down' } },
           { widget: 'gauge', data: { value: 45 }, options: { min: 0, max: 100, unit: '%', thresholds: [{ to: 60, color: 'green' }, { to: 80, color: 'yellow' }, { to: 100, color: 'red' }] } },
+          { widget: 'progress', data: { value: 680, max: 1000 }, options: { label: '{value} / 1000 ({percent}%)' }, span: 3 },
         ],
       },
       'Row layout': {
@@ -892,6 +1280,60 @@ const catalog: Record<string, WidgetDoc> = {
           { widget: 'callout', data: { message: 'System update completed.', level: 'success' } },
           { widget: 'metric', data: { value: 100, unit: '%', label: 'Deployment' } },
           { widget: 'progress', data: { value: 100, max: 100 } },
+        ],
+      },
+      'With global actions': {
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        children: [
+          { widget: 'kv', data: { Status: 'Running', Version: 'v2.4.1' } },
+          { widget: 'metric', data: { value: 99.9, unit: '%', label: 'Uptime' } },
+        ],
+        actions: [
+          { label: 'Restart', action: 'restart', style: 'danger' },
+          { label: 'View Logs', action: 'view_logs', style: 'primary' },
+        ],
+      },
+      'Column widths (1:3)': {
+        widget: 'compose',
+        layout: 'grid',
+        columns: 2,
+        options: { widths: [1, 3] },
+        children: [
+          { widget: 'kv', data: { Plan: 'Pro', Status: 'Active', Expires: '2026-12' } },
+          { widget: 'table', data: [{ name: 'Alice', role: 'Engineer', hours: 32 }, { name: 'Bob', role: 'Designer', hours: 28 }] },
+        ],
+      },
+      'Column widths (auto + stretch)': {
+        widget: 'compose',
+        layout: 'grid',
+        columns: 3,
+        options: { widths: ['auto', 2, 1] },
+        children: [
+          { widget: 'metric', data: { value: 42, label: 'ID' } },
+          { widget: 'metric', data: { value: 99.9, unit: '%', label: 'Uptime' } },
+          { widget: 'gauge', data: { value: 73 }, options: { min: 0, max: 100, unit: '%' } },
+        ],
+      },
+      'Collapsed section': {
+        widget: 'compose',
+        children: [
+          { widget: 'kv', data: { Summary: 'All systems operational', Updated: '2 min ago' } },
+          { widget: 'table', title: 'Detailed Logs', collapsed: true, data: [{ time: '10:00', event: 'Deploy v2.4.1' }, { time: '09:45', event: 'Build passed' }, { time: '09:30', event: 'Tests passed' }] },
+          { widget: 'code', title: 'Raw Output', collapsed: true, data: { content: '{"status":"ok","uptime":99.9}', language: 'json' } },
+        ],
+      },
+      'Card grid': {
+        widget: 'compose',
+        title: 'Dashboard',
+        layout: 'grid',
+        columns: 2,
+        options: { card: true },
+        children: [
+          { widget: 'metric', data: { value: 99.9, unit: '%', label: 'Uptime', icon: '\u2705' } },
+          { widget: 'metric', data: { value: 142, label: 'Requests/s', icon: '\u26A1' } },
+          { widget: 'progress', data: { value: 680, max: 1000 }, options: { label: '{value} / 1000' }, span: 2 },
         ],
       },
     },
@@ -988,106 +1430,76 @@ variantSelect.addEventListener('change', () => {
   selectVariant(Number(variantSelect.value));
 });
 
-// ── Props Panel ──
+// ── Props Panel (powered by specSurface from library) ──
 
-interface DocField {
-  key: string;
-  type: string;
-  desc: string;
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function parseDocString(docStr: string): DocField[] {
-  if (!docStr) return [];
-  return docStr.split(';').map((seg) => {
-    const s = seg.trim();
-    if (!s) return null;
-    // Match: "key (type): description" or "key (type?, optional): desc"
-    const m = s.match(/^(\S+)\s*\(([^)]+)\)\s*[:\-]?\s*(.*)/);
-    if (m) return { key: m[1], type: m[2].trim(), desc: m[3].trim() };
-    // Fallback: plain text
-    return { key: '', type: '', desc: s };
-  }).filter(Boolean) as DocField[];
+function renderSection(title: string, body: string): string {
+  return `<div class="props-section"><div class="props-section-title">${title}</div>${body}</div>`;
+}
+
+function renderPropInfoList(items: PropInfo[]): string {
+  let html = '<ul class="props-list">';
+  for (const p of items) {
+    html += `<li><span class="prop-key">${esc(p.key)}</span> <span class="prop-type">${esc(p.type)}</span>`;
+    if (p.desc) html += ` <span class="prop-desc">${esc(p.desc)}</span>`;
+    html += '</li>';
+  }
+  html += '</ul>';
+  return html;
+}
+
+function renderBadges(items: readonly string[], cls: string): string {
+  let html = '<div class="props-badges">';
+  for (const item of items) {
+    html += `<span class="${cls}">${esc(item)}</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderSurface(surface: SpecSurface): string {
+  let html = '';
+
+  if (surface.specKeys.length > 0) {
+    html += renderSection('Spec Keys', renderBadges(surface.specKeys, 'doc-badge shape'));
+  }
+  if (surface.dataFields.length > 0) {
+    html += renderSection('Data Fields', renderPropInfoList(surface.dataFields));
+  }
+  if (surface.mappingKeys.length > 0) {
+    html += renderSection('Mapping', renderPropInfoList(surface.mappingKeys));
+  }
+  if (surface.optionKeys.length > 0) {
+    html += renderSection('Options', renderPropInfoList(surface.optionKeys));
+  }
+  if (surface.fieldProps.length > 0) {
+    html += renderSection('Field Properties', renderPropInfoList(surface.fieldProps));
+  }
+  if (surface.fieldTypes.length > 0) {
+    html += renderSection('Field Types', renderBadges(surface.fieldTypes, 'props-badge'));
+  }
+  if (surface.actionStyles.length > 0) {
+    html += renderSection('Action Styles', renderBadges(surface.actionStyles, 'props-badge'));
+  }
+  if (surface.events.length > 0) {
+    html += renderSection('Events', renderBadges([...surface.events], 'props-badge'));
+  }
+
+  return html;
 }
 
 function updatePropsPanel(widgetType: string) {
-  const info = help(widgetType)[0];
-  if (!info) {
-    propsPanel.innerHTML = '';
-    return;
-  }
+  const entry = catalog[activeKey];
+  if (!entry) { propsPanel.innerHTML = ''; return; }
 
-  let html = '';
-
-  // Data Shape
-  html += `<div class="props-section">`;
-  html += `<div class="props-section-title">Data Shape</div>`;
-  html += `<ul class="props-list"><li><span class="prop-type">${info.dataShape}</span></li></ul>`;
-  html += `</div>`;
-
-  // Mapping Keys
-  if (info.mappingKeys.length > 0) {
-    html += `<div class="props-section">`;
-    html += `<div class="props-section-title">Mapping Keys</div>`;
-    html += `<div class="props-badges">`;
-    for (const k of info.mappingKeys) {
-      html += `<span class="doc-badge key">${k}</span>`;
-    }
-    html += `</div></div>`;
-  }
-
-  // Data Fields
-  if (info.dataFields) {
-    const fields = parseDocString(info.dataFields);
-    if (fields.length > 0) {
-      html += `<div class="props-section">`;
-      html += `<div class="props-section-title">Data Fields</div>`;
-      html += `<ul class="props-list">`;
-      for (const f of fields) {
-        if (f.key) {
-          html += `<li><span class="prop-key">${f.key}</span> <span class="prop-type">(${f.type})</span>`;
-          if (f.desc) html += ` <span class="prop-desc">${f.desc}</span>`;
-          html += `</li>`;
-        } else {
-          html += `<li><span class="prop-desc">${f.desc}</span></li>`;
-        }
-      }
-      html += `</ul></div>`;
-    }
-  }
-
-  // Options
-  if (info.optionsDocs) {
-    const opts = parseDocString(info.optionsDocs);
-    if (opts.length > 0) {
-      html += `<div class="props-section">`;
-      html += `<div class="props-section-title">Options</div>`;
-      html += `<ul class="props-list">`;
-      for (const o of opts) {
-        if (o.key) {
-          html += `<li><span class="prop-key">${o.key}</span> <span class="prop-type">(${o.type})</span>`;
-          if (o.desc) html += ` <span class="prop-desc">${o.desc}</span>`;
-          html += `</li>`;
-        } else {
-          html += `<li><span class="prop-desc">${o.desc}</span></li>`;
-        }
-      }
-      html += `</ul></div>`;
-    }
-  }
-
-  // Events
-  const events = getWidgetEvents(widgetType);
-  if (events.length > 0) {
-    html += `<div class="props-section">`;
-    html += `<div class="props-section-title">Events</div>`;
-    html += `<div class="props-badges">`;
-    for (const ev of events) {
-      html += `<span class="props-badge">${ev}</span>`;
-    }
-    html += `</div></div>`;
-  }
-
-  propsPanel.innerHTML = html;
+  const surface = specSurface(
+    Object.values(entry.variants) as Record<string, unknown>[],
+    widgetType,
+  );
+  propsPanel.innerHTML = renderSurface(surface);
 }
 
 // ── Widget Selection ──
@@ -1186,8 +1598,12 @@ editor.addEventListener('keydown', (e) => {
 // ── Theme Toggle ──
 
 themeBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  themeBtn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+  const isDark = document.body.classList.toggle('dark');
+  themeBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  document.querySelectorAll('u-widget').forEach(el => {
+    if (isDark) el.setAttribute('theme', 'dark');
+    else el.removeAttribute('theme');
+  });
 });
 
 // ── Event Log ──

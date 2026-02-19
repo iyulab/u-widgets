@@ -110,7 +110,7 @@ export class UTable extends LitElement {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 0;
+      padding: 10px 0 10px 8px;
       border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
       cursor: pointer;
       outline: none;
@@ -172,6 +172,19 @@ export class UTable extends LitElement {
       font-size: 0.8125rem;
       font-weight: 500;
       color: var(--u-widget-text-secondary, #64748b);
+    }
+
+    .list-badge {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      background: var(--u-widget-surface, #f1f5f9);
+      color: var(--u-widget-text-secondary, #64748b);
+      white-space: nowrap;
     }
 
     /* ── search ── */
@@ -242,7 +255,7 @@ export class UTable extends LitElement {
     }
 
     .compact .list-item {
-      padding: 6px 0;
+      padding: 6px 0 6px 8px;
       gap: 8px;
     }
 
@@ -285,7 +298,7 @@ export class UTable extends LitElement {
       }
 
       .list-item {
-        padding: 6px 0;
+        padding: 6px 0 6px 8px;
         gap: 8px;
       }
 
@@ -592,6 +605,7 @@ export class UTable extends LitElement {
     const iconKey = mapping?.icon;
     const avatarKey = mapping?.avatar;
     const trailingKey = mapping?.trailing;
+    const badgeKey = mapping?.badge;
 
     return html`
       <div class="list-container${compact ? ' compact' : ''}" part="list" @keydown=${this._onListKeydown}>
@@ -618,6 +632,9 @@ export class UTable extends LitElement {
                   ? html`<div class="list-secondary" part="secondary">${item[secondaryKey] ?? ''}</div>`
                   : nothing}
               </div>
+              ${badgeKey && item[badgeKey] != null
+                ? html`<span class="list-badge" part="badge">${item[badgeKey]}</span>`
+                : nothing}
               ${trailingKey && item[trailingKey] != null
                 ? html`<div class="list-trailing" part="trailing">${item[trailingKey]}</div>`
                 : nothing}

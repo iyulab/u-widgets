@@ -113,7 +113,7 @@ describe('u-gauge', () => {
       expect(fill?.getAttribute('stroke')).toBe('#dc2626');
     });
 
-    it('handles zero value (transparent fill)', async () => {
+    it('handles zero value (fill path has stroke="none")', async () => {
       const el = createElement({
         widget: 'gauge',
         data: { value: 0 },
@@ -122,7 +122,7 @@ describe('u-gauge', () => {
       const shadow = await render(el);
       const fill = shadow.querySelector('.gauge-fill');
       expect(fill).not.toBeNull();
-      expect(fill?.getAttribute('stroke')).toBe('transparent');
+      expect(fill?.getAttribute('stroke')).toBe('none');
       expect(shadow.querySelector('.gauge-track')).not.toBeNull();
     });
 

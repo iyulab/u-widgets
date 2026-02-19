@@ -43,11 +43,18 @@ export class UChart extends LitElement {
     css`
       :host {
         display: block;
+        container: u-chart / inline-size;
       }
 
       .chart-container {
         width: 100%;
         height: var(--u-widget-chart-height, 300px);
+      }
+
+      @container u-chart (max-width: 20rem) {
+        .chart-container {
+          height: var(--u-widget-chart-height-narrow, 200px);
+        }
       }
     `,
   ];

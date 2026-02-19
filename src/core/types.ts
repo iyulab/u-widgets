@@ -42,7 +42,18 @@ export type WidgetType =
   | 'compose'
   | 'markdown'
   | 'image'
-  | 'callout';
+  | 'callout'
+  | 'kv'
+  | 'code'
+  | 'citation'
+  | 'status'
+  | 'steps'
+  | 'rating'
+  | 'video'
+  | 'gallery'
+  | 'actions'
+  | 'divider'
+  | 'header';
 
 // ── Mapping ──
 
@@ -91,6 +102,8 @@ export interface UWidgetMapping {
   color?: string;
   /** Size encoding field (scatter bubble). */
   size?: string;
+  /** Opacity encoding field (scatter). Maps data values to point opacity (0.1–1.0). */
+  opacity?: string;
   /** Axis field (radar chart indicators). */
   axis?: string;
   /** Explicit column definitions for table widgets. */
@@ -105,6 +118,8 @@ export interface UWidgetMapping {
   avatar?: string;
   /** Trailing value field displayed on the right (list widget). */
   trailing?: string;
+  /** Badge/tag field (list widget). */
+  badge?: string;
 }
 
 /**
@@ -286,4 +301,6 @@ export interface UWidgetSpec {
 export interface UWidgetChildSpec extends Omit<UWidgetSpec, 'type' | 'version'> {
   /** Grid column span within the parent compose layout. */
   span?: number;
+  /** When true, the child is initially collapsed (uses native `<details>`). */
+  collapsed?: boolean;
 }

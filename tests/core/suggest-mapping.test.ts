@@ -191,4 +191,29 @@ describe('non-chart suggestions', () => {
     const area = suggestions.find((s) => s.widget === 'chart.area');
     expect(area).toBeUndefined();
   });
+
+  it('suggests kv for flat object with all primitive values', () => {
+    const data = { status: 'Active', plan: 'Pro', users: 42 };
+    const suggestions = suggestMapping(data);
+    const kv = suggestions.find((s) => s.widget === 'kv');
+    expect(kv).toBeDefined();
+    expect(kv!.confidence).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('suggests kv for array of {key, value} objects', () => {
+    const data = [
+      { key: 'Name', value: 'Alice' },
+      { key: 'Role', value: 'Engineer' },
+    ];
+    const suggestions = suggestMapping(data);
+    const kv = suggestions.find((s) => s.widget === 'kv');
+    expect(kv).toBeDefined();
+    expect(kv!.confidence).toBeGreaterThanOrEqual(0.85);
+  });
+
+  it('does not suggest kv for object with value key (prefers metric)', () => {
+    const data = { value: 42, unit: '%' };
+    const suggestions = suggestMapping(data);
+    expect(suggestions[0].widget).toBe('metric');
+  });
 });

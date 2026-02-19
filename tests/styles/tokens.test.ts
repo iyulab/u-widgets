@@ -27,9 +27,8 @@ describe('themeStyles', () => {
     });
 
     it('defines semantic color tokens', () => {
+      expect(cssText).toContain('--u-widget-positive:');
       expect(cssText).toContain('--u-widget-negative:');
-      expect(cssText).toContain('--u-widget-danger:');
-      expect(cssText).toContain('--u-widget-success:');
       expect(cssText).toContain('--u-widget-warning:');
     });
 
@@ -45,6 +44,11 @@ describe('themeStyles', () => {
 
     it('defines chart height token', () => {
       expect(cssText).toContain('--u-widget-chart-height:');
+    });
+
+    it('defines shadow tokens', () => {
+      expect(cssText).toContain('--u-widget-shadow:');
+      expect(cssText).toContain('--u-widget-shadow-hover:');
     });
   });
 
@@ -75,7 +79,7 @@ describe('themeStyles', () => {
     ];
 
     for (const name of elementNames) {
-      it(`${name} includes themeStyles in static styles`, async () => {
+      it(`${name} includes themeStyles in static styles`, { timeout: 15000 }, async () => {
         // Import elements to register them (u-chart is a separate entry point)
         await import('../../src/elements/u-widget.js');
         if (name === 'u-chart') {

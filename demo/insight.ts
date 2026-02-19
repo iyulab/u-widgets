@@ -732,8 +732,12 @@ function renderFeatures(): void {
 // ── Theme Toggle ──
 
 themeBtn.addEventListener('click', () => {
-  document.body.classList.toggle('dark');
-  themeBtn.textContent = document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+  const isDark = document.body.classList.toggle('dark');
+  themeBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  document.querySelectorAll('u-widget').forEach(el => {
+    if (isDark) el.setAttribute('theme', 'dark');
+    else el.removeAttribute('theme');
+  });
 });
 
 // ── Init ──
