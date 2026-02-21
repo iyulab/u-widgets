@@ -356,6 +356,26 @@ describe('u-metric', () => {
       expect(metrics[2]?.hasAttribute('data-variant')).toBe(false);
     });
 
+    it('metric: variant "info" sets data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 42, label: 'Info', variant: 'info' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.getAttribute('data-variant')).toBe('info');
+    });
+
+    it('metric: variant "neutral" sets data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 42, label: 'Neutral', variant: 'neutral' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.getAttribute('data-variant')).toBe('neutral');
+    });
+
     it('CSS: variant classes exist in styles', () => {
       const styles = (customElements.get('u-metric') as any).styles;
       const cssText = Array.isArray(styles)
@@ -364,6 +384,10 @@ describe('u-metric', () => {
       expect(cssText).toContain('data-variant');
       expect(cssText).toContain('success');
       expect(cssText).toContain('danger');
+      expect(cssText).toContain('info');
+      expect(cssText).toContain('neutral');
+      expect(cssText).toContain('--u-widget-primary');
+      expect(cssText).toContain('--u-widget-text-secondary');
     });
   });
 
