@@ -47,6 +47,15 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'metric',
         data: { value: 4250, label: 'Revenue', prefix: '$', suffix: '/mo', change: 8.3, trend: 'up' },
       },
+      'With format': {
+        widget: 'metric',
+        data: { value: 15000000, label: 'Total Revenue', format: 'currency:KRW' },
+        options: { locale: 'ko-KR' },
+      },
+      'With variant': {
+        widget: 'metric',
+        data: { value: 99.7, label: 'Uptime', suffix: '%', variant: 'success', change: 0.2, trend: 'up' },
+      },
     },
   },
   'stat-group': {
@@ -84,6 +93,15 @@ const catalog: Record<string, WidgetDoc> = {
           { value: 1284, label: 'Users', icon: '\uD83D\uDC65', description: 'Active in last 30 days', change: 5.2, trend: 'up' },
           { value: 3, label: 'Incidents', icon: '\u26A0\uFE0F', description: 'Requires attention', change: -1, trend: 'down' },
         ],
+      },
+      'With format & variant': {
+        widget: 'stat-group',
+        data: [
+          { value: 15000000, label: 'Total Sales', format: 'currency:KRW', variant: 'success' },
+          { value: 23.5, label: 'Churn Rate', format: 'percent', variant: 'danger' },
+          { value: 1284, label: 'Active Users', format: 'number', variant: 'info' },
+        ],
+        options: { locale: 'ko-KR' },
       },
     },
   },

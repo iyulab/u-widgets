@@ -224,6 +224,149 @@ describe('u-metric', () => {
     });
   });
 
+  describe('format field', () => {
+    it('metric: format "percent" appends % to numeric value', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 73, label: 'Rate', format: 'percent' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      expect(valueEl?.textContent).toContain('73');
+      expect(valueEl?.textContent).toContain('%');
+    });
+
+    it('metric: format "number" formats with locale separator', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 1234567, label: 'Total', format: 'number' },
+        options: { locale: 'en-US' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      // formatted: "1,234,567" — not raw "1234567"
+      expect(valueEl?.textContent).toContain('1,234,567');
+    });
+
+    it('metric: no format renders raw value unchanged', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 1234567, label: 'Raw' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      expect(valueEl?.textContent).toContain('1234567');
+    });
+
+    it('stat-group: format "percent" applied per item', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Repeat Rate', value: 67.3, format: 'percent' },
+          { label: 'Churn Rate', value: 5.1, format: 'percent' },
+        ],
+      });
+      const shadow = await render(el);
+      const values = shadow.querySelectorAll('.metric-value');
+      expect(values[0]?.textContent).toContain('%');
+      expect(values[1]?.textContent).toContain('%');
+    });
+
+    it('stat-group: mixed format and no-format items', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'Revenue', value: 1000000, format: 'number', options: { locale: 'en-US' } },
+          { label: 'Orders', value: 320 },
+        ],
+      });
+      const shadow = await render(el);
+      const values = shadow.querySelectorAll('.metric-value');
+      // Second item (no format) should show raw value
+      expect(values[1]?.textContent).toContain('320');
+    });
+
+    it('stat-group: locale from spec.options propagated to format', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [{ label: 'Rate', value: 42, format: 'percent' }],
+        options: { locale: 'en-US' },
+      });
+      const shadow = await render(el);
+      const valueEl = shadow.querySelector('.metric-value');
+      expect(valueEl?.textContent).toContain('42');
+      expect(valueEl?.textContent).toContain('%');
+    });
+  });
+
+  describe('variant field', () => {
+    it('metric: variant "danger" sets data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: '23.5%', label: '이탈률', variant: 'danger' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.getAttribute('data-variant')).toBe('danger');
+    });
+
+    it('metric: variant "success" sets data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: '67%', label: '재구매율', variant: 'success' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.getAttribute('data-variant')).toBe('success');
+    });
+
+    it('metric: variant "warning" sets data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 3, label: '재고 부족', variant: 'warning' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.getAttribute('data-variant')).toBe('warning');
+    });
+
+    it('metric: no variant sets no data-variant attribute', async () => {
+      const el = createElement({
+        widget: 'metric',
+        data: { value: 42, label: 'Normal' },
+      });
+      const shadow = await render(el);
+      const metricEl = shadow.querySelector('.metric');
+      expect(metricEl?.hasAttribute('data-variant')).toBe(false);
+    });
+
+    it('stat-group: each item can have independent variant', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: '재구매율', value: '67%', variant: 'success' },
+          { label: '이탈률', value: '23.5%', variant: 'danger' },
+          { label: '총 주문', value: 320 },
+        ],
+      });
+      const shadow = await render(el);
+      const metrics = shadow.querySelectorAll('.metric');
+      expect(metrics[0]?.getAttribute('data-variant')).toBe('success');
+      expect(metrics[1]?.getAttribute('data-variant')).toBe('danger');
+      expect(metrics[2]?.hasAttribute('data-variant')).toBe(false);
+    });
+
+    it('CSS: variant classes exist in styles', () => {
+      const styles = (customElements.get('u-metric') as any).styles;
+      const cssText = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(cssText).toContain('data-variant');
+      expect(cssText).toContain('success');
+      expect(cssText).toContain('danger');
+    });
+  });
+
   describe('container query', () => {
     it('has container-type declared in styles', () => {
       const styles = (customElements.get('u-metric') as any).styles;

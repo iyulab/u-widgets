@@ -1,6 +1,30 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
+
+// declare global block for HTMLElementTagNameMap and JSX IntrinsicElements.
+// rollup-plugin-dts strips declare global when bundling, so we append it after.
+const JSX_GLOBAL_DECLARATIONS = `
+declare global {
+    interface HTMLElementTagNameMap {
+        'u-widget': import('@iyulab/u-widgets').UWidget;
+    }
+    namespace JSX {
+        interface IntrinsicElements {
+            'u-widget': UWidgetElementProps;
+        }
+    }
+}
+
+declare module "react" {
+    namespace JSX {
+        interface IntrinsicElements {
+            "u-widget": UWidgetElementProps;
+        }
+    }
+}
+`;
 
 export default defineConfig({
   build: {
@@ -31,6 +55,14 @@ export default defineConfig({
     dts({
       include: ['src'],
       rollupTypes: true,
+      afterBuild() {
+        // Append declare global block that rollup-plugin-dts strips
+        const dtsPath = resolve(__dirname, 'dist/u-widgets.d.ts');
+        const content = readFileSync(dtsPath, 'utf-8');
+        if (!content.includes('HTMLElementTagNameMap')) {
+          writeFileSync(dtsPath, content + JSX_GLOBAL_DECLARATIONS);
+        }
+      },
     }),
   ],
   test: {

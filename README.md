@@ -88,6 +88,46 @@ AI assistants can use u-widgets via [MCP server](docs/mcp-server.md):
 npx @iyulab/u-widgets-mcp
 ```
 
+## Framework Integration
+
+u-widgets is a browser-only Web Component library — it requires DOM APIs (`customElements`, `HTMLElement`) and cannot run in Node.js or server-side environments.
+
+### Next.js (App Router)
+
+Create a client-side wrapper component:
+
+```tsx
+// components/widget.tsx
+"use client";
+import "@iyulab/u-widgets";
+
+export function Widget({ spec }: { spec: object }) {
+  return <u-widget spec={JSON.stringify(spec)} />;
+}
+```
+
+Use the wrapper from Server Components:
+
+```tsx
+// app/dashboard/page.tsx
+import { Widget } from "@/components/widget";
+
+export default async function Page() {
+  const data = await fetchData();
+  return <Widget spec={{ widget: "stat-group", data }} />;
+}
+```
+
+For pages where SSR hydration mismatch is a concern, use dynamic import:
+
+```tsx
+import dynamic from "next/dynamic";
+const Widget = dynamic(
+  () => import("@/components/widget").then((m) => m.Widget),
+  { ssr: false }
+);
+```
+
 ## Documentation
 
 - [Widget Reference](docs/widgets.md) — Schema, mapping, options, theming

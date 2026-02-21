@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { formatValue } from '../core/format.js';
 
 interface MetricData {
   value: number | string;
@@ -13,11 +14,15 @@ interface MetricData {
   trend?: 'up' | 'down' | 'flat';
   icon?: string;
   description?: string;
+  format?: string;
+  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 }
 
-function toMetricData(data: Record<string, unknown>): MetricData {
+function toMetricData(data: Record<string, unknown>, locale?: string): MetricData {
+  const rawValue = data.value as number | string;
+  const format = data.format as string | undefined;
   return {
-    value: (data.value as number | string) ?? 0,
+    value: format ? formatValue(rawValue, format, locale) : (rawValue ?? 0),
     label: data.label as string | undefined,
     unit: data.unit as string | undefined,
     prefix: data.prefix as string | undefined,
@@ -26,6 +31,8 @@ function toMetricData(data: Record<string, unknown>): MetricData {
     trend: data.trend as MetricData['trend'],
     icon: data.icon as string | undefined,
     description: data.description as string | undefined,
+    format: data.format as string | undefined,
+    variant: data.variant as MetricData['variant'],
   };
 }
 
@@ -94,6 +101,12 @@ export class UMetric extends LitElement {
     .metric-icon { font-size: 1.25rem; line-height: 1; margin-bottom: 2px; }
     .metric-description { font-size: 0.75rem; color: var(--u-widget-text-secondary, #64748b); margin-top: 2px; line-height: 1.3; }
 
+    /* ── variant colors ── */
+    .metric[data-variant="success"] .metric-value { color: var(--u-widget-positive, #16a34a); }
+    .metric[data-variant="danger"] .metric-value { color: var(--u-widget-negative, #dc2626); }
+    .metric[data-variant="warning"] .metric-value { color: var(--u-widget-warning, #d97706); }
+    .metric[data-variant="info"] .metric-value { color: var(--u-widget-info, #2563eb); }
+
     /* ── stat-group ── */
     .stat-group {
       display: flex;
@@ -138,20 +151,22 @@ export class UMetric extends LitElement {
   render() {
     if (!this.spec?.data) return nothing;
 
+    const locale = this.spec.options?.locale as string | undefined;
+
     if (this.spec.widget === 'stat-group') {
-      return this.renderStatGroup();
+      return this.renderStatGroup(locale);
     }
 
-    return this.renderMetric(toMetricData(this.spec.data as Record<string, unknown>));
+    return this.renderMetric(toMetricData(this.spec.data as Record<string, unknown>, locale));
   }
 
-  private renderStatGroup() {
+  private renderStatGroup(locale?: string) {
     const items = this.spec!.data as Record<string, unknown>[];
     if (!Array.isArray(items)) return nothing;
 
     return html`
       <div class="stat-group" part="stat-group">
-        ${items.map((item) => this.renderMetric(toMetricData(item)))}
+        ${items.map((item) => this.renderMetric(toMetricData(item, locale)))}
       </div>
     `;
   }
@@ -165,7 +180,7 @@ export class UMetric extends LitElement {
       : undefined;
 
     return html`
-      <div class="metric" part="metric" aria-label=${ariaLabel ?? nothing}>
+      <div class="metric" part="metric" aria-label=${ariaLabel ?? nothing} data-variant=${m.variant ?? nothing}>
         ${m.icon ? html`<div class="metric-icon" part="icon">${m.icon}</div>` : nothing}
         ${m.label ? html`<div class="metric-label" part="label">${m.label}</div>` : nothing}
         <div class="metric-value" part="value">
