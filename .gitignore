@@ -1,6 +1,7 @@
 # Local
 claudedocs/
 dev-docs/
+docs/plans/
 CLAUDE.md
 nul
 .playwright-mcp/

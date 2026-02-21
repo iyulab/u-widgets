@@ -1,9 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   registerLocale,
   getLocaleStrings,
   formatTemplate,
   getDefaultLocale,
+  setDefaultLocale,
+  getEffectiveLocale,
+  resolveLocale,
 } from '../../src/core/locale.js';
 
 describe('locale', () => {
@@ -88,6 +91,42 @@ describe('locale', () => {
 
     it('handles empty params', () => {
       expect(formatTemplate('no placeholders', {})).toBe('no placeholders');
+    });
+  });
+
+  describe('setDefaultLocale / resolveLocale', () => {
+    afterEach(() => {
+      setDefaultLocale(undefined);
+    });
+
+    it('setDefaultLocale stores the locale', () => {
+      setDefaultLocale('ko-KR');
+      expect(getEffectiveLocale()).toBe('ko-KR');
+    });
+
+    it('getEffectiveLocale returns undefined by default', () => {
+      expect(getEffectiveLocale()).toBeUndefined();
+    });
+
+    it('setDefaultLocale can be cleared', () => {
+      setDefaultLocale('ko-KR');
+      setDefaultLocale(undefined);
+      expect(getEffectiveLocale()).toBeUndefined();
+    });
+
+    it('resolveLocale: widget locale takes priority', () => {
+      setDefaultLocale('en-US');
+      expect(resolveLocale('ko-KR')).toBe('ko-KR');
+    });
+
+    it('resolveLocale: falls back to setDefaultLocale', () => {
+      setDefaultLocale('ko-KR');
+      expect(resolveLocale(undefined)).toBe('ko-KR');
+      expect(resolveLocale(null)).toBe('ko-KR');
+    });
+
+    it('resolveLocale: returns undefined when nothing set', () => {
+      expect(resolveLocale(undefined)).toBeUndefined();
     });
   });
 });

@@ -5,6 +5,7 @@ import { validate } from '../core/schema.js';
 import { normalize } from '../core/normalize.js';
 import { infer } from '../core/infer.js';
 import { suggestWidget } from '../core/suggest.js';
+import { resolveLocale } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import './u-metric.js';
 import './u-gauge.js';
@@ -268,10 +269,11 @@ export class UWidget extends LitElement {
     let resolved = mapping ? { ...spec, mapping } : spec;
 
     // Propagate locale attribute to spec if not already set
-    if (this.locale && !resolved.options?.locale) {
+    const effectiveLocale = resolveLocale(this.locale);
+    if (effectiveLocale && !resolved.options?.locale) {
       resolved = {
         ...resolved,
-        options: { ...resolved.options, locale: this.locale },
+        options: { ...resolved.options, locale: effectiveLocale },
       };
     }
 

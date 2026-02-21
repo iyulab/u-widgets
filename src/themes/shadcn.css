@@ -1,0 +1,36 @@
+/**
+ * u-widgets Shadcn/ui + Tailwind CSS v4 Theme Preset
+ *
+ * Usage (CSS/PostCSS):
+ *   @import "@iyulab/u-widgets/themes/shadcn.css";
+ *
+ * Or (JavaScript):
+ *   import "@iyulab/u-widgets/themes/shadcn.css";
+ *
+ * Apply AFTER your Shadcn globals.css.
+ * Requires Shadcn/ui globals.css to define --primary, --background, etc.
+ */
+
+:root {
+  --u-widget-bg: hsl(var(--background));
+  --u-widget-surface: hsl(var(--muted));
+  --u-widget-text: hsl(var(--foreground));
+  --u-widget-text-secondary: hsl(var(--muted-foreground));
+  --u-widget-border: hsl(var(--border));
+  --u-widget-primary: hsl(var(--primary));
+  --u-widget-negative: hsl(var(--destructive));
+  /* Shadcn does not define --success / --warning; u-widget defaults remain */
+  --u-widget-radius: var(--radius, 6px);
+}
+
+/* Dark mode: syncs with Shadcn .dark class */
+.dark {
+  --u-widget-bg: hsl(var(--background));
+  --u-widget-surface: hsl(var(--muted));
+  --u-widget-text: hsl(var(--foreground));
+  --u-widget-text-secondary: hsl(var(--muted-foreground));
+  --u-widget-border: hsl(var(--border));
+  --u-widget-primary: hsl(var(--primary));
+  --u-widget-negative: hsl(var(--destructive));
+  --u-widget-radius: var(--radius, 6px);
+}

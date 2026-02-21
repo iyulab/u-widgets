@@ -188,7 +188,21 @@ export class UCitation extends LitElement {
 
   private _extractDomain(url: string): string {
     try {
-      return new URL(url).hostname;
+      const hostname = new URL(url).hostname;
+      // localhost나 IP 주소는 그대로 반환
+      if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+        return hostname;
+      }
+      // www. 제거
+      const withoutWww = hostname.replace(/^www\./, '');
+      const parts = withoutWww.split('.');
+      // ccTLD (co.kr, co.uk, com.au 등): 마지막 3파트 유지
+      const ccTLDs = new Set(['co', 'com', 'net', 'org', 'gov', 'edu', 'ac']);
+      if (parts.length >= 3 && ccTLDs.has(parts[parts.length - 2])) {
+        return parts.slice(-3).join('.');
+      }
+      // 일반적인 경우: 마지막 2파트
+      return parts.slice(-2).join('.');
     } catch {
       return url;
     }

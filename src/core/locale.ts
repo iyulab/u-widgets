@@ -108,3 +108,48 @@ export function formatTemplate(
 export function getDefaultLocale(): UWidgetLocaleStrings {
   return { ...EN };
 }
+
+// ── Global default locale ──
+
+let _defaultLocale: string | undefined;
+
+/**
+ * Set the global default locale for all u-widgets.
+ *
+ * Resolution order (highest priority first):
+ *   1. Per-widget `locale` attribute/property
+ *   2. setDefaultLocale() value
+ *   3. document.documentElement.lang (browser only)
+ *   4. English fallback
+ *
+ * @example
+ * ```ts
+ * import { setDefaultLocale } from '@iyulab/u-widgets';
+ * setDefaultLocale('ko-KR');
+ * ```
+ */
+export function setDefaultLocale(lang: string | undefined): void {
+  _defaultLocale = lang;
+}
+
+/**
+ * Get the active global default locale set via setDefaultLocale().
+ * Returns undefined if not set.
+ */
+export function getEffectiveLocale(): string | undefined {
+  return _defaultLocale;
+}
+
+/**
+ * Resolve the locale to use for a widget.
+ *
+ * Priority: widgetLocale > setDefaultLocale() > document.lang > undefined
+ */
+export function resolveLocale(widgetLocale?: string | null): string | undefined {
+  if (widgetLocale) return widgetLocale;
+  if (_defaultLocale) return _defaultLocale;
+  if (typeof document !== 'undefined' && document.documentElement?.lang) {
+    return document.documentElement.lang;
+  }
+  return undefined;
+}

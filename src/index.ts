@@ -40,7 +40,9 @@ export { parseFormdown, registerFormdownParser, getFormdownParser } from './core
 export type { FormdownResult, FormdownParser } from './core/formdown.js';
 export { formatValue } from './core/format.js';
 export { suggestWidget } from './core/suggest.js';
-export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale } from './core/locale.js';
+export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale } from './core/locale.js';
 export type { UWidgetLocaleStrings } from './core/locale.js';
+
+export type { UWidgetElementProps } from './types/jsx.js';
 
 export { UWidget } from './elements/u-widget.js';

@@ -268,6 +268,75 @@ describe('u-code', () => {
       const html = code?.innerHTML ?? '';
       expect(html).toContain('class="hl-s"');
     });
+
+    it('does not highlight keywords inside double-quoted string literals', () => {
+      // "this function returns null" 내부의 function/null 등이 hl-k로 강조되면 안 됨
+      const el = renderCode({
+        widget: 'code',
+        data: { content: 'const msg = "this function returns null";', language: 'javascript' },
+      });
+      const code = shadow(el).querySelector('code');
+      // hl-s span 요소들을 DOM에서 직접 선택 — innerHTML 파싱 후 실제 DOM 요소로 존재함
+      const strSpans = code?.querySelectorAll('.hl-s') ?? [];
+      expect(strSpans.length).toBeGreaterThan(0);
+      // 각 문자열 span 내부에 hl-k span이 없어야 함
+      for (const span of strSpans) {
+        expect(span.querySelector('.hl-k')).toBeNull();
+      }
+    });
+
+    it('does not highlight keywords inside single-quoted string literals', () => {
+      const el = renderCode({
+        widget: 'code',
+        data: { content: "const s = 'if else return null';", language: 'javascript' },
+      });
+      const code = shadow(el).querySelector('code');
+      const strSpans = code?.querySelectorAll('.hl-s') ?? [];
+      expect(strSpans.length).toBeGreaterThan(0);
+      for (const span of strSpans) {
+        expect(span.querySelector('.hl-k')).toBeNull();
+      }
+    });
+
+    it('does not highlight keywords inside template literal strings', () => {
+      const el = renderCode({
+        widget: 'code',
+        data: { content: 'const s = `while true do return`;', language: 'javascript' },
+      });
+      const code = shadow(el).querySelector('code');
+      const strSpans = code?.querySelectorAll('.hl-s') ?? [];
+      expect(strSpans.length).toBeGreaterThan(0);
+      for (const span of strSpans) {
+        expect(span.querySelector('.hl-k')).toBeNull();
+      }
+    });
+
+    it('does not highlight keywords inside Python string literals', () => {
+      const el = renderCode({
+        widget: 'code',
+        data: { content: 'msg = "if for while return"', language: 'python' },
+      });
+      const code = shadow(el).querySelector('code');
+      const strSpans = code?.querySelectorAll('.hl-s') ?? [];
+      expect(strSpans.length).toBeGreaterThan(0);
+      for (const span of strSpans) {
+        expect(span.querySelector('.hl-k')).toBeNull();
+      }
+    });
+
+    it('still highlights keywords outside string literals', () => {
+      // 문자열 밖의 키워드는 여전히 강조되어야 함
+      const el = renderCode({
+        widget: 'code',
+        data: { content: 'const msg = "hello"; return msg;', language: 'javascript' },
+      });
+      const code = shadow(el).querySelector('code');
+      const html = code?.innerHTML ?? '';
+      const kwSpans = html.match(/class="hl-k">([^<]+)/g) ?? [];
+      const kwTexts = kwSpans.map(s => s.replace('class="hl-k">', ''));
+      expect(kwTexts).toContain('const');
+      expect(kwTexts).toContain('return');
+    });
   });
 
   describe('escaping', () => {

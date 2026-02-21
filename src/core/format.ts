@@ -2,6 +2,12 @@ type FormatType = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'byt
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
+// ISO 4217 zero-decimal currencies — no fractional digits by standard
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  'KRW', 'JPY', 'VND', 'IDR', 'BIF', 'CLP', 'GNF', 'ISK',
+  'KMF', 'MGA', 'PYG', 'RWF', 'UGX', 'UYI', 'VUV', 'XAF', 'XOF', 'XPF',
+]);
+
 /**
  * Format a value according to a format hint string.
  *
@@ -54,13 +60,18 @@ function formatNumber(value: unknown, locale?: string): string {
 function formatCurrency(value: unknown, currencyCode?: string, locale?: string): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
+  const currency = currencyCode || 'USD';
   try {
+    const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase());
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: currencyCode || 'USD',
+      currency,
+      ...(isZeroDecimal && {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
     }).format(num);
   } catch {
-    // Invalid currency code fallback
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: 'USD',

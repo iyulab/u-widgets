@@ -15,6 +15,7 @@ export const MAPPING_DOCS: Readonly<Record<string, string>> = {
   value: 'Value field (pie/funnel/heatmap)',
   color: 'Color grouping field (scatter)',
   size: 'Size encoding field (scatter bubble)',
+  opacity: 'Opacity encoding field (scatter bubble)',
   axis: 'Axis field (radar indicators)',
   columns: 'Column definitions (table)',
   primary: 'Primary text field (list)',

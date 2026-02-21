@@ -1,6 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { themeStyles } from '../../src/styles/tokens.js';
 
+// WCAG 2.1 relative luminance
+function relativeLuminance(hex: string): number {
+  const rgb = hex.replace('#', '').match(/.{2}/g)!
+    .map(c => parseInt(c, 16) / 255)
+    .map(c => c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+function contrastRatio(hex1: string, hex2: string): number {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 describe('themeStyles', () => {
   const cssText = themeStyles.cssText;
 
@@ -99,5 +115,51 @@ describe('themeStyles', () => {
         expect(allCss).toContain('--u-widget-primary:');
       });
     }
+  });
+});
+
+describe('WCAG AA color contrast (minimum 4.5:1)', () => {
+  describe('light theme defaults', () => {
+    it('primary text on white bg', () => {
+      expect(contrastRatio('#1a1a2e', '#ffffff')).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('secondary text on white bg', () => {
+      const ratio = contrastRatio('#64748b', '#ffffff');
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    });
+  });
+
+  describe('dark theme', () => {
+    const bg = '#1e1e2e';
+    const surface = '#2a2a3e';
+
+    it('primary text on dark bg', () => {
+      expect(contrastRatio('#e2e8f0', bg)).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('secondary text on dark bg', () => {
+      const ratio = contrastRatio('#94a3b8', bg);
+      console.log(`text-secondary on dark bg: ${ratio.toFixed(2)}:1`);
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('secondary text on surface', () => {
+      const ratio = contrastRatio('#94a3b8', surface);
+      console.log(`text-secondary on surface: ${ratio.toFixed(2)}:1`);
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('positive color on dark bg', () => {
+      expect(contrastRatio('#4ade80', bg)).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('negative color on dark bg', () => {
+      expect(contrastRatio('#f87171', bg)).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it('warning color on dark bg', () => {
+      expect(contrastRatio('#fbbf24', bg)).toBeGreaterThanOrEqual(4.5);
+    });
   });
 });

@@ -37,6 +37,21 @@ describe('formatValue', () => {
     it('falls back to USD for invalid currency code', () => {
       expect(formatValue(1234, 'currency:INVALID')).toBe('$1,234.00');
     });
+
+    it('KRW has no decimal places regardless of environment', () => {
+      const result = formatValue(150000, 'currency:KRW');
+      expect(result).not.toContain('.');
+      expect(result).toBe('₩150,000');
+    });
+
+    it('JPY has no decimal places', () => {
+      expect(formatValue(1234, 'currency:JPY')).not.toContain('.');
+    });
+
+    it('VND has no decimal places', () => {
+      const result = formatValue(1234, 'currency:VND');
+      expect(result).not.toContain('.');
+    });
   });
 
   describe('percent', () => {

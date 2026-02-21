@@ -68,7 +68,7 @@ describe('u-citation', () => {
         data: [{ title: 'Test', url: 'https://docs.example.com/page' }],
       });
       const url = shadow(el).querySelector('.cite-url');
-      expect(url?.textContent?.trim()).toBe('docs.example.com');
+      expect(url?.textContent?.trim()).toBe('example.com');
     });
 
     it('renders snippet text', () => {
@@ -206,6 +206,62 @@ describe('u-citation', () => {
         data: [{ title: 'Test' }],
       });
       expect(shadow(el).querySelector('[part="cite-num"]')).toBeTruthy();
+    });
+  });
+
+  describe('domain extraction', () => {
+    it('strips subdomain from docs.github.com → github.com', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'GitHub Docs', url: 'https://docs.github.com/en/actions' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('github.com');
+    });
+
+    it('preserves ccTLD: blog.example.co.kr → example.co.kr', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Blog', url: 'https://blog.example.co.kr/post/1' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('example.co.kr');
+    });
+
+    it('keeps localhost as-is', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Local', url: 'http://localhost:3000/path' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('localhost');
+    });
+
+    it('strips www. prefix: www.example.com → example.com', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'WWW', url: 'https://www.example.com/page' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('example.com');
+    });
+
+    it('keeps plain domain: example.com → example.com', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Plain', url: 'https://example.com/page' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('example.com');
+    });
+
+    it('returns original string for invalid URL', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Invalid', url: 'not-a-url' }],
+      });
+      const url = shadow(el).querySelector('.cite-url');
+      expect(url?.textContent?.trim()).toBe('not-a-url');
     });
   });
 

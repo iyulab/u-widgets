@@ -274,7 +274,16 @@ export interface UWidgetSpec {
   fields?: UWidgetFieldDefinition[];
   /** Formdown shorthand syntax for form fields (mutually exclusive with `fields`). */
   formdown?: string;
-  /** Widget-specific rendering options. */
+  /**
+   * Widget-specific rendering options.
+   *
+   * Chart widgets support an `echarts` sub-key for native ECharts option passthrough:
+   * ```json
+   * { "options": { "echarts": { "tooltip": { "trigger": "axis" } } } }
+   * ```
+   * All keys in `options.echarts` are deep-merged into the generated ECharts option.
+   * @see https://echarts.apache.org/en/option.html
+   */
   options?: Record<string, unknown>;
   /** Action buttons displayed below the widget. */
   actions?: UWidgetAction[];

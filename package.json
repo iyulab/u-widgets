@@ -23,7 +23,8 @@
     "./tools": {
       "types": "./dist/u-widgets-tools.d.ts",
       "import": "./dist/u-widgets-tools.js"
-    }
+    },
+    "./themes/shadcn.css": "./dist/themes/shadcn.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
@@ -38,6 +39,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/themes',{recursive:true});fs.copyFileSync('src/themes/shadcn.css','dist/themes/shadcn.css')\"",
     "build:cdn": "vite build --config vite.cdn.config.ts",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview": "vite preview",
