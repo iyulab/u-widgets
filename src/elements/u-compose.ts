@@ -45,6 +45,10 @@ export class UCompose extends LitElement {
       gap: var(--u-widget-gap, 16px);
     }
 
+    .layout-grid > * {
+      min-height: 60px;
+    }
+
     .child-card {
       padding: 16px 20px;
       border-radius: var(--u-widget-radius, 6px);

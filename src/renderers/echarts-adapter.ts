@@ -113,7 +113,9 @@ function buildCartesian(
   const categories = data.map((row) => String(row[xField] ?? ''));
   const horizontal = !!options.horizontal;
 
-  const seriesItems = yFields.map((field) => {
+  const seriesOverrides = Array.isArray(options.series) ? options.series as Record<string, unknown>[] : [];
+
+  const seriesItems = yFields.map((field, i) => {
     const s: Record<string, unknown> = {
       name: field,
       type,
@@ -122,6 +124,20 @@ function buildCartesian(
     if (options._area) s.areaStyle = {};
     if (options.smooth) s.smooth = true;
     if (options.step) s.step = options.step === true ? 'end' : options.step;
+
+    // Apply per-series overrides from options.series[i]
+    const override = seriesOverrides[i];
+    if (override) {
+      if (override.color) {
+        s.itemStyle = { color: override.color };
+        s.lineStyle = { ...(s.lineStyle as Record<string, unknown> ?? {}), color: override.color };
+      }
+      if (override.lineStyle) {
+        s.lineStyle = { ...(s.lineStyle as Record<string, unknown> ?? {}), ...(override.lineStyle as Record<string, unknown>) };
+      }
+      if (override.symbol !== undefined) s.symbol = override.symbol;
+      if (override.label) s.name = override.label as string;
+    }
     return s;
   });
 
@@ -142,7 +158,8 @@ function buildCartesian(
   };
 
   if (yFields.length > 1) {
-    result.legend = { data: yFields };
+    const legendNames = seriesItems.map((s) => s.name as string);
+    result.legend = { data: legendNames };
   }
 
   if (options.stack) {

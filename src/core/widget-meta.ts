@@ -113,6 +113,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   colorRange: 'Heatmap color gradient',
   histogram: 'Histogram mode (bar)',
   referenceLines: 'Reference/threshold lines',
+  series: 'Per-series overrides [{color?, lineStyle?, symbol?, label?}]',
   step: 'Step interpolation (line)',
   legend: 'Show/hide legend',
   grid: 'Show/hide grid lines',
@@ -169,9 +170,9 @@ export interface DataFieldInfo {
 
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
-  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.line': ['smooth', 'stack', 'step', 'colors', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.area': ['smooth', 'stack', 'colors', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel'],
   'chart.scatter': ['colors', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel'],

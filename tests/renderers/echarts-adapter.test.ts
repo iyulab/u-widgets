@@ -740,6 +740,112 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('options: series overrides', () => {
+    it('applies per-series color to itemStyle and lineStyle', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20 }],
+        mapping: { x: 'x', y: ['v1', 'v2'] },
+        options: {
+          series: [
+            { color: '#ff0000' },
+            { color: '#00ff00' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect((series[0].itemStyle as Obj).color).toBe('#ff0000');
+      expect((series[0].lineStyle as Obj).color).toBe('#ff0000');
+      expect((series[1].itemStyle as Obj).color).toBe('#00ff00');
+    });
+
+    it('applies per-series lineStyle overrides', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20 }],
+        mapping: { x: 'x', y: ['v1', 'v2'] },
+        options: {
+          series: [
+            {},
+            { lineStyle: { type: 'dashed', width: 2 } },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].lineStyle).toBeUndefined();
+      expect((series[1].lineStyle as Obj).type).toBe('dashed');
+      expect((series[1].lineStyle as Obj).width).toBe(2);
+    });
+
+    it('merges color and lineStyle correctly', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10 }],
+        mapping: { x: 'x', y: ['v1'] },
+        options: {
+          series: [
+            { color: '#ef4444', lineStyle: { type: 'dashed' } },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect((series[0].lineStyle as Obj).color).toBe('#ef4444');
+      expect((series[0].lineStyle as Obj).type).toBe('dashed');
+    });
+
+    it('applies per-series symbol override', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20 }],
+        mapping: { x: 'x', y: ['v1', 'v2'] },
+        options: {
+          series: [
+            {},
+            { symbol: 'none' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].symbol).toBeUndefined();
+      expect(series[1].symbol).toBe('none');
+    });
+
+    it('applies per-series label as legend name', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20 }],
+        mapping: { x: 'x', y: ['v1', 'v2'] },
+        options: {
+          series: [
+            { label: 'X-bar' },
+            { label: 'UCL' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].name).toBe('X-bar');
+      expect(series[1].name).toBe('UCL');
+      expect((result.legend as Obj).data).toEqual(['X-bar', 'UCL']);
+    });
+
+    it('ignores series overrides beyond yFields length', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ x: 'A', v: 10 }],
+        mapping: { x: 'x', y: ['v'] },
+        options: {
+          series: [
+            { color: '#ff0000' },
+            { color: '#00ff00' }, // no second series
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(1);
+      expect((series[0].itemStyle as Obj).color).toBe('#ff0000');
+    });
+  });
+
   describe('edge cases', () => {
     it('returns empty object for missing data', () => {
       const result = toEChartsOption(spec({ widget: 'chart.bar' }));
