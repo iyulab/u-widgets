@@ -45,6 +45,26 @@ describe('validate', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('allows type property on compose children (#1)', () => {
+    const result = validate({
+      widget: 'compose',
+      layout: 'stack',
+      children: [
+        { widget: 'stat-group', data: [{ label: 'TWA', value: '87.5' }] },
+        { widget: 'status', type: 'success', label: 'Compliant' },
+        { widget: 'gauge', value: 85, max: 200 },
+      ],
+    });
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('still rejects invalid type at root level', () => {
+    const result = validate({ widget: 'metric', type: 'invalid' });
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toContain('"type" must be "u-widget"');
+  });
+
   it('rejects fields + formdown together', () => {
     const result = validate({
       widget: 'form',

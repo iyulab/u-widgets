@@ -228,6 +228,9 @@ export class UForm extends LitElement {
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
 
+  @property({ type: String, reflect: true })
+  theme: string | null = null;
+
   @state()
   private _formData: Record<string, unknown> = {};
 

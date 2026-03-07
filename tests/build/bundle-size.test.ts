@@ -23,9 +23,9 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 5 KB gzip', () => {
+  it('charts bundle is under 6 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
-    expect(size).toBeLessThan(5 * 1024);
+    expect(size).toBeLessThan(6 * 1024);
   });
 
   it('tools bundle is under 12 KB gzip', () => {

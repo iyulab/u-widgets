@@ -72,10 +72,10 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
 
   if (options.grid === false) {
     // Hide grid lines on axes
-    if (result.xAxis && typeof result.xAxis === 'object') {
+    if (result.xAxis && typeof result.xAxis === 'object' && !Array.isArray(result.xAxis)) {
       result.xAxis = { ...result.xAxis as Record<string, unknown>, splitLine: { show: false } };
     }
-    if (result.yAxis && typeof result.yAxis === 'object') {
+    if (result.yAxis && typeof result.yAxis === 'object' && !Array.isArray(result.yAxis)) {
       result.yAxis = { ...result.yAxis as Record<string, unknown>, splitLine: { show: false } };
     }
   }
@@ -152,9 +152,21 @@ function buildCartesian(
     seriesItems.forEach((s) => { s.barCategoryGap = '0%'; });
   }
 
+  // Detect if any series requires a secondary Y axis
+  const needsDualYAxis = !horizontal && seriesItems.some((s) => (s.yAxisIndex as number) >= 1);
+  let yAxisConfig: unknown;
+  if (needsDualYAxis) {
+    const secondAxis = Array.isArray(options.yAxis) && (options.yAxis as unknown[]).length >= 2
+      ? (options.yAxis as Record<string, unknown>[])[1]
+      : { type: 'value' };
+    yAxisConfig = [valAxis, secondAxis];
+  } else {
+    yAxisConfig = horizontal ? catAxis : valAxis;
+  }
+
   const result: Record<string, unknown> = {
     xAxis: horizontal ? valAxis : catAxis,
-    yAxis: horizontal ? catAxis : valAxis,
+    yAxis: yAxisConfig,
     series: seriesItems,
     tooltip: { trigger: 'axis' },
   };
@@ -333,11 +345,34 @@ function buildPie(
     seriesItem.label = { show: false };
   }
 
-  return {
+  const result: Record<string, unknown> = {
     tooltip: { trigger: 'item' },
     legend: { orient: 'vertical', left: 'left' },
     series: [seriesItem],
   };
+
+  // Donut center label
+  const center = options.center as { label?: string; value?: string } | undefined;
+  if (options.donut && center && (center.label || center.value)) {
+    const children: Record<string, unknown>[] = [];
+    if (center.label) {
+      children.push({
+        type: 'text',
+        top: center.value ? -16 : 0,
+        style: { text: center.label, fontSize: 13, fill: '#999', textAlign: 'center' },
+      });
+    }
+    if (center.value) {
+      children.push({
+        type: 'text',
+        top: center.label ? 8 : 0,
+        style: { text: center.value, fontSize: 20, fontWeight: 'bold', fill: '#333', textAlign: 'center' },
+      });
+    }
+    result.graphic = [{ type: 'group', left: 'center', top: 'middle', children }];
+  }
+
+  return result;
 }
 
 function buildRadar(

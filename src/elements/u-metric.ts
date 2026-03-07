@@ -149,6 +149,9 @@ export class UMetric extends LitElement {
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
 
+  @property({ type: String, reflect: true })
+  theme: string | null = null;
+
   render() {
     if (!this.spec?.data) return nothing;
 

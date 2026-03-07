@@ -322,6 +322,9 @@ export class UTable extends LitElement {
   @property({ type: Object })
   spec: UWidgetSpec | null = null;
 
+  @property({ type: String, reflect: true })
+  theme: string | null = null;
+
   @state()
   private _sortField: string | null = null;
 

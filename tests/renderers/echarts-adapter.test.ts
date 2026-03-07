@@ -349,6 +349,43 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('options: donut center label (#6)', () => {
+    it('adds graphic center text with label and value', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.pie',
+        data: [{ cat: 'A', val: 60 }, { cat: 'B', val: 40 }],
+        options: { donut: true, center: { label: 'Total', value: '100' } },
+      }));
+      const graphic = result.graphic as ObjArray;
+      expect(graphic).toBeDefined();
+      expect(graphic.length).toBe(1);
+      const group = graphic[0];
+      expect(group.type).toBe('group');
+      const children = group.children as ObjArray;
+      expect(children.length).toBe(2);
+    });
+
+    it('adds graphic with value only', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.pie',
+        data: [{ cat: 'A', val: 60 }],
+        options: { donut: true, center: { value: '42%' } },
+      }));
+      const graphic = result.graphic as ObjArray;
+      const children = (graphic[0] as Obj).children as ObjArray;
+      expect(children.length).toBe(1);
+    });
+
+    it('does not add graphic when donut is false', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.pie',
+        data: [{ cat: 'A', val: 60 }],
+        options: { center: { label: 'Total', value: '100' } },
+      }));
+      expect(result.graphic).toBeUndefined();
+    });
+  });
+
   describe('options: showLabel', () => {
     it('hides pie labels when showLabel is false', () => {
       const result = toEChartsOption(spec({
@@ -843,6 +880,38 @@ describe('toEChartsOption', () => {
       const series = result.series as ObjArray;
       expect(series.length).toBe(1);
       expect((series[0].itemStyle as Obj).color).toBe('#ff0000');
+    });
+
+    it('creates dual yAxis array when series has yAxisIndex (#5)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { name: 'A', value: 50, cumulative: 50 },
+          { name: 'B', value: 30, cumulative: 80 },
+        ],
+        mapping: { x: 'name', y: ['value', 'cumulative'] },
+        options: {
+          series: [
+            { type: 'bar' },
+            { type: 'line', yAxisIndex: 1 },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('bar');
+      expect(series[1].type).toBe('line');
+      expect(series[1].yAxisIndex).toBe(1);
+      expect(Array.isArray(result.yAxis)).toBe(true);
+      expect((result.yAxis as ObjArray).length).toBe(2);
+    });
+
+    it('keeps single yAxis when no yAxisIndex used', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ name: 'A', value: 10 }],
+        mapping: { x: 'name', y: ['value'] },
+      }));
+      expect(Array.isArray(result.yAxis)).toBe(false);
     });
   });
 

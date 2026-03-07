@@ -69,7 +69,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
 
   const widget = obj.widget as string;
 
-  if (obj.type !== undefined && obj.type !== 'u-widget') {
+  if (_depth === 0 && obj.type !== undefined && obj.type !== 'u-widget') {
     errors.push('"type" must be "u-widget" if specified');
   }
 
