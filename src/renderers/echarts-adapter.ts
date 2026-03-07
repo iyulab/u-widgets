@@ -137,6 +137,8 @@ function buildCartesian(
       }
       if (override.symbol !== undefined) s.symbol = override.symbol;
       if (override.label) s.name = override.label as string;
+      if (override.type) s.type = override.type as string;
+      if (override.yAxisIndex !== undefined) s.yAxisIndex = override.yAxisIndex;
     }
     return s;
   });
