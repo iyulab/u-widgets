@@ -67,6 +67,7 @@ export class UGauge extends LitElement {
     .gauge-svg {
       display: block;
       width: 100%;
+      aspect-ratio: 200 / 195;
     }
 
     .gauge-track {

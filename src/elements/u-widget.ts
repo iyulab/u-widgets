@@ -111,6 +111,14 @@ export class UWidget extends LitElement {
         cursor: default;
       }
 
+      /* ── widget title ── */
+      .widget-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--u-widget-text, #1a1a2e);
+        margin: 0 0 8px 0;
+      }
+
       /* ── global action bar ── */
       .global-actions {
         display: flex;
@@ -352,10 +360,18 @@ export class UWidget extends LitElement {
         return this.renderFallback(resolved);
     }
 
+    // Render title above widget (skip for types that consume title themselves)
+    const titleExcluded = widget === 'header' || widget === 'actions' || widget === 'divider' || widget === 'compose';
+    const titleHtml = !titleExcluded && resolved.title
+      ? html`<div class="widget-title" part="title">${resolved.title}</div>`
+      : nothing;
+
     // Wrap in card container if options.card is set
     const isCard = Boolean((resolved.options as Record<string, unknown>)?.card);
     if (isCard) {
-      widgetHtml = html`<div class="card-container" part="card">${widgetHtml}</div>`;
+      widgetHtml = html`<div class="card-container" part="card">${titleHtml}${widgetHtml}</div>`;
+    } else if (titleHtml !== nothing) {
+      widgetHtml = html`${titleHtml}${widgetHtml}`;
     }
 
     // Append global action bar if actions are present
