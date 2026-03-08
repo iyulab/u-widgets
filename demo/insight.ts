@@ -1,6 +1,6 @@
-// Register u-widget and u-chart custom elements
+// Register u-widget and uw-chart custom elements
 import '../src/elements/u-widget.ts';
-import '../src/elements/u-chart.ts';
+import '../src/elements/uw-chart.ts';
 
 import {
   datasetProfile, columnProfiles,

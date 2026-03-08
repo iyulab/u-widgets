@@ -6,7 +6,7 @@
  */
 
 import '../src/elements/u-widget.js';
-import '../src/elements/u-chart.js';
+import '../src/elements/uw-chart.js';
 
 import { help, template } from '../src/core/catalog.js';
 import { validate } from '../src/core/schema.js';

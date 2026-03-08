@@ -1,5 +1,5 @@
 import '../src/elements/u-widget.ts';
-import '../src/elements/u-chart.ts';
+import '../src/elements/uw-chart.ts';
 
 type WidgetElement = HTMLElement & { spec: unknown };
 
