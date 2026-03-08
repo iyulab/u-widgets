@@ -1,6 +1,6 @@
-// Side-effect imports: register <u-widget> and <u-chart> custom elements
+// Side-effect imports: register <u-widget> and <uw-chart> custom elements
 import '../src/elements/u-widget.ts';
-import '../src/elements/u-chart.ts';
+import '../src/elements/uw-chart.ts';
 import { help } from '../src/core/catalog.ts';
 import { specSurface, type SpecSurface, type PropInfo } from '../src/core/spec-surface.ts';
 import { getWidgetEvents } from '../src/core/widget-meta.ts';
@@ -1575,7 +1575,7 @@ function syncPreviewSize() {
   panelPreview.style.setProperty('--u-widget-gauge-size', `${gaugeSize}px`);
 
   requestAnimationFrame(() => {
-    const chart = previewWidget.shadowRoot?.querySelector('u-chart') as HTMLElement & { resize?: () => void } | null;
+    const chart = previewWidget.shadowRoot?.querySelector('uw-chart') as HTMLElement & { resize?: () => void } | null;
     chart?.resize?.();
   });
 }

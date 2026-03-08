@@ -36,14 +36,14 @@ echarts.use([
   CanvasRenderer,
 ]);
 
-@customElement('u-chart')
-export class UChart extends LitElement {
+@customElement('uw-chart')
+export class UwChart extends LitElement {
   static styles = [
     themeStyles,
     css`
       :host {
         display: block;
-        container: u-chart / inline-size;
+        container: uw-chart / inline-size;
       }
 
       .chart-container {
@@ -51,7 +51,7 @@ export class UChart extends LitElement {
         height: var(--u-widget-chart-height, 300px);
       }
 
-      @container u-chart (max-width: 20rem) {
+      @container uw-chart (max-width: 20rem) {
         .chart-container {
           height: var(--u-widget-chart-height-narrow, 200px);
         }
@@ -97,7 +97,7 @@ export class UChart extends LitElement {
       });
       this._updateChart();
     } catch (e) {
-      console.warn('[u-chart] Failed to initialize ECharts:', (e as Error).message);
+      console.warn('[uw-chart] Failed to initialize ECharts:', (e as Error).message);
     }
   }
 
@@ -208,6 +208,6 @@ export class UChart extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-chart': UChart;
+    'uw-chart': UwChart;
   }
 }

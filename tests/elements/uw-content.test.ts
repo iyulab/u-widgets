@@ -1,30 +1,30 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../../src/elements/u-content.js';
-import type { UContent } from '../../src/elements/u-content.js';
+import '../../src/elements/uw-content.js';
+import type { UwContent } from '../../src/elements/uw-content.js';
 
-function createElement(spec: Record<string, unknown>): UContent {
-  const el = document.createElement('u-content') as UContent;
-  el.spec = spec as UContent['spec'];
+function createElement(spec: Record<string, unknown>): UwContent {
+  const el = document.createElement('uw-content') as UwContent;
+  el.spec = spec as UwContent['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UContent) {
+async function render(el: UwContent) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-content', () => {
+describe('uw-content', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
 
   it('is defined as a custom element', () => {
-    expect(customElements.get('u-content')).toBeDefined();
+    expect(customElements.get('uw-content')).toBeDefined();
   });
 
   it('renders nothing when spec is null', async () => {
-    const el = document.createElement('u-content') as UContent;
+    const el = document.createElement('uw-content') as UwContent;
     document.body.appendChild(el);
     await el.updateComplete;
     expect(el.shadowRoot!.querySelector('.markdown')).toBeNull();
@@ -459,11 +459,11 @@ describe('u-content', () => {
   });
 
   describe('container query', () => {
-    it('declares container: u-content / inline-size on :host', () => {
-      const styles = (customElements.get('u-content') as unknown as { styles: { cssText: string } }).styles;
+    it('declares container: uw-content / inline-size on :host', () => {
+      const styles = (customElements.get('uw-content') as unknown as { styles: { cssText: string } }).styles;
       const text = typeof styles === 'string' ? styles : Array.isArray(styles) ? styles.map((s: { cssText: string }) => s.cssText).join('') : styles.cssText;
       expect(text).toContain('container:');
-      expect(text).toContain('u-content');
+      expect(text).toContain('uw-content');
       expect(text).toContain('inline-size');
     });
   });

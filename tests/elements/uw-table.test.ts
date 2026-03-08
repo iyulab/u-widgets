@@ -1,21 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import '../../src/elements/u-table.js';
-import type { UTable } from '../../src/elements/u-table.js';
+import '../../src/elements/uw-table.js';
+import type { UwTable } from '../../src/elements/uw-table.js';
 import { registerLocale } from '../../src/core/locale.js';
 
-function createElement(spec: Record<string, unknown>): UTable {
-  const el = document.createElement('u-table') as UTable;
-  el.spec = spec as UTable['spec'];
+function createElement(spec: Record<string, unknown>): UwTable {
+  const el = document.createElement('uw-table') as UwTable;
+  el.spec = spec as UwTable['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UTable) {
+async function render(el: UwTable) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-table', () => {
+describe('uw-table', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -1003,12 +1003,12 @@ describe('u-table', () => {
 
   describe('container query', () => {
     it('has container-type declared in styles', () => {
-      const styles = (customElements.get('u-table') as any).styles;
+      const styles = (customElements.get('uw-table') as any).styles;
       const allCss = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';
       expect(allCss).toContain('container');
-      expect(allCss).toContain('u-table');
+      expect(allCss).toContain('uw-table');
     });
   });
 

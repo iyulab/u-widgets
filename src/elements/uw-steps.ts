@@ -30,18 +30,18 @@ function statusIcon(status: StepStatus, iconOverride?: string): TemplateResult {
 }
 
 /**
- * <u-steps> — Multi-step progress indicator widget.
+ * <uw-steps> — Multi-step progress indicator widget.
  *
  * Renders a sequence of steps with status indicators.
  * Supports vertical and horizontal layouts, compact mode.
  */
-@customElement('u-steps')
-export class USteps extends LitElement {
+@customElement('uw-steps')
+export class UwSteps extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-steps / inline-size;
+      container: uw-steps / inline-size;
     }
 
     /* ── Vertical Layout ── */
@@ -225,7 +225,7 @@ export class USteps extends LitElement {
     .steps-horizontal[data-compact] .step-icon { width: 20px; height: 20px; font-size: 0.625rem; }
     .steps-horizontal[data-compact] .step-label { font-size: 0.6875rem; margin-top: 4px; }
 
-    @container u-steps (max-width: 20rem) {
+    @container uw-steps (max-width: 20rem) {
       .step-label { font-size: 0.8125rem; }
       .step-desc { font-size: 0.75rem; }
 
@@ -356,6 +356,6 @@ export class USteps extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-steps': USteps;
+    'uw-steps': UwSteps;
   }
 }

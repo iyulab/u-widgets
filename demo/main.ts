@@ -1,6 +1,6 @@
-// Side-effect imports: register <u-widget> and <u-chart> custom elements
+// Side-effect imports: register <u-widget> and <uw-chart> custom elements
 import '../src/elements/u-widget.ts';
-import '../src/elements/u-chart.ts';
+import '../src/elements/uw-chart.ts';
 
 // ── Demo Specs ──
 

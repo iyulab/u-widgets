@@ -7,20 +7,20 @@ import { infer } from '../core/infer.js';
 import { suggestWidget } from '../core/suggest.js';
 import { resolveLocale } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import './u-metric.js';
-import './u-gauge.js';
-import './u-table.js';
-import './u-form.js';
-import './u-compose.js';
-import './u-content.js';
-import './u-kv.js';
-import './u-code.js';
-import './u-citation.js';
-import './u-status.js';
-import './u-steps.js';
-import './u-rating.js';
-import './u-video.js';
-import './u-gallery.js';
+import './uw-metric.js';
+import './uw-gauge.js';
+import './uw-table.js';
+import './uw-form.js';
+import './uw-compose.js';
+import './uw-content.js';
+import './uw-kv.js';
+import './uw-code.js';
+import './uw-citation.js';
+import './uw-status.js';
+import './uw-steps.js';
+import './uw-rating.js';
+import './uw-video.js';
+import './uw-gallery.js';
 
 /**
  * <u-widget> — Entry point router element.
@@ -296,51 +296,51 @@ export class UWidget extends LitElement {
     switch (widget) {
       case 'metric':
       case 'stat-group':
-        widgetHtml = html`<u-metric .spec=${resolved} theme=${t ?? nothing}></u-metric>`;
+        widgetHtml = html`<uw-metric .spec=${resolved} theme=${t ?? nothing}></uw-metric>`;
         break;
       case 'gauge':
       case 'progress':
-        widgetHtml = html`<u-gauge .spec=${resolved} theme=${t ?? nothing}></u-gauge>`;
+        widgetHtml = html`<uw-gauge .spec=${resolved} theme=${t ?? nothing}></uw-gauge>`;
         break;
       case 'table':
       case 'list':
-        widgetHtml = html`<u-table .spec=${resolved} theme=${t ?? nothing}></u-table>`;
+        widgetHtml = html`<uw-table .spec=${resolved} theme=${t ?? nothing}></uw-table>`;
         break;
       case 'form':
       case 'confirm':
-        widgetHtml = html`<u-form .spec=${resolved} theme=${t ?? nothing}></u-form>`;
+        widgetHtml = html`<uw-form .spec=${resolved} theme=${t ?? nothing}></uw-form>`;
         break;
       case 'compose':
-        widgetHtml = html`<u-compose .spec=${resolved} theme=${t ?? nothing}></u-compose>`;
+        widgetHtml = html`<uw-compose .spec=${resolved} theme=${t ?? nothing}></uw-compose>`;
         break;
       case 'markdown':
       case 'image':
       case 'callout':
-        widgetHtml = html`<u-content .spec=${resolved} theme=${t ?? nothing}></u-content>`;
+        widgetHtml = html`<uw-content .spec=${resolved} theme=${t ?? nothing}></uw-content>`;
         break;
       case 'kv':
-        widgetHtml = html`<u-kv .spec=${resolved} theme=${t ?? nothing}></u-kv>`;
+        widgetHtml = html`<uw-kv .spec=${resolved} theme=${t ?? nothing}></uw-kv>`;
         break;
       case 'code':
-        widgetHtml = html`<u-code .spec=${resolved} theme=${t ?? nothing}></u-code>`;
+        widgetHtml = html`<uw-code .spec=${resolved} theme=${t ?? nothing}></uw-code>`;
         break;
       case 'citation':
-        widgetHtml = html`<u-citation .spec=${resolved} theme=${t ?? nothing}></u-citation>`;
+        widgetHtml = html`<uw-citation .spec=${resolved} theme=${t ?? nothing}></uw-citation>`;
         break;
       case 'status':
-        widgetHtml = html`<u-status .spec=${resolved} theme=${t ?? nothing}></u-status>`;
+        widgetHtml = html`<uw-status .spec=${resolved} theme=${t ?? nothing}></uw-status>`;
         break;
       case 'steps':
-        widgetHtml = html`<u-steps .spec=${resolved} theme=${t ?? nothing}></u-steps>`;
+        widgetHtml = html`<uw-steps .spec=${resolved} theme=${t ?? nothing}></uw-steps>`;
         break;
       case 'rating':
-        widgetHtml = html`<u-rating .spec=${resolved} theme=${t ?? nothing}></u-rating>`;
+        widgetHtml = html`<uw-rating .spec=${resolved} theme=${t ?? nothing}></uw-rating>`;
         break;
       case 'video':
-        widgetHtml = html`<u-video .spec=${resolved} theme=${t ?? nothing}></u-video>`;
+        widgetHtml = html`<uw-video .spec=${resolved} theme=${t ?? nothing}></uw-video>`;
         break;
       case 'gallery':
-        widgetHtml = html`<u-gallery .spec=${resolved} theme=${t ?? nothing}></u-gallery>`;
+        widgetHtml = html`<uw-gallery .spec=${resolved} theme=${t ?? nothing}></uw-gallery>`;
         break;
       case 'actions':
         widgetHtml = this.renderActionsWidget(resolved);
@@ -352,9 +352,9 @@ export class UWidget extends LitElement {
         widgetHtml = this.renderHeader(resolved);
         break;
       default:
-        // chart.* types are handled by u-chart if loaded (separate entry point)
-        if (widget.startsWith('chart.') && customElements.get('u-chart')) {
-          widgetHtml = html`<u-chart .spec=${resolved} theme=${t ?? nothing}></u-chart>`;
+        // chart.* types are handled by uw-chart if loaded (separate entry point)
+        if (widget.startsWith('chart.') && customElements.get('uw-chart')) {
+          widgetHtml = html`<uw-chart .spec=${resolved} theme=${t ?? nothing}></uw-chart>`;
           break;
         }
         return this.renderFallback(resolved);

@@ -28,6 +28,6 @@ export { help, template } from './core/catalog.js';
 export { suggestMapping, autoSpec } from './core/suggest-mapping.js';
 export { parseFormdown } from './core/formdown.js';
 
-// Charts: registers <u-chart> (only functional if echarts is available at runtime)
-export { UChart } from './elements/u-chart.js';
+// Charts: registers <uw-chart> (only functional if echarts is available at runtime)
+export { UwChart } from './elements/uw-chart.js';
 export { toEChartsOption } from './renderers/echarts-adapter.js';

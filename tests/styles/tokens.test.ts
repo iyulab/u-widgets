@@ -85,21 +85,21 @@ describe('themeStyles', () => {
   describe('element themeStyles inclusion', () => {
     const elementNames = [
       'u-widget',
-      'u-chart',
-      'u-metric',
-      'u-gauge',
-      'u-table',
-      'u-form',
-      'u-content',
-      'u-compose',
+      'uw-chart',
+      'uw-metric',
+      'uw-gauge',
+      'uw-table',
+      'uw-form',
+      'uw-content',
+      'uw-compose',
     ];
 
     for (const name of elementNames) {
       it(`${name} includes themeStyles in static styles`, { timeout: 15000 }, async () => {
         // Import elements to register them (u-chart is a separate entry point)
         await import('../../src/elements/u-widget.js');
-        if (name === 'u-chart') {
-          await import('../../src/elements/u-chart.js');
+        if (name === 'uw-chart') {
+          await import('../../src/elements/uw-chart.js');
         }
         const ctor = customElements.get(name) as any;
         expect(ctor).toBeDefined();

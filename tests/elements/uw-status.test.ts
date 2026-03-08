@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let UStatus: typeof import('../../src/elements/u-status.js').UStatus;
+let UwStatus: typeof import('../../src/elements/uw-status.js').UwStatus;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-status.js');
-  UStatus = mod.UStatus;
+  const mod = await import('../../src/elements/uw-status.js');
+  UwStatus = mod.UwStatus;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new UStatus();
+  const el = new UwStatus();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-status', () => {
+describe('uw-status', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new UStatus();
+      const el = new UwStatus();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.status-list')).toBeNull();
     });

@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../../src/elements/u-compose.js';
-import type { UCompose } from '../../src/elements/u-compose.js';
+import '../../src/elements/uw-compose.js';
+import type { UwCompose } from '../../src/elements/uw-compose.js';
 
-function createElement(spec: Record<string, unknown>): UCompose {
-  const el = document.createElement('u-compose') as UCompose;
-  el.spec = spec as UCompose['spec'];
+function createElement(spec: Record<string, unknown>): UwCompose {
+  const el = document.createElement('uw-compose') as UwCompose;
+  el.spec = spec as UwCompose['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UCompose) {
+async function render(el: UwCompose) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-compose', () => {
+describe('uw-compose', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -169,7 +169,7 @@ describe('u-compose', () => {
   });
 
   it('renders nothing when spec is null', async () => {
-    const el = document.createElement('u-compose') as UCompose;
+    const el = document.createElement('uw-compose') as UwCompose;
     document.body.appendChild(el);
     await el.updateComplete;
     expect(el.shadowRoot!.children.length).toBe(0);
@@ -200,12 +200,12 @@ describe('u-compose', () => {
   });
 
   it('has container-type declared in styles', () => {
-    const styles = (customElements.get('u-compose') as any).styles;
+    const styles = (customElements.get('uw-compose') as any).styles;
     const cssText = Array.isArray(styles)
       ? styles.map((s: any) => s.cssText ?? '').join(' ')
       : styles?.cssText ?? '';
     expect(cssText).toContain('container');
-    expect(cssText).toContain('u-compose');
+    expect(cssText).toContain('uw-compose');
   });
 
   describe('column widths', () => {

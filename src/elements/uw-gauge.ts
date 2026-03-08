@@ -42,13 +42,13 @@ function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg
   return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
 }
 
-@customElement('u-gauge')
-export class UGauge extends LitElement {
+@customElement('uw-gauge')
+export class UwGauge extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-gauge / inline-size;
+      container: uw-gauge / inline-size;
     }
 
     .gauge-container {
@@ -123,7 +123,7 @@ export class UGauge extends LitElement {
       color: var(--u-widget-text-secondary, #64748b);
     }
 
-    @container u-gauge (max-width: 10rem) {
+    @container uw-gauge (max-width: 10rem) {
       .gauge-value {
         font-size: 1.25rem;
       }
@@ -266,6 +266,6 @@ export class UGauge extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-gauge': UGauge;
+    'uw-gauge': UwGauge;
   }
 }

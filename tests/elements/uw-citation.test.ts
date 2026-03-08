@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let UCitation: typeof import('../../src/elements/u-citation.js').UCitation;
+let UwCitation: typeof import('../../src/elements/uw-citation.js').UwCitation;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-citation.js');
-  UCitation = mod.UCitation;
+  const mod = await import('../../src/elements/uw-citation.js');
+  UwCitation = mod.UwCitation;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new UCitation();
+  const el = new UwCitation();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-citation', () => {
+describe('uw-citation', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new UCitation();
+      const el = new UwCitation();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.citations')).toBeNull();
     });

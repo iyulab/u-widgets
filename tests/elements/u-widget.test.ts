@@ -63,77 +63,77 @@ describe('u-widget', () => {
 
   // ── Routing ──
 
-  it('routes metric to u-metric', async () => {
+  it('routes metric to uw-metric', async () => {
     const el = createElement({ widget: 'metric', data: { value: 42 } });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-metric')).not.toBeNull();
+    expect(shadow.querySelector('uw-metric')).not.toBeNull();
   });
 
-  it('routes stat-group to u-metric', async () => {
+  it('routes stat-group to uw-metric', async () => {
     const el = createElement({
       widget: 'stat-group',
       data: [{ label: 'A', value: 1 }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-metric')).not.toBeNull();
+    expect(shadow.querySelector('uw-metric')).not.toBeNull();
   });
 
-  it('routes gauge to u-gauge', async () => {
+  it('routes gauge to uw-gauge', async () => {
     const el = createElement({ widget: 'gauge', data: { value: 75, max: 100 } });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-gauge')).not.toBeNull();
+    expect(shadow.querySelector('uw-gauge')).not.toBeNull();
   });
 
-  it('routes progress to u-gauge', async () => {
+  it('routes progress to uw-gauge', async () => {
     const el = createElement({ widget: 'progress', data: { value: 50, max: 100 } });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-gauge')).not.toBeNull();
+    expect(shadow.querySelector('uw-gauge')).not.toBeNull();
   });
 
-  it('routes table to u-table', async () => {
+  it('routes table to uw-table', async () => {
     const el = createElement({
       widget: 'table',
       data: [{ name: 'A', value: 1 }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-table')).not.toBeNull();
+    expect(shadow.querySelector('uw-table')).not.toBeNull();
   });
 
-  it('routes list to u-table', async () => {
+  it('routes list to uw-table', async () => {
     const el = createElement({
       widget: 'list',
       data: [{ name: 'A' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-table')).not.toBeNull();
+    expect(shadow.querySelector('uw-table')).not.toBeNull();
   });
 
-  it('routes form to u-form', async () => {
+  it('routes form to uw-form', async () => {
     const el = createElement({
       widget: 'form',
       fields: [{ field: 'name' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-form')).not.toBeNull();
+    expect(shadow.querySelector('uw-form')).not.toBeNull();
   });
 
-  it('routes confirm to u-form', async () => {
+  it('routes confirm to uw-form', async () => {
     const el = createElement({
       widget: 'confirm',
       description: 'Are you sure?',
       actions: [{ label: 'Yes', action: 'confirm' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-form')).not.toBeNull();
+    expect(shadow.querySelector('uw-form')).not.toBeNull();
   });
 
-  it('routes compose to u-compose', async () => {
+  it('routes compose to uw-compose', async () => {
     const el = createElement({
       widget: 'compose',
       children: [{ widget: 'metric', data: { value: 1 } }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-compose')).not.toBeNull();
+    expect(shadow.querySelector('uw-compose')).not.toBeNull();
   });
 
   // ── Fallback ──
@@ -182,15 +182,15 @@ describe('u-widget', () => {
     expect(shadow.querySelector('.fallback-hint')).toBeNull();
   });
 
-  // ── chart.* fallback (u-chart not loaded in core tests) ──
+  // ── chart.* fallback (uw-chart not loaded in core tests) ──
 
-  it('renders fallback for chart.* when u-chart is not loaded', async () => {
+  it('renders fallback for chart.* when uw-chart is not loaded', async () => {
     const el = createElement({
       widget: 'chart.bar',
       data: [{ x: 'A', y: 1 }],
     });
     const shadow = await render(el);
-    // u-chart is not registered in core-only test env, falls through to fallback
+    // uw-chart is not registered in core-only test env, falls through to fallback
     expect(shadow.querySelector('[part="fallback"]')).not.toBeNull();
   });
 
@@ -201,7 +201,7 @@ describe('u-widget', () => {
     el.setAttribute('spec', '{"widget":"metric","data":{"value":99}}');
     document.body.appendChild(el);
     const shadow = await render(el);
-    expect(shadow.querySelector('u-metric')).not.toBeNull();
+    expect(shadow.querySelector('uw-metric')).not.toBeNull();
   });
 
   it('handles invalid JSON attribute gracefully', async () => {
@@ -230,7 +230,7 @@ describe('u-widget', () => {
       bubbles: true,
       composed: true,
     });
-    el.shadowRoot!.querySelector('u-metric')!.dispatchEvent(internal);
+    el.shadowRoot!.querySelector('uw-metric')!.dispatchEvent(internal);
 
     expect(received).toHaveLength(1);
     expect(received[0].type).toBe('select');
@@ -249,7 +249,7 @@ describe('u-widget', () => {
       bubbles: true,
       composed: true,
     });
-    el.shadowRoot!.querySelector('u-metric')!.dispatchEvent(internal);
+    el.shadowRoot!.querySelector('uw-metric')!.dispatchEvent(internal);
 
     // Internal event should not reach document.body
     expect(internalSpy).not.toHaveBeenCalled();
@@ -291,7 +291,7 @@ describe('u-widget', () => {
     el.locale = 'ko';
     await el.updateComplete;
 
-    const metric = el.shadowRoot!.querySelector('u-metric') as any;
+    const metric = el.shadowRoot!.querySelector('uw-metric') as any;
     expect(metric.spec.options?.locale).toBe('ko');
   });
 
@@ -304,7 +304,7 @@ describe('u-widget', () => {
     el.locale = 'ko';
     await el.updateComplete;
 
-    const metric = el.shadowRoot!.querySelector('u-metric') as any;
+    const metric = el.shadowRoot!.querySelector('uw-metric') as any;
     expect(metric.spec.options?.locale).toBe('ja');
   });
 
@@ -320,86 +320,86 @@ describe('u-widget', () => {
 
   // ── KV Routing ──
 
-  it('routes kv to u-kv', async () => {
+  it('routes kv to uw-kv', async () => {
     const el = createElement({
       widget: 'kv',
       data: { status: 'Active', plan: 'Pro' },
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-kv')).not.toBeNull();
+    expect(shadow.querySelector('uw-kv')).not.toBeNull();
   });
 
   // ── Code Routing ──
 
-  it('routes code to u-code', async () => {
+  it('routes code to uw-code', async () => {
     const el = createElement({
       widget: 'code',
       data: { content: 'const x = 42;', language: 'javascript' },
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-code')).not.toBeNull();
+    expect(shadow.querySelector('uw-code')).not.toBeNull();
   });
 
   // ── Citation Routing ──
 
-  it('routes citation to u-citation', async () => {
+  it('routes citation to uw-citation', async () => {
     const el = createElement({
       widget: 'citation',
       data: [{ title: 'Test Source', url: 'https://example.com' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-citation')).not.toBeNull();
+    expect(shadow.querySelector('uw-citation')).not.toBeNull();
   });
 
   // ── Status Routing ──
 
-  it('routes status to u-status', async () => {
+  it('routes status to uw-status', async () => {
     const el = createElement({
       widget: 'status',
       data: [{ label: 'API', value: 'Up', level: 'success' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-status')).not.toBeNull();
+    expect(shadow.querySelector('uw-status')).not.toBeNull();
   });
 
   // ── Steps Routing ──
 
-  it('routes steps to u-steps', async () => {
+  it('routes steps to uw-steps', async () => {
     const el = createElement({
       widget: 'steps',
       data: [{ label: 'Step 1', status: 'done' }, { label: 'Step 2', status: 'active' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-steps')).not.toBeNull();
+    expect(shadow.querySelector('uw-steps')).not.toBeNull();
   });
 
   // ── Rating Routing ──
 
-  it('routes rating to u-rating', async () => {
+  it('routes rating to uw-rating', async () => {
     const el = createElement({
       widget: 'rating',
       data: { value: 4.5 },
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-rating')).not.toBeNull();
+    expect(shadow.querySelector('uw-rating')).not.toBeNull();
   });
 
-  it('routes video to u-video', async () => {
+  it('routes video to uw-video', async () => {
     const el = createElement({
       widget: 'video',
       data: { src: 'https://example.com/video.mp4' },
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-video')).not.toBeNull();
+    expect(shadow.querySelector('uw-video')).not.toBeNull();
   });
 
-  it('routes gallery to u-gallery', async () => {
+  it('routes gallery to uw-gallery', async () => {
     const el = createElement({
       widget: 'gallery',
       data: [{ src: 'https://example.com/1.jpg' }],
     });
     const shadow = await render(el);
-    expect(shadow.querySelector('u-gallery')).not.toBeNull();
+    expect(shadow.querySelector('uw-gallery')).not.toBeNull();
   });
 
   // ── Actions Widget ──

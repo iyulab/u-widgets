@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../../src/elements/u-gauge.js';
-import type { UGauge } from '../../src/elements/u-gauge.js';
+import '../../src/elements/uw-gauge.js';
+import type { UwGauge } from '../../src/elements/uw-gauge.js';
 
-function createElement(spec: Record<string, unknown>): UGauge {
-  const el = document.createElement('u-gauge') as UGauge;
-  el.spec = spec as UGauge['spec'];
+function createElement(spec: Record<string, unknown>): UwGauge {
+  const el = document.createElement('uw-gauge') as UwGauge;
+  el.spec = spec as UwGauge['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UGauge) {
+async function render(el: UwGauge) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-gauge', () => {
+describe('uw-gauge', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -247,11 +247,11 @@ describe('u-gauge', () => {
   });
 
   describe('container query', () => {
-    it('declares container: u-gauge / inline-size on :host', () => {
-      const styles = (customElements.get('u-gauge') as unknown as { styles: { cssText: string } }).styles;
+    it('declares container: uw-gauge / inline-size on :host', () => {
+      const styles = (customElements.get('uw-gauge') as unknown as { styles: { cssText: string } }).styles;
       const text = typeof styles === 'string' ? styles : Array.isArray(styles) ? styles.map((s: { cssText: string }) => s.cssText).join('') : styles.cssText;
       expect(text).toContain('container:');
-      expect(text).toContain('u-gauge');
+      expect(text).toContain('uw-gauge');
       expect(text).toContain('inline-size');
     });
   });

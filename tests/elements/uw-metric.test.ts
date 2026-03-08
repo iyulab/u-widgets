@@ -1,20 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../../src/elements/u-metric.js';
-import type { UMetric } from '../../src/elements/u-metric.js';
+import '../../src/elements/uw-metric.js';
+import type { UwMetric } from '../../src/elements/uw-metric.js';
 
-function createElement(spec: Record<string, unknown>): UMetric {
-  const el = document.createElement('u-metric') as UMetric;
-  el.spec = spec as UMetric['spec'];
+function createElement(spec: Record<string, unknown>): UwMetric {
+  const el = document.createElement('uw-metric') as UwMetric;
+  el.spec = spec as UwMetric['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UMetric) {
+async function render(el: UwMetric) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-metric', () => {
+describe('uw-metric', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -377,7 +377,7 @@ describe('u-metric', () => {
     });
 
     it('CSS: variant classes exist in styles', () => {
-      const styles = (customElements.get('u-metric') as any).styles;
+      const styles = (customElements.get('uw-metric') as any).styles;
       const cssText = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';
@@ -393,12 +393,12 @@ describe('u-metric', () => {
 
   describe('container query', () => {
     it('has container-type declared in styles', () => {
-      const styles = (customElements.get('u-metric') as any).styles;
+      const styles = (customElements.get('uw-metric') as any).styles;
       const cssText = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';
       expect(cssText).toContain('container');
-      expect(cssText).toContain('u-metric');
+      expect(cssText).toContain('uw-metric');
     });
   });
 });

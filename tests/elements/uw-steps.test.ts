@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let USteps: typeof import('../../src/elements/u-steps.js').USteps;
+let UwSteps: typeof import('../../src/elements/uw-steps.js').UwSteps;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-steps.js');
-  USteps = mod.USteps;
+  const mod = await import('../../src/elements/uw-steps.js');
+  UwSteps = mod.UwSteps;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new USteps();
+  const el = new UwSteps();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-steps', () => {
+describe('uw-steps', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new USteps();
+      const el = new UwSteps();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.steps-vertical')).toBeNull();
       expect(shadow(el).querySelector('.steps-horizontal')).toBeNull();

@@ -9,13 +9,13 @@ interface GalleryItem {
   caption?: string;
 }
 
-@customElement('u-gallery')
-export class UGallery extends LitElement {
+@customElement('uw-gallery')
+export class UwGallery extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-gallery / inline-size;
+      container: uw-gallery / inline-size;
     }
 
     .gallery-grid {
@@ -43,7 +43,7 @@ export class UGallery extends LitElement {
       background: var(--u-widget-surface, #f1f5f9);
     }
 
-    @container u-gallery (max-width: 20rem) {
+    @container uw-gallery (max-width: 20rem) {
       .gallery-grid {
         grid-template-columns: 1fr !important;
       }
@@ -119,6 +119,6 @@ export class UGallery extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-gallery': UGallery;
+    'uw-gallery': UwGallery;
   }
 }

@@ -11,18 +11,18 @@ interface CitationItem {
 }
 
 /**
- * <u-citation> — Source/reference card widget.
+ * <uw-citation> — Source/reference card widget.
  *
  * Renders one or more citations with title, URL, snippet, and source.
  * Supports compact (single-line) and numbered display modes.
  */
-@customElement('u-citation')
-export class UCitation extends LitElement {
+@customElement('uw-citation')
+export class UwCitation extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-citation / inline-size;
+      container: uw-citation / inline-size;
     }
 
     .citations {
@@ -110,7 +110,7 @@ export class UCitation extends LitElement {
     .citations[data-compact] .cite-snippet,
     .citations[data-compact] .cite-source { display: none; }
 
-    @container u-citation (max-width: 20rem) {
+    @container uw-citation (max-width: 20rem) {
       .cite-title { font-size: 0.8125rem; }
       .cite-snippet { font-size: 0.75rem; }
     }
@@ -241,6 +241,6 @@ export class UCitation extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-citation': UCitation;
+    'uw-citation': UwCitation;
   }
 }

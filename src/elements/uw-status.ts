@@ -23,18 +23,18 @@ const LEVEL_ICONS: Record<StatusLevel, string> = {
 };
 
 /**
- * <u-status> — Status indicator widget.
+ * <uw-status> — Status indicator widget.
  *
  * Renders one or more status items with label, value, and level-based coloring.
  * Single item or array of items.
  */
-@customElement('u-status')
-export class UStatus extends LitElement {
+@customElement('uw-status')
+export class UwStatus extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-status / inline-size;
+      container: uw-status / inline-size;
     }
 
     .status-list {
@@ -90,7 +90,7 @@ export class UStatus extends LitElement {
       color: var(--u-widget-text-secondary, #64748b);
     }
 
-    @container u-status (max-width: 20rem) {
+    @container uw-status (max-width: 20rem) {
       .status-list { gap: 8px 16px; }
       .status-item { font-size: 0.8125rem; }
     }
@@ -157,6 +157,6 @@ export class UStatus extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-status': UStatus;
+    'uw-status': UwStatus;
   }
 }

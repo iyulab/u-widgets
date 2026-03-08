@@ -3,13 +3,13 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
-@customElement('u-content')
-export class UContent extends LitElement {
+@customElement('uw-content')
+export class UwContent extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-content / inline-size;
+      container: uw-content / inline-size;
     }
 
     /* ── markdown ── */
@@ -163,7 +163,7 @@ export class UContent extends LitElement {
       margin-bottom: 4px;
     }
 
-    @container u-content (max-width: 20rem) {
+    @container uw-content (max-width: 20rem) {
       .markdown {
         font-size: 0.8125rem;
       }
@@ -358,6 +358,6 @@ export class UContent extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-content': UContent;
+    'uw-content': UwContent;
   }
 }

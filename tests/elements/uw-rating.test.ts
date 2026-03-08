@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let URating: typeof import('../../src/elements/u-rating.js').URating;
+let UwRating: typeof import('../../src/elements/uw-rating.js').UwRating;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-rating.js');
-  URating = mod.URating;
+  const mod = await import('../../src/elements/uw-rating.js');
+  UwRating = mod.UwRating;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new URating();
+  const el = new UwRating();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-rating', () => {
+describe('uw-rating', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new URating();
+      const el = new UwRating();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.rating')).toBeNull();
     });

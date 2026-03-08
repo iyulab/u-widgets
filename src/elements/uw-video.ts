@@ -3,13 +3,13 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
-@customElement('u-video')
-export class UVideo extends LitElement {
+@customElement('uw-video')
+export class UwVideo extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-video / inline-size;
+      container: uw-video / inline-size;
     }
 
     .video-container {
@@ -28,7 +28,7 @@ export class UVideo extends LitElement {
       color: var(--u-widget-text-secondary, #64748b);
     }
 
-    @container u-video (max-width: 20rem) {
+    @container uw-video (max-width: 20rem) {
       video {
         border-radius: 4px;
       }
@@ -94,6 +94,6 @@ export class UVideo extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-video': UVideo;
+    'uw-video': UwVideo;
   }
 }

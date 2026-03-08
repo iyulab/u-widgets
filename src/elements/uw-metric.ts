@@ -36,13 +36,13 @@ function toMetricData(data: Record<string, unknown>, locale?: string): MetricDat
   };
 }
 
-@customElement('u-metric')
-export class UMetric extends LitElement {
+@customElement('uw-metric')
+export class UwMetric extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-metric / inline-size;
+      container: uw-metric / inline-size;
     }
 
     /* ── metric (single) ── */
@@ -59,7 +59,7 @@ export class UMetric extends LitElement {
       color: var(--u-widget-text, #1a1a2e);
     }
 
-    @container u-metric (max-width: 30rem) {
+    @container uw-metric (max-width: 30rem) {
       .metric-value {
         font-size: 1.5rem;
       }
@@ -126,7 +126,7 @@ export class UMetric extends LitElement {
       padding-left: 1.5rem;
     }
 
-    @container u-metric (max-width: 30rem) {
+    @container uw-metric (max-width: 30rem) {
       .stat-group {
         flex-direction: column;
         gap: 1rem;
@@ -203,6 +203,6 @@ export class UMetric extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-metric': UMetric;
+    'uw-metric': UwMetric;
   }
 }

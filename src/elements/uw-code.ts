@@ -229,18 +229,18 @@ function highlightJSON(code: string): string {
 // ── Component ──
 
 /**
- * <u-code> — Syntax-highlighted code display widget.
+ * <uw-code> — Syntax-highlighted code display widget.
  *
  * Supports 12 languages with a lightweight built-in highlighter.
  * Features: line numbers, highlighted lines, copy button, scroll containment.
  */
-@customElement('u-code')
-export class UCode extends LitElement {
+@customElement('uw-code')
+export class UwCode extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-code / inline-size;
+      container: uw-code / inline-size;
     }
 
     .code-block {
@@ -333,7 +333,7 @@ export class UCode extends LitElement {
     :host([theme="dark"]) .hl-c { color: #64748b; }
     :host([theme="dark"]) .hl-n { color: #fbbf24; }
 
-    @container u-code (max-width: 20rem) {
+    @container uw-code (max-width: 20rem) {
       pre { font-size: 0.75rem; padding: 8px; }
       .code-header { padding: 4px 8px; }
       .line-no { width: 2.5ch; margin-right: 1ch; }
@@ -414,6 +414,6 @@ export class UCode extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-code': UCode;
+    'uw-code': UwCode;
   }
 }

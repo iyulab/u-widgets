@@ -4,18 +4,18 @@ import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
 /**
- * <u-kv> — Key-value pair display widget.
+ * <uw-kv> — Key-value pair display widget.
  *
  * Renders structured key-value data in vertical, horizontal, or grid layout.
  * Data can be a flat object or an array of { key, value } pairs.
  */
-@customElement('u-kv')
-export class UKv extends LitElement {
+@customElement('uw-kv')
+export class UwKv extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-kv / inline-size;
+      container: uw-kv / inline-size;
     }
 
     .kv-vertical {
@@ -90,7 +90,7 @@ export class UKv extends LitElement {
       text-align: left;
     }
 
-    @container u-kv (max-width: 20rem) {
+    @container uw-kv (max-width: 20rem) {
       .kv-horizontal {
         flex-direction: column;
         gap: 8px;
@@ -167,6 +167,6 @@ export class UKv extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-kv': UKv;
+    'uw-kv': UwKv;
   }
 }

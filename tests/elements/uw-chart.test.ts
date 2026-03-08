@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock echarts before importing u-chart
+// Mock echarts before importing uw-chart
 const mockSetOption = vi.fn();
 const mockDispose = vi.fn();
 const mockResize = vi.fn();
@@ -51,23 +51,23 @@ vi.mock('echarts/renderers', () => ({
 }));
 
 // Import after mocks are set up
-const { UChart } = await import('../../src/elements/u-chart.js');
-type UChartType = InstanceType<typeof UChart>;
+const { UwChart } = await import('../../src/elements/uw-chart.js');
+type UwChartType = InstanceType<typeof UwChart>;
 type UWidgetSpecType = import('../../src/core/types.js').UWidgetSpec;
 
-function createElement(spec: Record<string, unknown>): UChartType {
-  const el = document.createElement('u-chart') as UChartType;
+function createElement(spec: Record<string, unknown>): UwChartType {
+  const el = document.createElement('uw-chart') as UwChartType;
   el.spec = spec as UWidgetSpecType;
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UChartType) {
+async function render(el: UwChartType) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-chart', () => {
+describe('uw-chart', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     mockSetOption.mockClear();
@@ -77,7 +77,7 @@ describe('u-chart', () => {
   });
 
   it('is defined as a custom element', () => {
-    expect(customElements.get('u-chart')).toBeDefined();
+    expect(customElements.get('uw-chart')).toBeDefined();
   });
 
   it('renders a chart container div', async () => {
@@ -90,7 +90,7 @@ describe('u-chart', () => {
   });
 
   it('renders nothing when spec is null', async () => {
-    const el = document.createElement('u-chart') as UChartType;
+    const el = document.createElement('uw-chart') as UwChartType;
     document.body.appendChild(el);
     await el.updateComplete;
     expect(el.shadowRoot!.querySelector('.chart-container')).toBeNull();
@@ -177,7 +177,7 @@ describe('u-chart', () => {
   });
 
   it('includes themeStyles in static styles', () => {
-    const styles = (customElements.get('u-chart') as any).styles;
+    const styles = (customElements.get('uw-chart') as any).styles;
     expect(Array.isArray(styles)).toBe(true);
     expect(styles.length).toBeGreaterThanOrEqual(2);
   });
@@ -303,7 +303,7 @@ describe('u-chart', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     expect(warnSpy).toHaveBeenCalledWith(
-      '[u-chart] Failed to initialize ECharts:',
+      '[uw-chart] Failed to initialize ECharts:',
       'Canvas not supported',
     );
     warnSpy.mockRestore();

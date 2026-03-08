@@ -1,21 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import '../../src/elements/u-form.js';
-import type { UForm } from '../../src/elements/u-form.js';
+import '../../src/elements/uw-form.js';
+import type { UwForm } from '../../src/elements/uw-form.js';
 import { registerLocale } from '../../src/core/locale.js';
 
-function createElement(spec: Record<string, unknown>): UForm {
-  const el = document.createElement('u-form') as UForm;
-  el.spec = spec as UForm['spec'];
+function createElement(spec: Record<string, unknown>): UwForm {
+  const el = document.createElement('uw-form') as UwForm;
+  el.spec = spec as UwForm['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UForm) {
+async function render(el: UwForm) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-form', () => {
+describe('uw-form', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
@@ -1260,16 +1260,16 @@ describe('u-form', () => {
 
   describe('container query', () => {
     it('has container-type declared in styles', () => {
-      const styles = (customElements.get('u-form') as any).styles;
+      const styles = (customElements.get('uw-form') as any).styles;
       const allCss = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';
       expect(allCss).toContain('container');
-      expect(allCss).toContain('u-form');
+      expect(allCss).toContain('uw-form');
     });
 
     it('has responsive rules for narrow containers', () => {
-      const styles = (customElements.get('u-form') as any).styles;
+      const styles = (customElements.get('uw-form') as any).styles;
       const allCss = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';

@@ -4,13 +4,13 @@ import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent }
 import { getLocaleStrings, formatTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
-@customElement('u-form')
-export class UForm extends LitElement {
+@customElement('uw-form')
+export class UwForm extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-form / inline-size;
+      container: uw-form / inline-size;
     }
 
     .form-container {
@@ -195,7 +195,7 @@ export class UForm extends LitElement {
       line-height: 1.5;
     }
 
-    @container u-form (max-width: 20rem) {
+    @container uw-form (max-width: 20rem) {
       .form-container {
         gap: 12px;
       }
@@ -637,6 +637,6 @@ export class UForm extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-form': UForm;
+    'uw-form': UwForm;
   }
 }

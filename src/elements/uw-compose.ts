@@ -3,12 +3,12 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetChildSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
-@customElement('u-compose')
-export class UCompose extends LitElement {
+@customElement('uw-compose')
+export class UwCompose extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
-      container: u-compose / inline-size;
+      container: uw-compose / inline-size;
     }
 
     .compose-container {
@@ -96,7 +96,7 @@ export class UCompose extends LitElement {
     }
 
     /* ── container-query responsive ── */
-    @container u-compose (max-width: 30rem) {
+    @container uw-compose (max-width: 30rem) {
       .layout-row {
         flex-direction: column;
       }
@@ -184,6 +184,6 @@ export class UCompose extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-compose': UCompose;
+    'uw-compose': UwCompose;
   }
 }

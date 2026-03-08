@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let UVideo: typeof import('../../src/elements/u-video.js').UVideo;
+let UwVideo: typeof import('../../src/elements/uw-video.js').UwVideo;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-video.js');
-  UVideo = mod.UVideo;
+  const mod = await import('../../src/elements/uw-video.js');
+  UwVideo = mod.UwVideo;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new UVideo();
+  const el = new UwVideo();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-video', () => {
+describe('uw-video', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new UVideo();
+      const el = new UwVideo();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.video-container')).toBeNull();
     });

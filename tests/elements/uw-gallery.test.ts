@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
-let UGallery: typeof import('../../src/elements/u-gallery.js').UGallery;
+let UwGallery: typeof import('../../src/elements/uw-gallery.js').UwGallery;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-gallery.js');
-  UGallery = mod.UGallery;
+  const mod = await import('../../src/elements/uw-gallery.js');
+  UwGallery = mod.UwGallery;
 });
 
 function render(spec: UWidgetSpec): HTMLElement {
-  const el = new UGallery();
+  const el = new UwGallery();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -19,10 +19,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-gallery', () => {
+describe('uw-gallery', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new UGallery();
+      const el = new UwGallery();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.gallery-grid')).toBeNull();
     });

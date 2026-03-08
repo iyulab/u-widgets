@@ -13,17 +13,17 @@ const ICONS: Record<RatingIcon, [string, string, string]> = {
 };
 
 /**
- * <u-rating> — Star/heart/thumb rating widget.
+ * <uw-rating> — Star/heart/thumb rating widget.
  *
  * Display-only or interactive mode. Supports fractional values for display.
  */
-@customElement('u-rating')
-export class URating extends LitElement {
+@customElement('uw-rating')
+export class UwRating extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-rating / inline-size;
+      container: uw-rating / inline-size;
     }
 
     .rating {
@@ -120,7 +120,7 @@ export class URating extends LitElement {
       color: var(--u-widget-primary, #4f46e5);
     }
 
-    @container u-rating (max-width: 20rem) {
+    @container uw-rating (max-width: 20rem) {
       .rating-icon { font-size: 1rem; }
       .rating-value { font-size: 0.8125rem; }
     }
@@ -239,6 +239,6 @@ export class URating extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-rating': URating;
+    'uw-rating': UwRating;
   }
 }

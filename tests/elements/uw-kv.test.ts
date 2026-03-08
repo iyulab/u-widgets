@@ -1,30 +1,30 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../../src/elements/u-kv.js';
-import type { UKv } from '../../src/elements/u-kv.js';
+import '../../src/elements/uw-kv.js';
+import type { UwKv } from '../../src/elements/uw-kv.js';
 
-function createElement(spec: Record<string, unknown>): UKv {
-  const el = document.createElement('u-kv') as UKv;
-  el.spec = spec as UKv['spec'];
+function createElement(spec: Record<string, unknown>): UwKv {
+  const el = document.createElement('uw-kv') as UwKv;
+  el.spec = spec as UwKv['spec'];
   document.body.appendChild(el);
   return el;
 }
 
-async function render(el: UKv) {
+async function render(el: UwKv) {
   await el.updateComplete;
   return el.shadowRoot!;
 }
 
-describe('u-kv', () => {
+describe('uw-kv', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
 
   it('is defined as a custom element', () => {
-    expect(customElements.get('u-kv')).toBeDefined();
+    expect(customElements.get('uw-kv')).toBeDefined();
   });
 
   it('renders nothing when spec is null', async () => {
-    const el = document.createElement('u-kv') as UKv;
+    const el = document.createElement('uw-kv') as UwKv;
     document.body.appendChild(el);
     await el.updateComplete;
     expect(el.shadowRoot!.querySelector('[part="kv"]')).toBeNull();

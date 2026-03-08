@@ -2,15 +2,15 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
 // Dynamic import to ensure custom elements are registered
-let UCode: typeof import('../../src/elements/u-code.js').UCode;
+let UwCode: typeof import('../../src/elements/uw-code.js').UwCode;
 
 beforeEach(async () => {
-  const mod = await import('../../src/elements/u-code.js');
-  UCode = mod.UCode;
+  const mod = await import('../../src/elements/uw-code.js');
+  UwCode = mod.UwCode;
 });
 
 function renderCode(spec: UWidgetSpec): HTMLElement {
-  const el = new UCode();
+  const el = new UwCode();
   el.spec = spec;
   (el as any).performUpdate();
   return el;
@@ -20,10 +20,10 @@ function shadow(el: HTMLElement) {
   return el.shadowRoot!;
 }
 
-describe('u-code', () => {
+describe('uw-code', () => {
   describe('basic rendering', () => {
     it('renders nothing when spec is null', () => {
-      const el = new UCode();
+      const el = new UwCode();
       (el as any).performUpdate();
       expect(shadow(el).querySelector('.code-block')).toBeNull();
     });

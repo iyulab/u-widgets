@@ -7,13 +7,13 @@ import { themeStyles } from '../styles/tokens.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
-@customElement('u-table')
-export class UTable extends LitElement {
+@customElement('uw-table')
+export class UwTable extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
       font-family: system-ui, -apple-system, sans-serif;
-      container: u-table / inline-size;
+      container: uw-table / inline-size;
     }
 
     /* ── table ── */
@@ -283,7 +283,7 @@ export class UTable extends LitElement {
     }
 
     /* ── container-query responsive ── */
-    @container u-table (max-width: 30rem) {
+    @container uw-table (max-width: 30rem) {
       table {
         font-size: 0.75rem;
       }
@@ -695,6 +695,6 @@ export class UTable extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'u-table': UTable;
+    'uw-table': UwTable;
   }
 }

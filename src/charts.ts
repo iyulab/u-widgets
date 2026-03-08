@@ -13,5 +13,5 @@
  * ```
  */
 
-export { UChart } from './elements/u-chart.js';
+export { UwChart } from './elements/uw-chart.js';
 export { toEChartsOption } from './renderers/echarts-adapter.js';
