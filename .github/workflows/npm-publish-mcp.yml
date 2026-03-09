@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - mcp/package.json
+  workflow_run:
+    workflows: ["Publish to npm"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -14,6 +18,10 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Skip if triggered by workflow_run and parent failed
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: read
     defaults:
@@ -50,7 +58,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.check.outputs.exists == 'false'
-        run: npm ci
+        run: npm install --package-lock-only && npm ci
 
       - name: Build
         if: steps.check.outputs.exists == 'false'
