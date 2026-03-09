@@ -807,6 +807,36 @@ const catalog: Record<string, WidgetDoc> = {
     },
   },
 
+  'chart.histogram': {
+    label: 'Histogram',
+    group: 'Charts',
+    ...meta('chart.histogram'),
+    variants: {
+      'Auto-binning': {
+        widget: 'chart.histogram',
+        data: [12, 15, 18, 22, 25, 28, 31, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 78],
+      },
+      'Object array': {
+        widget: 'chart.histogram',
+        data: [
+          { score: 55 }, { score: 62 }, { score: 71 }, { score: 78 },
+          { score: 83 }, { score: 91 }, { score: 67 }, { score: 74 },
+        ],
+        mapping: { value: 'score' },
+      },
+      'Custom bins + referenceLines': {
+        widget: 'chart.histogram',
+        data: [10, 15, 20, 22, 25, 30, 35, 40, 42, 45, 50, 55, 60, 65, 70, 75],
+        options: {
+          bins: 5,
+          referenceLines: [
+            { axis: 'y', value: 4, label: 'Expected', color: '#6366f1', style: 'dashed' },
+          ],
+        },
+      },
+    },
+  },
+
   // ── Content ──
   markdown: {
     label: 'Markdown',

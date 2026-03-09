@@ -15,7 +15,7 @@
         "table", "list",
         "chart.bar", "chart.line", "chart.area", "chart.pie",
         "chart.scatter", "chart.radar", "chart.heatmap", "chart.box",
-        "chart.funnel", "chart.waterfall", "chart.treemap",
+        "chart.funnel", "chart.waterfall", "chart.treemap", "chart.histogram",
         "form", "confirm",
         "markdown", "image", "callout",
         "kv", "code", "citation", "status", "steps",

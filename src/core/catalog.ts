@@ -62,6 +62,7 @@ const CATALOG: readonly WidgetInfo[] = [
   { widget: 'chart.funnel', category: 'chart', description: 'Funnel chart for sequential stages', mappingKeys: ['label', 'value'], dataShape: 'array' },
   { widget: 'chart.waterfall', category: 'chart', description: 'Waterfall chart for cumulative values', mappingKeys: ['x', 'y'], dataShape: 'array' },
   { widget: 'chart.treemap', category: 'chart', description: 'Treemap for hierarchical data', mappingKeys: [], dataShape: 'array' },
+  { widget: 'chart.histogram', category: 'chart', description: 'Histogram for frequency distribution with auto-binning', mappingKeys: ['value'], dataShape: 'array' },
   // Display
   { widget: 'metric', category: 'display', description: 'Single KPI value with optional trend', mappingKeys: [], dataShape: 'object' },
   { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array' },
@@ -184,6 +185,10 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   'chart.treemap': {
     widget: 'chart.treemap',
     data: [{ name: 'Group A', value: 100 }, { name: 'Group B', value: 80 }],
+  },
+  'chart.histogram': {
+    widget: 'chart.histogram',
+    data: [12, 15, 22, 28, 35, 42, 48, 55, 62, 68, 72, 78] as unknown as Record<string, unknown>[],
   },
   'metric': {
     widget: 'metric',
@@ -476,6 +481,21 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
           { item: 'OpEx', amount: -120 },
           { item: 'Tax', amount: -50 },
         ],
+      },
+    },
+  ],
+  'chart.histogram': [
+    {
+      label: 'Custom bins + referenceLines',
+      spec: {
+        widget: 'chart.histogram',
+        data: [10, 15, 20, 22, 25, 30, 35, 40, 42, 45, 50, 55, 60, 65, 70, 75] as unknown as Record<string, unknown>[],
+        options: {
+          bins: 5,
+          referenceLines: [
+            { axis: 'y', value: 4, label: 'Expected', color: '#6366f1', style: 'dashed' },
+          ],
+        },
       },
     },
   ],

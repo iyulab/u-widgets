@@ -19,7 +19,8 @@ export type ChartType =
   | 'chart.box'
   | 'chart.funnel'
   | 'chart.waterfall'
-  | 'chart.treemap';
+  | 'chart.treemap'
+  | 'chart.histogram';
 
 /**
  * All supported widget type identifiers.

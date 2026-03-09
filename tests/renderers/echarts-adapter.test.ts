@@ -1284,6 +1284,95 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('chart.histogram', () => {
+    it('auto-bins flat number array using Sturges rule', () => {
+      const values = [2, 5, 8, 12, 15, 18, 22, 25, 28, 31, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65];
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: values as unknown as Record<string, unknown>[],
+      }));
+      const xAxis = result.xAxis as Obj;
+      expect(xAxis.type).toBe('category');
+      const categories = xAxis.data as string[];
+      // Sturges: ceil(log2(20)+1) = 6
+      expect(categories.length).toBe(6);
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('bar');
+      expect(series[0].barCategoryGap).toBe('0%');
+      const counts = series[0].data as number[];
+      expect(counts.reduce((a: number, b: number) => a + b, 0)).toBe(20);
+    });
+
+    it('accepts object array with mapping.value', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [
+          { score: 55 }, { score: 62 }, { score: 71 },
+          { score: 78 }, { score: 83 }, { score: 91 },
+        ],
+        mapping: { value: 'score' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].type).toBe('bar');
+    });
+
+    it('auto-infers value field from first number field', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [
+          { name: 'a', val: 10 },
+          { name: 'b', val: 20 },
+          { name: 'c', val: 30 },
+          { name: 'd', val: 40 },
+        ],
+      }));
+      expect(result.series).toBeDefined();
+    });
+
+    it('supports options.bins to override auto bin count', () => {
+      const values = [10, 20, 30, 40, 50, 60, 70, 80];
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: values as unknown as Record<string, unknown>[],
+        options: { bins: 4 },
+      }));
+      const categories = (result.xAxis as Obj).data as string[];
+      expect(categories.length).toBe(4);
+    });
+
+    it('supports referenceLines', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [10, 20, 30, 40, 50] as unknown as Record<string, unknown>[],
+        options: {
+          referenceLines: [
+            { axis: 'y', value: 2, label: 'Avg', color: 'red' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].markLine).toBeDefined();
+    });
+
+    it('returns empty for empty data', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [] as unknown as Record<string, unknown>[],
+      }));
+      expect(result).toEqual({});
+    });
+
+    it('formats bin labels as range with en-dash', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [0, 10, 20, 30] as unknown as Record<string, unknown>[],
+        options: { bins: 2 },
+      }));
+      const labels = (result.xAxis as Obj).data as string[];
+      expect(labels[0]).toContain('\u2013'); // en-dash
+    });
+  });
+
   describe('chart-level options', () => {
     it('hides legend when options.legend is false', () => {
       const result = toEChartsOption(spec({

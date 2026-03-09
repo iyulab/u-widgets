@@ -78,6 +78,9 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
     case 'chart.treemap':
       result = buildTreemap(data, options);
       break;
+    case 'chart.histogram':
+      result = buildHistogram(data, mapping, options);
+      break;
     default:
       return {};
   }
@@ -738,6 +741,89 @@ function toTreeNode(item: Record<string, unknown>): Record<string, unknown> {
     node.children = (item.children as Record<string, unknown>[]).map((child) => toTreeNode(child));
   }
   return node;
+}
+
+function buildHistogram(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  options: Record<string, unknown>,
+): Record<string, unknown> {
+  // Extract numeric values from flat array or object array
+  let values: number[];
+  if (!Array.isArray(data) || data.length === 0) return {};
+
+  if (typeof data[0] === 'number') {
+    values = data as number[];
+  } else {
+    const field = mapping?.value ?? guessNumberField(data as Record<string, unknown>[]);
+    if (!field) return {};
+    values = (data as Record<string, unknown>[]).map((row) => Number(row[field] ?? 0));
+  }
+
+  if (values.length === 0) return {};
+
+  // Determine bin count: explicit or Sturges' rule
+  const binCount = typeof options.bins === 'number'
+    ? options.bins
+    : Math.ceil(Math.log2(values.length) + 1);
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min;
+  const binWidth = range / binCount || 1;
+
+  // Build bins
+  const bins: number[] = new Array(binCount).fill(0);
+  const labels: string[] = [];
+
+  for (let i = 0; i < binCount; i++) {
+    const lo = min + i * binWidth;
+    const hi = min + (i + 1) * binWidth;
+    const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(1);
+    labels.push(`${fmt(lo)}\u2013${fmt(hi)}`);
+  }
+
+  for (const v of values) {
+    let idx = Math.floor((v - min) / binWidth);
+    if (idx >= binCount) idx = binCount - 1; // clamp max to last bin
+    bins[idx]++;
+  }
+
+  const series: Record<string, unknown> = {
+    type: 'bar',
+    data: bins,
+    barCategoryGap: '0%',
+  };
+
+  const result: Record<string, unknown> = {
+    xAxis: { type: 'category', data: labels, axisTick: { alignWithLabel: true } },
+    yAxis: { type: 'value' },
+    series: [series],
+    tooltip: { trigger: 'axis' },
+  };
+
+  // Reference lines
+  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  if (Array.isArray(refLines) && refLines.length > 0) {
+    series.markLine = {
+      silent: true,
+      symbol: 'none',
+      data: refLines.map((rl) => {
+        const item: Record<string, unknown> = {};
+        if (rl.axis === 'x') item.xAxis = rl.value;
+        else item.yAxis = rl.value;
+        if (rl.label) item.name = rl.label;
+        const lineStyle: Record<string, unknown> = {};
+        if (rl.color) lineStyle.color = rl.color;
+        if (rl.style) lineStyle.type = rl.style;
+        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
+        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
+        return item;
+      }),
+    };
+  }
+
+  return result;
 }
 
 function getNumberFields(data: Record<string, unknown>[]): string[] {
