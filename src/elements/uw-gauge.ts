@@ -89,6 +89,7 @@ export class UwGauge extends LitElement {
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      width: 65%;
     }
 
     .gauge-value {
@@ -108,6 +109,10 @@ export class UwGauge extends LitElement {
       font-weight: 600;
       line-height: 1.2;
       margin-top: 2px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* ── progress bar ── */

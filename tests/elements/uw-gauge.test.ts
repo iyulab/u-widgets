@@ -231,6 +231,26 @@ describe('uw-gauge', () => {
       expect(container?.getAttribute('aria-valuetext')).toBe('85% Healthy');
     });
 
+    it('truncates long subtitle with ellipsis', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        data: { value: 85 },
+        options: {
+          min: 0, max: 100,
+          thresholds: [
+            { to: 100, color: '#22c55e', label: 'Excellent Working Condition Status' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      const subtitle = shadow.querySelector('.gauge-subtitle') as HTMLElement;
+      expect(subtitle).not.toBeNull();
+      const styles = getComputedStyle(subtitle);
+      expect(styles.overflow).toBe('hidden');
+      expect(styles.textOverflow).toBe('ellipsis');
+      expect(styles.whiteSpace).toBe('nowrap');
+    });
+
     it('hides SVG from screen readers', async () => {
       const el = createElement({
         widget: 'gauge',
