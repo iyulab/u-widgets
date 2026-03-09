@@ -1,13 +1,5 @@
-import type { UWidgetSpec, NormalizedMapping } from '../core/types.js';
+import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption } from '../core/types.js';
 import { normalizeMapping } from '../core/normalize.js';
-
-interface ReferenceLineOption {
-  axis: 'x' | 'y';
-  value: number | string;
-  label?: string;
-  color?: string;
-  style?: 'solid' | 'dashed' | 'dotted';
-}
 
 interface ConditionalStyleRule {
   field: string;

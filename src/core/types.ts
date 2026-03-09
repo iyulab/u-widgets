@@ -241,6 +241,25 @@ export interface UWidgetEvent {
   data?: Record<string, unknown>;
 }
 
+// ── Chart Options ──
+
+/**
+ * Reference line drawn on a chart axis.
+ * Used in `options.referenceLines` for bar, line, area, and scatter charts.
+ */
+export interface ReferenceLineOption {
+  /** Which axis the line is drawn on. */
+  axis: 'x' | 'y';
+  /** Position value on the axis. */
+  value: number | string;
+  /** Label text displayed at the line endpoint. */
+  label?: string;
+  /** Line color (CSS color or named color). */
+  color?: string;
+  /** Line style. Default: `'solid'`. */
+  style?: 'solid' | 'dashed' | 'dotted';
+}
+
 // ── Spec Envelope ──
 
 /**
