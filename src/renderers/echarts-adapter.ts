@@ -23,7 +23,10 @@ function matchConditionalStyle(
   rules: ConditionalStyleRule[],
 ): ConditionalStyleRule | undefined {
   for (const rule of rules) {
-    const val = Number(row[rule.field] ?? 0);
+    const raw = row[rule.field];
+    if (raw === undefined || raw === null) continue;
+    const val = Number(raw);
+    if (Number.isNaN(val)) continue;
     const aboveOk = rule.above === undefined || val > rule.above;
     const belowOk = rule.below === undefined || val < rule.below;
     if (aboveOk && belowOk) return rule;

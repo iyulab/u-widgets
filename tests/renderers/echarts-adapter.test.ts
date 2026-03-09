@@ -1243,6 +1243,45 @@ describe('toEChartsOption', () => {
       expect(data[0]).toEqual([1, 10]);
       expect(data[1]).toEqual({ value: [2, 20], itemStyle: { color: 'red' } });
     });
+
+    it('ignores rules when field does not exist in data', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', y: 10 }],
+        options: {
+          conditionalStyles: [
+            { field: 'temp', below: 20, color: 'blue' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      // 'temp' field doesn't exist → rule should NOT match
+      expect(series[0].data).toEqual([10]);
+    });
+
+    it('scatter conditionalStyles with opacity mapping merges both', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, temp: 95, score: 50 },
+          { x: 2, y: 20, temp: 30, score: 80 },
+        ],
+        mapping: { x: 'x', y: 'y', opacity: 'score' },
+        options: {
+          conditionalStyles: [
+            { field: 'temp', above: 80, color: 'red' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const points = series[0].data as { value: number[]; itemStyle: { color?: string; opacity?: number } }[];
+      // First point: temp=95 > 80 → red + opacity from score
+      expect(points[0].itemStyle.color).toBe('red');
+      expect(points[0].itemStyle.opacity).toBeDefined();
+      // Second point: temp=30, no match → only opacity
+      expect(points[1].itemStyle.color).toBeUndefined();
+      expect(points[1].itemStyle.opacity).toBeDefined();
+    });
   });
 
   describe('chart-level options', () => {
