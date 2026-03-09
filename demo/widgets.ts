@@ -406,6 +406,23 @@ const catalog: Record<string, WidgetDoc> = {
         ],
         mapping: { x: 'month', y: ['desktop', 'mobile', 'tablet'] },
       },
+      'Conditional Styling': {
+        widget: 'chart.line',
+        data: [
+          { x: 'Mon', y: 22 }, { x: 'Tue', y: 35 }, { x: 'Wed', y: 48 },
+          { x: 'Thu', y: 62 }, { x: 'Fri', y: 41 }, { x: 'Sat', y: 78 },
+          { x: 'Sun', y: 55 },
+        ],
+        options: {
+          conditionalStyles: [
+            { field: 'y', above: 60, color: '#ef4444', symbol: 'triangle', symbolSize: 10 },
+            { field: 'y', below: 30, color: '#3b82f6' },
+          ],
+          referenceLines: [
+            { axis: 'y', value: 60, label: 'Warning', color: '#ef4444', style: 'dashed' },
+          ],
+        },
+      },
     },
   },
   'chart.area': {
@@ -513,6 +530,33 @@ const catalog: Record<string, WidgetDoc> = {
           group: i % 3 === 0 ? 'A' : i % 3 === 1 ? 'B' : 'C',
         })),
         mapping: { x: 'x', y: 'y', color: 'group' },
+      },
+      'ReferenceLines': {
+        widget: 'chart.scatter',
+        data: [
+          { x: 1.5, y: 32 }, { x: 2.0, y: 45 }, { x: 3.1, y: 28 },
+          { x: 4.5, y: 51 }, { x: 5.2, y: 62 }, { x: 6.0, y: 38 },
+        ],
+        options: {
+          referenceLines: [
+            { axis: 'y', value: 50, label: 'UCL', color: '#ef4444', style: 'dashed' },
+            { axis: 'y', value: 30, label: 'LCL', color: '#3b82f6', style: 'dashed' },
+          ],
+        },
+      },
+      'Conditional Styling': {
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, temp: 25 }, { x: 2, y: 35, temp: 85 },
+          { x: 3, y: 20, temp: 45 }, { x: 4, y: 50, temp: 92 },
+          { x: 5, y: 15, temp: 30 }, { x: 6, y: 45, temp: 78 },
+        ],
+        options: {
+          conditionalStyles: [
+            { field: 'temp', above: 80, color: '#ef4444' },
+            { field: 'temp', below: 30, color: '#3b82f6' },
+          ],
+        },
       },
     },
   },
