@@ -114,6 +114,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   histogram: 'Histogram mode (bar)',
   referenceLines: 'Reference/threshold lines',
   series: 'Per-series overrides [{color?, lineStyle?, symbol?, label?}]',
+  conditionalStyles: 'Per-point conditional styling rules [{field, above?, below?, color, symbol?, symbolSize?}]',
+  subtitle: 'Static subtitle text (gauge)',
   step: 'Step interpolation (line)',
   legend: 'Show/hide legend',
   grid: 'Show/hide grid lines',
@@ -170,11 +172,11 @@ export interface DataFieldInfo {
 
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
-  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.area': ['smooth', 'stack', 'colors', 'series', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel'],
-  'chart.scatter': ['colors', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel'],
   'chart.heatmap': ['colorRange', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.box': ['colors', 'legend', 'grid', 'animate'],
@@ -183,7 +185,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.treemap': ['colors', 'animate', 'showLabel'],
   'metric': [],
   'stat-group': [],
-  'gauge': ['min', 'max', 'unit', 'thresholds', 'label'],
+  'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label'],
   'table': ['pageSize', 'compact', 'searchable'],
   'list': ['compact'],

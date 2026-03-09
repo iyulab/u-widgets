@@ -1087,6 +1087,164 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('options: conditionalStyles', () => {
+    it('applies per-point itemStyle.color for line chart based on above threshold', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 30 },
+          { x: 'C', y: 50 },
+        ],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 25, color: 'red' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      // A (10) stays plain
+      expect(data[0]).toBe(10);
+      // B (30) and C (50) get conditional color
+      expect(data[1]).toEqual({ value: 30, itemStyle: { color: 'red' } });
+      expect(data[2]).toEqual({ value: 50, itemStyle: { color: 'red' } });
+    });
+
+    it('applies below threshold', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 30 },
+        ],
+        options: {
+          conditionalStyles: [{ field: 'y', below: 20, color: 'blue' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toEqual({ value: 10, itemStyle: { color: 'blue' } });
+      expect(data[1]).toBe(30);
+    });
+
+    it('applies range (above + below) threshold', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 30 },
+          { x: 'C', y: 50 },
+        ],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 20, below: 40, color: 'orange' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toBe(10);
+      expect(data[1]).toEqual({ value: 30, itemStyle: { color: 'orange' } });
+      expect(data[2]).toBe(50);
+    });
+
+    it('first matching rule wins', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', y: 90 }],
+        options: {
+          conditionalStyles: [
+            { field: 'y', above: 80, color: 'red' },
+            { field: 'y', above: 50, color: 'yellow' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toEqual({ value: 90, itemStyle: { color: 'red' } });
+    });
+
+    it('supports symbol and symbolSize overrides', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', y: 90 }],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 50, color: 'red', symbol: 'triangle', symbolSize: 12 }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      const point = data[0] as Obj;
+      expect(point.value).toBe(90);
+      expect((point.itemStyle as Obj).color).toBe('red');
+      expect(point.symbol).toBe('triangle');
+      expect(point.symbolSize).toBe(12);
+    });
+
+    it('works with bar chart', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 50 },
+        ],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 25, color: 'red' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toBe(10);
+      expect(data[1]).toEqual({ value: 50, itemStyle: { color: 'red' } });
+    });
+
+    it('works with area chart', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.area',
+        data: [
+          { x: 'A', y: 10 },
+          { x: 'B', y: 50 },
+        ],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 25, color: 'red' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].areaStyle).toBeDefined();
+      const data = series[0].data as unknown[];
+      expect(data[0]).toBe(10);
+      expect(data[1]).toEqual({ value: 50, itemStyle: { color: 'red' } });
+    });
+
+    it('does nothing when no rules match', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', y: 10 }],
+        options: {
+          conditionalStyles: [{ field: 'y', above: 100, color: 'red' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toBe(10);
+    });
+
+    it('supports conditionalStyles for scatter points', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, temp: 5 },
+          { x: 2, y: 20, temp: 95 },
+        ],
+        mapping: { x: 'x', y: 'y' },
+        options: {
+          conditionalStyles: [{ field: 'temp', above: 80, color: 'red' }],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const data = series[0].data as unknown[];
+      expect(data[0]).toEqual([1, 10]);
+      expect(data[1]).toEqual({ value: [2, 20], itemStyle: { color: 'red' } });
+    });
+  });
+
   describe('chart-level options', () => {
     it('hides legend when options.legend is false', () => {
       const result = toEChartsOption(spec({

@@ -9,6 +9,28 @@ interface ReferenceLineOption {
   style?: 'solid' | 'dashed' | 'dotted';
 }
 
+interface ConditionalStyleRule {
+  field: string;
+  above?: number;
+  below?: number;
+  color: string;
+  symbol?: string;
+  symbolSize?: number;
+}
+
+function matchConditionalStyle(
+  row: Record<string, unknown>,
+  rules: ConditionalStyleRule[],
+): ConditionalStyleRule | undefined {
+  for (const rule of rules) {
+    const val = Number(row[rule.field] ?? 0);
+    const aboveOk = rule.above === undefined || val > rule.above;
+    const belowOk = rule.below === undefined || val < rule.below;
+    if (aboveOk && belowOk) return rule;
+  }
+  return undefined;
+}
+
 /**
  * Translate a u-widget spec into an ECharts option object.
  * This is a pure function with no DOM or ECharts dependency.
@@ -114,12 +136,25 @@ function buildCartesian(
   const horizontal = !!options.horizontal;
 
   const seriesOverrides = Array.isArray(options.series) ? options.series as Record<string, unknown>[] : [];
+  const condStyles = options.conditionalStyles as ConditionalStyleRule[] | undefined;
 
   const seriesItems = yFields.map((field, i) => {
     const s: Record<string, unknown> = {
       name: field,
       type,
-      data: data.map((row) => row[field] ?? null),
+      data: data.map((row) => {
+        const val = row[field] ?? null;
+        if (condStyles?.length) {
+          const match = matchConditionalStyle(row, condStyles);
+          if (match) {
+            const item: Record<string, unknown> = { value: val, itemStyle: { color: match.color } };
+            if (match.symbol) item.symbol = match.symbol;
+            if (match.symbolSize) item.symbolSize = match.symbolSize;
+            return item;
+          }
+        }
+        return val;
+      }),
     };
     if (options._area) s.areaStyle = {};
     if (options.smooth) s.smooth = true;
@@ -244,10 +279,27 @@ function buildScatter(
   }
   const opacityRange = opacityMax - opacityMin || 1;
 
-  // Helper: build a data point — plain array or object with itemStyle for opacity
+  const condStyles = options.conditionalStyles as ConditionalStyleRule[] | undefined;
+
+  // Helper: build a data point — plain array or object with itemStyle for opacity/conditionalStyles
   const toPoint = (row: Record<string, unknown>): unknown => {
     const pt = [Number(row[xField] ?? 0), Number(row[yField] ?? 0)];
     if (sizeField) pt.push(Number(row[sizeField] ?? 0));
+
+    if (condStyles?.length) {
+      const match = matchConditionalStyle(row, condStyles);
+      if (match) {
+        const style: Record<string, unknown> = { color: match.color };
+        if (opacityField) {
+          const raw = Number(row[opacityField] ?? 0);
+          style.opacity = Math.round((0.1 + 0.9 * ((raw - opacityMin) / opacityRange)) * 100) / 100;
+        }
+        const item: Record<string, unknown> = { value: pt, itemStyle: style };
+        if (match.symbol) item.symbol = match.symbol;
+        if (match.symbolSize) item.symbolSize = match.symbolSize;
+        return item;
+      }
+    }
 
     if (opacityField) {
       const raw = Number(row[opacityField] ?? 0);
