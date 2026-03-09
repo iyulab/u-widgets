@@ -139,6 +139,33 @@ const catalog: Record<string, WidgetDoc> = {
           ],
         },
       },
+      'Threshold labels (Battery SoH)': {
+        widget: 'gauge',
+        title: 'Battery Health',
+        data: { value: 85 },
+        options: {
+          min: 0, max: 100, unit: '%',
+          thresholds: [
+            { to: 30, color: '#ef4444', label: 'Replace' },
+            { to: 70, color: '#f59e0b', label: 'Degraded' },
+            { to: 100, color: '#22c55e', label: 'Healthy' },
+          ],
+        },
+      },
+      'Static subtitle': {
+        widget: 'gauge',
+        data: { value: 1.45 },
+        options: {
+          min: 0, max: 2, unit: '',
+          subtitle: 'Capable',
+          thresholds: [
+            { to: 0.67, color: '#ef4444' },
+            { to: 1.0, color: '#f59e0b' },
+            { to: 1.33, color: '#22c55e' },
+            { to: 2.0, color: '#16a34a' },
+          ],
+        },
+      },
     },
   },
   progress: {

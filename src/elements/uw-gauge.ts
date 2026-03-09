@@ -3,17 +3,25 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
+interface GaugeThreshold {
+  to: number;
+  color: string;
+  label?: string;
+}
+
 interface GaugeOptions {
   min: number;
   max: number;
   unit: string;
-  thresholds: { to: number; color: string }[];
+  subtitle: string;
+  thresholds: GaugeThreshold[];
 }
 
 const DEFAULT_GAUGE_OPTIONS: GaugeOptions = {
   min: 0,
   max: 100,
   unit: '',
+  subtitle: '',
   thresholds: [],
 };
 
@@ -95,6 +103,13 @@ export class UwGauge extends LitElement {
       color: var(--u-widget-text-secondary, #64748b);
     }
 
+    .gauge-subtitle {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
     /* ── progress bar ── */
     .progress-container {
       display: flex;
@@ -130,6 +145,10 @@ export class UwGauge extends LitElement {
 
       .gauge-unit {
         font-size: 0.625rem;
+      }
+
+      .gauge-subtitle {
+        font-size: 0.5625rem;
       }
 
       .progress-info {
@@ -168,12 +187,24 @@ export class UwGauge extends LitElement {
     return Number(data.value ?? 0);
   }
 
+  private getActiveLabel(value: number, opts: GaugeOptions): string {
+    if (opts.subtitle) return opts.subtitle;
+    if (!opts.thresholds?.length) return '';
+    const sorted = [...opts.thresholds].sort((a, b) => a.to - b.to);
+    for (const t of sorted) {
+      if (value <= t.to && t.label) return t.label;
+    }
+    const last = sorted[sorted.length - 1];
+    return last.label ?? '';
+  }
+
   private renderGauge() {
     const opts = this.getOptions();
     const value = this.getValue();
     const range = opts.max - opts.min;
     const pct = range > 0 ? Math.max(0, Math.min(1, (value - opts.min) / range)) : 0;
     const color = this.getThresholdColor(value, opts);
+    const activeLabel = this.getActiveLabel(value, opts);
 
     const cx = 100, cy = 100, r = 80;
     const startAngle = 150;
@@ -184,7 +215,7 @@ export class UwGauge extends LitElement {
     const fillPath = pct > 0 ? describeArc(cx, cy, r, startAngle, endAngle) : null;
 
     const label = typeof this.spec!.title === 'string' ? this.spec!.title : 'Gauge';
-    const valueText = `${value}${opts.unit}`;
+    const valueText = activeLabel ? `${value}${opts.unit} ${activeLabel}` : `${value}${opts.unit}`;
 
     return html`
       <div class="gauge-container" part="gauge"
@@ -199,6 +230,7 @@ export class UwGauge extends LitElement {
           <div class="gauge-center">
             <div class="gauge-value" part="value">${value}</div>
             ${opts.unit ? html`<div class="gauge-unit" part="unit">${opts.unit}</div>` : nothing}
+            ${activeLabel ? html`<div class="gauge-subtitle" part="subtitle" style="color:${color}">${activeLabel}</div>` : nothing}
           </div>
           <svg class="gauge-svg" viewBox="0 0 200 195" role="presentation" aria-hidden="true">
             <path class="gauge-track" d="${trackPath}" fill="none" stroke-width="12" stroke-linecap="round"></path>

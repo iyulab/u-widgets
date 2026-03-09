@@ -149,6 +149,88 @@ describe('uw-gauge', () => {
       expect(container?.getAttribute('aria-valuetext')).toBe('73%');
     });
 
+    it('displays active threshold label as subtitle', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        data: { value: 73 },
+        options: {
+          min: 0, max: 100,
+          thresholds: [
+            { to: 30, color: '#ef4444', label: 'Poor' },
+            { to: 70, color: '#f59e0b', label: 'Fair' },
+            { to: 100, color: '#22c55e', label: 'Good' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      const subtitle = shadow.querySelector('.gauge-subtitle');
+      expect(subtitle?.textContent).toBe('Good');
+      expect(subtitle?.getAttribute('style')).toContain('#22c55e');
+    });
+
+    it('displays static subtitle from options', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        data: { value: 50 },
+        options: { min: 0, max: 100, subtitle: 'Normal' },
+      });
+      const shadow = await render(el);
+      const subtitle = shadow.querySelector('.gauge-subtitle');
+      expect(subtitle?.textContent).toBe('Normal');
+    });
+
+    it('static subtitle takes priority over threshold label', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        data: { value: 73 },
+        options: {
+          min: 0, max: 100,
+          subtitle: 'Override',
+          thresholds: [
+            { to: 50, color: '#ef4444', label: 'Low' },
+            { to: 100, color: '#22c55e', label: 'High' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.gauge-subtitle')?.textContent).toBe('Override');
+    });
+
+    it('hides subtitle when no labels and no subtitle option', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        data: { value: 73 },
+        options: {
+          min: 0, max: 100,
+          thresholds: [
+            { to: 50, color: '#ef4444' },
+            { to: 100, color: '#22c55e' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.gauge-subtitle')).toBeNull();
+    });
+
+    it('includes active label in aria-valuetext', async () => {
+      const el = createElement({
+        widget: 'gauge',
+        title: 'Battery',
+        data: { value: 85 },
+        options: {
+          min: 0, max: 100, unit: '%',
+          thresholds: [
+            { to: 30, color: '#ef4444', label: 'Replace' },
+            { to: 70, color: '#f59e0b', label: 'Degraded' },
+            { to: 100, color: '#22c55e', label: 'Healthy' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      const container = shadow.querySelector('.gauge-container');
+      expect(container?.getAttribute('aria-valuetext')).toBe('85% Healthy');
+    });
+
     it('hides SVG from screen readers', async () => {
       const el = createElement({
         widget: 'gauge',
