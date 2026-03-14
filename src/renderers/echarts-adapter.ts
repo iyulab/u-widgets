@@ -92,13 +92,14 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   }
 
   if (options.grid === false) {
-    // Hide grid lines on axes
-    if (result.xAxis && typeof result.xAxis === 'object' && !Array.isArray(result.xAxis)) {
-      result.xAxis = { ...result.xAxis as Record<string, unknown>, splitLine: { show: false } };
-    }
-    if (result.yAxis && typeof result.yAxis === 'object' && !Array.isArray(result.yAxis)) {
-      result.yAxis = { ...result.yAxis as Record<string, unknown>, splitLine: { show: false } };
-    }
+    // Hide grid lines on axes (handles both single axis and array)
+    const hideGrid = (axis: unknown): unknown => {
+      if (!axis || typeof axis !== 'object') return axis;
+      if (Array.isArray(axis)) return axis.map(hideGrid);
+      return { ...axis as Record<string, unknown>, splitLine: { show: false } };
+    };
+    if (result.xAxis) result.xAxis = hideGrid(result.xAxis);
+    if (result.yAxis) result.yAxis = hideGrid(result.yAxis);
   }
 
   if (options.animate === false) {

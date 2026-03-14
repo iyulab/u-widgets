@@ -139,7 +139,10 @@ export class UwChart extends LitElement {
         option.color = themeColors;
       }
     }
-    if (this._readCSSVar('--u-widget-bg')) {
+    const hasExplicitBg = !!(
+      (this.spec.options as Record<string, unknown> | undefined)?.echarts as Record<string, unknown> | undefined
+    )?.backgroundColor;
+    if (!hasExplicitBg && this._readCSSVar('--u-widget-bg')) {
       option.backgroundColor = 'transparent';
     }
 
@@ -159,24 +162,29 @@ export class UwChart extends LitElement {
     // Global text style
     option.textStyle = { ...(option.textStyle as Record<string, unknown>), color: textColor };
 
-    // Axis styling — merge into existing axis config preserving formatter etc.
+    // Axis styling — deep-merge into existing axis config preserving all existing properties
     const mergeAxisTheme = (axis: unknown): unknown => {
       if (!axis || typeof axis !== 'object') return axis;
       if (Array.isArray(axis)) return axis.map(mergeAxisTheme);
       const a = axis as Record<string, unknown>;
+      const existingLine = a.axisLine as Record<string, unknown> ?? {};
+      const existingLineStyle = existingLine.lineStyle as Record<string, unknown> ?? {};
+      const existingSplit = a.splitLine as Record<string, unknown> ?? {};
+      const existingSplitStyle = existingSplit.lineStyle as Record<string, unknown> ?? {};
       return {
         ...a,
         axisLabel: { ...(a.axisLabel as Record<string, unknown> ?? {}), color: secondaryColor || textColor },
-        axisLine: { lineStyle: { color: borderColor || secondaryColor } },
-        splitLine: { lineStyle: { color: borderColor } },
+        axisLine: { ...existingLine, lineStyle: { ...existingLineStyle, color: borderColor || secondaryColor } },
+        splitLine: { ...existingSplit, lineStyle: { ...existingSplitStyle, color: borderColor } },
       };
     };
     if (option.xAxis) option.xAxis = mergeAxisTheme(option.xAxis);
     if (option.yAxis) option.yAxis = mergeAxisTheme(option.yAxis);
 
-    // Legend
+    // Legend — merge textStyle preserving existing properties
     if (option.legend && typeof option.legend === 'object') {
-      option.legend = { ...option.legend as Record<string, unknown>, textStyle: { color: textColor } };
+      const leg = option.legend as Record<string, unknown>;
+      option.legend = { ...leg, textStyle: { ...(leg.textStyle as Record<string, unknown> ?? {}), color: textColor } };
     }
   }
 
