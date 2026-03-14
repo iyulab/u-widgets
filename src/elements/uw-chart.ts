@@ -128,10 +128,16 @@ export class UwChart extends LitElement {
 
     const option = toEChartsOption(this.spec);
 
-    // Inject theme colors from CSS custom properties
-    const themeColors = this._readThemeColors();
-    if (themeColors.length > 0) {
-      option.color = themeColors;
+    // Inject theme colors from CSS custom properties,
+    // but only if the spec didn't provide explicit colors
+    const hasSpecColors = Array.isArray(
+      (this.spec.options as Record<string, unknown> | undefined)?.colors,
+    ) && ((this.spec.options as Record<string, unknown>).colors as unknown[]).length > 0;
+    if (!hasSpecColors) {
+      const themeColors = this._readThemeColors();
+      if (themeColors.length > 0) {
+        option.color = themeColors;
+      }
     }
     if (this._readCSSVar('--u-widget-bg')) {
       option.backgroundColor = 'transparent';
@@ -153,18 +159,20 @@ export class UwChart extends LitElement {
     // Global text style
     option.textStyle = { ...(option.textStyle as Record<string, unknown>), color: textColor };
 
-    // Axis styling
-    const axisStyle = {
-      axisLabel: { color: secondaryColor || textColor },
-      axisLine: { lineStyle: { color: borderColor || secondaryColor } },
-      splitLine: { lineStyle: { color: borderColor } },
+    // Axis styling — merge into existing axis config preserving formatter etc.
+    const mergeAxisTheme = (axis: unknown): unknown => {
+      if (!axis || typeof axis !== 'object') return axis;
+      if (Array.isArray(axis)) return axis.map(mergeAxisTheme);
+      const a = axis as Record<string, unknown>;
+      return {
+        ...a,
+        axisLabel: { ...(a.axisLabel as Record<string, unknown> ?? {}), color: secondaryColor || textColor },
+        axisLine: { lineStyle: { color: borderColor || secondaryColor } },
+        splitLine: { lineStyle: { color: borderColor } },
+      };
     };
-    if (option.xAxis && typeof option.xAxis === 'object') {
-      option.xAxis = { ...option.xAxis as Record<string, unknown>, ...axisStyle };
-    }
-    if (option.yAxis && typeof option.yAxis === 'object') {
-      option.yAxis = { ...option.yAxis as Record<string, unknown>, ...axisStyle };
-    }
+    if (option.xAxis) option.xAxis = mergeAxisTheme(option.xAxis);
+    if (option.yAxis) option.yAxis = mergeAxisTheme(option.yAxis);
 
     // Legend
     if (option.legend && typeof option.legend === 'object') {
