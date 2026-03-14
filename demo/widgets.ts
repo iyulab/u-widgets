@@ -406,6 +406,50 @@ const catalog: Record<string, WidgetDoc> = {
         ],
         mapping: { x: 'month', y: ['desktop', 'mobile', 'tablet'] },
       },
+      'Per-series styles': {
+        widget: 'chart.line',
+        data: [
+          { month: 'Jan', orders: 150, qa: 80, support: 45 },
+          { month: 'Feb', orders: 180, qa: 95, support: 52 },
+          { month: 'Mar', orders: 210, qa: 110, support: 60 },
+          { month: 'Apr', orders: 195, qa: 120, support: 55 },
+        ],
+        mapping: { x: 'month', y: ['orders', 'qa', 'support'] },
+        options: {
+          series: [
+            { color: '#f97316' },
+            { color: '#8b5cf6' },
+            { color: '#3b82f6', lineStyle: { type: 'dashed' } },
+          ],
+        },
+      },
+      'Axis format (percent)': {
+        widget: 'chart.line',
+        data: [
+          { month: 'Jan', rate: 82 },
+          { month: 'Feb', rate: 91 },
+          { month: 'Mar', rate: 76 },
+          { month: 'Apr', rate: 105 },
+        ],
+        options: {
+          yFormat: { suffix: '%' },
+          referenceLines: [
+            { axis: 'y', value: 100, label: 'Target', color: '#16a34a', style: 'dashed' },
+          ],
+        },
+      },
+      'Axis format (currency)': {
+        widget: 'chart.bar',
+        data: [
+          { month: 'Jan', revenue: 12000000 },
+          { month: 'Feb', revenue: 18500000 },
+          { month: 'Mar', revenue: 15200000 },
+        ],
+        options: {
+          yFormat: { type: 'currency', currency: 'KRW' },
+          locale: 'ko-KR',
+        },
+      },
       'Conditional Styling': {
         widget: 'chart.line',
         data: [

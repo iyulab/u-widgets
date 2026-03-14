@@ -261,6 +261,24 @@ export interface ReferenceLineOption {
   style?: 'solid' | 'dashed' | 'dotted';
 }
 
+/**
+ * Axis label format option for chart X/Y axes.
+ * Used in `options.xFormat` / `options.yFormat` to format axis tick labels.
+ * Leverages the same format system as `formatValue()`.
+ */
+export interface AxisFormatOption {
+  /** Format type — delegates to `formatValue()`. */
+  type?: 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'bytes';
+  /** Static prefix prepended to each label. */
+  prefix?: string;
+  /** Static suffix appended to each label. */
+  suffix?: string;
+  /** Currency code when type is 'currency' (e.g., 'KRW', 'USD'). */
+  currency?: string;
+  /** Number of decimal places for numeric formats. */
+  decimals?: number;
+}
+
 // ── Spec Envelope ──
 
 /**

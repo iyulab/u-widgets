@@ -1423,4 +1423,111 @@ describe('toEChartsOption', () => {
       expect(result.animation).toBeUndefined();
     });
   });
+
+  describe('axis format (xFormat / yFormat)', () => {
+    it('applies yFormat suffix to value axis', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 50 }],
+        options: { yFormat: { suffix: '%' } },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(50)).toBe('50%');
+    });
+
+    it('applies yFormat prefix to value axis', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 1000 }],
+        options: { yFormat: { prefix: '$' } },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(1000)).toBe('$1000');
+    });
+
+    it('applies yFormat with currency type', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10000 }],
+        options: { yFormat: { type: 'currency', currency: 'KRW' }, locale: 'ko-KR' },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      const formatted = formatter(10000);
+      expect(formatted).toContain('10,000');
+    });
+
+    it('applies yFormat with percent type (axis values are display units)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ month: 'Jan', rate: 73 }],
+        options: { yFormat: { type: 'percent' } },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(73)).toBe('73%');
+    });
+
+    it('applies xFormat to category axis', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'Jan', val: 10 }],
+        options: { xFormat: { prefix: '2024-' } },
+      }));
+      const xAxis = result.xAxis as Record<string, unknown>;
+      const formatter = (xAxis.axisLabel as Record<string, unknown>).formatter as (v: string) => string;
+      expect(formatter('Jan')).toBe('2024-Jan');
+    });
+
+    it('applies yFormat with number type and decimals', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 3.14159 }],
+        options: { yFormat: { type: 'number', decimals: 1 } },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(3.14159)).toMatch(/3[.,]1/);
+    });
+
+    it('applies yFormat to scatter value axes', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [{ x: 1, y: 50 }],
+        mapping: { x: 'x', y: 'y' },
+        options: { yFormat: { suffix: ' kg' } },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(50)).toBe('50 kg');
+    });
+
+    it('does not add formatter when format options are absent', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ cat: 'A', val: 10 }],
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>;
+      expect(yAxis.axisLabel).toBeUndefined();
+    });
+
+    it('applies yFormat to dual y-axis (both value axes)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ month: 'Jan', sales: 100, rate: 73 }],
+        mapping: { x: 'month', y: ['sales', 'rate'] },
+        options: {
+          series: [{ }, { yAxisIndex: 1 }],
+          yAxis: [{}, { type: 'value' }],
+          yFormat: { suffix: '%' },
+        },
+      }));
+      const yAxis = result.yAxis as Record<string, unknown>[];
+      expect(Array.isArray(yAxis)).toBe(true);
+      const formatter0 = (yAxis[0].axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter0(100)).toBe('100%');
+    });
+  });
 });

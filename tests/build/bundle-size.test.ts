@@ -23,9 +23,9 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 6 KB gzip', () => {
+  it('charts bundle is under 7 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
-    expect(size).toBeLessThan(6 * 1024);
+    expect(size).toBeLessThan(7 * 1024); // includes format.ts for axis label formatting
   });
 
   it('tools bundle is under 12 KB gzip', () => {
@@ -54,6 +54,6 @@ describe('bundle size budget', () => {
       (sum: number, f: string) => sum + gzipSize(resolve(DIST, f)),
       0
     );
-    expect(totalGzip).toBeLessThan(4 * 1024); // shared chunks < 4 KB gzip
+    expect(totalGzip).toBeLessThan(5 * 1024); // shared chunks < 5 KB gzip (tokens + infer + formdown)
   });
 });

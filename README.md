@@ -72,6 +72,58 @@ npm install @iyulab/u-widgets
 { "widget": "compose", "layout": "grid", "children": [{ "widget": "metric", "data": { "value": 42 } }, { "widget": "gauge", "data": { "value": 73 } }] }
 ```
 
+## Chart Options
+
+XY charts (`chart.bar`, `chart.line`, `chart.area`, `chart.scatter`) support declarative options that eliminate the need for ECharts passthrough:
+
+### Reference Lines
+
+```json
+{
+  "widget": "chart.line",
+  "data": [{ "month": "Jan", "rate": 82 }, { "month": "Feb", "rate": 105 }],
+  "options": {
+    "referenceLines": [
+      { "axis": "y", "value": 100, "label": "Target", "color": "#16a34a", "style": "dashed" }
+    ]
+  }
+}
+```
+
+### Per-Series Styles
+
+```json
+{
+  "widget": "chart.line",
+  "data": [{ "month": "Jan", "orders": 150, "qa": 80, "support": 45 }],
+  "mapping": { "x": "month", "y": ["orders", "qa", "support"] },
+  "options": {
+    "series": [
+      { "color": "#f97316" },
+      { "color": "#8b5cf6" },
+      { "color": "#3b82f6", "lineStyle": { "type": "dashed" } }
+    ]
+  }
+}
+```
+
+Each entry in `options.series` maps 1:1 to the `mapping.y` array. Supported overrides: `color`, `lineStyle`, `symbol`, `label`, `type`, `yAxisIndex`.
+
+### Axis Label Format
+
+```json
+{
+  "widget": "chart.bar",
+  "data": [{ "month": "Jan", "revenue": 12000000 }],
+  "options": {
+    "yFormat": { "type": "currency", "currency": "KRW" },
+    "locale": "ko-KR"
+  }
+}
+```
+
+`xFormat` / `yFormat` accept: `type` (`number`, `currency`, `percent`, `date`, `bytes`), `prefix`, `suffix`, `currency`, `decimals`.
+
 ## Events
 
 ```js

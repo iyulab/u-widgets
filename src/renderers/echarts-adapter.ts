@@ -1,4 +1,5 @@
-import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption } from '../core/types.js';
+import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption } from '../core/types.js';
+import { formatValue } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
 
 interface ConditionalStyleRule {
@@ -107,6 +108,11 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   if (Array.isArray(options.colors) && options.colors.length > 0) {
     result.color = options.colors;
   }
+
+  // Apply axis format options
+  const locale = options.locale as string | undefined;
+  applyAxisFormat(result, 'xAxis', options.xFormat as AxisFormatOption | undefined, locale);
+  applyAxisFormat(result, 'yAxis', options.yFormat as AxisFormatOption | undefined, locale);
 
   // Apply echarts passthrough: deep-merge
   const passthrough = options.echarts as Record<string, unknown> | undefined;
@@ -856,4 +862,70 @@ function deepMerge(
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
+}
+
+/**
+ * Build a formatter string or function for ECharts axis labels
+ * based on an AxisFormatOption.
+ */
+function buildAxisFormatter(fmt: AxisFormatOption, locale?: string): (value: number | string) => string {
+  return (value: number | string) => {
+    let result: string;
+    if (fmt.type) {
+      const formatStr = fmt.type === 'currency' && fmt.currency
+        ? `currency:${fmt.currency}`
+        : fmt.type;
+      result = formatValue(value, formatStr, locale);
+      // For percent type, formatValue divides by 100 — but axis values are already in
+      // display units (e.g. 73 means 73%), so use raw suffix instead
+      if (fmt.type === 'percent') {
+        result = typeof value === 'number'
+          ? new Intl.NumberFormat(locale, { maximumFractionDigits: fmt.decimals ?? 2 }).format(value) + '%'
+          : String(value) + '%';
+      }
+    } else {
+      result = String(value);
+    }
+    if (fmt.decimals !== undefined && fmt.type === 'number') {
+      const num = Number(value);
+      if (!isNaN(num)) {
+        result = new Intl.NumberFormat(locale, {
+          minimumFractionDigits: fmt.decimals,
+          maximumFractionDigits: fmt.decimals,
+        }).format(num);
+      }
+    }
+    if (fmt.prefix) result = fmt.prefix + result;
+    if (fmt.suffix) result = result + fmt.suffix;
+    return result;
+  };
+}
+
+/**
+ * Apply xFormat/yFormat to the corresponding axis in the ECharts option.
+ * Handles both single axis and axis arrays (dual Y axis).
+ */
+function applyAxisFormat(
+  result: Record<string, unknown>,
+  axisKey: 'xAxis' | 'yAxis',
+  fmt: AxisFormatOption | undefined,
+  locale?: string,
+): void {
+  if (!fmt || !result[axisKey]) return;
+
+  const formatter = buildAxisFormatter(fmt, locale);
+  const axis = result[axisKey];
+
+  if (Array.isArray(axis)) {
+    // Dual axis — apply to all value-type axes
+    result[axisKey] = (axis as Record<string, unknown>[]).map((a) => {
+      if (a.type === 'value') {
+        return { ...a, axisLabel: { ...(a.axisLabel as Record<string, unknown> ?? {}), formatter } };
+      }
+      return a;
+    });
+  } else if (isPlainObject(axis)) {
+    const a = axis as Record<string, unknown>;
+    result[axisKey] = { ...a, axisLabel: { ...(a.axisLabel as Record<string, unknown> ?? {}), formatter } };
+  }
 }

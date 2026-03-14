@@ -122,6 +122,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   grid: 'Show/hide grid lines',
   animate: 'Enable/disable animation',
   showLabel: 'Show/hide data labels',
+  xFormat: 'X-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
+  yFormat: 'Y-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
   // table / list
   pageSize: 'Rows per page',
   compact: 'Compact display mode',
@@ -173,18 +175,18 @@ export interface DataFieldInfo {
 
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
-  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel'],
-  'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel'],
   'chart.heatmap': ['colorRange', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.box': ['colors', 'legend', 'grid', 'animate'],
   'chart.funnel': ['colors', 'legend', 'animate', 'showLabel'],
   'chart.waterfall': ['colors', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.treemap': ['colors', 'animate', 'showLabel'],
-  'chart.histogram': ['bins', 'colors', 'referenceLines', 'legend', 'grid', 'animate'],
+  'chart.histogram': ['bins', 'colors', 'referenceLines', 'xFormat', 'yFormat', 'legend', 'grid', 'animate'],
   'metric': [],
   'stat-group': [],
   'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle'],
