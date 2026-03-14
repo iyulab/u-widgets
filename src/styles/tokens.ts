@@ -10,19 +10,28 @@ import { css } from 'lit';
  * - Chart: chart-height, chart-color-1..10
  *
  * **Theme modes:**
- * 1. Light mode: No `:host` color defaults — each `var()` call has a light fallback.
- *    This allows host applications to set `--u-widget-*` on any ancestor and have
- *    the values inherited naturally through Shadow DOM.
+ * 1. Light mode: `:host` sets explicit color defaults for all tokens.
  * 2. Dark mode via `prefers-color-scheme: dark` (automatic, unless `theme="light"`)
  * 3. Dark mode via `theme="dark"` attribute (manual override)
  *
- * Host applications can override any `--u-widget-*` variable at any ancestor.
- * Colors inherit automatically — no need to set `theme` attribute just for theming.
+ * Host applications can override any `--u-widget-*` variable by styling the
+ * element directly (e.g., `u-widget { --u-widget-text: blue; }`).
  * The `theme="dark"` attribute is still useful for component-specific overrides
  * (e.g., code syntax highlight colors).
  */
 export const themeStyles = css`
   :host {
+    /* ── Colors (Light defaults) ── */
+    --u-widget-bg: #fff;
+    --u-widget-surface: #f1f5f9;
+    --u-widget-text: #1a1a2e;
+    --u-widget-text-secondary: #64748b;
+    --u-widget-border: #e2e8f0;
+    --u-widget-primary: #4f46e5;
+    --u-widget-positive: #16a34a;
+    --u-widget-negative: #dc2626;
+    --u-widget-warning: #d97706;
+
     /* ── Spacing ── */
     --u-widget-gap: 16px;
     --u-widget-radius: 6px;

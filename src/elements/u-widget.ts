@@ -41,12 +41,12 @@ export class UWidget extends LitElement {
       .error-card {
         padding: 10px 14px;
         border-radius: 6px;
-        border: 1px solid var(--u-widget-negative, #ef4444);
-        background: color-mix(in srgb, var(--u-widget-negative, #ef4444) 8%, var(--u-widget-bg, #fff));
+        border: 1px solid var(--u-widget-negative, #dc2626);
+        background: color-mix(in srgb, var(--u-widget-negative, #dc2626) 8%, var(--u-widget-bg, #fff));
         font-size: 0.8125rem;
       }
 
-      .error-header { font-weight: 600; color: var(--u-widget-negative, #ef4444); margin-bottom: 4px; }
+      .error-header { font-weight: 600; color: var(--u-widget-negative, #dc2626); margin-bottom: 4px; }
       .error-list { margin: 0; padding-left: 20px; color: var(--u-widget-text-secondary, #64748b); }
 
       .fallback-card {

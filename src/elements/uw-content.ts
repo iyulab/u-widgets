@@ -135,26 +135,26 @@ export class UwContent extends LitElement {
     }
 
     .callout-info {
-      background: color-mix(in srgb, var(--u-widget-primary, #3b82f6) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-primary, #3b82f6);
+      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-primary, #4f46e5);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-warning {
-      background: color-mix(in srgb, var(--u-widget-warning, #f59e0b) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-warning, #f59e0b);
+      background: color-mix(in srgb, var(--u-widget-warning, #d97706) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-warning, #d97706);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-error {
-      background: color-mix(in srgb, var(--u-widget-negative, #ef4444) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-negative, #ef4444);
+      background: color-mix(in srgb, var(--u-widget-negative, #dc2626) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-negative, #dc2626);
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .callout-success {
-      background: color-mix(in srgb, var(--u-widget-positive, #22c55e) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-positive, #22c55e);
+      background: color-mix(in srgb, var(--u-widget-positive, #16a34a) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-positive, #16a34a);
       color: var(--u-widget-text, #1a1a2e);
     }
 

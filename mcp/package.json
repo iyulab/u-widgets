@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets-mcp",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "MCP server for the u-widgets declarative widget system (uw-* internal prefix)",
   "type": "module",
   "main": "./dist/index.js",

@@ -105,7 +105,7 @@ export class UwMetric extends LitElement {
     .metric[data-variant="success"] .metric-value { color: var(--u-widget-positive, #16a34a); }
     .metric[data-variant="danger"] .metric-value { color: var(--u-widget-negative, #dc2626); }
     .metric[data-variant="warning"] .metric-value { color: var(--u-widget-warning, #d97706); }
-    .metric[data-variant="info"]    .metric-value { color: var(--u-widget-primary, #3b82f6); }
+    .metric[data-variant="info"]    .metric-value { color: var(--u-widget-primary, #4f46e5); }
     .metric[data-variant="neutral"] .metric-value { color: var(--u-widget-text-secondary, #64748b); }
 
     /* ── stat-group ── */
