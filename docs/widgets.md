@@ -51,6 +51,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `video` | HTML5 video player | — (uses `data.src`) |
 | `gallery` | Image gallery grid | — (uses data array) |
 | `kv` | Key-value pairs | — (uses data object) |
+| `math` | LaTeX math expression | — (uses `data.expression`) |
 
 ### Input
 
@@ -128,6 +129,33 @@ When `mapping` is omitted, the renderer infers it from data structure:
 | `showLabel` | `boolean` | pie | Show data labels |
 | `echarts` | `object` | all charts | Raw ECharts option passthrough |
 | `colorRange` | `[string, string]` | heatmap | 색상 범위 `["#e0f2fe","#0c4a6e"]` |
+
+## Math
+
+Requires the separate entry point and `katex` peer dependency:
+
+```ts
+import '@iyulab/u-widgets/math';
+```
+
+```json
+{ "widget": "math", "data": { "expression": "E = mc^2" } }
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `displayMode` | `boolean` | `false` | Block mode with centered large formula |
+
+**Display mode (block):**
+```json
+{
+  "widget": "math",
+  "data": { "expression": "\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}" },
+  "options": { "displayMode": true }
+}
+```
+
+Uses MathML output for zero-CSS Shadow DOM rendering. Invalid LaTeX shows an error message with the original expression.
 
 ## Actions
 

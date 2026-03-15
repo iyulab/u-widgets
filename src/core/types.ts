@@ -52,6 +52,7 @@ export type WidgetType =
   | 'rating'
   | 'video'
   | 'gallery'
+  | 'math'
   | 'actions'
   | 'divider'
   | 'header';

@@ -357,6 +357,11 @@ export class UWidget extends LitElement {
           widgetHtml = html`<uw-chart .spec=${resolved} theme=${t ?? nothing}></uw-chart>`;
           break;
         }
+        // math is handled by uw-math if loaded (separate entry point)
+        if (widget === 'math' && customElements.get('uw-math')) {
+          widgetHtml = html`<uw-math .spec=${resolved} theme=${t ?? nothing}></uw-math>`;
+          break;
+        }
         return this.renderFallback(resolved);
     }
 

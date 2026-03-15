@@ -28,9 +28,14 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(7 * 1024); // includes format.ts for axis label formatting
   });
 
-  it('tools bundle is under 12 KB gzip', () => {
+  it('tools bundle is under 13 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js'));
-    expect(size).toBeLessThan(12 * 1024); // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE
+    expect(size).toBeLessThan(13 * 1024); // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE
+  });
+
+  it('math bundle is under 2 KB gzip', () => {
+    const size = gzipSize(resolve(DIST, 'u-widgets-math.js'));
+    expect(size).toBeLessThan(2 * 1024);
   });
 
   it('forms bundle is under 2 KB gzip', () => {

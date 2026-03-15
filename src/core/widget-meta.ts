@@ -85,6 +85,8 @@ export const DATA_FIELD_DOCS: Readonly<Record<string, string>> = {
   url: 'Link URL',
   snippet: 'Excerpt or summary text',
   source: 'Source name or publisher',
+  // math
+  expression: 'LaTeX math expression string',
   // chart data
   group: 'Group / category identifier',
   min: 'Minimum stat value',
@@ -146,6 +148,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   muted: 'Start muted (default false, auto when autoplay)',
   // gallery
   aspectRatio: 'Image aspect ratio (e.g. "1:1", "16:9", default auto)',
+  // math
+  displayMode: 'Block mode with centered large formula (default false = inline)',
   // compose / kv / actions / divider / steps
   layout: 'Layout mode (stack, row, grid, horizontal, vertical, wrap, column)',
   columns: 'Number of grid columns',
@@ -207,6 +211,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'rating': ['max', 'interactive', 'icon', 'label'],
   'video': ['autoplay', 'controls', 'loop', 'muted'],
   'gallery': ['columns', 'aspectRatio'],
+  'math': ['displayMode'],
   'actions': ['layout'],
   'divider': [],
   'header': [],
@@ -262,6 +267,9 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'code': [
     { key: 'content', type: 'string', desc: 'Code text content', required: true },
     { key: 'language', type: 'string', desc: 'Language identifier (e.g. javascript, python, sql)' },
+  ],
+  'math': [
+    { key: 'expression', type: 'string', desc: 'LaTeX math expression', required: true },
   ],
   'header': [
     { key: 'text', type: 'string', desc: 'Heading text', required: true },
@@ -336,6 +344,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'gallery': 'No mapping. data is [{src, alt?, caption?}]. columns/aspectRatio in options.',
   'steps': 'No mapping. data is [{label, status?, description?, icon?}]. status: done/active/pending/error. icon: emoji/text override. layout: vertical/horizontal.',
   'rating': 'No mapping. data is {value?, max?}. options: interactive, icon (star/heart/thumb), max, label.',
+  'math': 'No mapping. data is {expression}. Renders LaTeX via KaTeX. displayMode in options.',
   'actions': 'No data. Uses actions[] array. layout in options (wrap/column).',
   'divider': 'No data. label/spacing in options.',
   'header': 'data is {text, level?}. level defaults to 2.',

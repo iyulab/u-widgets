@@ -1,6 +1,7 @@
-// Side-effect imports: register <u-widget> and <uw-chart> custom elements
+// Side-effect imports: register <u-widget> and <uw-chart>/<uw-math> custom elements
 import '../src/elements/u-widget.ts';
 import '../src/elements/uw-chart.ts';
+import '../src/elements/uw-math.ts';
 import { help } from '../src/core/catalog.ts';
 import { specSurface, type SpecSurface, type PropInfo } from '../src/core/spec-surface.ts';
 import { getWidgetEvents } from '../src/core/widget-meta.ts';
@@ -1337,6 +1338,37 @@ const catalog: Record<string, WidgetDoc> = {
       'Single status': {
         widget: 'status',
         data: { label: 'Build', value: 'Passing', level: 'success' },
+      },
+    },
+  },
+  math: {
+    label: 'Math',
+    group: 'Content',
+    ...meta('math'),
+    variants: {
+      'Simple inline': {
+        widget: 'math',
+        data: { expression: 'E = mc^2' },
+      },
+      'Display mode (block)': {
+        widget: 'math',
+        data: { expression: 'C_{pk} = \\min\\left(\\frac{USL - \\bar{x}}{3\\sigma},\\; \\frac{\\bar{x} - LSL}{3\\sigma}\\right)' },
+        options: { displayMode: true },
+      },
+      'Quadratic formula': {
+        widget: 'math',
+        data: { expression: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}' },
+        options: { displayMode: true },
+      },
+      'Integral': {
+        widget: 'math',
+        data: { expression: '\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}' },
+        options: { displayMode: true },
+      },
+      'OEE formula': {
+        widget: 'math',
+        data: { expression: 'OEE = \\frac{\\text{Good Count} \\times \\text{Ideal Cycle Time}}{\\text{Planned Production Time}}' },
+        options: { displayMode: true },
       },
     },
   },

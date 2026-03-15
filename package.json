@@ -24,13 +24,18 @@
       "types": "./dist/u-widgets-tools.d.ts",
       "import": "./dist/u-widgets-tools.js"
     },
+    "./math": {
+      "types": "./dist/u-widgets-math.d.ts",
+      "import": "./dist/u-widgets-math.js"
+    },
     "./themes/shadcn.css": "./dist/themes/shadcn.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
     "./dist/u-widgets.js",
     "./dist/u-widgets-charts.js",
-    "./dist/u-widgets-forms.js"
+    "./dist/u-widgets-forms.js",
+    "./dist/u-widgets-math.js"
   ],
   "files": [
     "dist",
@@ -73,13 +78,17 @@
   },
   "peerDependencies": {
     "@formdown/core": "^0.4.0",
-    "echarts": "^5.5.0 || ^6.0.0"
+    "echarts": "^5.5.0 || ^6.0.0",
+    "katex": "^0.16.0"
   },
   "peerDependenciesMeta": {
     "echarts": {
       "optional": true
     },
     "@formdown/core": {
+      "optional": true
+    },
+    "katex": {
       "optional": true
     }
   },
@@ -90,6 +99,7 @@
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "happy-dom": "^15.0.0",
+    "katex": "^0.16.38",
     "typescript": "~5.7.0",
     "typescript-eslint": "^8.0.0",
     "vite": "^6.0.0",

@@ -86,6 +86,7 @@ const CATALOG: readonly WidgetInfo[] = [
   { widget: 'video', category: 'content', description: 'Video player with controls, poster, and caption', mappingKeys: [], dataShape: 'object' },
   { widget: 'gallery', category: 'content', description: 'Image gallery grid with captions', mappingKeys: [], dataShape: 'array' },
   { widget: 'kv', category: 'content', description: 'Key-value pairs display (object or array of {key, value})', mappingKeys: [], dataShape: 'object' },
+  { widget: 'math', category: 'content', description: 'Render LaTeX mathematical expressions via KaTeX', mappingKeys: [], dataShape: 'object' },
   { widget: 'actions', category: 'content', description: 'Standalone action buttons (quick replies, suggested actions)', mappingKeys: [], dataShape: 'none' },
   { widget: 'divider', category: 'content', description: 'Visual separator with optional label', mappingKeys: [], dataShape: 'none' },
   { widget: 'header', category: 'content', description: 'Section heading (h1–h3)', mappingKeys: [], dataShape: 'object' },
@@ -255,7 +256,7 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   },
   'callout': {
     widget: 'callout',
-    data: { content: 'This is an informational callout.', variant: 'info' },
+    data: { message: 'This is an informational callout.', level: 'info' },
   },
   'code': {
     widget: 'code',
@@ -301,6 +302,10 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   'kv': {
     widget: 'kv',
     data: { status: 'Active', plan: 'Pro', expires: '2026-03-15' },
+  },
+  'math': {
+    widget: 'math',
+    data: { expression: 'E = mc^2' },
   },
   'actions': {
     widget: 'actions',
@@ -811,6 +816,23 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
         widget: 'kv',
         data: { CPU: '72%', Memory: '4.2 GB', Disk: '85%' },
         options: { layout: 'horizontal' },
+      },
+    },
+  ],
+  'math': [
+    {
+      label: 'Display mode (block)',
+      spec: {
+        widget: 'math',
+        data: { expression: 'C_{pk} = \\min\\left(\\frac{USL - \\bar{x}}{3\\sigma},\\; \\frac{\\bar{x} - LSL}{3\\sigma}\\right)' },
+        options: { displayMode: true },
+      },
+    },
+    {
+      label: 'Simple inline',
+      spec: {
+        widget: 'math',
+        data: { expression: 'a^2 + b^2 = c^2' },
       },
     },
   ],

@@ -34,11 +34,12 @@ export default defineConfig({
         'u-widgets-charts': resolve(__dirname, 'src/charts.ts'),
         'u-widgets-forms': resolve(__dirname, 'src/forms.ts'),
         'u-widgets-tools': resolve(__dirname, 'src/tools.ts'),
+        'u-widgets-math': resolve(__dirname, 'src/math.ts'),
       },
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//],
+      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex'],
       output: {
         globals: {
           lit: 'Lit',

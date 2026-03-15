@@ -1,6 +1,7 @@
-// Side-effect imports: register <u-widget> and <uw-chart> custom elements
+// Side-effect imports: register <u-widget> and optional entry point elements
 import '../src/elements/u-widget.ts';
 import '../src/elements/uw-chart.ts';
+import '../src/elements/uw-math.ts';
 
 // ── Demo Specs ──
 
@@ -307,6 +308,11 @@ const specs = {
       { src: 'https://placehold.co/300x200/ef4444/fff?text=4', alt: 'Image 4' },
     ],
   },
+  math: {
+    widget: 'math',
+    data: { expression: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}' },
+    options: { displayMode: true },
+  },
   code: {
     widget: 'code',
     data: {
@@ -418,6 +424,7 @@ bind('demo-markdown', specs.markdown);
 bind('demo-image', specs.image);
 bind('demo-callout', specs.callout);
 bind('demo-video', specs.video);
+bind('demo-math', specs.math);
 bind('demo-gallery', specs.gallery);
 bind('demo-code', specs.code);
 bind('demo-kv', specs.kv);

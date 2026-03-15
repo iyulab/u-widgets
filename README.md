@@ -33,6 +33,8 @@ npm install @iyulab/u-widgets
   import '@iyulab/u-widgets';
   // For chart support (requires echarts peer dependency):
   // import '@iyulab/u-widgets/charts';
+  // For math expression support (requires katex peer dependency):
+  // import '@iyulab/u-widgets/math';
 </script>
 
 <u-widget .spec=${{ widget: 'metric', data: { value: 42, unit: 'users' } }}></u-widget>
@@ -53,6 +55,7 @@ npm install @iyulab/u-widgets
 | `gauge`, `progress` | Value within range |
 | `table`, `list`, `kv` | Structured data |
 | `code`, `citation`, `status`, `steps`, `rating`, `video`, `gallery` | Content display |
+| `math` | LaTeX math expressions (requires `katex`) |
 | `form`, `confirm` | User input |
 | `compose` | Widget composition |
 
@@ -67,6 +70,9 @@ npm install @iyulab/u-widgets
 
 // Form
 { "widget": "form", "fields": [{ "field": "name", "type": "text", "required": true }], "actions": [{ "label": "Submit", "action": "submit" }] }
+
+// Math (requires u-widgets/math entry point)
+{ "widget": "math", "data": { "expression": "E = mc^2" } }
 
 // Compose
 { "widget": "compose", "layout": "grid", "children": [{ "widget": "metric", "data": { "value": 42 } }, { "widget": "gauge", "data": { "value": 73 } }] }

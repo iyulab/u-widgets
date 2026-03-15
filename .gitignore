@@ -5,6 +5,7 @@ docs/plans/
 CLAUDE.md
 nul
 .playwright-mcp/
+.serena/
 
 # Dependencies
 node_modules/

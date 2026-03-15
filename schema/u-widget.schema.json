@@ -19,7 +19,7 @@
         "form", "confirm",
         "markdown", "image", "callout",
         "kv", "code", "citation", "status", "steps",
-        "rating", "video", "gallery",
+        "rating", "video", "gallery", "math",
         "actions", "divider", "header"
       ],
       "description": "Widget type identifier"

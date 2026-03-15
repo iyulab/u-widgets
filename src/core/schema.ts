@@ -30,7 +30,7 @@ const ARRAY_DATA = new Set([
 ]);
 
 /** Widgets that expect an object for `data`. */
-const OBJECT_DATA = new Set(['metric', 'gauge', 'progress', 'header', 'code', 'rating', 'video']);
+const OBJECT_DATA = new Set(['metric', 'gauge', 'progress', 'header', 'code', 'rating', 'video', 'math']);
 
 /**
  * Validate a u-widget spec.
