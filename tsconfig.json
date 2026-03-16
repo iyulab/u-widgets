@@ -18,7 +18,11 @@
 
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+
+    "paths": {
+      "@iyulab/u-widgets": ["./src/index.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

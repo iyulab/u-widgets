@@ -35,11 +35,12 @@ export default defineConfig({
         'u-widgets-forms': resolve(__dirname, 'src/forms.ts'),
         'u-widgets-tools': resolve(__dirname, 'src/tools.ts'),
         'u-widgets-math': resolve(__dirname, 'src/math.ts'),
+        'u-widgets-react': resolve(__dirname, 'src/react.ts'),
       },
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex'],
+      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex', 'react', /^react\//, '@lit/react', /^@lit\/react\//, '@iyulab/u-widgets'],
       output: {
         globals: {
           lit: 'Lit',
@@ -66,6 +67,11 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      '@iyulab/u-widgets': resolve(__dirname, 'src/index.ts'),
+    },
+  },
   test: {
     globals: true,
     environment: 'happy-dom',

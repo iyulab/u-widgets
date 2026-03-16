@@ -69,6 +69,17 @@ describe('entry point: u-widgets/tools', () => {
   });
 });
 
+describe('entry point: u-widgets/react', () => {
+  it('exports UWidget React component', async () => {
+    // Import react entry — elements are already registered from index tests above,
+    // so we rely on the module cache via vite alias (no double-registration error).
+    const mod = await import('../../src/react.js');
+    expect(mod.UWidget).toBeDefined();
+    // createComponent returns a React.forwardRef object with $$typeof and render
+    expect(mod.UWidget).toHaveProperty('render');
+  });
+});
+
 describe('entry point: u-widgets/charts', () => {
   it('exports UChart and toEChartsOption', async () => {
     // Charts entry requires echarts mocks

@@ -28,6 +28,10 @@
       "types": "./dist/u-widgets-math.d.ts",
       "import": "./dist/u-widgets-math.js"
     },
+    "./react": {
+      "types": "./dist/u-widgets-react.d.ts",
+      "import": "./dist/u-widgets-react.js"
+    },
     "./themes/shadcn.css": "./dist/themes/shadcn.css"
   },
   "sideEffects": [
@@ -78,8 +82,10 @@
   },
   "peerDependencies": {
     "@formdown/core": "^0.4.0",
+    "@lit/react": "^1.0.0 || ^2.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
-    "katex": "^0.16.0"
+    "katex": "^0.16.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "echarts": {
@@ -90,16 +96,25 @@
     },
     "katex": {
       "optional": true
+    },
+    "@lit/react": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
     }
   },
   "devDependencies": {
+    "@lit/react": "^1.0.8",
     "@open-wc/testing": "^4.0.0",
     "@playwright/test": "^1.58.2",
+    "@types/react": "^19.2.14",
     "echarts": "^6.0.0",
     "eslint": "^9.0.0",
     "globals": "^15.0.0",
     "happy-dom": "^15.0.0",
     "katex": "^0.16.38",
+    "react": "^19.2.4",
     "typescript": "~5.7.0",
     "typescript-eslint": "^8.0.0",
     "vite": "^6.0.0",
