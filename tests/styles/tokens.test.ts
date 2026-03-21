@@ -69,16 +69,21 @@ describe('themeStyles', () => {
   });
 
   describe('dark mode', () => {
-    it('includes prefers-color-scheme dark media query', () => {
-      expect(cssText).toContain('prefers-color-scheme');
+    it('uses color-scheme for automatic dark/light adaptation', () => {
+      expect(cssText).toContain('color-scheme:');
+      expect(cssText).toContain('light dark');
     });
 
-    it('excludes theme="light" from auto dark mode', () => {
-      expect(cssText).toContain(':not([theme="light"])');
+    it('uses light-dark() for color tokens', () => {
+      expect(cssText).toContain('light-dark(');
     });
 
     it('includes manual theme="dark" selector', () => {
       expect(cssText).toContain('[theme="dark"]');
+    });
+
+    it('includes manual theme="light" selector', () => {
+      expect(cssText).toContain('[theme="light"]');
     });
   });
 

@@ -9,7 +9,7 @@ import type { UWidgetSpec } from '../core/types.js';
 export interface UWidgetElementProps {
   /** Widget spec — object (via property binding) or JSON string (via attribute). */
   spec?: UWidgetSpec | string;
-  /** Theme override. Omit for prefers-color-scheme auto-detection. */
+  /** Theme override. Omit for color-scheme auto-detection. */
   theme?: 'light' | 'dark';
   /** BCP 47 locale tag, e.g. 'ko-KR'. */
   locale?: string;

@@ -288,9 +288,8 @@ export class UwCode extends LitElement {
 
     .code-body {
       overflow: auto;
-      background: var(--u-widget-bg, #fff);
+      background: var(--u-widget-bg);
     }
-    :host([theme="dark"]) .code-body { background: #1e1e2e; }
 
     pre {
       margin: 0;
@@ -316,22 +315,16 @@ export class UwCode extends LitElement {
     }
 
     .line-hl {
-      background: rgba(79, 70, 229, 0.08);
+      background: light-dark(rgba(79, 70, 229, 0.08), rgba(79, 70, 229, 0.15));
       margin: 0 -12px;
       padding: 0 12px;
     }
-    :host([theme="dark"]) .line-hl { background: rgba(79, 70, 229, 0.15); }
 
     /* Syntax token colors */
-    .hl-k { color: #8b5cf6; }  /* keyword — purple */
-    .hl-s { color: #059669; }  /* string — green */
-    .hl-c { color: #94a3b8; font-style: italic; } /* comment — gray */
-    .hl-n { color: #d97706; }  /* number — amber */
-
-    :host([theme="dark"]) .hl-k { color: #a78bfa; }
-    :host([theme="dark"]) .hl-s { color: #34d399; }
-    :host([theme="dark"]) .hl-c { color: #64748b; }
-    :host([theme="dark"]) .hl-n { color: #fbbf24; }
+    .hl-k { color: light-dark(#8b5cf6, #a78bfa); }  /* keyword — purple */
+    .hl-s { color: light-dark(#059669, #34d399); }  /* string — green */
+    .hl-c { color: light-dark(#94a3b8, #64748b); font-style: italic; } /* comment — gray */
+    .hl-n { color: light-dark(#d97706, #fbbf24); }  /* number — amber */
 
     @container uw-code (max-width: 20rem) {
       pre { font-size: 0.75rem; padding: 8px; }

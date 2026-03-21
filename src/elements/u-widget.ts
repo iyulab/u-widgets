@@ -26,7 +26,7 @@ import './uw-gallery.js';
  * <u-widget> — Entry point router element.
  * Reads spec.widget and delegates to the appropriate sub-component.
  *
- * Supports theme attribute: theme="dark" | theme="light" | (auto via prefers-color-scheme)
+ * Supports theme attribute: theme="dark" | theme="light" | (auto via color-scheme inheritance)
  */
 @customElement('u-widget')
 export class UWidget extends LitElement {
@@ -226,7 +226,7 @@ export class UWidget extends LitElement {
   })
   spec: UWidgetSpec | null = null;
 
-  /** Theme override: "dark" | "light" | null (auto via prefers-color-scheme). */
+  /** Theme override: "dark" | "light" | null (auto via color-scheme inheritance). */
   @property({ type: String, reflect: true })
   theme: string | null = null;
 
