@@ -66,6 +66,12 @@ describe('themeStyles', () => {
       expect(cssText).toContain('--u-widget-shadow:');
       expect(cssText).toContain('--u-widget-shadow-hover:');
     });
+
+    it('defines chart color palette tokens', () => {
+      for (let i = 1; i <= 8; i++) {
+        expect(cssText).toContain(`--u-widget-chart-color-${i}:`);
+      }
+    });
   });
 
   describe('dark mode', () => {
@@ -74,8 +80,8 @@ describe('themeStyles', () => {
       expect(cssText).toContain('light dark');
     });
 
-    it('uses light-dark() for color tokens', () => {
-      expect(cssText).toContain('light-dark(');
+    it('uses @media prefers-color-scheme for dark mode', () => {
+      expect(cssText).toContain('prefers-color-scheme: dark');
     });
 
     it('includes manual theme="dark" selector', () => {
