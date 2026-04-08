@@ -18,9 +18,15 @@ interface MetricData {
   variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 }
 
-function toMetricData(data: Record<string, unknown>, locale?: string): MetricData {
+function toMetricData(
+  data: Record<string, unknown>,
+  locale?: string,
+  optionFormat?: string,
+): MetricData {
   const rawValue = data.value as number | string;
-  const format = data.format as string | undefined;
+  // 우선순위: 데이터 항목별 format > spec.options.format
+  // (stat-group은 항목별 format이 자연스럽고, 단일 metric은 options.format이 자연스러움)
+  const format = (data.format as string | undefined) ?? optionFormat;
   return {
     value: format ? formatValue(rawValue, format, locale) : (rawValue ?? 0),
     label: data.label as string | undefined,
@@ -156,21 +162,24 @@ export class UwMetric extends LitElement {
     if (!this.spec?.data) return nothing;
 
     const locale = this.spec.options?.locale as string | undefined;
+    const optionFormat = this.spec.options?.format as string | undefined;
 
     if (this.spec.widget === 'stat-group') {
-      return this.renderStatGroup(locale);
+      return this.renderStatGroup(locale, optionFormat);
     }
 
-    return this.renderMetric(toMetricData(this.spec.data as Record<string, unknown>, locale));
+    return this.renderMetric(
+      toMetricData(this.spec.data as Record<string, unknown>, locale, optionFormat),
+    );
   }
 
-  private renderStatGroup(locale?: string) {
+  private renderStatGroup(locale?: string, optionFormat?: string) {
     const items = this.spec!.data as Record<string, unknown>[];
     if (!Array.isArray(items)) return nothing;
 
     return html`
       <div class="stat-group" part="stat-group">
-        ${items.map((item) => this.renderMetric(toMetricData(item, locale)))}
+        ${items.map((item) => this.renderMetric(toMetricData(item, locale, optionFormat)))}
       </div>
     `;
   }

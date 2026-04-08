@@ -872,6 +872,28 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function buildAxisFormatter(fmt: AxisFormatOption, locale?: string): (value: number | string) => string {
   return (value: number | string) => {
     let result: string;
+    // Compact notation short-circuits formatValue — Intl.NumberFormat handles both
+    // number and currency compact formatting (e.g. `₩1.2억`, `$1.2M`).
+    if (fmt.compact && (fmt.type === 'number' || fmt.type === 'currency')) {
+      const num = Number(value);
+      if (!isNaN(num)) {
+        const nfOpts: Intl.NumberFormatOptions = {
+          notation: 'compact',
+          compactDisplay: 'short',
+          maximumFractionDigits: fmt.decimals ?? 1,
+        };
+        if (fmt.type === 'currency' && fmt.currency) {
+          nfOpts.style = 'currency';
+          nfOpts.currency = fmt.currency;
+        }
+        result = new Intl.NumberFormat(locale, nfOpts).format(num);
+      } else {
+        result = String(value);
+      }
+      if (fmt.prefix) result = fmt.prefix + result;
+      if (fmt.suffix) result = result + fmt.suffix;
+      return result;
+    }
     if (fmt.type) {
       const formatStr = fmt.type === 'currency' && fmt.currency
         ? `currency:${fmt.currency}`

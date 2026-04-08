@@ -278,6 +278,12 @@ export interface AxisFormatOption {
   currency?: string;
   /** Number of decimal places for numeric formats. */
   decimals?: number;
+  /**
+   * Use compact notation (e.g., `1.2M`, `₩1.2억`). Helpful when axis values span
+   * several orders of magnitude and full-length labels would overflow the label
+   * container. Applies to `number` and `currency` types.
+   */
+  compact?: boolean;
 }
 
 // ── Spec Envelope ──

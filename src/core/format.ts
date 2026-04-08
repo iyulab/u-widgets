@@ -17,7 +17,8 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * @param value - The value to format (coerced to number where needed).
  * @param format - Format hint, optionally with a parameter after `:` (e.g., `"currency:USD"`).
  * @param locale - BCP 47 locale tag for number/currency formatting. Falls back to browser default.
- * @returns Formatted string, or empty string if value is null/undefined.
+ * @returns Formatted string. Null/undefined values render as `—` (em-dash) so
+ * empty cells in tables/metrics are visually distinct from "0".
  *
  * @example
  * ```ts
@@ -25,10 +26,11 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
  * formatValue(73, 'percent')          // "73%"
  * formatValue(1536000, 'bytes')       // "1.5 MB"
+ * formatValue(null, 'currency:KRW')   // "—"
  * ```
  */
 export function formatValue(value: unknown, format?: string, locale?: string): string {
-  if (value == null) return '';
+  if (value == null) return '—';
 
   // Parse format string: 'currency:USD' → type='currency', param='USD'
   const [type, param] = format?.split(':') ?? [];
