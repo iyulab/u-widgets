@@ -372,7 +372,10 @@ export class UwTable extends LitElement {
     const sortable = this.spec!.options?.sortable !== false;
     const searchable = !!this.spec!.options?.searchable;
     const compact = !!this.spec!.options?.compact;
-    const pageSize = Number(this.spec!.options?.pageSize) || 0;
+    const rawPageSize = this.spec!.options?.pageSize;
+    const pageSize = rawPageSize != null
+      ? Number(rawPageSize)
+      : data.length > 1000 ? 100 : 0;
 
     // Pipeline: filter → sort → paginate
     const filtered = this._searchQuery ? this.filterData(data, columns) : data;

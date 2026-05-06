@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.4] - 2026-05-07
+
+### Fixed
+- `uw-table`: `pageSize` 미설정 시 1,000행 초과 데이터를 자동으로 100건씩 페이지네이션. 기존에는 전체 행을 한 번에 DOM 마운트하여 대용량 데이터에서 성능 저하 발생. `spec.options.pageSize: 0`으로 명시한 기존 소비자는 영향 없음
+
 ## [0.4.0] - 2026-02-18
 
 ### Added
