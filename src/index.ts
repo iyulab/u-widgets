@@ -46,3 +46,6 @@ export type { UWidgetLocaleStrings } from './core/locale.js';
 export type { UWidgetElementProps } from './types/jsx.js';
 
 export { UWidget } from './elements/u-widget.js';
+
+import { installGlobalThemeSync } from './theme-sync.js';
+installGlobalThemeSync();
