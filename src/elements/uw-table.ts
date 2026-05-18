@@ -29,7 +29,7 @@ export class UwTable extends LitElement {
     }
 
     table {
-      width: 100%;
+      min-width: 100%;
       border-collapse: collapse;
       font-size: 0.875rem;
     }
@@ -67,6 +67,7 @@ export class UwTable extends LitElement {
       padding: 8px 12px;
       border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
       color: var(--u-widget-text, #1a1a2e);
+      white-space: nowrap;
     }
 
     tbody tr {
