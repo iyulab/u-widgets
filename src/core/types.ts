@@ -264,8 +264,15 @@ export interface ReferenceLineOption {
 
 /**
  * Axis label format option for chart X/Y axes.
- * Used in `options.xFormat` / `options.yFormat` to format axis tick labels.
- * Leverages the same format system as `formatValue()`.
+ *
+ * Physical axis keys: `options.xFormat` / `options.yFormat`
+ *
+ * Semantic aliases for cartesian charts (bar/line/area):
+ * - `options.valueAxisFormat` — formats the value axis regardless of orientation.
+ *   In horizontal mode the value axis is xAxis; in vertical mode it is yAxis.
+ * - `options.categoryAxisFormat` — formats the category axis regardless of orientation.
+ *
+ * Prefer the semantic aliases when using `horizontal: true` to avoid confusion.
  */
 export interface AxisFormatOption {
   /** Format type — delegates to `formatValue()`. */

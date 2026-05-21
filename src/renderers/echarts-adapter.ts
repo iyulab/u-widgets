@@ -115,6 +115,18 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   applyAxisFormat(result, 'xAxis', options.xFormat as AxisFormatOption | undefined, locale);
   applyAxisFormat(result, 'yAxis', options.yFormat as AxisFormatOption | undefined, locale);
 
+  // Semantic aliases: valueAxisFormat / categoryAxisFormat route to the value or category
+  // axis regardless of horizontal orientation. In horizontal bar/line/area, the value axis
+  // is xAxis and the category axis is yAxis — the reverse of vertical orientation.
+  const isCartesian = widget === 'chart.bar' || widget === 'chart.line' || widget === 'chart.area';
+  if (isCartesian && (options.valueAxisFormat || options.categoryAxisFormat)) {
+    const horizontal = !!options.horizontal;
+    const valueKey: 'xAxis' | 'yAxis' = horizontal ? 'xAxis' : 'yAxis';
+    const catKey: 'xAxis' | 'yAxis' = horizontal ? 'yAxis' : 'xAxis';
+    applyAxisFormat(result, valueKey, options.valueAxisFormat as AxisFormatOption | undefined, locale);
+    applyAxisFormat(result, catKey, options.categoryAxisFormat as AxisFormatOption | undefined, locale);
+  }
+
   // Apply echarts passthrough: deep-merge
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
