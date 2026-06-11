@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.8] - 2026-06-11
+
+### Fixed
+- `theme-sync`: import 시점 자동 초기화가 SSR DOM shim 환경(@lit-labs/ssr 등)에서 throw하여 소비자 모듈 로드 자체가 실패하던 문제 수정 — `documentElement`/`querySelectorAll`/`MutationObserver` 부재 시 no-op으로 통과 (ISSUE-20260610-uwidgets-themesync-ssr-unsafe)
+
+### Added
+- `options.echarts` passthrough에 미등록 ECharts 컴포넌트 키(`dataZoom`, `toolbox`, `title` 등)가 전달되면 키당 1회 콘솔 경고 출력 — 옵션은 병합되지만 런타임에 동작하지 않는 false affordance 방지 (ISSUE-20260609-uwidgets-echarts-datazoom-passthrough). 헤비 인터랙션(zoom/pan/toolbox)은 `@iyulab/flex-chart`가 담당 예정
+
 ## [0.11.4] - 2026-05-07
 
 ### Fixed

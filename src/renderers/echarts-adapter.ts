@@ -34,6 +34,12 @@ function matchConditionalStyle(
  * Supports `options.echarts` passthrough: any key-value pairs in
  * `options.echarts` are deep-merged (one level) into the generated
  * ECharts option, allowing full customization.
+ *
+ * Limitation: passthrough merges option objects only — it does not register
+ * the ECharts component modules those options require. Keys like `dataZoom`,
+ * `toolbox`, or `title` (see UNREGISTERED_COMPONENT_KEYS) are merged but stay
+ * inactive at runtime, and a one-time console warning is emitted. For heavy
+ * interactions (zoom/pan/toolbox), use `@iyulab/flex-chart` instead.
  */
 export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   const widget = spec.widget;
@@ -130,10 +136,39 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   // Apply echarts passthrough: deep-merge
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
+    warnUnregisteredComponentKeys(passthrough);
     result = deepMerge(result, passthrough);
   }
 
   return result;
+}
+
+/**
+ * Top-level ECharts option keys whose component modules u-widgets does NOT
+ * register (tree-shakeable build — see echarts.use([...]) in uw-chart.ts).
+ * Passing them via `options.echarts` merges the option but the feature stays
+ * inactive at runtime, so we warn to avoid a false affordance.
+ * Heavy interactions (zoom/pan/toolbox) belong to @iyulab/flex-chart.
+ */
+const UNREGISTERED_COMPONENT_KEYS = new Set([
+  'title', 'dataZoom', 'toolbox', 'brush', 'timeline', 'calendar',
+  'graphic', 'dataset', 'polar', 'geo', 'singleAxis', 'parallel',
+  'parallelAxis', 'axisPointer', 'aria',
+]);
+
+const warnedKeys = new Set<string>();
+
+function warnUnregisteredComponentKeys(passthrough: Record<string, unknown>): void {
+  for (const key of Object.keys(passthrough)) {
+    if (!UNREGISTERED_COMPONENT_KEYS.has(key) || warnedKeys.has(key)) continue;
+    warnedKeys.add(key);
+    console.warn(
+      `[u-widgets] options.echarts.${key} requires an ECharts component that ` +
+      `u-widgets does not register (tree-shakeable build). The option is merged ` +
+      `but will not work at runtime. For heavy interactions (zoom/pan/toolbox), ` +
+      `use @iyulab/flex-chart instead.`,
+    );
+  }
 }
 
 function buildCartesian(
