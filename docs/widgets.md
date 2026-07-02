@@ -252,6 +252,22 @@ CSS custom properties on any ancestor element:
 }
 ```
 
+### `data-theme` 자동 동기화
+
+`u-widgets`를 import하면 `installGlobalThemeSync()`가 **자동 실행**된다(옵트인 불필요). 이 함수는:
+
+- `document.documentElement`의 `data-theme` 속성(`"dark"` | 그 외)을 `MutationObserver`로 감시
+- 새로 추가되는 `<u-widget>` 노드를 감시(`document.body` 하위 `childList`/`subtree`)
+- 감지 시 모든 `<u-widget>`에 `theme="dark"` 또는 `theme="light"` 속성을 자동 전파
+
+```html
+<html data-theme="dark">
+  <!-- 이 안의 모든 <u-widget>이 자동으로 theme="dark"를 받는다 -->
+</html>
+```
+
+**직접 `installGlobalThemeSync`를 호출하거나 동일한 `MutationObserver`를 재구현할 필요가 없다** — 별도의 테마 동기화 로직을 앱에서 구현하면 동일 DOM을 감시하는 옵저버가 중복 설치되어 오버헤드가 배가된다. `theme` 속성을 개별 위젯에 수동으로 지정하고 싶을 때만 `<u-widget theme="dark">`처럼 직접 설정하면 된다(자동 동기화보다 우선 적용되지 않으므로, 수동 관리가 필요하면 `data-theme` 자체를 쓰지 않는 편이 낫다).
+
 ### Shadcn/ui + Tailwind 통합
 
 Shadcn/ui 또는 Tailwind CSS 4 프로젝트에서는 공식 프리셋을 임포트하세요:

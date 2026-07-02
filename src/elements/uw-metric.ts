@@ -18,6 +18,23 @@ interface MetricData {
   variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 }
 
+const VALID_VARIANTS = new Set(['success', 'warning', 'danger', 'info', 'neutral']);
+const warnedVariants = new Set<string>();
+
+function normalizeVariant(variant: unknown): MetricData['variant'] {
+  if (variant == null) return undefined;
+  if (VALID_VARIANTS.has(variant as string)) return variant as MetricData['variant'];
+  const key = String(variant);
+  if (!warnedVariants.has(key)) {
+    warnedVariants.add(key);
+    console.warn(
+      `[uw-metric] Unknown variant "${key}" — expected one of ${[...VALID_VARIANTS].join(', ')}. ` +
+      `Falling back to default styling.`,
+    );
+  }
+  return undefined;
+}
+
 function toMetricData(
   data: Record<string, unknown>,
   locale?: string,
@@ -38,7 +55,7 @@ function toMetricData(
     icon: data.icon as string | undefined,
     description: data.description as string | undefined,
     format: data.format as string | undefined,
-    variant: data.variant as MetricData['variant'],
+    variant: normalizeVariant(data.variant),
   };
 }
 

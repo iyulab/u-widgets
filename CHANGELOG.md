@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.9] - 2026-07-02
+
+### Fixed
+- `UWidgetColumnDefinition.format` 타입이 `currency:${string}` 형태를 허용하지 않아 JSDoc·런타임(`formatValue`)이 이미 지원하는 `"currency:KRW"` 같은 값을 지정할 때마다 `as unknown as` 캐스트가 필요했던 문제 수정 — 템플릿 리터럴 타입 추가(하위 호환)
+- `uw-metric`의 `variant`가 유효하지 않은 값(예: `'default'`)을 받으면 타입 캐스트만 거쳐 조용히 no-op 렌더링되던 문제 — 알 수 없는 variant 값에 대해 콘솔 경고(값당 1회)를 추가하고 기본 스타일로 폴백
+
+### Documentation
+- `docs/widgets.md`에 `installGlobalThemeSync()` auto-run 동작(import 시점 자동 실행, `data-theme` 감시·전파 메커니즘) 문서화 — 기존에 문서화되지 않아 소비자가 동일 기능을 중복 구현하는 사례 발생
+
 ## [0.11.8] - 2026-06-11
 
 ### Fixed
