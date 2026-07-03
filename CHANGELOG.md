@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.10] - 2026-07-03
+
+### Fixed
+- `uw-metric`: 좁은 카드(모바일 2열 stat-group)에서 큰 통화 값(예: `₩5,122,661,618`)이 천단위 그룹 중간에서 줄바꿈되던 문제 수정. `.metric-value`에 `white-space: nowrap`을 지정해 한 줄을 유지하고, 이미 존재하던 `container: uw-metric / inline-size` 기준으로 카드 폭 티어(16rem → 1.25rem, 12rem → 1.05rem) container 쿼리를 추가해 좁은 카드에서 폰트를 줄여 맞춘다. `part="value"`가 노출되지만 `u-widget` 래퍼의 중첩 shadow DOM(exportparts 없음)에 막혀 소비자 `::part(value)` CSS로 도달 불가하므로 업스트림 수정. yesung-oms dogfooding에서 발견.
+
 ## [0.11.9] - 2026-07-02
 
 ### Fixed

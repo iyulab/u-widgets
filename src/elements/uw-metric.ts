@@ -80,11 +80,26 @@ export class UwMetric extends LitElement {
       font-weight: 700;
       line-height: 1.1;
       color: var(--u-widget-text, #1a1a2e);
+      /* 큰 수치(예: 통화 억/조 단위)가 천단위 그룹 중간에서 줄바꿈되면 가독성이 크게 떨어진다.
+         한 줄 유지하고, 좁은 카드에서는 아래 container 쿼리로 폰트를 줄여 맞춘다. */
+      white-space: nowrap;
     }
 
     @container uw-metric (max-width: 30rem) {
       .metric-value {
         font-size: 1.5rem;
+      }
+    }
+
+    @container uw-metric (max-width: 16rem) {
+      .metric-value {
+        font-size: 1.25rem;
+      }
+    }
+
+    @container uw-metric (max-width: 12rem) {
+      .metric-value {
+        font-size: 1.05rem;
       }
     }
 
