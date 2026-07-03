@@ -138,6 +138,34 @@ widget.addEventListener('u-widget-event', (e) => {
 });
 ```
 
+## React
+
+`@iyulab/u-widgets/react` 서브패스가 `<u-widget>`의 일급 React 래퍼 `UWidget`을 제공합니다. `spec`을 문자열로 직렬화(`JSON.stringify`)하지 않고 객체 prop으로 그대로 넘길 수 있으며, `u-widget-event`는 `onWidgetEvent` 콜백 prop으로 노출됩니다.
+
+베이스 패키지를 별도로 import해 커스텀 엘리먼트를 등록해야 합니다. `@lit/react`·`react`는 peerDependency이므로 함께 설치합니다.
+
+```bash
+npm install @iyulab/u-widgets @lit/react react
+```
+
+```tsx
+import '@iyulab/u-widgets';                        // <u-widget> 등록 (side-effect)
+import { UWidget } from '@iyulab/u-widgets/react';
+import type { UWidgetSpec } from '@iyulab/u-widgets/react';
+
+function Dashboard() {
+  return (
+    <UWidget
+      spec={{ widget: 'stat-group', data: { value: 42 } }}
+      onWidgetEvent={(e) => console.log(e.detail)} // e.detail: UWidgetEvent
+    />
+  );
+}
+```
+
+- `UWidgetSpec`/`UWidgetEvent`/`UWidgetAction` 타입도 함께 re-export됩니다. `onWidgetEvent`은 `CustomEvent`를 받고 `e.detail`이 `UWidgetEvent` 페이로드입니다.
+- 손수 `<u-widget spec={JSON.stringify(spec)} />` 래퍼를 만들 필요가 없습니다 — 이 공식 래퍼가 객체 spec·타입드 이벤트를 처리합니다.
+
 ## MCP Server
 
 AI assistants can use u-widgets via [MCP server](docs/mcp-server.md):
@@ -152,15 +180,17 @@ u-widgets is a browser-only Web Component library — it requires DOM APIs (`cus
 
 ### Next.js (App Router)
 
-Create a client-side wrapper component:
+Wrap the official `UWidget` React wrapper (위 [React](#react) 참고) in a client component so it registers the element and stays out of Server Components:
 
 ```tsx
 // components/widget.tsx
 "use client";
-import "@iyulab/u-widgets";
+import "@iyulab/u-widgets";                        // <u-widget> 등록
+import { UWidget } from "@iyulab/u-widgets/react";
+import type { UWidgetSpec } from "@iyulab/u-widgets/react";
 
-export function Widget({ spec }: { spec: object }) {
-  return <u-widget spec={JSON.stringify(spec)} />;
+export function Widget({ spec }: { spec: UWidgetSpec }) {
+  return <UWidget spec={spec} />;
 }
 ```
 

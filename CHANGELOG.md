@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.11] - 2026-07-03
+
+### Documentation
+- `README.md`에 `## React` 섹션 신설 — `@iyulab/u-widgets/react` 서브패스가 제공하는 공식 래퍼 `UWidget`(객체 `spec` prop·`onWidgetEvent` 타입드 이벤트·`UWidgetSpec/UWidgetEvent/UWidgetAction` 타입 re-export·peerDependency 안내)을 문서화. 그동안 `/react` 서브패스가 존재함에도 README에 전혀 노출되지 않아 소비자가 공식 래퍼를 발견하지 못했다.
+- `## Framework Integration`의 Next.js 예제를 공식 래퍼 사용으로 교정 — 기존 예제는 `<u-widget spec={JSON.stringify(spec)} />` 손수 래퍼를 만들도록 안내해, 같은 패키지에 객체 spec·타입드 이벤트를 처리하는 공식 `UWidget` 래퍼가 있는데도 소비자를 수동 직렬화 우회로 유도하고 있었다.
+
 ## [0.11.10] - 2026-07-03
 
 ### Fixed
