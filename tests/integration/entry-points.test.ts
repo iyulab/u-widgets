@@ -93,7 +93,7 @@ describe('entry point: u-widgets/charts', () => {
     vi.doMock('echarts/charts', () => ({
       BarChart: {}, LineChart: {}, PieChart: {}, ScatterChart: {},
       RadarChart: {}, HeatmapChart: {}, BoxplotChart: {}, FunnelChart: {},
-      TreemapChart: {},
+      TreemapChart: {}, CustomChart: {},
     }));
     vi.doMock('echarts/components', () => ({
       GridComponent: {}, TooltipComponent: {}, LegendComponent: {},

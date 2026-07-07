@@ -2,9 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { formatValue } from '../../src/core/format.js';
 
 describe('formatValue', () => {
-  it('returns empty string for null', () => {
-    expect(formatValue(null)).toBe('');
-    expect(formatValue(undefined)).toBe('');
+  it('returns em-dash for null/undefined', () => {
+    // fc4e03e: null/undefined는 의도적으로 em-dash(—)로 렌더 (format.ts JSDoc 참조)
+    expect(formatValue(null)).toBe('—');
+    expect(formatValue(undefined)).toBe('—');
   });
 
   it('returns string as-is when no format', () => {

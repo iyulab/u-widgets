@@ -107,6 +107,40 @@ describe('uw-table', () => {
       expect(th?.getAttribute('data-align')).toBe('right');
     });
 
+    it('applies variant highlight to column cells', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [{ metric: 'Yield', value: 98 }],
+        mapping: {
+          columns: [
+            { field: 'metric', label: 'Metric' },
+            { field: 'value', label: 'Value', variant: 'success' },
+          ],
+        },
+      });
+      const shadow = await render(el);
+      const tds = shadow.querySelectorAll('tbody td');
+      expect(tds[0]?.getAttribute('data-variant')).toBeNull();
+      expect(tds[1]?.getAttribute('data-variant')).toBe('success');
+    });
+
+    it('ignores an unknown variant and warns once', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const el = createElement({
+        widget: 'table',
+        data: [{ value: 1 }],
+        mapping: {
+          columns: [{ field: 'value', variant: 'primary' }],
+        },
+      });
+      const shadow = await render(el);
+      const td = shadow.querySelector('tbody td');
+      expect(td?.getAttribute('data-variant')).toBeNull();
+      expect(warnSpy).toHaveBeenCalled();
+      expect(String(warnSpy.mock.calls[0][0])).toContain('primary');
+      warnSpy.mockRestore();
+    });
+
     it('renders nothing when no data', async () => {
       const el = createElement({ widget: 'table' });
       const shadow = await render(el);

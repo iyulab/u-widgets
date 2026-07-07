@@ -35,6 +35,7 @@ vi.mock('echarts/charts', () => ({
   BoxplotChart: {},
   FunnelChart: {},
   TreemapChart: {},
+  CustomChart: {},
 }));
 
 vi.mock('echarts/components', () => ({

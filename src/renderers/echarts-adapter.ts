@@ -140,6 +140,10 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
     result = deepMerge(result, passthrough);
   }
 
+  // Guard series-type false affordance: catches both options.series[i].type
+  // overrides and options.echarts.series passthrough at the final assembly point.
+  warnUnregisteredSeriesTypes(result.series);
+
   return result;
 }
 
@@ -166,6 +170,38 @@ function warnUnregisteredComponentKeys(passthrough: Record<string, unknown>): vo
       `[u-widgets] options.echarts.${key} requires an ECharts component that ` +
       `u-widgets does not register (tree-shakeable build). The option is merged ` +
       `but will not work at runtime. For heavy interactions (zoom/pan/toolbox), ` +
+      `use @iyulab/flex-chart instead.`,
+    );
+  }
+}
+
+/**
+ * ECharts series `type` values whose chart modules u-widgets registers
+ * (see echarts.use([...]) in uw-chart.ts). A series requesting any other type —
+ * via `options.series[i].type` override or an `options.echarts.series[].type`
+ * passthrough — merges into the option but renders nothing at runtime (ECharts
+ * emits its own "Series <type> is used but not imported" warning), so we surface
+ * a u-widgets message that names the fix. Symmetric with UNREGISTERED_COMPONENT_KEYS,
+ * which guards the same false-affordance class for top-level component keys.
+ */
+const REGISTERED_SERIES_TYPES = new Set([
+  'bar', 'line', 'pie', 'scatter', 'radar',
+  'heatmap', 'boxplot', 'funnel', 'treemap', 'custom',
+]);
+
+const warnedSeriesTypes = new Set<string>();
+
+function warnUnregisteredSeriesTypes(series: unknown): void {
+  const list = Array.isArray(series) ? series : series != null ? [series] : [];
+  for (const s of list) {
+    if (!s || typeof s !== 'object') continue;
+    const type = (s as Record<string, unknown>).type;
+    if (typeof type !== 'string' || REGISTERED_SERIES_TYPES.has(type) || warnedSeriesTypes.has(type)) continue;
+    warnedSeriesTypes.add(type);
+    console.warn(
+      `[u-widgets] series type "${type}" requires an ECharts chart module that ` +
+      `u-widgets does not register (tree-shakeable build). The series is merged ` +
+      `but will not render at runtime. For advanced chart types, ` +
       `use @iyulab/flex-chart instead.`,
     );
   }

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] - 2026-07-07
+
+### Added
+- `chart.*`: ECharts **CustomChart(custom series)** 등록 — `options.series[i].type: "custom"` 또는 `options.echarts` passthrough로 custom `renderItem`(Gantt/타임라인 등)을 주입하면 이제 바로 렌더된다. 기존에는 임의 series `type` 오버라이드를 허용하면서 CustomChart만 미등록이어서 `[ECharts] Series custom is used but not imported` 경고 후 무음 미렌더되던 비대칭을 해소. online-tools(quality) dogfooding에서 발견. 소비자 앱측 `use([CustomChart])` 워크어라운드 제거 가능.
+- `uw-chart`/echarts-adapter: **미등록 series-type 어포던스 가드** 신설 — `options.series[i].type` 오버라이드와 `options.echarts.series[].type` passthrough가 미등록 series(`graph`/`sankey`/`gauge`/`sunburst` 등)를 요청하면, raw ECharts 경고 대신 u-widgets dev 경고 + `@iyulab/flex-chart` 리디렉트를 출력한다. 등록 series는 `bar`/`line`/`pie`/`scatter`/`radar`/`heatmap`/`boxplot`/`funnel`/`treemap`/`custom`. 컴포넌트 키 가드(`dataZoom`/`toolbox` 등)와 대칭 완성 — tree-shakeable 빌드의 false-affordance를 series 클래스까지 확장.
+- `uw-table`: **컬럼 강조(`variant`)** — `UWidgetColumnDefinition`에 `variant?: 'success'|'warning'|'danger'|'info'|'neutral'` 추가. 지정 시 해당 컬럼 셀에 `font-weight:600` + `uw-metric`과 동일한 `--u-widget-*` 색 토큰을 적용해 핵심 열을 강조한다. 그동안 stat-group(`uw-metric`)만 `variant` 강조가 가능하고 `table`은 강조 렌더 경로가 없던 카탈로그 내 표현력 비대칭을 해소. 미등록 variant는 warn-once 후 default fallback. schema `columnDefinition`에도 반영. chemical/batch dogfooding에서 발견.
+
+### Fixed
+- `tests/core/format.test.ts`: `formatValue(null)`이 빈 문자열을 기대하던 stale 테스트를 수정 — 0.11.x의 em-dash(`—`) null 렌더링(의도된 동작, JSDoc 문서화됨)과 불일치했다.
+
 ## [0.11.11] - 2026-07-03
 
 ### Documentation

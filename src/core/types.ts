@@ -76,6 +76,12 @@ export interface UWidgetColumnDefinition {
   format?: 'number' | 'currency' | `currency:${string}` | 'percent' | 'date' | 'datetime' | 'bytes';
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
+  /**
+   * Semantic emphasis applied to this column's cells (bold + color token).
+   * Reuses uw-metric's variant vocabulary so highlight semantics stay
+   * consistent across the widget catalog.
+   */
+  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 }
 
 /**

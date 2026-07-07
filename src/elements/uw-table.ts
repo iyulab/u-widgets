@@ -7,6 +7,27 @@ import { themeStyles } from '../styles/tokens.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
+const VALID_COLUMN_VARIANTS = new Set(['success', 'warning', 'danger', 'info', 'neutral']);
+const warnedColumnVariants = new Set<string>();
+
+/**
+ * Validate a column variant, warning once on unknown values (mirrors uw-metric's
+ * normalizeVariant so an invalid highlight fails loudly rather than silently).
+ */
+function normalizeColumnVariant(variant: unknown): UWidgetColumnDefinition['variant'] {
+  if (variant == null) return undefined;
+  if (VALID_COLUMN_VARIANTS.has(variant as string)) return variant as UWidgetColumnDefinition['variant'];
+  const key = String(variant);
+  if (!warnedColumnVariants.has(key)) {
+    warnedColumnVariants.add(key);
+    console.warn(
+      `[uw-table] Unknown column variant "${key}" — expected one of ${[...VALID_COLUMN_VARIANTS].join(', ')}. ` +
+      `Falling back to default styling.`,
+    );
+  }
+  return undefined;
+}
+
 @customElement('uw-table')
 export class UwTable extends LitElement {
   static styles = [themeStyles, css`
@@ -99,6 +120,26 @@ export class UwTable extends LitElement {
     th[data-align='right'],
     td[data-align='right'] {
       text-align: right;
+    }
+
+    /* ── column variant highlight (mirrors uw-metric variant tokens) ── */
+    td[data-variant] {
+      font-weight: 600;
+    }
+    td[data-variant='success'] {
+      color: var(--u-widget-positive, #16a34a);
+    }
+    td[data-variant='danger'] {
+      color: var(--u-widget-negative, #dc2626);
+    }
+    td[data-variant='warning'] {
+      color: var(--u-widget-warning, #d97706);
+    }
+    td[data-variant='info'] {
+      color: var(--u-widget-primary, #4f46e5);
+    }
+    td[data-variant='neutral'] {
+      color: var(--u-widget-text-secondary, #64748b);
     }
 
     /* ── list ── */
@@ -450,7 +491,7 @@ export class UwTable extends LitElement {
                 >
                   ${columns.map(
                     (col) =>
-                      html`<td data-align=${col.align ?? 'left'} part="td"
+                      html`<td data-align=${col.align ?? 'left'} data-variant=${normalizeColumnVariant(col.variant) ?? nothing} part="td"
                         >${formatValue(row[col.field], col.format, typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined)}</td
                       >`,
                   )}

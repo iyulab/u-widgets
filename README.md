@@ -115,6 +115,18 @@ XY charts (`chart.bar`, `chart.line`, `chart.area`, `chart.scatter`) support dec
 
 Each entry in `options.series` maps 1:1 to the `mapping.y` array. Supported overrides: `color`, `lineStyle`, `symbol`, `label`, `type`, `yAxisIndex`.
 
+The `type` override (and `options.echarts.series[].type` passthrough) may only request a registered series: `bar`, `line`, `pie`, `scatter`, `radar`, `heatmap`, `boxplot`, `funnel`, `treemap`, `custom`. Any other type (`graph`, `sankey`, `gauge`, `sunburst`, …) merges into the option but does not render — u-widgets emits a dev warning pointing to [`@iyulab/flex-chart`](https://www.npmjs.com/package/@iyulab/flex-chart) for advanced chart types (this is the same tree-shakeable boundary as heavy interaction components like `dataZoom`/`toolbox`).
+
+`custom` (ECharts custom series, e.g. Gantt/timeline) is registered and renders directly, **but supply it via `options.echarts` passthrough, not `options.series`** — the `options.series` per-entry override only carries the style keys listed above (`color`/`lineStyle`/`symbol`/`label`/`type`/`yAxisIndex`), so a custom series' `renderItem`/`encode` would be dropped:
+
+```json
+{
+  "widget": "chart.bar",
+  "data": [{ "task": "Design", "start": 0, "end": 3 }],
+  "options": { "echarts": { "series": [{ "type": "custom", "renderItem": "…" }] } }
+}
+```
+
 ### Axis Label Format
 
 ```json

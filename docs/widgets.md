@@ -80,8 +80,8 @@ When `mapping` is omitted, the renderer infers it from data structure:
 // Chart
 "mapping": { "x": "fieldName", "y": ["field1", "field2"], "color": "fieldName" }
 
-// Table
-"mapping": { "columns": [{ "field": "id", "label": "ID", "format": "number", "align": "right" }] }
+// Table (optional `variant` bolds + colors a column's cells: success|warning|danger|info|neutral)
+"mapping": { "columns": [{ "field": "id", "label": "ID", "format": "number", "align": "right" }, { "field": "yield", "label": "Yield", "variant": "success" }] }
 
 // List
 "mapping": { "primary": "name", "secondary": "description", "avatar": "imageUrl", "trailing": "score" }

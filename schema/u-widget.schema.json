@@ -274,6 +274,11 @@
           "type": "string",
           "enum": ["left", "center", "right"],
           "description": "Column alignment"
+        },
+        "variant": {
+          "type": "string",
+          "enum": ["success", "warning", "danger", "info", "neutral"],
+          "description": "Semantic emphasis for this column's cells (bold + color token, mirrors uw-metric variant)"
         }
       },
       "required": ["field"],

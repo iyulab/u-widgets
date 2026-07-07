@@ -6,7 +6,7 @@ import { themeStyles } from '../styles/tokens.js';
 
 // Tree-shakeable ECharts imports
 import * as echarts from 'echarts/core';
-import { BarChart, LineChart, PieChart, ScatterChart, RadarChart, HeatmapChart, BoxplotChart, FunnelChart, TreemapChart } from 'echarts/charts';
+import { BarChart, LineChart, PieChart, ScatterChart, RadarChart, HeatmapChart, BoxplotChart, FunnelChart, TreemapChart, CustomChart } from 'echarts/charts';
 import {
   GridComponent,
   TooltipComponent,
@@ -27,6 +27,7 @@ echarts.use([
   BoxplotChart,
   FunnelChart,
   TreemapChart,
+  CustomChart,
   GridComponent,
   TooltipComponent,
   LegendComponent,
