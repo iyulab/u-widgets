@@ -1085,6 +1085,33 @@ describe('toEChartsOption', () => {
       }));
       expect(result.tooltip).toBeDefined();
     });
+
+    it('parent without explicit value omits value so ECharts sums children', () => {
+      // value: 0을 명시하면 ECharts는 children 합산 대신 면적 0으로 렌더 → 트리맵 전체가 빈 화면(무음 결함)
+      const result = toEChartsOption(spec({
+        widget: 'chart.treemap',
+        data: [
+          {
+            name: 'Engineering', children: [
+              { name: 'Frontend', value: 12 },
+              { name: 'Backend', value: 18 },
+            ],
+          },
+        ],
+      }));
+      const data = (result.series as ObjArray)[0].data as ObjArray;
+      expect(data[0].value).toBeUndefined();
+      expect((data[0].children as ObjArray)[0].value).toBe(12);
+    });
+
+    it('leaf without value still defaults to 0', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.treemap',
+        data: [{ name: 'Empty' }],
+      }));
+      const data = (result.series as ObjArray)[0].data as ObjArray;
+      expect(data[0].value).toBe(0);
+    });
   });
 
   describe('options: conditionalStyles', () => {

@@ -11,20 +11,21 @@ async function waitForWidgets(page: Page) {
 }
 
 /**
- * Read text from the deepest shadow root of a u-widget.
- * Traverses: u-widget#shadow → inner-element#shadow → textContent
+ * Read text from a u-widget's shadow tree, including nested shadow roots.
+ * u-widget shadow 직속 텍스트(예: .widget-title)와 내부 컴포넌트(uw-form 등)의
+ * shadow 텍스트를 모두 합친다 — 첫 요소만 보는 순회는 title 렌더 시 버튼을 놓친다.
  */
 async function deepShadowText(page: Page, id: string): Promise<string> {
   return page.evaluate((hostId) => {
     const host = document.getElementById(hostId);
     if (!host?.shadowRoot) return '';
-    // Find the inner component (u-metric, u-table, u-gauge, etc.)
-    const inner = host.shadowRoot.querySelector('[class]') ??
-                  host.shadowRoot.children[0];
-    if (inner?.shadowRoot) {
-      return inner.shadowRoot.textContent?.trim() ?? '';
+    const parts: string[] = [host.shadowRoot.textContent?.trim() ?? ''];
+    for (const child of host.shadowRoot.querySelectorAll('*')) {
+      if (child.shadowRoot) {
+        parts.push(child.shadowRoot.textContent?.trim() ?? '');
+      }
     }
-    return host.shadowRoot.textContent?.trim() ?? '';
+    return parts.filter(Boolean).join(' ');
   }, id);
 }
 
@@ -122,6 +123,55 @@ test.describe('Display Widgets', () => {
     expect(text).toContain('Errors');
   });
 
+  test('stat-group: 7 items with long values never overlap', async ({ page }) => {
+    // 회귀 가드: ISSUE-20260713-uwidgets-statgroup-overlap
+    // 항목 7개 × 12자리+ 값에서 값 텍스트가 셀 폭을 넘으면(=이웃 셀 침범) 실패.
+    const result = await page.evaluate(() => {
+      const host = document.getElementById('demo-stat-group-long');
+      if (!host?.shadowRoot) return null;
+      for (const child of host.shadowRoot.querySelectorAll('*')) {
+        const metrics = child.shadowRoot?.querySelectorAll('.stat-group .metric');
+        if (!metrics?.length) continue;
+        const cells = [...metrics].map((m) => {
+          const value = m.querySelector('.metric-value') as HTMLElement;
+          const rect = m.getBoundingClientRect();
+          return {
+            top: Math.round(rect.top),
+            left: rect.left,
+            overflow: value ? value.scrollWidth - value.clientWidth : 0,
+          };
+        });
+        return { count: cells.length, cells };
+      }
+      return null;
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.count).toBe(7);
+    // 각 값 텍스트는 자기 셀 안에 들어가야 한다 (1px 반올림 허용)
+    for (const [i, cell] of result!.cells.entries()) {
+      expect(cell.overflow, `value #${i} overflows its cell by ${cell.overflow}px`)
+        .toBeLessThanOrEqual(1);
+    }
+    // 1280px 뷰포트에서 7개 장문 값은 한 줄에 못 들어간다 — wrap이 실제로 일어나야 함
+    const rowTops = new Set(result!.cells.map((c) => c.top));
+    expect(rowTops.size).toBeGreaterThanOrEqual(2);
+  });
+
+  test('metric variant renders danger color on value', async ({ page }) => {
+    // v0.11.9 variant — CSS-text 유닛 가드만으론 토큰 해석/셰도우 적용을 못 본다: 실렌더 색 검증
+    const color = await page.evaluate(() => {
+      const host = document.getElementById('demo-metric-variant');
+      if (!host?.shadowRoot) return null;
+      for (const child of host.shadowRoot.querySelectorAll('*')) {
+        const v = child.shadowRoot?.querySelector('.metric[data-variant="danger"] .metric-value');
+        if (v) return getComputedStyle(v).color;
+      }
+      return null;
+    });
+    expect(color).toBe('rgb(220, 38, 38)'); // --u-widget-negative default
+  });
+
   test('gauge renders arc', async ({ page }) => {
     const hasSvg = await deepShadowHas(page, 'demo-gauge', 'svg');
     expect(hasSvg).toBe(true);
@@ -150,6 +200,25 @@ test.describe('Data Widgets', () => {
     expect(text).toContain('Salary');
   });
 
+  test('table column variant highlights cells', async ({ page }) => {
+    // v0.12.0 컬럼 variant — 실렌더 색·굵기 검증
+    const style = await page.evaluate(() => {
+      const host = document.getElementById('demo-table');
+      if (!host?.shadowRoot) return null;
+      for (const child of host.shadowRoot.querySelectorAll('*')) {
+        const td = child.shadowRoot?.querySelector('td[data-variant="success"]');
+        if (td) {
+          const cs = getComputedStyle(td);
+          return { color: cs.color, weight: cs.fontWeight };
+        }
+      }
+      return null;
+    });
+    expect(style).not.toBeNull();
+    expect(style!.color).toBe('rgb(22, 163, 74)'); // --u-widget-positive default
+    expect(style!.weight).toBe('600');
+  });
+
   test('list renders items', async ({ page }) => {
     const itemCount = await deepShadowCount(page, 'demo-list', '.list-item');
     expect(itemCount).toBe(3);
@@ -170,7 +239,57 @@ test.describe('Chart Widgets', () => {
     'demo-chart-box',
     'demo-chart-heatmap',
     'demo-chart-radar',
+    'demo-chart-funnel',
+    'demo-chart-waterfall',
+    'demo-chart-treemap',
   ];
+
+  test('treemap renders visible tiles (not blank)', async ({ page }) => {
+    // 회귀 가드: 부모 노드 value:0 강제 주입 시 트리맵이 캔버스는 있지만 빈 화면으로
+    // 무음 실패한다 — 캔버스 존재 검사로는 못 잡으므로 픽셀 비율로 검증.
+    await page.waitForTimeout(1000);
+    const coloredRatio = await page.evaluate(() => {
+      const host = document.getElementById('demo-chart-treemap');
+      if (!host?.shadowRoot) return -1;
+      for (const child of host.shadowRoot.querySelectorAll('*')) {
+        const canvas = child.shadowRoot?.querySelector('canvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return -1;
+          const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+          let colored = 0;
+          for (let i = 0; i < img.length; i += 4) {
+            if (img[i + 3] > 0 && !(img[i] > 240 && img[i + 1] > 240 && img[i + 2] > 240)) colored++;
+          }
+          return colored / (img.length / 4);
+        }
+      }
+      return -1;
+    });
+    expect(coloredRatio).toBeGreaterThan(0.1);
+  });
+
+  test('custom series renders without unregistered-series warning', async ({ page }) => {
+    // v0.12.0 CustomChart 등록 — 미등록이면 dev 경고 후 무음 미렌더된다
+    const warnings: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'warning') warnings.push(msg.text());
+    });
+    await page.goto('/demo/');
+    await waitForWidgets(page);
+    await page.waitForTimeout(1500);
+
+    const hasCanvas = await page.evaluate(() => {
+      const widget = document.getElementById('demo-chart-custom');
+      if (!widget?.shadowRoot) return false;
+      for (const child of widget.shadowRoot.querySelectorAll('*')) {
+        if (child.shadowRoot?.querySelector('canvas')) return true;
+      }
+      return false;
+    });
+    expect(hasCanvas).toBe(true);
+    expect(warnings.filter((w) => w.includes('series type'))).toEqual([]);
+  });
 
   for (const id of chartIds) {
     test(`${id} renders canvas`, async ({ page }) => {

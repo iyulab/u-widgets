@@ -175,6 +175,30 @@ describe('uw-metric', () => {
       expect(shadow.querySelector('.stat-group')).not.toBeNull();
     });
 
+    it('wraps stat-group in clip container for row-leading dividers', async () => {
+      const el = createElement({
+        widget: 'stat-group',
+        data: [
+          { label: 'A', value: 10 },
+          { label: 'B', value: 20 },
+        ],
+      });
+      const shadow = await render(el);
+      // 구분선 클립 기법: .stat-group-clip > .stat-group 구조 유지가 전제
+      expect(shadow.querySelector('.stat-group-clip > .stat-group')).not.toBeNull();
+    });
+
+    it('CSS: cells never shrink below content (overlap regression)', () => {
+      // ISSUE-20260713-uwidgets-statgroup-overlap — 셀이 값보다 좁아지면
+      // nowrap 값이 이웃 셀 위로 겹쳐 그려진다. min-width가 콘텐츠 기반이어야 함.
+      const styles = (customElements.get('uw-metric') as any).styles;
+      const cssText = Array.isArray(styles)
+        ? styles.map((s: any) => s.cssText ?? '').join(' ')
+        : styles?.cssText ?? '';
+      expect(cssText).toContain('min-width: min(100%, max-content)');
+      expect(cssText).not.toContain('min-width: 100px');
+    });
+
     it('renders icon when provided', async () => {
       const el = createElement({
         widget: 'stat-group',

@@ -825,9 +825,16 @@ function buildTreemap(
 function toTreeNode(item: Record<string, unknown>): Record<string, unknown> {
   const node: Record<string, unknown> = {
     name: String(item.name ?? ''),
-    value: Number(item.value ?? 0),
   };
-  if (Array.isArray(item.children)) {
+  const hasChildren = Array.isArray(item.children);
+  // 부모 노드에 value: 0을 명시하면 ECharts가 children 합산 대신 면적 0으로 렌더한다
+  // (트리맵 전체가 빈 화면이 되는 무음 결함). value가 있을 때만 전달하고 합산은 ECharts에 맡긴다.
+  if (item.value != null) {
+    node.value = Number(item.value);
+  } else if (!hasChildren) {
+    node.value = 0;
+  }
+  if (hasChildren) {
     node.children = (item.children as Record<string, unknown>[]).map((child) => toTreeNode(child));
   }
   return node;

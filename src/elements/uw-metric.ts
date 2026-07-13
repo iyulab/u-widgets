@@ -147,19 +147,27 @@ export class UwMetric extends LitElement {
     .metric[data-variant="neutral"] .metric-value { color: var(--u-widget-text-secondary, #64748b); }
 
     /* ── stat-group ── */
+    /* 겹침 방지: 셀은 콘텐츠(max-content)보다 좁아질 수 없고, 넘치는 항목은 다음 행으로 wrap.
+       셀 단위 container query 폰트 축소는 inline-size containment가 max-content 기여를 제거해
+       콘텐츠 기반 사이징과 양립 불가 — wrap 방식 채택. */
+    .stat-group-clip {
+      /* 행 선두 셀의 구분선은 음수 margin으로 왼쪽 바깥에 놓이므로 여기서 클립 */
+      overflow: hidden;
+    }
+
     .stat-group {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: 1.5rem;
+      gap: 1rem 1.5rem;
+      /* 모든 셀이 구분선+패딩을 가지므로 행 선두 셀 몫을 왼쪽 바깥으로 밀어낸다 */
+      margin-left: calc(-1.5rem - 1px);
     }
 
     .stat-group .metric {
-      flex: 1;
-      min-width: 100px;
-    }
-
-    .stat-group .metric + .metric {
+      flex: 1 1 auto;
+      /* 값보다 좁아지지 않게 — 겹침 대신 wrap. 위젯 전체보다 긴 극단값은 100%로 캡 */
+      min-width: min(100%, max-content);
       border-left: 1px solid var(--u-widget-border, #e2e8f0);
       padding-left: 1.5rem;
     }
@@ -168,16 +176,17 @@ export class UwMetric extends LitElement {
       .stat-group {
         flex-direction: column;
         gap: 1rem;
+        margin-left: 0;
       }
 
       .stat-group .metric {
         flex: none;
         min-width: 0;
+        border-left: none;
+        padding-left: 0;
       }
 
       .stat-group .metric + .metric {
-        border-left: none;
-        padding-left: 0;
         border-top: 1px solid var(--u-widget-border, #e2e8f0);
         padding-top: 1rem;
       }
@@ -210,8 +219,10 @@ export class UwMetric extends LitElement {
     if (!Array.isArray(items)) return nothing;
 
     return html`
-      <div class="stat-group" part="stat-group">
-        ${items.map((item) => this.renderMetric(toMetricData(item, locale, optionFormat)))}
+      <div class="stat-group-clip">
+        <div class="stat-group" part="stat-group">
+          ${items.map((item) => this.renderMetric(toMetricData(item, locale, optionFormat)))}
+        </div>
       </div>
     `;
   }

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.12.1] - 2026-07-13
+
+### Fixed
+- `chart.treemap`: **계층 데이터에서 부모 노드에 `value`를 생략하면 트리맵 전체가 빈 화면으로 렌더**되던 무음 결함 수정. `toTreeNode`가 `value: Number(item.value ?? 0)`으로 부모에 명시적 0을 주입해 ECharts가 children 합산 대신 면적 0으로 그렸다. value가 있을 때만 전달하고 합산은 ECharts에 맡긴다(leaf는 기존대로 0 기본값). e2e 렌더 커버리지 확장 중 데모 스크린샷 육안 검증에서 발견 — 캔버스 존재 검사로는 못 잡는 결함이라 픽셀 비율 e2e 가드 추가. 회귀 가드: 유닛(RED→GREEN) + e2e 픽셀 검사.
+- `uw-metric`(stat-group): **항목 수가 많고 값이 긴 경우(예: 7항목 × 12자리 천단위 값) 값 텍스트가 이웃 셀 위로 겹쳐 판독 불가**하던 표시 결함 수정 (ISSUE-20260713-uwidgets-statgroup-overlap). 원인은 `flex: 1; min-width: 100px`(콘텐츠 무관 균등분할·shrink 허용) × `white-space: nowrap`(0.11.10) × overflow 미처리 조합. 셀에 `min-width: min(100%, max-content)`를 적용해 값보다 좁아질 수 없게 하고, 넘치는 항목은 다음 행으로 wrap한다. wrap 도입에 따라 `+` 셀렉터 구분선(한 줄 전제)이 둘째 행 선두에도 붙는 동반 결함을 클립 래퍼(음수 마진) 기법으로 함께 해결 — 구분선은 같은 행 인접 셀 사이에만 나타난다. 좁은 폭(≤30rem) 컬럼 모드는 기존 동작 유지. 알려진 한계: 단일 값이 위젯 전체 폭을 넘는 극단(60자+)은 위젯 경계에서 클립. 회귀 가드: e2e 바운딩 검사(7항목 × 12자리, RED→GREEN 검증) + 유닛 CSS 가드 + 데모 스트레스 카드. online-tools(construction) dogfooding에서 발견.
+- `README.md` React 예제: `widget: 'stat-group'`에 metric 형태의 객체 `data`를 넘겨 아무것도 렌더되지 않는 예제였던 것을 배열 data로 교정 (stat-group `data`는 배열 필수).
+- `e2e/widgets.spec.ts` `deepShadowText` 헬퍼: `title`이 있는 스펙에서 첫 요소(`.widget-title`)만 보고 중첩 shadow 텍스트를 놓쳐 `confirm` 테스트가 오탐 실패하던 것을 호스트+전 shadow 자식 텍스트 합산으로 수정.
+- `playwright.config.ts`: webServer 부팅 타임아웃 30s→120s — `vite --force` 콜드 부팅(의존성 사전번들 재생성)이 30s를 초과해 e2e가 서버 기동 단계에서 실패하던 문제.
+- `src/types/jsx.ts`: `@typescript-eslint/no-namespace` 린트 에러 해소 — JSX 전역 증강은 namespace 선언만 가능하므로 사유 명시 인라인 disable.
+
 ## [0.12.0] - 2026-07-07
 
 ### Added

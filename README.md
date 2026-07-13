@@ -168,7 +168,7 @@ import type { UWidgetSpec } from '@iyulab/u-widgets/react';
 function Dashboard() {
   return (
     <UWidget
-      spec={{ widget: 'stat-group', data: { value: 42 } }}
+      spec={{ widget: 'stat-group', data: [{ label: 'Active', value: 42 }, { label: 'Errors', value: 3 }] }}
       onWidgetEvent={(e) => console.log(e.detail)} // e.detail: UWidgetEvent
     />
   );

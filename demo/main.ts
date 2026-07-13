@@ -18,6 +18,25 @@ const specs = {
       { value: 7, label: 'Errors', trend: 'flat' },
     ],
   },
+  // 회귀 케이스: 항목 7개 × 12자리+ 값 — 셀 겹침 방지 (ISSUE-20260713-uwidgets-statgroup-overlap)
+  statGroupLong: {
+    widget: 'stat-group',
+    data: [
+      { value: 9700, label: '단면적', unit: 'mm²', format: 'number' },
+      { value: 264660833.33, label: 'Ix', unit: 'mm⁴', format: 'number' },
+      { value: 20030833.33, label: 'Iy', unit: 'mm⁴', format: 'number' },
+      { value: 1323304.17, label: 'Sx', unit: 'mm³', format: 'number' },
+      { value: 200308.33, label: 'Sy', unit: 'mm³', format: 'number' },
+      { value: 165.18, label: 'rx', unit: 'mm', format: 'number' },
+      { value: 45.44, label: 'ry', unit: 'mm', format: 'number' },
+    ],
+    options: { locale: 'en-US' },
+  },
+  // v0.11.9+ variant 강조 — e2e 실렌더(색상) 검증 대상
+  metricVariant: {
+    widget: 'metric',
+    data: { value: 23.5, label: 'Churn Rate', suffix: '%', variant: 'danger' },
+  },
   gauge: {
     widget: 'gauge',
     data: { value: 73 },
@@ -47,7 +66,8 @@ const specs = {
         { field: 'name', label: 'Name' },
         { field: 'role', label: 'Role' },
         { field: 'status', label: 'Status' },
-        { field: 'salary', label: 'Salary', format: 'currency', align: 'right' },
+        // variant: v0.12.0 컬럼 강조 — e2e 실렌더(색·굵기) 검증 대상
+        { field: 'salary', label: 'Salary', format: 'currency', align: 'right', variant: 'success' },
       ],
     },
   },
@@ -162,6 +182,42 @@ const specs = {
       { skill: 'SQL', alice: 60, bob: 80 },
     ],
     mapping: { axis: 'skill', y: ['alice', 'bob'] },
+  },
+  // v0.12.0 CustomChart 등록 — options.echarts passthrough로 custom renderItem 주입 (Gantt류).
+  // series 배열은 deep-merge에서 통째로 교체되므로 생성된 bar series 대신 custom만 렌더된다.
+  // api.style()은 echarts 6.1 DEPRECATED — literal style 사용.
+  chartCustom: {
+    widget: 'chart.bar',
+    data: [
+      { task: 'Design', end: 3 },
+      { task: 'Build', end: 7 },
+      { task: 'Test', end: 9 },
+    ],
+    mapping: { x: 'task', y: ['end'] },
+    options: {
+      echarts: {
+        series: [{
+          type: 'custom',
+          // [categoryIndex, start, end] — 카테고리 축 위 떠 있는 구간 막대
+          data: [[0, 0, 3], [1, 2, 7], [2, 6, 9]],
+          renderItem: (_params: unknown, api: {
+            value: (i: number) => number;
+            coord: (v: [number, number]) => [number, number];
+            size: (v: [number, number]) => [number, number];
+          }) => {
+            const cat = api.value(0);
+            const bottom = api.coord([cat, api.value(1)]);
+            const top = api.coord([cat, api.value(2)]);
+            const width = api.size([1, 0])[0] * 0.4;
+            return {
+              type: 'rect',
+              shape: { x: bottom[0] - width / 2, y: top[1], width, height: bottom[1] - top[1] },
+              style: { fill: '#4f46e5' },
+            };
+          },
+        }],
+      },
+    },
   },
   form: {
     widget: 'form',
@@ -397,7 +453,9 @@ const bind = (id: string, spec: unknown) => {
 };
 
 bind('demo-metric', specs.metric);
+bind('demo-metric-variant', specs.metricVariant);
 bind('demo-stat-group', specs.statGroup);
+bind('demo-stat-group-long', specs.statGroupLong);
 bind('demo-gauge', specs.gauge);
 bind('demo-progress', specs.progress);
 bind('demo-table', specs.table);
@@ -412,6 +470,7 @@ bind('demo-chart-scatter', specs.chartScatter);
 bind('demo-chart-box', specs.chartBox);
 bind('demo-chart-heatmap', specs.chartHeatmap);
 bind('demo-chart-radar', specs.chartRadar);
+bind('demo-chart-custom', specs.chartCustom);
 bind('demo-form', specs.form);
 bind('demo-formdown', specs.formdownForm);
 bind('demo-confirm', specs.confirm);

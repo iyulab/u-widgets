@@ -38,7 +38,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.waterfall` | 폭포 차트 | `label`, `value` |
 | `chart.treemap` | 트리맵 | `label`, `value` |
 | `metric` | Single KPI value | — (uses data shape) |
-| `stat-group` | Multiple KPIs in a row | — (uses data shape) |
+| `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
 | `gauge` | Gauge with thresholds | — (uses `data.value`) |
 | `progress` | Progress bar | — (uses `data.value`) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
