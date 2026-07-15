@@ -63,9 +63,12 @@ function formatCurrency(value: unknown, currencyCode?: string, locale?: string):
   const num = Number(value);
   if (isNaN(num)) return String(value);
   const currency = currencyCode || 'USD';
+  // Default to en-US so symbol rendering (e.g. "$" not "US$") stays consistent
+  // regardless of the host OS locale when the caller doesn't specify one.
+  const resolvedLocale = locale ?? 'en-US';
   try {
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase());
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(resolvedLocale, {
       style: 'currency',
       currency,
       ...(isZeroDecimal && {
@@ -74,7 +77,7 @@ function formatCurrency(value: unknown, currencyCode?: string, locale?: string):
       }),
     }).format(num);
   } catch {
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(resolvedLocale, {
       style: 'currency',
       currency: 'USD',
     }).format(num);

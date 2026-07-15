@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
@@ -56,7 +56,7 @@ export default defineConfig({
   plugins: [
     dts({
       include: ['src'],
-      rollupTypes: true,
+      bundleTypes: true,
       afterBuild() {
         // Append declare global block that rollup-plugin-dts strips
         const dtsPath = resolve(__dirname, 'dist/u-widgets.d.ts');
