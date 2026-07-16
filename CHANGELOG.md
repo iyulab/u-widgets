@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.13.0] - 2026-07-16
+
+### Added
+- `chart.waterfall`: **행 단위 총계(total) 막대** 지원 — `mapping.total`(필드명)로 지정한 행은 절대 총계 막대로 `base=0`에서 그려지고 누적(running total)을 자기 값으로 리셋한다(선행 총계=개시 잔액, 후행 총계=마감 잔액). 지금까지 모든 행이 예외 없이 델타(증감)로 누적되어, 표준 waterfall 관례(첫·마지막 행은 절대 총계)를 따라 데이터를 넘기면 **마지막 총계 행이 `2×total` 높이로 그려지던** 결함(ISSUE-20260714, `quality/oee`·`quality/yield` 프로덕션 실재현 — 게이지 81.2% vs waterfall ~162)을 해소. 총계 행 미지정 시 3-시리즈 출력이 byte-identical하게 유지되어 파괴적 변경이 없다. 총계 막대는 중립색(slate)으로 증감 막대와 시각 구분. schema mapping 검증 allowlist에도 `total` 반영. online-tools(NT-85) dogfooding에서 발견.
+
+### Fixed
+- `echarts-adapter`: 축 config를 `options` 최상위(`options.xAxis`/`yAxis`)에 두면 조용히 무시되던 문제에 **dev 경고**를 추가 — `options.echarts.xAxis`(생성된 축 위에 재귀 deep-merge)로 유도한다. 축 라벨 제어(`axisLabel.interval`/`rotate` 등 긴 라벨 자동 소실 방지)는 `options.echarts` passthrough로 **이미 지원**되고 있었으나(문서·회귀 테스트로 명시), 최상위 경로로 넘기던 기존 소비자(`energy/transformer-loss` 등)의 값이 버려지고 있었다. `docs/widgets.md`에 waterfall total 매핑 + 축 라벨 제어 레시피 문서화, adapter의 "one level" 주석을 실제 재귀 deep-merge로 정정.
+
+### Build
+- `@microsoft/api-extractor`를 명시적 devDependency로 추가 — `vite-plugin-dts` v5에서 `bundleTypes`(선언 파일 번들)는 `@microsoft/api-extractor`를 optional peerDependency로 요구한다. 표준 `npm ci`(단독 저장소)에서 자동 설치되지 않아 번들이 조용히 per-file로 폴백(그리고 `afterBuild` 훅이 stale toolchain 조합에서 `dist/u-widgets.d.ts` 미생성으로 실패)하던 릴리스 정합 문제를 해소. 이제 v4 시절과 동일한 번들된 엔트리별 단일 `.d.ts`(`u-widgets.d.ts` 등)를 출력한다.
+
 ## [0.12.1] - 2026-07-13
 
 ### Fixed
