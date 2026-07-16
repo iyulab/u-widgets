@@ -35,7 +35,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.heatmap` | 히트맵 | `x`, `y`, `value` |
 | `chart.box` | 박스플롯 | `x`, `low`, `q1`, `median`, `q3`, `high` |
 | `chart.funnel` | 깔때기 차트 | `label`, `value` |
-| `chart.waterfall` | 폭포 차트 | `label`, `value` |
+| `chart.waterfall` | 폭포 차트 | `x`, `y`, `total?` |
 | `chart.treemap` | 트리맵 | `label`, `value` |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
@@ -127,8 +127,46 @@ When `mapping` is omitted, the renderer infers it from data structure:
 | `smooth` | `boolean` | line, area | Smooth curves |
 | `donut` | `boolean` | pie | Donut chart |
 | `showLabel` | `boolean` | pie | Show data labels |
-| `echarts` | `object` | all charts | Raw ECharts option passthrough |
+| `echarts` | `object` | all charts | Raw ECharts option passthrough (recursively deep-merged; see below) |
 | `colorRange` | `[string, string]` | heatmap | 색상 범위 `["#e0f2fe","#0c4a6e"]` |
+
+### Waterfall totals
+
+By default every waterfall row is a **delta** added to the running total. To draw an
+**absolute total bar from zero** (opening or closing balance), name a per-row flag field
+with `mapping.total` — truthy rows are drawn from 0 and reset the running total to their
+own value (so a leading total is an opening balance, a trailing total a closing balance).
+Total bars get a distinct neutral color. Omit `mapping.total` for a pure cumulative-delta
+waterfall (unchanged default).
+
+```ts
+{
+  widget: 'chart.waterfall',
+  data: [
+    { step: 'Revenue', amount: 500, isTotal: true },  // opening total, from 0
+    { step: 'Cost',    amount: -200 },                 // delta
+    { step: 'Tax',     amount: -80 },                  // delta
+    { step: 'Profit',  amount: 220, isTotal: true },   // closing total, from 0 (not 2×)
+  ],
+  mapping: { x: 'step', y: 'amount', total: 'isTotal' },
+}
+```
+
+### Axis label control (interval / rotate / name)
+
+Axis config must go under **`options.echarts`** — it is deep-merged onto the generated
+axis, so the builder's category data is preserved. Placing `xAxis`/`yAxis` at the
+`options` top level is ignored (a dev warning points to the fix). Use this when long or
+numerous category labels are auto-hidden by ECharts:
+
+```ts
+options: {
+  echarts: {
+    xAxis: { axisLabel: { interval: 0, rotate: 30 } }, // force every label to show
+    yAxis: { name: 'Units' },
+  },
+}
+```
 
 ## Math
 

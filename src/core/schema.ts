@@ -152,7 +152,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
 
     if (dataKeys) {
       // Check scalar mapping fields
-      for (const key of ['x', 'y', 'label', 'value', 'color', 'size', 'axis', 'primary', 'secondary', 'icon', 'avatar', 'trailing'] as const) {
+      for (const key of ['x', 'y', 'label', 'value', 'color', 'size', 'axis', 'total', 'primary', 'secondary', 'icon', 'avatar', 'trailing'] as const) {
         const val = mapping[key];
         if (typeof val === 'string' && !dataKeys.has(val)) {
           warnings.push(`mapping.${key} references "${val}" which is not found in data keys [${[...dataKeys].join(', ')}]`);

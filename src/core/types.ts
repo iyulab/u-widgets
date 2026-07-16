@@ -114,6 +114,14 @@ export interface UWidgetMapping {
   opacity?: string;
   /** Axis field (radar chart indicators). */
   axis?: string;
+  /**
+   * Total-flag field (waterfall charts). Names a per-row field whose truthy value
+   * marks that row as an absolute total bar drawn from zero (not a delta stacked on
+   * the running total). Total rows reset the running total to their own value, so a
+   * leading total acts as an opening balance and a trailing total as a closing
+   * balance. Omit for a pure cumulative-delta waterfall (current default behavior).
+   */
+  total?: string;
   /** Explicit column definitions for table widgets. */
   columns?: UWidgetColumnDefinition[];
   /** Primary text field (list widget). */

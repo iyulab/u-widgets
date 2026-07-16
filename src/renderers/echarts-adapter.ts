@@ -32,8 +32,10 @@ function matchConditionalStyle(
  * This is a pure function with no DOM or ECharts dependency.
  *
  * Supports `options.echarts` passthrough: any key-value pairs in
- * `options.echarts` are deep-merged (one level) into the generated
- * ECharts option, allowing full customization.
+ * `options.echarts` are recursively deep-merged into the generated
+ * ECharts option (nested objects merge; arrays replace), allowing full
+ * customization — including axis control such as
+ * `options.echarts.xAxis.axisLabel` on top of the builder's category data.
  *
  * Limitation: passthrough merges option objects only — it does not register
  * the ECharts component modules those options require. Keys like `dataZoom`,
@@ -133,7 +135,10 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
     applyAxisFormat(result, catKey, options.categoryAxisFormat as AxisFormatOption | undefined, locale);
   }
 
-  // Apply echarts passthrough: deep-merge
+  // Axis config placed at options top-level (instead of options.echarts) is dropped — warn.
+  warnMisplacedAxisOptions(options);
+
+  // Apply echarts passthrough: recursive deep-merge onto the generated option.
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
     warnUnregisteredComponentKeys(passthrough);
@@ -161,6 +166,27 @@ const UNREGISTERED_COMPONENT_KEYS = new Set([
 ]);
 
 const warnedKeys = new Set<string>();
+
+const warnedMisplacedAxis = new Set<string>();
+
+/**
+ * Axis config belongs under `options.echarts`, which is deep-merged onto the
+ * builder-generated axis. A bare top-level `options.xAxis` / `options.yAxis` is
+ * NOT merged and is silently dropped — several consumers passed `options.xAxis.name`
+ * for months without effect. Surface the misplacement (warn-once per axis) with the
+ * exact corrected path. Same false-affordance guard class as UNREGISTERED_COMPONENT_KEYS.
+ */
+function warnMisplacedAxisOptions(options: Record<string, unknown>): void {
+  for (const axis of ['xAxis', 'yAxis'] as const) {
+    if (options[axis] == null || warnedMisplacedAxis.has(axis)) continue;
+    warnedMisplacedAxis.add(axis);
+    console.warn(
+      `[u-widgets] options.${axis} is ignored — axis config must go under ` +
+      `options.echarts.${axis} (deep-merged onto the generated axis), e.g. ` +
+      `options: { echarts: { ${axis}: { axisLabel: { interval: 0, rotate: 30 } } } }.`,
+    );
+  }
+}
 
 function warnUnregisteredComponentKeys(passthrough: Record<string, unknown>): void {
   for (const key of Object.keys(passthrough)) {
@@ -746,6 +772,7 @@ function buildWaterfall(
   const records = data as Record<string, unknown>[];
   const xField = mapping?.x ?? guessStringField(records);
   const yField = (mapping?.y ?? [guessNumberField(records)])[0];
+  const totalField = mapping?.total;
 
   if (!xField || !yField) return {};
 
@@ -753,51 +780,81 @@ function buildWaterfall(
   const baseValues: number[] = [];
   const positiveValues: (number | null)[] = [];
   const negativeValues: (number | null)[] = [];
+  const totalValues: (number | null)[] = [];
+  let hasTotalRow = false;
 
   let running = 0;
   for (const row of records) {
     const label = String(row[xField] ?? '');
     const value = Number(row[yField] ?? 0);
+    const isTotal = totalField != null && !!row[totalField];
     categories.push(label);
 
-    if (value >= 0) {
+    if (isTotal) {
+      // Absolute total bar: drawn from zero, and it resets the running total to its
+      // own value (a leading total is an opening balance, a trailing total a closing
+      // balance). Not added as a delta — that is the "2×total" bug this guards.
+      hasTotalRow = true;
+      baseValues.push(0);
+      positiveValues.push(null);
+      negativeValues.push(null);
+      totalValues.push(value);
+      running = value;
+    } else if (value >= 0) {
       baseValues.push(running);
       positiveValues.push(value);
       negativeValues.push(null);
+      totalValues.push(null);
+      running += value;
     } else {
       baseValues.push(running + value);
       positiveValues.push(null);
       negativeValues.push(Math.abs(value));
+      totalValues.push(null);
+      running += value;
     }
-    running += value;
+  }
+
+  const series: Record<string, unknown>[] = [
+    {
+      name: 'Base',
+      type: 'bar',
+      stack: 'waterfall',
+      itemStyle: { borderColor: 'transparent', color: 'transparent' },
+      emphasis: { itemStyle: { borderColor: 'transparent', color: 'transparent' } },
+      data: baseValues,
+    },
+    {
+      name: 'Positive',
+      type: 'bar',
+      stack: 'waterfall',
+      data: positiveValues,
+    },
+    {
+      name: 'Negative',
+      type: 'bar',
+      stack: 'waterfall',
+      data: negativeValues,
+    },
+  ];
+
+  // Only emit the Total series when total rows exist, keeping the pure
+  // cumulative-delta waterfall byte-identical (non-breaking).
+  if (hasTotalRow) {
+    series.push({
+      name: 'Total',
+      type: 'bar',
+      stack: 'waterfall',
+      itemStyle: { color: '#607d8b' }, // neutral slate — visually distinct from increments
+      data: totalValues,
+    });
   }
 
   return {
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: { type: 'category', data: categories },
     yAxis: { type: 'value' },
-    series: [
-      {
-        name: 'Base',
-        type: 'bar',
-        stack: 'waterfall',
-        itemStyle: { borderColor: 'transparent', color: 'transparent' },
-        emphasis: { itemStyle: { borderColor: 'transparent', color: 'transparent' } },
-        data: baseValues,
-      },
-      {
-        name: 'Positive',
-        type: 'bar',
-        stack: 'waterfall',
-        data: positiveValues,
-      },
-      {
-        name: 'Negative',
-        type: 'bar',
-        stack: 'waterfall',
-        data: negativeValues,
-      },
-    ],
+    series,
   };
 }
 

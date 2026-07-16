@@ -266,6 +266,16 @@ describe('validate', () => {
     expect(result.warnings).toHaveLength(1);
   });
 
+  it('warns when mapping.total references missing field', () => {
+    const result = validate({
+      widget: 'chart.waterfall',
+      data: [{ item: 'A', value: 30 }],
+      mapping: { x: 'item', y: 'value', total: 'isTotal' },
+    });
+    expect(result.valid).toBe(true);
+    expect(result.warnings.some((w) => w.includes('isTotal'))).toBe(true);
+  });
+
   it('no warnings when mapping fields match data', () => {
     const result = validate({
       widget: 'chart.bar',

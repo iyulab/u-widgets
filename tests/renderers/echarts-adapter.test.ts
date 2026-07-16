@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { toEChartsOption } from '../../src/renderers/echarts-adapter.js';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
@@ -10,6 +10,10 @@ function spec(overrides: Partial<UWidgetSpec>): UWidgetSpec {
 }
 
 describe('toEChartsOption', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('chart.bar', () => {
     it('builds bar chart with auto-inferred mapping', () => {
       const result = toEChartsOption(spec({
@@ -427,6 +431,23 @@ describe('toEChartsOption', () => {
       expect((result.title as Obj).text).toBe('Monthly Sales');
     });
 
+    it('warns when axis options are placed at options top-level instead of options.echarts', () => {
+      // energy/transformer-loss etc. pass options.xAxis.name and it is silently dropped
+      // (only options.echarts.* is merged). Surface the misplacement with a pointer.
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ month: 'Jan', sales: 100 }],
+        options: {
+          xAxis: { name: 'Month' }, // wrong place — dropped
+        },
+      }));
+      expect(warn).toHaveBeenCalled();
+      const msg = warn.mock.calls.map((c) => String(c[0])).join('\n');
+      expect(msg).toContain('options.xAxis');
+      expect(msg).toContain('options.echarts.xAxis');
+    });
+
     it('overrides non-object values', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.bar',
@@ -511,6 +532,38 @@ describe('toEChartsOption', () => {
       // Array should be replaced, not concatenated
       expect((result.xAxis as Obj).data).toEqual(['Override']);
       expect((result.xAxis as Obj).type).toBe('category');
+    });
+
+    it('lets a waterfall force all long axis labels via echarts.xAxis without clobbering categories', () => {
+      // Handoff-blocking proof: consumers can control axisLabel (interval/rotate) TODAY
+      // through options.echarts — the builder's category data survives the deep-merge.
+      // This is why online-tools chemical/cycle-time (a waterfall with long labels)
+      // needs no upstream builder change to render every label.
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { phase: 'Filling Time', value: 5 },
+          { phase: 'Packing Time', value: 3 },
+          { phase: 'Cooling Time', value: 8 },
+          { phase: 'Mold Open/Close Time', value: 3 },
+          { phase: 'Ejection Time', value: 2 },
+        ],
+        mapping: { x: 'phase', y: ['value'] },
+        options: {
+          echarts: {
+            xAxis: { axisLabel: { interval: 0, rotate: 30 } },
+          },
+        },
+      }));
+      const xAxis = result.xAxis as Obj;
+      // categories preserved…
+      expect(xAxis.type).toBe('category');
+      expect(xAxis.data).toEqual([
+        'Filling Time', 'Packing Time', 'Cooling Time', 'Mold Open/Close Time', 'Ejection Time',
+      ]);
+      // …and axisLabel forcing every label to show is merged on top.
+      expect((xAxis.axisLabel as Obj).interval).toBe(0);
+      expect((xAxis.axisLabel as Obj).rotate).toBe(30);
     });
   });
 
@@ -1039,6 +1092,61 @@ describe('toEChartsOption', () => {
       }));
       const base = (result.series as ObjArray)[0];
       expect((base.itemStyle as Obj).color).toBe('transparent');
+    });
+
+    it('draws total rows from zero instead of stacking on the running total', () => {
+      // Regression for the "final total row drawn at 2×total" bug:
+      // A total row must sit on base=0, not on top of the accumulated running total.
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'Opening', value: 100, isTotal: true }, // total → base 0, running := 100
+          { item: 'Loss A', value: -10 },                 // delta  → base 90, running 90
+          { item: 'Loss B', value: -9 },                  // delta  → base 81, running 81
+          { item: 'Closing', value: 81, isTotal: true },  // total → base 0 (NOT 81 → top 162)
+        ],
+        mapping: { x: 'item', y: ['value'], total: 'isTotal' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(4); // Base, Positive, Negative, Total
+      expect(series[3].name).toBe('Total');
+      // Base: total rows sit at 0; deltas cascade from the reset running total.
+      expect(series[0].data).toEqual([0, 90, 81, 0]);
+      expect(series[1].data).toEqual([null, null, null, null]); // no plain increments here
+      expect(series[2].data).toEqual([null, 10, 9, null]);      // the two losses
+      expect(series[3].data).toEqual([100, null, null, 81]);    // the two totals, from zero
+    });
+
+    it('keeps the 3-series shape unchanged when no total rows are present', () => {
+      // Non-total path must stay byte-identical (provably non-breaking).
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'A', value: 100 },
+          { item: 'B', value: -30 },
+          { item: 'C', value: 50 },
+        ],
+        mapping: { x: 'item', y: ['value'], total: 'isTotal' },
+      }));
+      const series = result.series as ObjArray;
+      expect(series.length).toBe(3);
+      expect(series[0].data).toEqual([0, 70, 70]);
+      expect(series[1].data).toEqual([100, null, 50]);
+      expect(series[2].data).toEqual([null, 30, null]);
+    });
+
+    it('gives total bars a distinct color from increment bars', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.waterfall',
+        data: [
+          { item: 'A', value: 100 },
+          { item: 'Total', value: 100, isTotal: true },
+        ],
+        mapping: { x: 'item', y: ['value'], total: 'isTotal' },
+      }));
+      const totalSeries = (result.series as ObjArray)[3];
+      expect(totalSeries.name).toBe('Total');
+      expect((totalSeries.itemStyle as Obj)?.color).toBeDefined();
     });
   });
 
