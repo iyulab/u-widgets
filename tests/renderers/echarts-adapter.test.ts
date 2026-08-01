@@ -537,8 +537,8 @@ describe('toEChartsOption', () => {
     it('lets a waterfall force all long axis labels via echarts.xAxis without clobbering categories', () => {
       // Handoff-blocking proof: consumers can control axisLabel (interval/rotate) TODAY
       // through options.echarts — the builder's category data survives the deep-merge.
-      // This is why online-tools chemical/cycle-time (a waterfall with long labels)
-      // needs no upstream builder change to render every label.
+      // This is why a waterfall with long category labels needs no upstream
+      // builder change to render every label.
       const result = toEChartsOption(spec({
         widget: 'chart.waterfall',
         data: [
