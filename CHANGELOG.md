@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [0.13.0] - 2026-07-16
 
 ### Added
-- `chart.waterfall`: **행 단위 총계(total) 막대** 지원 — `mapping.total`(필드명)로 지정한 행은 절대 총계 막대로 `base=0`에서 그려지고 누적(running total)을 자기 값으로 리셋한다(선행 총계=개시 잔액, 후행 총계=마감 잔액). 지금까지 모든 행이 예외 없이 델타(증감)로 누적되어, 표준 waterfall 관례(첫·마지막 행은 절대 총계)를 따라 데이터를 넘기면 **마지막 총계 행이 `2×total` 높이로 그려지던** 결함(ISSUE-20260714, `quality/oee`·`quality/yield` 프로덕션 실재현 — 게이지 81.2% vs waterfall ~162)을 해소. 총계 행 미지정 시 3-시리즈 출력이 byte-identical하게 유지되어 파괴적 변경이 없다. 총계 막대는 중립색(slate)으로 증감 막대와 시각 구분. schema mapping 검증 allowlist에도 `total` 반영. online-tools(NT-85) dogfooding에서 발견.
+- `chart.waterfall`: **행 단위 총계(total) 막대** 지원 — `mapping.total`(필드명)로 지정한 행은 절대 총계 막대로 `base=0`에서 그려지고 누적(running total)을 자기 값으로 리셋한다(선행 총계=개시 잔액, 후행 총계=마감 잔액). 지금까지 모든 행이 예외 없이 델타(증감)로 누적되어, 표준 waterfall 관례(첫·마지막 행은 절대 총계)를 따라 데이터를 넘기면 **마지막 총계 행이 `2×total` 높이로 그려지던** 결함(프로덕션 실재현 — 같은 지표가 게이지에서는 81.2%, waterfall 에서는 ~162 로 어긋남)을 해소. 총계 행 미지정 시 3-시리즈 출력이 byte-identical하게 유지되어 파괴적 변경이 없다. 총계 막대는 중립색(slate)으로 증감 막대와 시각 구분. schema mapping 검증 allowlist에도 `total` 반영. 실사용에서 관측.
 
 ### Fixed
 - `echarts-adapter`: 축 config를 `options` 최상위(`options.xAxis`/`yAxis`)에 두면 조용히 무시되던 문제에 **dev 경고**를 추가 — `options.echarts.xAxis`(생성된 축 위에 재귀 deep-merge)로 유도한다. 축 라벨 제어(`axisLabel.interval`/`rotate` 등 긴 라벨 자동 소실 방지)는 `options.echarts` passthrough로 **이미 지원**되고 있었으나(문서·회귀 테스트로 명시), 최상위 경로로 넘기던 기존 소비자(`energy/transformer-loss` 등)의 값이 버려지고 있었다. `docs/widgets.md`에 waterfall total 매핑 + 축 라벨 제어 레시피 문서화, adapter의 "one level" 주석을 실제 재귀 deep-merge로 정정.
@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Fixed
 - `chart.treemap`: **계층 데이터에서 부모 노드에 `value`를 생략하면 트리맵 전체가 빈 화면으로 렌더**되던 무음 결함 수정. `toTreeNode`가 `value: Number(item.value ?? 0)`으로 부모에 명시적 0을 주입해 ECharts가 children 합산 대신 면적 0으로 그렸다. value가 있을 때만 전달하고 합산은 ECharts에 맡긴다(leaf는 기존대로 0 기본값). e2e 렌더 커버리지 확장 중 데모 스크린샷 육안 검증에서 발견 — 캔버스 존재 검사로는 못 잡는 결함이라 픽셀 비율 e2e 가드 추가. 회귀 가드: 유닛(RED→GREEN) + e2e 픽셀 검사.
-- `uw-metric`(stat-group): **항목 수가 많고 값이 긴 경우(예: 7항목 × 12자리 천단위 값) 값 텍스트가 이웃 셀 위로 겹쳐 판독 불가**하던 표시 결함 수정 (ISSUE-20260713-uwidgets-statgroup-overlap). 원인은 `flex: 1; min-width: 100px`(콘텐츠 무관 균등분할·shrink 허용) × `white-space: nowrap`(0.11.10) × overflow 미처리 조합. 셀에 `min-width: min(100%, max-content)`를 적용해 값보다 좁아질 수 없게 하고, 넘치는 항목은 다음 행으로 wrap한다. wrap 도입에 따라 `+` 셀렉터 구분선(한 줄 전제)이 둘째 행 선두에도 붙는 동반 결함을 클립 래퍼(음수 마진) 기법으로 함께 해결 — 구분선은 같은 행 인접 셀 사이에만 나타난다. 좁은 폭(≤30rem) 컬럼 모드는 기존 동작 유지. 알려진 한계: 단일 값이 위젯 전체 폭을 넘는 극단(60자+)은 위젯 경계에서 클립. 회귀 가드: e2e 바운딩 검사(7항목 × 12자리, RED→GREEN 검증) + 유닛 CSS 가드 + 데모 스트레스 카드. online-tools(construction) dogfooding에서 발견.
+- `uw-metric`(stat-group): **항목 수가 많고 값이 긴 경우(예: 7항목 × 12자리 천단위 값) 값 텍스트가 이웃 셀 위로 겹쳐 판독 불가**하던 표시 결함 수정. 원인은 `flex: 1; min-width: 100px`(콘텐츠 무관 균등분할·shrink 허용) × `white-space: nowrap`(0.11.10) × overflow 미처리 조합. 셀에 `min-width: min(100%, max-content)`를 적용해 값보다 좁아질 수 없게 하고, 넘치는 항목은 다음 행으로 wrap한다. wrap 도입에 따라 `+` 셀렉터 구분선(한 줄 전제)이 둘째 행 선두에도 붙는 동반 결함을 클립 래퍼(음수 마진) 기법으로 함께 해결 — 구분선은 같은 행 인접 셀 사이에만 나타난다. 좁은 폭(≤30rem) 컬럼 모드는 기존 동작 유지. 알려진 한계: 단일 값이 위젯 전체 폭을 넘는 극단(60자+)은 위젯 경계에서 클립. 회귀 가드: e2e 바운딩 검사(7항목 × 12자리, RED→GREEN 검증) + 유닛 CSS 가드 + 데모 스트레스 카드. 실사용에서 관측.
 - `README.md` React 예제: `widget: 'stat-group'`에 metric 형태의 객체 `data`를 넘겨 아무것도 렌더되지 않는 예제였던 것을 배열 data로 교정 (stat-group `data`는 배열 필수).
 - `e2e/widgets.spec.ts` `deepShadowText` 헬퍼: `title`이 있는 스펙에서 첫 요소(`.widget-title`)만 보고 중첩 shadow 텍스트를 놓쳐 `confirm` 테스트가 오탐 실패하던 것을 호스트+전 shadow 자식 텍스트 합산으로 수정.
 - `playwright.config.ts`: webServer 부팅 타임아웃 30s→120s — `vite --force` 콜드 부팅(의존성 사전번들 재생성)이 30s를 초과해 e2e가 서버 기동 단계에서 실패하던 문제.
@@ -28,9 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [0.12.0] - 2026-07-07
 
 ### Added
-- `chart.*`: ECharts **CustomChart(custom series)** 등록 — `options.series[i].type: "custom"` 또는 `options.echarts` passthrough로 custom `renderItem`(Gantt/타임라인 등)을 주입하면 이제 바로 렌더된다. 기존에는 임의 series `type` 오버라이드를 허용하면서 CustomChart만 미등록이어서 `[ECharts] Series custom is used but not imported` 경고 후 무음 미렌더되던 비대칭을 해소. online-tools(quality) dogfooding에서 발견. 소비자 앱측 `use([CustomChart])` 워크어라운드 제거 가능.
+- `chart.*`: ECharts **CustomChart(custom series)** 등록 — `options.series[i].type: "custom"` 또는 `options.echarts` passthrough로 custom `renderItem`(Gantt/타임라인 등)을 주입하면 이제 바로 렌더된다. 기존에는 임의 series `type` 오버라이드를 허용하면서 CustomChart만 미등록이어서 `[ECharts] Series custom is used but not imported` 경고 후 무음 미렌더되던 비대칭을 해소. 실사용에서 관측 — 소비자 앱측 `use([CustomChart])` 워크어라운드 제거 가능.
 - `uw-chart`/echarts-adapter: **미등록 series-type 어포던스 가드** 신설 — `options.series[i].type` 오버라이드와 `options.echarts.series[].type` passthrough가 미등록 series(`graph`/`sankey`/`gauge`/`sunburst` 등)를 요청하면, raw ECharts 경고 대신 u-widgets dev 경고 + `@iyulab/flex-chart` 리디렉트를 출력한다. 등록 series는 `bar`/`line`/`pie`/`scatter`/`radar`/`heatmap`/`boxplot`/`funnel`/`treemap`/`custom`. 컴포넌트 키 가드(`dataZoom`/`toolbox` 등)와 대칭 완성 — tree-shakeable 빌드의 false-affordance를 series 클래스까지 확장.
-- `uw-table`: **컬럼 강조(`variant`)** — `UWidgetColumnDefinition`에 `variant?: 'success'|'warning'|'danger'|'info'|'neutral'` 추가. 지정 시 해당 컬럼 셀에 `font-weight:600` + `uw-metric`과 동일한 `--u-widget-*` 색 토큰을 적용해 핵심 열을 강조한다. 그동안 stat-group(`uw-metric`)만 `variant` 강조가 가능하고 `table`은 강조 렌더 경로가 없던 카탈로그 내 표현력 비대칭을 해소. 미등록 variant는 warn-once 후 default fallback. schema `columnDefinition`에도 반영. chemical/batch dogfooding에서 발견.
+- `uw-table`: **컬럼 강조(`variant`)** — `UWidgetColumnDefinition`에 `variant?: 'success'|'warning'|'danger'|'info'|'neutral'` 추가. 지정 시 해당 컬럼 셀에 `font-weight:600` + `uw-metric`과 동일한 `--u-widget-*` 색 토큰을 적용해 핵심 열을 강조한다. 그동안 stat-group(`uw-metric`)만 `variant` 강조가 가능하고 `table`은 강조 렌더 경로가 없던 카탈로그 내 표현력 비대칭을 해소. 미등록 variant는 warn-once 후 default fallback. schema `columnDefinition`에도 반영. 실사용에서 관측.
 
 ### Fixed
 - `tests/core/format.test.ts`: `formatValue(null)`이 빈 문자열을 기대하던 stale 테스트를 수정 — 0.11.x의 em-dash(`—`) null 렌더링(의도된 동작, JSDoc 문서화됨)과 불일치했다.
@@ -44,7 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [0.11.10] - 2026-07-03
 
 ### Fixed
-- `uw-metric`: 좁은 카드(모바일 2열 stat-group)에서 큰 통화 값(예: `₩5,122,661,618`)이 천단위 그룹 중간에서 줄바꿈되던 문제 수정. `.metric-value`에 `white-space: nowrap`을 지정해 한 줄을 유지하고, 이미 존재하던 `container: uw-metric / inline-size` 기준으로 카드 폭 티어(16rem → 1.25rem, 12rem → 1.05rem) container 쿼리를 추가해 좁은 카드에서 폰트를 줄여 맞춘다. `part="value"`가 노출되지만 `u-widget` 래퍼의 중첩 shadow DOM(exportparts 없음)에 막혀 소비자 `::part(value)` CSS로 도달 불가하므로 업스트림 수정. yesung-oms dogfooding에서 발견.
+- `uw-metric`: 좁은 카드(모바일 2열 stat-group)에서 큰 통화 값(예: `₩5,122,661,618`)이 천단위 그룹 중간에서 줄바꿈되던 문제 수정. `.metric-value`에 `white-space: nowrap`을 지정해 한 줄을 유지하고, 이미 존재하던 `container: uw-metric / inline-size` 기준으로 카드 폭 티어(16rem → 1.25rem, 12rem → 1.05rem) container 쿼리를 추가해 좁은 카드에서 폰트를 줄여 맞춘다. `part="value"`가 노출되지만 `u-widget` 래퍼의 중첩 shadow DOM(exportparts 없음)에 막혀 소비자 `::part(value)` CSS로 도달 불가하므로 업스트림 수정. 실사용에서 관측.
 
 ## [0.11.9] - 2026-07-02
 
@@ -58,10 +58,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [0.11.8] - 2026-06-11
 
 ### Fixed
-- `theme-sync`: import 시점 자동 초기화가 SSR DOM shim 환경(@lit-labs/ssr 등)에서 throw하여 소비자 모듈 로드 자체가 실패하던 문제 수정 — `documentElement`/`querySelectorAll`/`MutationObserver` 부재 시 no-op으로 통과 (ISSUE-20260610-uwidgets-themesync-ssr-unsafe)
+- `theme-sync`: import 시점 자동 초기화가 SSR DOM shim 환경(@lit-labs/ssr 등)에서 throw하여 소비자 모듈 로드 자체가 실패하던 문제 수정 — `documentElement`/`querySelectorAll`/`MutationObserver` 부재 시 no-op으로 통과
 
 ### Added
-- `options.echarts` passthrough에 미등록 ECharts 컴포넌트 키(`dataZoom`, `toolbox`, `title` 등)가 전달되면 키당 1회 콘솔 경고 출력 — 옵션은 병합되지만 런타임에 동작하지 않는 false affordance 방지 (ISSUE-20260609-uwidgets-echarts-datazoom-passthrough). 헤비 인터랙션(zoom/pan/toolbox)은 `@iyulab/flex-chart`가 담당 예정
+- `options.echarts` passthrough에 미등록 ECharts 컴포넌트 키(`dataZoom`, `toolbox`, `title` 등)가 전달되면 키당 1회 콘솔 경고 출력 — 옵션은 병합되지만 런타임에 동작하지 않는 false affordance 방지. 헤비 인터랙션(zoom/pan/toolbox)은 `@iyulab/flex-chart`가 담당 예정
 
 ## [0.11.4] - 2026-05-07
 
