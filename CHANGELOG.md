@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.14.0] - 2026-08-02
+
+### Fixed
+
+- ★**채움 버튼의 글자가 다크 테마에서 읽히지 않던 문제.** `[data-style="primary"]` ·
+  `[data-style="danger"]` · 완료된 단계(`uw-steps`)가 `color: white` 를 유채색 면 위에
+  칠하는데, 다크 팔레트는 그 색들을 **밝게** 만든다(다크 페이지에서 *글자*로 읽히게 하려고):
+
+  ```
+  흰 글자 대비 —  primary #818cf8  2.98 ✗   ·  negative #f87171  2.77 ✗
+                 positive #4ade80  1.74 ✗            (AA 기준 4.5)
+  ```
+
+  한 토큰이 **면**과 **글자**를 겸할 수 없어서 생긴 결함이다. 전경을 토큰으로 분리하고
+  테마에 따라 뒤집는다 — 아래 Added 참조. 라이트는 종전대로 흰색이다(6.29 / 4.83 / 5.02).
+
+- **`--u-widget-positive` 가 라이트에서 AA 미달.** `#16a34a` 는 흰 바탕 대비 **3.30** 인데
+  이 토큰은 틴트만이 아니라 **글자**로도 쓰인다(`uw-metric` 값, `uw-code` diff 표시).
+  `#15803d`(**5.02**)로 한 단 내렸다.
+
+- **`--u-widget-text-secondary` 가 표면 위에서 AA 미달.** `#64748b` 는 `--u-widget-bg`
+  위에서는 4.76 으로 통과하지만 `--u-widget-surface`(`#f1f5f9`) 위에서는 **4.34** 였고,
+  보조 텍스트는 표면 위에 놓이는 경우가 그만큼 많다. `#5b6777`(**5.25** / 바탕 5.75).
+
+### Added
+
+- **`--u-widget-on-primary` · `--u-widget-on-negative` · `--u-widget-on-positive`** —
+  채움 면 위의 전경색. 라이트 `#ffffff` / 다크 `#1e1e2e`.
+  브랜드를 바꿀 때 `--u-widget-primary` 와 **함께** 조정하면 된다. 종전에는 전경이
+  리터럴이라 조정할 방법이 없었다.
+
+### Known issues
+
+- `--u-widget-border` 가 바탕 대비 **1.23**(라이트) · **1.59**(다크)로 WCAG 1.4.11(3.0)에
+  미달한다. 무엇이 "UI 컴포넌트 경계"인지의 판단이 선행돼야 한다.
+
 ## [0.13.0] - 2026-07-16
 
 ### Added

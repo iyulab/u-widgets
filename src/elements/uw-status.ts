@@ -56,7 +56,7 @@ export class UwStatus extends LitElement {
     }
 
     .status-label {
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       font-weight: 500;
     }
 
@@ -75,7 +75,7 @@ export class UwStatus extends LitElement {
     }
     [data-level="success"] .status-icon,
     [data-level="success"] .status-value {
-      color: var(--u-widget-positive, #16a34a);
+      color: var(--u-widget-positive, #15803d);
     }
     [data-level="warning"] .status-icon,
     [data-level="warning"] .status-value {
@@ -87,7 +87,7 @@ export class UwStatus extends LitElement {
     }
     [data-level="neutral"] .status-icon,
     [data-level="neutral"] .status-value {
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     @container uw-status (max-width: 20rem) {

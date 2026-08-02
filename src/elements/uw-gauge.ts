@@ -101,7 +101,7 @@ export class UwGauge extends LitElement {
 
     .gauge-unit {
       font-size: 0.75rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .gauge-subtitle {
@@ -140,7 +140,7 @@ export class UwGauge extends LitElement {
       display: flex;
       justify-content: space-between;
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     @container uw-gauge (max-width: 10rem) {

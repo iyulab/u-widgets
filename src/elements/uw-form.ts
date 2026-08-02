@@ -150,7 +150,7 @@ export class UwForm extends LitElement {
 
     button[data-style='primary'] {
       background: var(--u-widget-primary, #4f46e5);
-      color: white;
+      color: var(--u-widget-on-primary, #fff);
       border-color: transparent;
     }
 
@@ -160,7 +160,7 @@ export class UwForm extends LitElement {
 
     button[data-style='danger'] {
       background: var(--u-widget-negative, #dc2626);
-      color: white;
+      color: var(--u-widget-on-negative, #fff);
       border-color: transparent;
     }
 

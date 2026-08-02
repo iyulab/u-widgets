@@ -58,7 +58,7 @@ export class UwTable extends LitElement {
     th {
       text-align: left;
       font-weight: 600;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       padding: 8px 12px;
       border-bottom: 2px solid var(--u-widget-border, #e2e8f0);
       white-space: nowrap;
@@ -127,7 +127,7 @@ export class UwTable extends LitElement {
       font-weight: 600;
     }
     td[data-variant='success'] {
-      color: var(--u-widget-positive, #16a34a);
+      color: var(--u-widget-positive, #15803d);
     }
     td[data-variant='danger'] {
       color: var(--u-widget-negative, #dc2626);
@@ -139,7 +139,7 @@ export class UwTable extends LitElement {
       color: var(--u-widget-primary, #4f46e5);
     }
     td[data-variant='neutral'] {
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     /* ── list ── */
@@ -181,7 +181,7 @@ export class UwTable extends LitElement {
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .list-avatar {
@@ -205,7 +205,7 @@ export class UwTable extends LitElement {
 
     .list-secondary {
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       margin-top: 2px;
     }
 
@@ -213,7 +213,7 @@ export class UwTable extends LitElement {
       flex-shrink: 0;
       font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .list-badge {
@@ -225,7 +225,7 @@ export class UwTable extends LitElement {
       font-size: 0.6875rem;
       font-weight: 500;
       background: var(--u-widget-surface, #f1f5f9);
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       white-space: nowrap;
     }
 
@@ -259,7 +259,7 @@ export class UwTable extends LitElement {
       gap: 8px;
       margin-top: 8px;
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .pagination button {

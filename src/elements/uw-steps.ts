@@ -117,7 +117,7 @@ export class UwSteps extends LitElement {
 
     .step-desc {
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       margin-top: 2px;
       line-height: 1.4;
     }
@@ -155,7 +155,7 @@ export class UwSteps extends LitElement {
     }
 
     .step-h-line[data-done] {
-      background: var(--u-widget-positive, #16a34a);
+      background: var(--u-widget-positive, #15803d);
     }
 
     .step-h-line:not([data-done]) {
@@ -181,19 +181,19 @@ export class UwSteps extends LitElement {
 
     /* ── Status Colors ── */
     [data-status="done"] .step-icon {
-      background: var(--u-widget-positive, #16a34a);
-      color: white;
+      background: var(--u-widget-positive, #15803d);
+      color: var(--u-widget-on-positive, #fff);
     }
     [data-status="done"] .step-label {
       color: var(--u-widget-text, #1a1a2e);
     }
     [data-status="done"] .step-line {
-      background: var(--u-widget-positive, #16a34a);
+      background: var(--u-widget-positive, #15803d);
     }
 
     [data-status="active"] .step-icon {
       background: var(--u-widget-primary, #4f46e5);
-      color: white;
+      color: var(--u-widget-on-primary, #fff);
     }
     [data-status="active"] .step-label {
       color: var(--u-widget-primary, #4f46e5);
@@ -202,15 +202,15 @@ export class UwSteps extends LitElement {
 
     [data-status="pending"] .step-icon {
       background: var(--u-widget-surface, #f1f5f9);
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
     [data-status="pending"] .step-label {
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     [data-status="error"] .step-icon {
       background: var(--u-widget-negative, #dc2626);
-      color: white;
+      color: var(--u-widget-on-negative, #fff);
     }
     [data-status="error"] .step-label {
       color: var(--u-widget-negative, #dc2626);

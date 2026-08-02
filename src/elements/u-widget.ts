@@ -47,7 +47,7 @@ export class UWidget extends LitElement {
       }
 
       .error-header { font-weight: 600; color: var(--u-widget-negative, #dc2626); margin-bottom: 4px; }
-      .error-list { margin: 0; padding-left: 20px; color: var(--u-widget-text-secondary, #64748b); }
+      .error-list { margin: 0; padding-left: 20px; color: var(--u-widget-text-secondary, #5b6777); }
 
       .fallback-card {
         padding: 10px 14px;
@@ -55,9 +55,9 @@ export class UWidget extends LitElement {
         border: 1px dashed var(--u-widget-border, #e2e8f0);
         font-size: 0.8125rem;
       }
-      .fallback-label { font-size: 0.6875rem; font-weight: 600; color: var(--u-widget-text-secondary, #64748b); margin-bottom: 6px; }
+      .fallback-label { font-size: 0.6875rem; font-weight: 600; color: var(--u-widget-text-secondary, #5b6777); margin-bottom: 6px; }
       .fallback-hint { font-size: 0.75rem; color: var(--u-widget-primary, #4f46e5); margin-bottom: 6px; }
-      .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: 0.75rem; color: var(--u-widget-text-secondary, #64748b); max-height: 200px; overflow-y: auto; }
+      .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: 0.75rem; color: var(--u-widget-text-secondary, #5b6777); max-height: 200px; overflow-y: auto; }
 
       .card-container {
         padding: 16px 20px;
@@ -92,7 +92,7 @@ export class UWidget extends LitElement {
 
       [part="action-btn"][data-style='primary'] {
         background: var(--u-widget-primary, #4f46e5);
-        color: white;
+        color: var(--u-widget-on-primary, #fff);
         border-color: transparent;
       }
 
@@ -102,7 +102,7 @@ export class UWidget extends LitElement {
 
       [part="action-btn"][data-style='danger'] {
         background: var(--u-widget-negative, #dc2626);
-        color: white;
+        color: var(--u-widget-on-negative, #fff);
         border-color: transparent;
       }
 
@@ -144,7 +144,7 @@ export class UWidget extends LitElement {
         display: flex;
         align-items: center;
         gap: 12px;
-        color: var(--u-widget-text-secondary, #64748b);
+        color: var(--u-widget-text-secondary, #5b6777);
         font-size: 0.75rem;
       }
 

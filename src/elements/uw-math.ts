@@ -45,7 +45,7 @@ export class UwMath extends LitElement {
       display: block;
       margin-top: 4px;
       font-size: 0.75rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       word-break: break-all;
     }
   `];

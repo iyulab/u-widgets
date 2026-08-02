@@ -58,7 +58,7 @@ export class UwKv extends LitElement {
     .kv-key {
       font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       flex-shrink: 0;
     }
 

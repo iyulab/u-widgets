@@ -261,7 +261,7 @@ export class UwCode extends LitElement {
     .code-lang {
       font-size: 0.6875rem;
       font-weight: 600;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -271,7 +271,7 @@ export class UwCode extends LitElement {
       border-radius: 4px;
       border: 1px solid var(--u-widget-border, #e2e8f0);
       background: var(--u-widget-bg, #fff);
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
       cursor: pointer;
       font-size: 0.6875rem;
       font-family: inherit;
@@ -282,8 +282,8 @@ export class UwCode extends LitElement {
       color: var(--u-widget-text, #1a1a2e);
     }
     .code-copy[data-copied] {
-      color: var(--u-widget-positive, #16a34a);
-      border-color: var(--u-widget-positive, #16a34a);
+      color: var(--u-widget-positive, #15803d);
+      border-color: var(--u-widget-positive, #15803d);
     }
 
     .code-body {

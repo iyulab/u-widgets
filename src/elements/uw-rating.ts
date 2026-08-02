@@ -99,12 +99,12 @@ export class UwRating extends LitElement {
 
     .rating-count {
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .rating-label {
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     /* Hover preview */

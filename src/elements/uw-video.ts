@@ -25,7 +25,7 @@ export class UwVideo extends LitElement {
     .video-caption {
       margin-top: 6px;
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     @container uw-video (max-width: 20rem) {

@@ -71,7 +71,7 @@ export class UwContent extends LitElement {
       border-left: 3px solid var(--u-widget-border, #e2e8f0);
       padding-left: 12px;
       margin: 0.5em 0;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .markdown a {
@@ -122,7 +122,7 @@ export class UwContent extends LitElement {
     .image-caption {
       margin-top: 6px;
       font-size: 0.8125rem;
-      color: var(--u-widget-text-secondary, #64748b);
+      color: var(--u-widget-text-secondary, #5b6777);
     }
 
     /* ── callout ── */
@@ -153,8 +153,8 @@ export class UwContent extends LitElement {
     }
 
     .callout-success {
-      background: color-mix(in srgb, var(--u-widget-positive, #16a34a) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-positive, #16a34a);
+      background: color-mix(in srgb, var(--u-widget-positive, #15803d) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--u-widget-positive, #15803d);
       color: var(--u-widget-text, #1a1a2e);
     }
 
