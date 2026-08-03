@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { isDateLikeString } from '../../src/core/utils.js';
 

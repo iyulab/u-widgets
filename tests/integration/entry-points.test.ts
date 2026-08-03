@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Entry point export tests.
  *

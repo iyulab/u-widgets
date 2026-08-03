@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect, vi } from 'vitest';
 import { normalize, normalizeMapping } from '../../src/core/normalize.js';
 import { registerFormdownParser, getFormdownParser } from '../../src/core/formdown.js';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { help, template } from '../../src/core/catalog.js';
 import type { WidgetDetail } from '../../src/core/catalog.js';

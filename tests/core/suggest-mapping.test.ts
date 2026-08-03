@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { suggestMapping, autoSpec } from '../../src/core/suggest-mapping.js';
 

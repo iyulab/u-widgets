@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { toEChartsOption } from '../../src/renderers/echarts-adapter.js';
 import type { UWidgetSpec } from '../../src/core/types.js';
