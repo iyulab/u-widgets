@@ -54,7 +54,7 @@ export class UwForm extends LitElement {
     textarea:focus,
     select:focus {
       border-color: var(--u-widget-primary, #4f46e5);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--u-widget-primary, #4f46e5) 10%, transparent);
     }
 
     textarea {
@@ -179,7 +179,7 @@ export class UwForm extends LitElement {
     input.invalid:focus,
     textarea.invalid:focus,
     select.invalid:focus {
-      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--u-widget-negative, #dc2626) 10%, transparent);
     }
 
     /* ── confirm ── */

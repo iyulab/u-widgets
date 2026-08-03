@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.14.1] - 2026-08-03
+
+### Fixed
+
+- **포커스 링·강조 배경이 브랜드 색을 따라가지 않던 문제** — 세 곳이 인디고 값을
+  `rgba(79, 70, 229, …)` 리터럴로 굽고 있었다. `--u-widget-primary` 는 **테마마다 다른
+  값**(라이트 `#4f46e5` / 다크 `#818cf8`)인데 리터럴은 그것을 모르므로, 다크에서
+  테두리와 포커스 링이 서로 다른 인디고가 됐다. 소비자가 브랜드를 덮어도 따라오지 않았다.
+  `color-mix()` 로 토큰에서 파생하도록 고쳤다(무효 오류 배경도 `--u-widget-negative` 기준).
+
 ## [0.14.0] - 2026-08-02
 
 ### Fixed

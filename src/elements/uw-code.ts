@@ -315,7 +315,9 @@ export class UwCode extends LitElement {
     }
 
     .line-hl {
-      background: light-dark(rgba(79, 70, 229, 0.08), rgba(79, 70, 229, 0.15));
+      background: light-dark(
+        color-mix(in srgb, var(--u-widget-primary, #4f46e5) 8%, transparent),
+        color-mix(in srgb, var(--u-widget-primary, #4f46e5) 15%, transparent));
       margin: 0 -12px;
       padding: 0 12px;
     }
