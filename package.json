@@ -47,7 +47,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run typecheck && vite build",
     "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/themes',{recursive:true});fs.copyFileSync('src/themes/shadcn.css','dist/themes/shadcn.css')\"",
     "build:cdn": "vite build --config vite.cdn.config.ts",
     "build:demo": "vite build --config vite.demo.config.ts",
