@@ -36,10 +36,7 @@
   },
   "sideEffects": [
     "./src/elements/*.ts",
-    "./dist/u-widgets.js",
-    "./dist/u-widgets-charts.js",
-    "./dist/u-widgets-forms.js",
-    "./dist/u-widgets-math.js"
+    "./dist/*.js"
   ],
   "files": [
     "dist",
