@@ -32,7 +32,7 @@
       "types": "./dist/u-widgets-react.d.ts",
       "import": "./dist/u-widgets-react.js"
     },
-    "./themes/shadcn.css": "./src/themes/shadcn.css"
+    "./themes/shadcn.css": "./dist/themes/shadcn.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
