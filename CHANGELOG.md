@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.15.0] - 2026-08-05
+
+### Changed
+
+- ⚠**`@iyulab/components` is now a required peer dependency (`>=1.24.0`).** The token
+  sheet is a runtime premise rather than a nicety — the styles reference it in 58 places,
+  and installing without it lets the fallback literals quietly stand in for the theme.
+
+  Consumers pinned to `@iyulab/components@1.23.x` will see an `ERESOLVE` on install.
+
+### Fixed
+
+- **`sideEffects` no longer misses part of the emitted entry points.** The declaration
+  named four output files, but with multiple entries the bundler splits shared code —
+  custom-element registrations included — into hash-named chunks that were not listed. A
+  consumer's bundler could drop them and the widgets would never register, with no build
+  error. It now covers `./dist/*.js`.
+
+- **The `./themes/shadcn.css` subpath points back at the built output.** It had been
+  rewritten to a source path, which does not exist in the published package.
+
 ## [0.14.1] - 2026-08-03
 
 ### Fixed
