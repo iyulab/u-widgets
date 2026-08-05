@@ -32,7 +32,7 @@
       "types": "./dist/u-widgets-react.d.ts",
       "import": "./dist/u-widgets-react.js"
     },
-    "./themes/shadcn.css": "./dist/themes/shadcn.css"
+    "./themes/shadcn.css": "./src/themes/shadcn.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
@@ -43,8 +43,15 @@
   ],
   "files": [
     "dist",
-    "schema"
+    "schema",
+    "package.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "npm run typecheck && vite build",
@@ -82,6 +89,7 @@
   },
   "peerDependencies": {
     "@formdown/core": "^0.4.0",
+    "@iyulab/components": ">=1.24.0",
     "@lit/react": "^1.0.0 || ^2.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
     "katex": "^0.16.0",
