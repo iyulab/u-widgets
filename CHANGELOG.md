@@ -18,6 +18,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   `u-widgets` remains installable and themeable without any other design-system package
   present.
 
+### Fixed
+
+- **`@iyulab/components` is no longer a required peer dependency.** It was declared in 0.15.0
+  but nothing in this package's source actually imports it or references its tokens — this
+  package has always styled itself through its own local `--u-widget-*` custom properties.
+  Installing `u-widgets` no longer requires installing (or satisfying a version range for) a
+  package it does not use.
+
 ## [0.15.0] - 2026-08-05
 
 ### Changed
