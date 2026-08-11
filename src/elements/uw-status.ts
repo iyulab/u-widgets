@@ -47,11 +47,11 @@ export class UwStatus extends LitElement {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
     }
 
     .status-icon {
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       flex-shrink: 0;
     }
 
@@ -92,7 +92,7 @@ export class UwStatus extends LitElement {
 
     @container uw-status (max-width: 20rem) {
       .status-list { gap: 8px 16px; }
-      .status-item { font-size: 0.8125rem; }
+      .status-item { font-size: var(--u-widget-font-size-label, 0.8125rem); }
     }
   `];
 

@@ -6,7 +6,10 @@ import { css } from 'lit';
  * **Token categories:**
  * - Colors: bg, surface, text, text-secondary, border, primary, positive, negative, warning
  * - Spacing: gap, radius
- * - Typography: font-family, font-size
+ * - Typography: font-family, font-size (body tier) + font-size-label/caption/overline
+ *   (a 4-tier rem-based scale — kept local to this package rather than referencing
+ *   @iyulab/components' --u-text-* tokens, since u-widgets is designed to be usable
+ *   standalone without that package installed)
  * - Chart: chart-height, chart-color-1..10
  *
  * **Theme modes:**
@@ -59,6 +62,9 @@ export const themeStyles = css`
     /* ── Typography ── */
     --u-widget-font-family: system-ui, -apple-system, sans-serif;
     --u-widget-font-size: 0.875rem;
+    --u-widget-font-size-label: 0.8125rem;
+    --u-widget-font-size-caption: 0.75rem;
+    --u-widget-font-size-overline: 0.6875rem;
 
     /* ── Chart ── */
     --u-widget-chart-height: 300px;

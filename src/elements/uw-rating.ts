@@ -92,18 +92,18 @@ export class UwRating extends LitElement {
 
     /* Value display */
     .rating-value {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .rating-count {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .rating-label {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -122,7 +122,7 @@ export class UwRating extends LitElement {
 
     @container uw-rating (max-width: 20rem) {
       .rating-icon { font-size: 1rem; }
-      .rating-value { font-size: 0.8125rem; }
+      .rating-value { font-size: var(--u-widget-font-size-label, 0.8125rem); }
     }
   `];
 

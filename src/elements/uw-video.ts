@@ -24,7 +24,7 @@ export class UwVideo extends LitElement {
 
     .video-caption {
       margin-top: 6px;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -34,7 +34,7 @@ export class UwVideo extends LitElement {
       }
 
       .video-caption {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
         margin-top: 4px;
       }
     }

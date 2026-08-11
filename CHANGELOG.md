@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.16.0] - 2026-08-11
+
+### Added
+
+- **A rem-based typography scale**: `--u-widget-font-size-label` (0.8125rem), `-caption`
+  (0.75rem), `-overline` (0.6875rem), alongside the existing `--u-widget-font-size` (body,
+  0.875rem). Every element previously hardcoded one of these four values directly in dozens of
+  places; they now reference the shared tokens, so a host page can retune the whole scale (or
+  a single tier) by setting one custom property instead of overriding each element's internal
+  selectors. Values are unchanged — this is purely additive, no visual difference at defaults.
+  The scale stays local to this package (not a reference to any other package's tokens), so
+  `u-widgets` remains installable and themeable without any other design-system package
+  present.
+
 ## [0.15.0] - 2026-08-05
 
 ### Changed

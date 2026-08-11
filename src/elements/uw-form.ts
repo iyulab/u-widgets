@@ -26,7 +26,7 @@ export class UwForm extends LitElement {
     }
 
     .field-label {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
     }
@@ -42,7 +42,7 @@ export class UwForm extends LitElement {
       padding: 8px 12px;
       border: 1px solid var(--u-widget-border, #e2e8f0);
       border-radius: 6px;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-family: inherit;
       color: var(--u-widget-text, #1a1a2e);
       background: var(--u-widget-bg, #fff);
@@ -121,7 +121,7 @@ export class UwForm extends LitElement {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       cursor: pointer;
     }
 
@@ -135,7 +135,7 @@ export class UwForm extends LitElement {
     button {
       padding: 8px 20px;
       border-radius: 6px;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 500;
       cursor: pointer;
       border: 1px solid var(--u-widget-border, #e2e8f0);
@@ -165,7 +165,7 @@ export class UwForm extends LitElement {
     }
 
     .field-error {
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-negative, #dc2626);
       margin-top: 2px;
     }
@@ -201,11 +201,11 @@ export class UwForm extends LitElement {
       }
 
       .field-label {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       input, textarea, select {
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
         padding: 6px 8px;
       }
 
@@ -220,7 +220,7 @@ export class UwForm extends LitElement {
 
       button {
         padding: 8px 14px;
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
     }
   `];

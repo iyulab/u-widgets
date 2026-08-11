@@ -52,7 +52,7 @@ export class UwCitation extends LitElement {
       height: 22px;
       border-radius: 4px;
       background: var(--u-widget-surface, #f1f5f9);
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -66,7 +66,7 @@ export class UwCitation extends LitElement {
     }
 
     .cite-title {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
       overflow: hidden;
@@ -78,7 +78,7 @@ export class UwCitation extends LitElement {
     }
 
     .cite-url {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       color: var(--u-widget-text-secondary, #94a3b8);
       overflow: hidden;
       text-overflow: ellipsis;
@@ -87,7 +87,7 @@ export class UwCitation extends LitElement {
     }
 
     .cite-snippet {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
       margin-top: 4px;
       line-height: 1.4;
@@ -98,7 +98,7 @@ export class UwCitation extends LitElement {
     }
 
     .cite-source {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       color: var(--u-widget-text-secondary, #94a3b8);
       margin-top: 4px;
     }
@@ -111,8 +111,8 @@ export class UwCitation extends LitElement {
     .citations[data-compact] .cite-source { display: none; }
 
     @container uw-citation (max-width: 20rem) {
-      .cite-title { font-size: 0.8125rem; }
-      .cite-snippet { font-size: 0.75rem; }
+      .cite-title { font-size: var(--u-widget-font-size-label, 0.8125rem); }
+      .cite-snippet { font-size: var(--u-widget-font-size-caption, 0.75rem); }
     }
   `];
 

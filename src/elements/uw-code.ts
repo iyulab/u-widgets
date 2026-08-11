@@ -259,7 +259,7 @@ export class UwCode extends LitElement {
     }
 
     .code-lang {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-weight: 600;
       color: var(--u-widget-text-secondary, #5b6777);
       text-transform: uppercase;
@@ -273,7 +273,7 @@ export class UwCode extends LitElement {
       background: var(--u-widget-bg, #fff);
       color: var(--u-widget-text-secondary, #5b6777);
       cursor: pointer;
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-family: inherit;
       transition: all 0.15s;
     }
@@ -295,7 +295,7 @@ export class UwCode extends LitElement {
       margin: 0;
       padding: 12px;
       font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Consolas, Monaco, monospace;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       line-height: 1.5;
       tab-size: 2;
       white-space: pre;
@@ -329,7 +329,7 @@ export class UwCode extends LitElement {
     .hl-n { color: light-dark(#d97706, #fbbf24); }  /* number — amber */
 
     @container uw-code (max-width: 20rem) {
-      pre { font-size: 0.75rem; padding: 8px; }
+      pre { font-size: var(--u-widget-font-size-caption, 0.75rem); padding: 8px; }
       .code-header { padding: 4px 8px; }
       .line-no { width: 2.5ch; margin-right: 1ch; }
     }

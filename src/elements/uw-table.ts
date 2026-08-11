@@ -52,7 +52,7 @@ export class UwTable extends LitElement {
     table {
       min-width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
     }
 
     th {
@@ -62,7 +62,7 @@ export class UwTable extends LitElement {
       padding: 8px 12px;
       border-bottom: 2px solid var(--u-widget-border, #e2e8f0);
       white-space: nowrap;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       text-transform: uppercase;
       letter-spacing: 0.025em;
     }
@@ -81,7 +81,7 @@ export class UwTable extends LitElement {
 
     .sort-arrow {
       margin-left: 4px;
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
     }
 
     td {
@@ -180,7 +180,7 @@ export class UwTable extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -198,20 +198,20 @@ export class UwTable extends LitElement {
     }
 
     .list-primary {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 500;
       color: var(--u-widget-text, #1a1a2e);
     }
 
     .list-secondary {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
       margin-top: 2px;
     }
 
     .list-trailing {
       flex-shrink: 0;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       font-weight: 500;
       color: var(--u-widget-text-secondary, #5b6777);
     }
@@ -222,7 +222,7 @@ export class UwTable extends LitElement {
       align-items: center;
       padding: 2px 8px;
       border-radius: 10px;
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-weight: 500;
       background: var(--u-widget-surface, #f1f5f9);
       color: var(--u-widget-text-secondary, #5b6777);
@@ -238,7 +238,7 @@ export class UwTable extends LitElement {
       width: 100%;
       box-sizing: border-box;
       padding: 6px 10px;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       border: 1px solid var(--u-widget-border, #e2e8f0);
       border-radius: 4px;
       outline: none;
@@ -258,7 +258,7 @@ export class UwTable extends LitElement {
       justify-content: center;
       gap: 8px;
       margin-top: 8px;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -269,7 +269,7 @@ export class UwTable extends LitElement {
       background: var(--u-widget-bg, #fff);
       color: var(--u-widget-text, #1a1a2e);
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       font-family: inherit;
     }
 
@@ -284,12 +284,12 @@ export class UwTable extends LitElement {
 
     /* ── compact ── */
     .compact table {
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
     }
 
     .compact th {
       padding: 4px 8px;
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
     }
 
     .compact td {
@@ -313,26 +313,26 @@ export class UwTable extends LitElement {
     }
 
     .compact .list-primary {
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
     }
 
     .compact .list-secondary {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
     }
 
     .compact .list-trailing {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
     }
 
     /* ── container-query responsive ── */
     @container uw-table (max-width: 30rem) {
       table {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       th {
         padding: 4px 8px;
-        font-size: 0.6875rem;
+        font-size: var(--u-widget-font-size-overline, 0.6875rem);
       }
 
       td {
@@ -351,12 +351,12 @@ export class UwTable extends LitElement {
       }
 
       .list-primary {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       .list-secondary,
       .list-trailing {
-        font-size: 0.6875rem;
+        font-size: var(--u-widget-font-size-overline, 0.6875rem);
       }
     }
   `];

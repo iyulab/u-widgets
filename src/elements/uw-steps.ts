@@ -74,13 +74,13 @@ export class UwSteps extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       font-weight: 700;
       flex-shrink: 0;
     }
 
     .step-svg { width: 14px; height: 14px; }
-    .step-icon-text { font-size: 0.75rem; line-height: 1; }
+    .step-icon-text { font-size: var(--u-widget-font-size-caption, 0.75rem); line-height: 1; }
 
     .step-line {
       width: 2px;
@@ -110,13 +110,13 @@ export class UwSteps extends LitElement {
     .step-v:last-child .step-body { padding-bottom: 0; }
 
     .step-label {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 500;
       line-height: 24px;
     }
 
     .step-desc {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
       margin-top: 2px;
       line-height: 1.4;
@@ -170,7 +170,7 @@ export class UwSteps extends LitElement {
 
     .step-h .step-label {
       text-align: center;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       line-height: 1.3;
       margin-top: 6px;
       max-width: 100%;
@@ -223,11 +223,11 @@ export class UwSteps extends LitElement {
     .steps-vertical[data-compact] .step-line { min-height: 6px; }
 
     .steps-horizontal[data-compact] .step-icon { width: 20px; height: 20px; font-size: 0.625rem; }
-    .steps-horizontal[data-compact] .step-label { font-size: 0.6875rem; margin-top: 4px; }
+    .steps-horizontal[data-compact] .step-label { font-size: var(--u-widget-font-size-overline, 0.6875rem); margin-top: 4px; }
 
     @container uw-steps (max-width: 20rem) {
-      .step-label { font-size: 0.8125rem; }
-      .step-desc { font-size: 0.75rem; }
+      .step-label { font-size: var(--u-widget-font-size-label, 0.8125rem); }
+      .step-desc { font-size: var(--u-widget-font-size-caption, 0.75rem); }
 
       /* horizontal → vertical auto-conversion on narrow containers */
       .steps-horizontal {
@@ -265,7 +265,7 @@ export class UwSteps extends LitElement {
         white-space: normal;
         margin-top: 0;
         line-height: 24px;
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
     }
   `];

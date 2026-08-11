@@ -284,4 +284,31 @@ describe('uw-citation', () => {
       expect(items.length).toBe(1);
     });
   });
+
+  describe('typography scale — font-size is a live custom-property reference, not a baked-in literal', () => {
+    function renderAttached(spec: UWidgetSpec): HTMLElement {
+      const el = render(spec);
+      document.body.appendChild(el);
+      return el;
+    }
+
+    it('.cite-num (overline tier) resolves the token default when unset', () => {
+      const el = renderAttached({
+        widget: 'citation',
+        data: [{ title: 'Source A' }],
+      });
+      const num = shadow(el).querySelector('.cite-num') as HTMLElement;
+      expect(getComputedStyle(num).fontSize).toBe('11px');
+    });
+
+    it('.cite-num (overline tier) follows a host override of --u-widget-font-size-overline', () => {
+      const el = renderAttached({
+        widget: 'citation',
+        data: [{ title: 'Source A' }],
+      });
+      el.style.setProperty('--u-widget-font-size-overline', '20px');
+      const num = shadow(el).querySelector('.cite-num') as HTMLElement;
+      expect(getComputedStyle(num).fontSize).toBe('20px');
+    });
+  });
 });

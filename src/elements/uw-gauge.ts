@@ -100,12 +100,12 @@ export class UwGauge extends LitElement {
     }
 
     .gauge-unit {
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
     .gauge-subtitle {
-      font-size: 0.6875rem;
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-weight: 600;
       line-height: 1.2;
       margin-top: 2px;
@@ -139,7 +139,7 @@ export class UwGauge extends LitElement {
     .progress-info {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -157,7 +157,7 @@ export class UwGauge extends LitElement {
       }
 
       .progress-info {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       .progress-bar-track {

@@ -43,7 +43,7 @@ export class UWidget extends LitElement {
         border-radius: 6px;
         border: 1px solid var(--u-widget-negative, #dc2626);
         background: color-mix(in srgb, var(--u-widget-negative, #dc2626) 8%, var(--u-widget-bg, #fff));
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
 
       .error-header { font-weight: 600; color: var(--u-widget-negative, #dc2626); margin-bottom: 4px; }
@@ -53,11 +53,11 @@ export class UWidget extends LitElement {
         padding: 10px 14px;
         border-radius: 6px;
         border: 1px dashed var(--u-widget-border, #e2e8f0);
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
-      .fallback-label { font-size: 0.6875rem; font-weight: 600; color: var(--u-widget-text-secondary, #5b6777); margin-bottom: 6px; }
-      .fallback-hint { font-size: 0.75rem; color: var(--u-widget-primary, #4f46e5); margin-bottom: 6px; }
-      .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: 0.75rem; color: var(--u-widget-text-secondary, #5b6777); max-height: 200px; overflow-y: auto; }
+      .fallback-label { font-size: var(--u-widget-font-size-overline, 0.6875rem); font-weight: 600; color: var(--u-widget-text-secondary, #5b6777); margin-bottom: 6px; }
+      .fallback-hint { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-primary, #4f46e5); margin-bottom: 6px; }
+      .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); max-height: 200px; overflow-y: auto; }
 
       .card-container {
         padding: 16px 20px;
@@ -76,7 +76,7 @@ export class UWidget extends LitElement {
       [part="action-btn"] {
         padding: 8px 20px;
         border-radius: 6px;
-        font-size: 0.875rem;
+        font-size: var(--u-widget-font-size, 0.875rem);
         font-weight: 500;
         cursor: pointer;
         border: 1px solid var(--u-widget-border, #e2e8f0);
@@ -113,7 +113,7 @@ export class UWidget extends LitElement {
 
       /* ── widget title ── */
       .widget-title {
-        font-size: 0.875rem;
+        font-size: var(--u-widget-font-size, 0.875rem);
         font-weight: 600;
         color: var(--u-widget-text, #1a1a2e);
         margin: 0 0 8px 0;
@@ -145,7 +145,7 @@ export class UWidget extends LitElement {
         align-items: center;
         gap: 12px;
         color: var(--u-widget-text-secondary, #5b6777);
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       .divider::before,
@@ -200,7 +200,7 @@ export class UWidget extends LitElement {
 
         [part="action-btn"] {
           padding: 8px 14px;
-          font-size: 0.8125rem;
+          font-size: var(--u-widget-font-size-label, 0.8125rem);
         }
 
         .header-widget[data-level='1'] { font-size: 1.25rem; }

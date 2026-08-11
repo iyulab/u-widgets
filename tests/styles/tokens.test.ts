@@ -58,6 +58,13 @@ describe('themeStyles', () => {
       expect(cssText).toContain('--u-widget-font-size:');
     });
 
+    it('defines a typography scale (label/caption/overline tiers, rem-based)', () => {
+      expect(cssText).toMatch(/--u-widget-font-size-label:\s*0\.8125rem/);
+      expect(cssText).toMatch(/--u-widget-font-size-caption:\s*0\.75rem/);
+      expect(cssText).toMatch(/--u-widget-font-size-overline:\s*0\.6875rem/);
+      // body tier reuses the existing --u-widget-font-size token (0.875rem) — no new token for it.
+    });
+
     it('defines chart height token', () => {
       expect(cssText).toContain('--u-widget-chart-height:');
     });

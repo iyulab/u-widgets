@@ -14,7 +14,7 @@ export class UwContent extends LitElement {
 
     /* ── markdown ── */
     .markdown {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       line-height: 1.6;
       color: var(--u-widget-text, #1a1a2e);
     }
@@ -44,7 +44,7 @@ export class UwContent extends LitElement {
       background: var(--u-widget-surface, #f1f5f9);
       padding: 0.15em 0.4em;
       border-radius: 3px;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       font-family: 'SF Mono', 'Fira Code', monospace;
     }
 
@@ -53,7 +53,7 @@ export class UwContent extends LitElement {
       padding: 12px;
       border-radius: 6px;
       overflow-x: auto;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
     }
 
     .markdown pre code {
@@ -87,7 +87,7 @@ export class UwContent extends LitElement {
       width: 100%;
       border-collapse: collapse;
       margin: 0.5em 0;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
     }
 
     .markdown th,
@@ -121,7 +121,7 @@ export class UwContent extends LitElement {
 
     .image-caption {
       margin-top: 6px;
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -130,7 +130,7 @@ export class UwContent extends LitElement {
       padding: 12px 16px;
       border-radius: 6px;
       border-left: 4px solid;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       line-height: 1.5;
     }
 
@@ -165,7 +165,7 @@ export class UwContent extends LitElement {
 
     @container uw-content (max-width: 20rem) {
       .markdown {
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
 
       .markdown h1 { font-size: 1.25rem; }
@@ -174,11 +174,11 @@ export class UwContent extends LitElement {
 
       .callout {
         padding: 8px 12px;
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
 
       .image-caption {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
     }
   `];

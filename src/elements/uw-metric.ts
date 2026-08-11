@@ -104,14 +104,14 @@ export class UwMetric extends LitElement {
     }
 
     .metric-unit {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 400;
       color: var(--u-widget-text-secondary, #5b6777);
       margin-left: 4px;
     }
 
     .metric-change {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       font-weight: 500;
       display: inline-flex;
       align-items: center;
@@ -131,13 +131,13 @@ export class UwMetric extends LitElement {
     }
 
     .metric-label {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
       font-weight: 500;
     }
 
     .metric-icon { font-size: 1.25rem; line-height: 1; margin-bottom: 2px; }
-    .metric-description { font-size: 0.75rem; color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
+    .metric-description { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
 
     /* ── variant colors ── */
     .metric[data-variant="success"] .metric-value { color: var(--u-widget-positive, #15803d); }

@@ -56,14 +56,14 @@ export class UwKv extends LitElement {
     }
 
     .kv-key {
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       font-weight: 500;
       color: var(--u-widget-text-secondary, #5b6777);
       flex-shrink: 0;
     }
 
     .kv-value {
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
       text-align: right;
@@ -97,11 +97,11 @@ export class UwKv extends LitElement {
       }
 
       .kv-key {
-        font-size: 0.75rem;
+        font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
       .kv-value {
-        font-size: 0.8125rem;
+        font-size: var(--u-widget-font-size-label, 0.8125rem);
       }
     }
   `];

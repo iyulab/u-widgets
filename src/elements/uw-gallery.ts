@@ -38,7 +38,7 @@ export class UwGallery extends LitElement {
 
     .gallery-caption {
       padding: 4px 8px;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
       background: var(--u-widget-surface, #f1f5f9);
     }

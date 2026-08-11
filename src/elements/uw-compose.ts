@@ -70,7 +70,7 @@ export class UwCompose extends LitElement {
       align-items: center;
       gap: 6px;
       padding: 8px 12px;
-      font-size: 0.875rem;
+      font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 500;
       color: var(--u-widget-text, #1a1a2e);
       cursor: pointer;

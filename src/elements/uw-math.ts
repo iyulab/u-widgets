@@ -37,14 +37,14 @@ export class UwMath extends LitElement {
       border-radius: 4px;
       border: 1px solid var(--u-widget-negative, #dc2626);
       background: color-mix(in srgb, var(--u-widget-negative, #dc2626) 8%, var(--u-widget-bg, #fff));
-      font-size: 0.8125rem;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-negative, #dc2626);
     }
 
     .math-error code {
       display: block;
       margin-top: 4px;
-      font-size: 0.75rem;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
       word-break: break-all;
     }
