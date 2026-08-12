@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.16.1] - 2026-08-12
+
+### Fixed
+
+- **Published `.d.ts` declarations were broken for 16 of the 17 registered custom elements,
+  across all 6 build entries.** The dts bundler strips `declare global` blocks (which hold each
+  element's `HTMLElementTagNameMap` entry) and a build-time patch step was meant to restore
+  them, but its guard only recognized the one element it had originally been written for and
+  silently skipped the rest, leaving orphaned/broken global declarations behind. The patch now
+  detects and restores every stripped block (brace-depth aware, not a single string match),
+  covers all 17 elements, and runs against every build entry. `uw-chart` and `uw-math` are now
+  typed with their real exported classes instead of a generic `HTMLElement`.
+
 ## [0.16.0] - 2026-08-11
 
 ### Added
