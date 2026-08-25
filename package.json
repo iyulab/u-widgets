@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
@@ -41,6 +41,7 @@
   "files": [
     "dist",
     "schema",
+    "skills",
     "package.json",
     "README.md",
     "CHANGELOG.md",

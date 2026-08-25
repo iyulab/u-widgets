@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.16.2] - 2026-08-25
+
+### Added
+
+- Agent-skill reference docs (`skills/iyulab-u-widgets/`) — the `<u-widget spec="...">` usage
+  pattern, the full widget catalog (`widget` value → element → description), events, and the
+  complete `--u-widget-*` CSS Custom Properties token sheet.
+
 ## [0.16.1] - 2026-08-12
 
 ### Fixed
