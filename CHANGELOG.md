@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.17.0] - 2026-08-30
+
+### Added
+
+- `getPrimaryDataField(widgetType)` — names the single data field that holds a widget's
+  headline/live value, for widget types where that's unambiguous (`metric`/`gauge`/`progress`/
+  `status`/`stat-group`, all `→ "value"`). `required: true` on a widget's data fields can't
+  answer this alone — `status`/`stat-group` each have more than one required field, and the
+  non-value ones (e.g. `status.label`) are typically static captions rather than a bound live
+  value. Returns `undefined` for widget types with free-form user-defined mapping (`chart.*`,
+  `table`, `list`, ...), which have no single fixed headline field.
+
 ## [0.16.2] - 2026-08-25
 
 ### Added
