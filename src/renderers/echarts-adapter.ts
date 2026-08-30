@@ -921,8 +921,18 @@ function buildHistogram(
     ? options.bins
     : Math.ceil(Math.log2(values.length) + 1);
 
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  // The X axis domain must cover referenceLines too, not just the data \u2014 otherwise an
+  // out-of-domain reference (e.g. a spec limit outside the observed sample range) has no
+  // valid bin-index coordinate to draw at (docket #146).
+  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  const refXValues = Array.isArray(refLines)
+    ? refLines
+        .filter((rl) => rl.axis === 'x' && typeof rl.value === 'number')
+        .map((rl) => rl.value as number)
+    : [];
+
+  const min = Math.min(...values, ...refXValues);
+  const max = Math.max(...values, ...refXValues);
   const range = max - min;
   const binWidth = range / binCount || 1;
 
@@ -930,10 +940,17 @@ function buildHistogram(
   const bins: number[] = new Array(binCount).fill(0);
   const labels: string[] = [];
 
+  // Decimal places needed so adjacent bin boundaries (which differ by binWidth) don't
+  // round to the same displayed label \u2014 fixed 1-decimal rounding showed "9.7\u20139.7" for
+  // bins narrower than 0.1 (docket #146 secondary repro).
+  const labelDecimals = binWidth > 0 && binWidth < 1
+    ? Math.min(10, Math.max(1, Math.ceil(-Math.log10(binWidth))))
+    : 1;
+
   for (let i = 0; i < binCount; i++) {
     const lo = min + i * binWidth;
     const hi = min + (i + 1) * binWidth;
-    const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(1);
+    const fmt = (n: number) => Number.isInteger(n) ? String(n) : n.toFixed(labelDecimals);
     labels.push(`${fmt(lo)}\u2013${fmt(hi)}`);
   }
 
@@ -956,15 +973,19 @@ function buildHistogram(
     tooltip: { trigger: 'axis' },
   };
 
-  // Reference lines
-  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  // Reference lines — the X axis above is a *category* axis (each category is a bin
+  // range label), so a raw domain value (e.g. 10.5) is not a valid coordinate: ECharts
+  // reads a numeric xAxis coordinate on a category axis as a bin **index**, not a data
+  // value. Convert to the fractional bin-index position the value falls at instead
+  // (docket #146 — previously every line landed at/near the same clamped edge index).
   if (Array.isArray(refLines) && refLines.length > 0) {
     series.markLine = {
       silent: true,
       symbol: 'none',
       data: refLines.map((rl) => {
         const item: Record<string, unknown> = {};
-        if (rl.axis === 'x') item.xAxis = rl.value;
+        if (rl.axis === 'x' && typeof rl.value === 'number') item.xAxis = (rl.value - min) / binWidth;
+        else if (rl.axis === 'x') item.xAxis = rl.value;
         else item.yAxis = rl.value;
         if (rl.label) item.name = rl.label;
         const lineStyle: Record<string, unknown> = {};

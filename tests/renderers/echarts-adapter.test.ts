@@ -1498,6 +1498,60 @@ describe('toEChartsOption', () => {
       expect(result).toEqual({});
     });
 
+    it('extends the X-axis domain to cover out-of-domain x referenceLines (docket #146)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [9.9, 9.95, 10.0, 10.05, 10.1] as unknown as Record<string, unknown>[],
+        options: {
+          bins: 6,
+          referenceLines: [
+            { axis: 'x', value: 9.5, label: 'LSL' },
+            { axis: 'x', value: 10.5, label: 'USL' },
+            { axis: 'x', value: 10.0, label: 'Mean' },
+          ],
+        },
+      }));
+      const labels = (result.xAxis as Obj).data as string[];
+      const firstLo = Number(labels[0].split('–')[0]);
+      const lastHi = Number(labels[labels.length - 1].split('–')[1]);
+      expect(firstLo).toBeCloseTo(9.5, 5);
+      expect(lastHi).toBeCloseTo(10.5, 5);
+    });
+
+    it('places x referenceLines at distinct bin-index coordinates, not the same clamped edge (docket #146)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [9.9, 9.95, 10.0, 10.05, 10.1] as unknown as Record<string, unknown>[],
+        options: {
+          bins: 6,
+          referenceLines: [
+            { axis: 'x', value: 9.5, label: 'LSL' },
+            { axis: 'x', value: 10.5, label: 'USL' },
+            { axis: 'x', value: 10.0, label: 'Mean' },
+          ],
+        },
+      }));
+      const series = result.series as ObjArray;
+      const markLineData = (series[0].markLine as Obj).data as Obj[];
+      const coords = markLineData.map((d) => d.xAxis as number);
+      coords.forEach((c) => expect(Number.isFinite(c)).toBe(true));
+      // the bug had all three collapse onto the same clamped edge index
+      expect(new Set(coords).size).toBe(3);
+    });
+
+    it('produces distinguishable bin labels for bin widths under 0.1 (docket #146 secondary repro)', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.histogram',
+        data: [9.7, 9.75, 9.8, 9.85, 9.9] as unknown as Record<string, unknown>[],
+        options: { bins: 10 },
+      }));
+      const labels = (result.xAxis as Obj).data as string[];
+      for (const label of labels) {
+        const [lo, hi] = label.split('–');
+        expect(lo).not.toBe(hi);
+      }
+    });
+
     it('formats bin labels as range with en-dash', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.histogram',
