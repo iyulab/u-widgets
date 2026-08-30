@@ -42,7 +42,7 @@ export { formatValue } from './core/format.js';
 export { suggestWidget } from './core/suggest.js';
 export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale } from './core/locale.js';
 export type { UWidgetLocaleStrings } from './core/locale.js';
-export { getPrimaryDataField } from './core/widget-meta.js';
+export { getPrimaryDataField } from './core/primary-field.js';
 
 export type { UWidgetElementProps } from './types/jsx.js';
 

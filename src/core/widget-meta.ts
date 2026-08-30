@@ -310,26 +310,6 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   ],
 };
 
-/**
- * The single data field that holds a widget's headline/live value, for widget types where that's
- * unambiguous. `required: true` in `WIDGET_DATA_FIELDS` can't answer this alone — some widgets
- * (`status`, `stat-group`) have more than one required field, and the non-value ones (e.g.
- * `status.label`) are typically static captions, not something a consumer binds to a live
- * source. Widgets with free-form user-defined mapping (`chart.*`, `table`, `list`, ...) have no
- * single fixed headline field and correctly return `undefined`.
- */
-const WIDGET_PRIMARY_DATA_FIELD: Readonly<Record<string, string>> = {
-  metric: 'value',
-  'stat-group': 'value',
-  gauge: 'value',
-  progress: 'value',
-  status: 'value',
-};
-
-export function getPrimaryDataField(widget: string): string | undefined {
-  return WIDGET_PRIMARY_DATA_FIELD[widget];
-}
-
 /** Auto-inference hints — tells LLM what can be omitted. */
 export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'chart.bar': 'mapping omittable. First string → x, number fields → y.',
