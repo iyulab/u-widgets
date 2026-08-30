@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.17.1] - 2026-08-30
+
+### Fixed
+
+- **`chart.histogram`'s `referenceLines` landed on the wrong position, or overlapped
+  regardless of their actual value.** The histogram's X axis is a category axis
+  (each category is a bin-range label), but a reference line's raw domain value was
+  passed straight through as the axis coordinate — on a category axis, ECharts reads
+  a numeric coordinate as a bin **index**, not a data value, so lines landed at
+  effectively arbitrary positions and any line whose value exceeded the bin count
+  clamped onto the same trailing index. Reference line values are now converted to
+  their fractional bin-index position, and the bin domain is extended to cover any
+  reference line outside the data's own range so it still appears on the axis. Also
+  widened bin-label decimal precision for narrow bins, which previously rounded to a
+  fixed one decimal place and could render identical start/end labels (e.g. "9.7–9.7").
+
 ## [0.17.0] - 2026-08-30
 
 ### Added
