@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
@@ -90,7 +90,7 @@
     "@formdown/core": "^0.4.0",
     "@lit/react": "^1.0.0 || ^2.0.0",
     "echarts": "^5.5.0 || ^6.0.0",
-    "katex": "^0.16.0",
+    "katex": "^0.17.0",
     "react": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
@@ -117,12 +117,12 @@
     "@playwright/test": "^1.61.1",
     "@types/react": "^19.2.17",
     "echarts": "^6.1.0",
-    "eslint": "^9.0.0",
+    "eslint": "^9.39.4",
     "globals": "^17.7.0",
     "happy-dom": "^20.10.6",
     "katex": "^0.17.0",
     "react": "^19.2.7",
-    "typescript": "~5.7.0",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.64.0",
     "vite": "^8.1.4",
     "vite-plugin-dts": "^5.0.3",

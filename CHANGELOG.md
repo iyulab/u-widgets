@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.0] - 2026-09-08
+
+### Changed
+
+- **`katex` is now declared as `^0.17.0` (was `^0.16.0`) in `peerDependencies`.** The old
+  range did not include the version this package is actually built and tested against:
+  `devDependencies` has specified `^0.17.0`, and semver treats a `0.x` minor as a major, so
+  `^0.16.0` excludes `0.17.0`. A consumer that satisfied the declared range therefore ran
+  `uw-math` against a version this package had never exercised. The range also failed to
+  overlap `@iyulab/chat-components`, which depends on `katex ^0.17.0` — an application using
+  both could not resolve a single shared install. `katex` remains an optional peer
+  dependency; nothing changes for consumers who do not use the `math` widget.
+
 ## [0.17.1] - 2026-08-30
 
 ### Fixed
