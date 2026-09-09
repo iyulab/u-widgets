@@ -49,7 +49,7 @@ describe('echarts passthrough — 미등록 컴포넌트 키 경고', () => {
       data: DATA,
       options: { echarts: { toolbox: {}, title: { text: 'T' } } },
     }));
-    const messages = warnSpy.mock.calls.map(c => String(c[0])).join('\n');
+    const messages = warnSpy.mock.calls.map((c: unknown[]) => String(c[0])).join('\n');
     expect(messages).toContain('toolbox');
     expect(messages).toContain('title');
   });
@@ -126,7 +126,7 @@ describe('echarts series type — 미등록 series 경고', () => {
       data: DATA,
       options: { echarts: { series: [{ type: 'sankey' }] } },
     }));
-    const messages = warnSpy.mock.calls.map((c) => String(c[0])).join('\n');
+    const messages = warnSpy.mock.calls.map((c: unknown[]) => String(c[0])).join('\n');
     expect(messages).toContain('sankey');
   });
 

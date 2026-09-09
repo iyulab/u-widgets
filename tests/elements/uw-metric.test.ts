@@ -4,7 +4,7 @@ import type { UwMetric } from '../../src/elements/uw-metric.js';
 
 function createElement(spec: Record<string, unknown>): UwMetric {
   const el = document.createElement('uw-metric') as UwMetric;
-  el.spec = spec as UwMetric['spec'];
+  el.spec = spec as unknown as UwMetric['spec'];
   document.body.appendChild(el);
   return el;
 }

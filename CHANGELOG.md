@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.1] - 2026-09-10
+
+### Fixed
+
+- **Two pointer targets were below the 24×24 CSS px minimum** (WCAG 2.2 SC 2.5.8). The form's
+  checkbox and radio rows measured 343×19 — the pointer target is the wrapping label, not the
+  13×13 native input, so the fix is a minimum row height and the check glyph is untouched. The
+  copy button grew from 21px to the floor; its width is unchanged.
+
+### Changed
+
+- **The optional `katex` peer range widens to `>=0.17 <0.19`** (was `^0.17.0`). An optional peer
+  is a statement that the consumer picks the version, and narrowing to a single minor works
+  against that. The range stops below 0.19 because that break is a CSS class prefix: the
+  stylesheet is loaded by the consuming app, so pulling only the JavaScript forward would break
+  rendering silently whenever the two disagree.
+
+- **The lockfile is no longer committed.** It had exactly one consumer — the demo deploy's
+  `npm ci` — and that is where it broke: once the lock drifted from the manifest, `npm ci`
+  failed outright while CI stayed green, because CI installs with `npm install`. The deploy now
+  installs the same way every other path here does. This is internal to the repository and does
+  not affect consumers of the published package.
+
 ## [0.18.0] - 2026-09-08
 
 ### Changed

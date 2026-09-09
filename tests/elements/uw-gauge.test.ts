@@ -4,7 +4,7 @@ import type { UwGauge } from '../../src/elements/uw-gauge.js';
 
 function createElement(spec: Record<string, unknown>): UwGauge {
   const el = document.createElement('uw-gauge') as UwGauge;
-  el.spec = spec as UwGauge['spec'];
+  el.spec = spec as unknown as UwGauge['spec'];
   document.body.appendChild(el);
   return el;
 }

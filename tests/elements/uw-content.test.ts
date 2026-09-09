@@ -4,7 +4,7 @@ import type { UwContent } from '../../src/elements/uw-content.js';
 
 function createElement(spec: Record<string, unknown>): UwContent {
   const el = document.createElement('uw-content') as UwContent;
-  el.spec = spec as UwContent['spec'];
+  el.spec = spec as unknown as UwContent['spec'];
   document.body.appendChild(el);
   return el;
 }

@@ -5,7 +5,7 @@ import type { UWidgetEvent } from '../../src/core/types.js';
 
 function createElement(spec: Record<string, unknown>): UWidget {
   const el = document.createElement('u-widget') as UWidget;
-  el.spec = spec as UWidget['spec'];
+  el.spec = spec as unknown as UWidget['spec'];
   document.body.appendChild(el);
   return el;
 }

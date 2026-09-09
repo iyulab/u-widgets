@@ -66,7 +66,7 @@ describe('entry point: u-widgets/tools', () => {
     const mod = await import('../../src/tools.js');
     const spec = mod.template('metric');
     expect(spec).toBeDefined();
-    expect(spec.widget).toBe('metric');
+    expect(spec!.widget).toBe('metric');
   });
 });
 

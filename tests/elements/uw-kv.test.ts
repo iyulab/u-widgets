@@ -4,7 +4,7 @@ import type { UwKv } from '../../src/elements/uw-kv.js';
 
 function createElement(spec: Record<string, unknown>): UwKv {
   const el = document.createElement('uw-kv') as UwKv;
-  el.spec = spec as UwKv['spec'];
+  el.spec = spec as unknown as UwKv['spec'];
   document.body.appendChild(el);
   return el;
 }

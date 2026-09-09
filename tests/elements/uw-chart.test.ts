@@ -58,7 +58,7 @@ type UWidgetSpecType = import('../../src/core/types.js').UWidgetSpec;
 
 function createElement(spec: Record<string, unknown>): UwChartType {
   const el = document.createElement('uw-chart') as UwChartType;
-  el.spec = spec as UWidgetSpecType;
+  el.spec = spec as unknown as UWidgetSpecType;
   document.body.appendChild(el);
   return el;
 }
@@ -237,7 +237,7 @@ describe('uw-chart', () => {
     const clickHandler = clickCall![1] as (params: Record<string, unknown>) => void;
 
     const events: CustomEvent[] = [];
-    el.addEventListener('u-widget-internal', ((e: CustomEvent) => events.push(e)) as EventListener);
+    el.addEventListener('u-widget-internal', ((e: Event) => events.push(e as CustomEvent)) as EventListener);
 
     // Simulate ECharts click callback
     clickHandler({ name: 'A', seriesName: 'value', value: 10, dataIndex: 0 });

@@ -22,8 +22,12 @@
 
     "paths": {
       "@iyulab/u-widgets": ["./src/index.ts"]
-    }
+    },
+    // ⚠TypeScript 6 은 typeRoots 의 `@types/*` 를 «전부» 자동 포함하지 않는다(5.9 는 했다).
+    // `tests/build/*` 가 `fs`·`path`·`zlib`·`__dirname` 을 쓰므로 명시해야 한다
+    // — 빼면 TS2591/TS2304 로 죽는다(cycle-475 가 `flex-table` 에서 밟은 자리와 같다).
+    "types": ["node"]
   },
-  "include": ["src"],
+  "include": ["src", "tests"],
   "exclude": ["node_modules", "dist"]
 }

@@ -5,7 +5,7 @@ import { registerLocale } from '../../src/core/locale.js';
 
 function createElement(spec: Record<string, unknown>): UwTable {
   const el = document.createElement('uw-table') as UwTable;
-  el.spec = spec as UwTable['spec'];
+  el.spec = spec as unknown as UwTable['spec'];
   document.body.appendChild(el);
   return el;
 }

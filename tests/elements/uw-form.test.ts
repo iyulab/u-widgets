@@ -5,7 +5,7 @@ import { registerLocale } from '../../src/core/locale.js';
 
 function createElement(spec: Record<string, unknown>): UwForm {
   const el = document.createElement('uw-form') as UwForm;
-  el.spec = spec as UwForm['spec'];
+  el.spec = spec as unknown as UwForm['spec'];
   document.body.appendChild(el);
   return el;
 }

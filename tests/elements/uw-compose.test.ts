@@ -4,7 +4,7 @@ import type { UwCompose } from '../../src/elements/uw-compose.js';
 
 function createElement(spec: Record<string, unknown>): UwCompose {
   const el = document.createElement('uw-compose') as UwCompose;
-  el.spec = spec as UwCompose['spec'];
+  el.spec = spec as unknown as UwCompose['spec'];
   document.body.appendChild(el);
   return el;
 }
