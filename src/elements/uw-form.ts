@@ -115,12 +115,17 @@ export class UwForm extends LitElement {
       overflow-y: auto;
     }
 
+    /* 🔴포인터 타깃은 13x13 네이티브 입력이 아니라 «이 라벨»이다 — 라벨을 누르면 토글되므로
+       WCAG 2.2 SC 2.5.8 이 재는 「포인터 동작을 받는 영역」이 여기다. 실측 343x19 로 높이가
+       5px 모자랐다. 입력 자체에 치수를 주면 브라우저가 체크 글리프를 박스에 맞춰 키워
+       시각이 바뀌지만, 라벨 행의 하한은 글리프를 건드리지 않는다. */
     .checkbox-group label,
     .radio-group label,
     .multiselect-group label {
       display: flex;
       align-items: center;
       gap: 8px;
+      min-block-size: 24px;
       font-size: var(--u-widget-font-size, 0.875rem);
       cursor: pointer;
     }

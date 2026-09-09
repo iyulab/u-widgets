@@ -266,7 +266,16 @@ export class UwCode extends LitElement {
       letter-spacing: 0.05em;
     }
 
+    /* 🔴WCAG 2.2 SC 2.5.8 — 실측 48x21 이라 높이가 3px 모자랐다. 이 버튼은 테두리·배경을 가진
+       «보이는» 버튼이라 히트 영역만 넓히는 처방(components 의 checkbox·chip)이 성립하지
+       않는다 ⇒ 버튼 자체를 24px 하한으로 올린다. 글자 크기·좌우 여백은 그대로라 «작은 유틸
+       버튼» 감각은 유지된다(참고로 GitHub 의 같은 자리 버튼은 28px 다).
+       ⚠inline-flex 로 바꾼 이유는 min-block-size 만으로는 브라우저마다 세로 중앙 정렬이
+       갈리기 때문이다 — 헤더가 이미 flex 라 배치에는 영향이 없다. */
     .code-copy {
+      display: inline-flex;
+      align-items: center;
+      min-block-size: 24px;
       padding: 2px 10px;
       border-radius: 4px;
       border: 1px solid var(--u-widget-border, #e2e8f0);

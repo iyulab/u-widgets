@@ -44,19 +44,25 @@ const MIN = 24;
 /**
  * 🔴**측정 결과 미달인데 «올리면 눈에 보이는» 것 — 사람 판단 대기.**
  *
- * - `uw-code` — 복사 버튼이 **48×21**. `.code-copy` 는 테두리·배경을 가진 **보이는 버튼**이라
- *   히트 영역만 넓히는 처방(`components` 의 checkbox·chip 에 쓴 것)이 여기서는 성립하지
- *   않는다 — 넓히면 버튼 자체가 커진다. ⇒ 시각적 공개 계약 변경이라 자율 착수 금지 축이다.
- * - `uw-form` — 네이티브 `input[checkbox]`/`input[radio]` 가 **13×13**(브라우저 기본값,
- *   치수 지정이 없다). ⚠**`components` 의 `u-checkbox` 와 처방이 다르다** — 저쪽은 커스텀
- *   엘리먼트라 호스트에 최소 높이를 줄 수 있었지만, 여기는 **네이티브 입력 자체**라 크기를
- *   주면 체크 표시가 그만큼 커진다(브라우저가 글리프를 박스에 맞춰 그린다). 라벨 행 전체를
- *   타깃으로 삼는 재구조화가 정석인데 그것은 마크업 변경이다 ⇒ 사람 판단.
+ * ✅**지금은 비어 있다** — 신설(cycle-489) 시점의 둘을 cycle-493·494 가 모두 해소했다.
+ * 새로 핀을 넣을 때는 **왜 자율로 고칠 수 없는지**(선택지가 둘 이상인 시각 계약 변경인지)를
+ * 여기 함께 적을 것.
+ *
+ * ✅**`uw-code` 는 cycle-494 가 해소했다** — 복사 버튼 **48×21**. 테두리·배경을 가진 «보이는»
+ *   버튼이라 히트 영역만 넓히는 처방이 성립하지 않아 **버튼 자체를 24px 하한으로** 올렸다
+ *   (사람 결정 §C-A ⑸ ⑴안). 글자 크기·좌우 여백은 그대로다.
+ * ✅**`uw-form` 은 cycle-493 이 해소했다 — 그리고 세 갈림길이 전부 틀린 전제 위에 있었다.**
+ *   *"네이티브 입력 자체라 크기를 주면 글리프가 커진다"* 는 맞지만, ***애초에 입력이 타깃이***
+ *   ***아니었다*** — 입력은 `<label>` 에 감싸여 있어 라벨을 눌러도 토글된다. 즉 SC 2.5.8 이
+ *   재는 영역은 라벨 행(실측 **343×19**)이고, 모자란 것은 **높이 5px** 뿐이었다. ⇒ 마크업
+ *   재구조화도 `appearance` 커스텀 렌더도 필요 없이 라벨에 `min-block-size` 하한 하나로 닫혔고,
+ *   **이 파일이 입력이 아니라 라벨을 재도록** 함께 고쳤다(`collectTargets` 참조).
+ *   ⚠교훈: ***「고칠 수 없다」로 보이면 「재는 대상이 맞는가」를 먼저 의심할 것.***
  *
  * 여기 있는 동안 이 파일은 그것을 **미달로 단언**하므로 스위트는 초록이고, 치수를 올리면
  * 빨개진다 — 그때 이 목록에서 빼는 것이 완료 신호다.
  */
-const UNDERSIZED_PINS = new Set(['uw-code', 'uw-form']);
+const UNDERSIZED_PINS = new Set<string>([]);
 
 /**
  * SC 2.5.8 **「인라인」 예외** — 문장 안에 놓인 타깃은 규격이 명시적으로 면제한다.
@@ -103,7 +109,18 @@ async function collectTargets(page: Page, interactive: string): Promise<Target[]
         const tag = el.tagName.toLowerCase();
         const nextOwner = tag.startsWith('uw-') || tag === 'u-widget' ? tag : owner;
         if (el.matches(sel)) {
-          const r = el.getBoundingClientRect();
+          // 🔴**체크박스·라디오의 포인터 타깃은 입력 자체가 아니라 «활성화 라벨»이다.**
+          //   라벨을 누르면 토글되므로 SC 2.5.8 이 재는 「포인터 동작을 받는 영역」은 라벨
+          //   전체다(네이티브 입력은 13x13 이지만 라벨 행은 그보다 훨씬 크다).
+          //   ⚠**규칙이라 손으로 쓴다** — 어떤 라벨이 «활성화»하는지는 도출이 아니라 우리
+          //   지식이다. 그리고 **체크박스·라디오에만** 적용한다: 텍스트 입력의 라벨은 클릭
+          //   시 포커스만 주고 그 입력은 어차피 자기 크기로 충분하므로, 넓히면 정당한 미달을
+          //   숨기는 쪽으로만 작용한다.
+          const input = el as HTMLInputElement;
+          const usesLabel =
+            el.tagName === 'INPUT' && (input.type === 'checkbox' || input.type === 'radio');
+          const measured = (usesLabel && input.labels?.[0]) || el;
+          const r = measured.getBoundingClientRect();
           // 숨겨진 것은 타깃이 아니다 — 열린 상태에서만 존재하는 컨트롤이 여기 걸린다.
           if (r.width > 0 || r.height > 0) {
             const kind = tag === "input" ? tag + "[" + ((el as HTMLInputElement).type || "text") + "]" : tag;
@@ -145,6 +162,11 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
   });
 
   test('📌미달 재고 — 핀이 실제 미달과 일치한다 (사람 판단 대기)', async ({ page }) => {
+    /* 🔴**빈 집합에서는 아래 루프가 아무것도 단언하지 않는다** — 「초록인데 아무것도 안 재는」
+       상태다. 그래서 비어 있다는 사실 자체를 먼저 단언한다: 누군가 핀을 다시 넣으면 이 줄이
+       빨개져 «사람 판단 대기 항목이 생겼다»를 명시적으로 알린다. */
+    expect([...UNDERSIZED_PINS].sort(), '핀이 늘었다 — 사람 판단 대기 항목이 생겼다는 뜻이다').toEqual([]);
+
     await load(page);
     const ours = (await collectTargets(page, INTERACTIVE)).filter((t) => t.owner !== 'page');
 
@@ -157,6 +179,68 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
         mine.some((t) => t.w < MIN || t.h < MIN),
         `${owner} 실측 ${mine.map((t) => `${Math.round(t.w)}x${Math.round(t.h)}`).join(' ')}`,
       ).toBe(true);
+    }
+  });
+
+  /* §C-A ⑸ 의 `uw-form` 절반 (cycle-493). ⚠**두 축을 함께 재지 않으면 이 결정을 검증할 수
+     없다** — 라벨만 재면 「글리프까지 커졌다」를, 입력만 재면 「타깃이 안 커졌다」를 통과시킨다.
+     입력에 치수를 주지 않았다는 것이 이 처방의 핵심이므로 13×13 을 명시적으로 고정한다. */
+  test('uw-form — 타깃(라벨)은 24px 하한을 넘고, 네이티브 입력은 브라우저 기본값 그대로다', async ({ page }) => {
+    await load(page);
+    const rows = await page.evaluate(() => {
+      const out: { label: [number, number]; input: [number, number] }[] = [];
+      const walk = (root: ParentNode) => {
+        for (const el of Array.from(root.querySelectorAll('*'))) {
+          if (el.tagName === 'INPUT') {
+            const i = el as HTMLInputElement;
+            if ((i.type === 'checkbox' || i.type === 'radio') && i.labels?.[0]) {
+              const l = i.labels[0].getBoundingClientRect();
+              const r = i.getBoundingClientRect();
+              out.push({ label: [l.width, l.height], input: [r.width, r.height] });
+            }
+          }
+          const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+          if (sr) walk(sr);
+        }
+      };
+      walk(document.body);
+      return out;
+    });
+
+    expect(rows.length, '데모에 체크박스/라디오가 하나도 없으면 이 판정은 공허하다').toBeGreaterThan(0);
+    for (const r of rows) {
+      expect(Math.round(r.label[1]), `라벨 ${r.label.map(Math.round).join('x')}`).toBeGreaterThanOrEqual(MIN);
+      expect(Math.round(r.input[1]), '입력에 치수를 주면 브라우저가 체크 글리프를 함께 키운다')
+        .toBeLessThan(MIN);
+    }
+  });
+
+  /* §C-A ⑸ 의 `uw-code` 절반 (cycle-494). 여기서 재는 두 축은 「높이는 올랐는가」와
+     「그 대가로 버튼이 옆으로 부풀지는 않았는가」다 — 후자를 재지 않으면 «작은 유틸 버튼
+     감각을 유지한다»는 이 결정의 조건이 검증되지 않는다. */
+  test('uw-code — 복사 버튼이 24px 하한을 넘고, 가로는 그대로다', async ({ page }) => {
+    await load(page);
+    const rects = await page.evaluate(() => {
+      const out: [number, number][] = [];
+      const walk = (root: ParentNode) => {
+        for (const el of Array.from(root.querySelectorAll('*'))) {
+          if (el.classList?.contains('code-copy')) {
+            const r = el.getBoundingClientRect();
+            out.push([r.width, r.height]);
+          }
+          const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+          if (sr) walk(sr);
+        }
+      };
+      walk(document.body);
+      return out;
+    });
+
+    expect(rects.length, '데모에 코드블록이 없으면 이 판정은 공허하다').toBeGreaterThan(0);
+    for (const [w, h] of rects) {
+      expect(Math.round(h), `실측 ${Math.round(w)}x${Math.round(h)}`).toBeGreaterThanOrEqual(MIN);
+      expect(Math.round(w), '가로가 부풀었다면 「좌우 여백은 그대로」라는 전제가 깨진 것이다')
+        .toBeLessThanOrEqual(56);
     }
   });
 
