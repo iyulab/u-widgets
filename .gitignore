@@ -32,3 +32,8 @@ playwright-report/
 # Env
 .env
 .env.local
+# 🔴lock 파일은 커밋하지 않는다 — 이 모노레포 공통 정책이다(cycle-502, HD-45).
+# 커밋된 lock 은 매니페스트와 어긋나는 순간 `npm ci` 경로를 죽이고, 그 어긋남을
+# 강제하는 장치가 어디에도 없다(실측: cycle-491 이 그렇게 죽은 Deploy Demo 를 고쳤다).
+# ⚠따라서 `npm ci` 를 쓰는 워크플로도 함께 사라져야 한다 — 그것이 이 정책의 나머지 절반이다.
+package-lock.json

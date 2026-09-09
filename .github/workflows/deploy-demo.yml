@@ -19,11 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # lock 파일이 없는 정책이므로(`ci.yml`·`npm-publish.yml` 과 같다) 자동 캐싱을 끈다 —
+      # setup-node 의 lock 기반 캐싱은 lock-less 설치와 충돌한다.
+      # 🔴이 스텝이 `npm ci` 였던 동안 커밋된 lock 이 매니페스트와 어긋나 배포가 죽었다
+      # (cycle-491 이 lock 재생성으로 응급 복구, cycle-502 가 구조적 원인을 제거).
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run build:demo
       - uses: actions/upload-pages-artifact@v3
         with:
