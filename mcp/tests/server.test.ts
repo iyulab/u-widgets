@@ -59,11 +59,14 @@ describe('help tool', () => {
     expect(catalog.some((w) => w.widget === 'metric')).toBe(true);
   });
 
-  it('filters by exact widget name', async () => {
+  // An exact widget name resolves to a single WidgetDetail, not a one-element list.
+  // The library declares this in its overloads: `help(widget: string): WidgetInfo[] | WidgetDetail`
+  // — a category or prefix yields a list, an exact name yields the detail object.
+  it('returns the detail object for an exact widget name', async () => {
     const result = await client.callTool({ name: 'help', arguments: { widget: 'chart.bar' } });
-    const items = parseText(result) as Array<{ widget: string }>;
-    expect(items).toHaveLength(1);
-    expect(items[0].widget).toBe('chart.bar');
+    const detail = parseText(result) as { widget: string };
+    expect(Array.isArray(detail)).toBe(false);
+    expect(detail.widget).toBe('chart.bar');
   });
 
   it('filters by category', async () => {

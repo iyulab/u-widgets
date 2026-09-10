@@ -28,6 +28,6 @@
     // — 빼면 TS2591/TS2304 로 죽는다(cycle-475 가 `flex-table` 에서 밟은 자리와 같다).
     "types": ["node"]
   },
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "e2e"],
   "exclude": ["node_modules", "dist"]
 }

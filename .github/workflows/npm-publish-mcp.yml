@@ -27,11 +27,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 🔴lock 기반 캐싱을 쓰지 않는다 — `mcp/package-lock.json` 은 2026-09-09 부터
+      #   추적되지 않는다(리포 공통 정책, `.gitignore`). `cache: npm` +
+      #   `cache-dependency-path` 는 그 경로가 **체크아웃 시점에 존재해야** 하고, 없으면
+      #   *"Some specified paths were not resolved, unable to cache dependencies"* 로
+      #   **이 단계에서 죽는다.** 아래 Install 이 lock 을 «스스로 생성한 뒤» `npm ci` 를
+      #   쓰지만, 그것은 이 단계보다 **뒤**다.
+      #   ⚠마지막 성공 실행은 2026-09-08 — 추적 해제 «이전» 이라 아직 드러난 적이 없다.
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: mcp/package-lock.json
           registry-url: https://registry.npmjs.org
 
       - name: Get package version
@@ -60,6 +65,16 @@ jobs:
       - name: Build
         if: steps.check.outputs.exists == 'false'
         run: npm run build
+
+      # ★신설(2026-09-10) — 이 스위트는 **어디에서도 돌지 않고 있었다.**
+      #   부모의 vitest 는 `include: ['tests/**/*.{test,spec}.ts']` 라 `mcp/tests` 를 보지
+      #   않고, 부모의 `ci.yml` 은 패키지 루트에서만 돈다. 그 사이에 `help(<exact>)` 가
+      #   배열 → WidgetDetail 로 바뀌었는데 **아무것도 실패하지 않았다.**
+      #   ⇒ 게시 직전이 이 스위트가 도는 유일한 자리다. 여기서 막지 않으면 검증된 적 없는
+      #   코드를 게시한다.
+      - name: Test
+        if: steps.check.outputs.exists == 'false'
+        run: npm test
 
       - name: Publish
         if: steps.check.outputs.exists == 'false'
