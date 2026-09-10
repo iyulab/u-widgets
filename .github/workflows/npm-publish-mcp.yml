@@ -14,6 +14,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # Skip if triggered by workflow_run and parent failed
     if: >-
       github.event_name != 'workflow_run' ||
