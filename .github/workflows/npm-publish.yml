@@ -20,10 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No lock-based caching: `package-lock.json` is not tracked in this repo, and
+      # setup-node's `cache: npm` fails at this step ("Dependencies lock file is not
+      # found") before Install ever runs. Same reason `ci.yml` and `deploy-demo.yml`
+      # disable it.
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
           registry-url: https://registry.npmjs.org
 
       - name: Get package version
