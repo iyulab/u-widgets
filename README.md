@@ -78,6 +78,18 @@ npm install @iyulab/u-widgets
 { "widget": "compose", "layout": "grid", "children": [{ "widget": "metric", "data": { "value": 42 } }, { "widget": "gauge", "data": { "value": 73 } }] }
 ```
 
+## Sizing
+
+Widgets grow to fit their content. Give the host a height when it must fit a fixed box — the
+constraint reaches the chart canvas, the table’s row area and the code body:
+
+```html
+<u-widget style="height: 400px"></u-widget>    <!-- chart fills the cell -->
+<u-widget style="max-height: 240px"></u-widget> <!-- table rows scroll -->
+```
+
+Full contract: [docs/widgets.md](docs/widgets.md#sizing).
+
 ## Chart Options
 
 XY charts (`chart.bar`, `chart.line`, `chart.area`, `chart.scatter`) support declarative options that eliminate the need for ECharts passthrough:

@@ -215,7 +215,13 @@ test.describe('Data Widgets', () => {
       return null;
     });
     expect(style).not.toBeNull();
-    expect(style!.color).toBe('rgb(22, 163, 74)'); // --u-widget-positive default
+    /* `--u-widget-positive` default. ⚠It was `#16a34a` when this assertion was written; 0.14.0
+       darkened it to `#15803d` for contrast (3.30 → 5.02 on bg) and this line was not updated,
+       so it failed from then on. ⚠`demo/shared.css` sets `--u-widget-positive: #16a34a` on
+       `:root`, which does *not* reach here — every element re-declares the token on its own
+       `:host`, and a `:host` declaration beats an inherited value. Overriding a token means
+       styling the element (`u-widget { --u-widget-positive: … }`), as the token sheet documents. */
+    expect(style!.color).toBe('rgb(21, 128, 61)');
     expect(style!.weight).toBe('600');
   });
 

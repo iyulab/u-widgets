@@ -104,6 +104,21 @@ el.addEventListener('u-widget-event', (e: CustomEvent<UWidgetEvent>) => {
 });
 ```
 
+## Sizing
+
+Widgets grow to fit their content — in normal page flow they need no height. Give the host a height
+only when the widget must fit a fixed box, and the constraint reaches the chart canvas, the table's
+row area and the code body:
+
+```html
+<u-widget style="height: 400px"></u-widget>     <!-- chart fills the cell, not its 300px default -->
+<u-widget style="max-height: 240px"></u-widget>  <!-- table rows scroll instead of overflowing -->
+```
+
+`--u-widget-chart-height` is the chart's height when nothing constrains the host, not a cap. Widgets
+other than these three still grow past a host height — wrap them yourself if you must clip.
+See [Widget Reference](../../docs/widgets.md#sizing) for the full contract.
+
 ## Theming
 
 - [CSS Custom Properties](./references/css-custom-properties.md) — the full `--u-widget-*` token

@@ -101,6 +101,29 @@ When `mapping` is omitted, the renderer infers it from data structure:
 | `datetime` | `2025-01-15 14:30` |
 | `bytes` | `1.2 GB` |
 
+## Sizing
+
+Every widget grows to fit its content, so a widget in normal page flow needs no height at all.
+Give the host a height only when the widget must fit a fixed box — a dashboard cell, a split
+pane, a card of a set size — and that constraint reaches the widget’s own scroll area:
+
+```html
+<!-- the chart fills the cell instead of staying at its 300px default -->
+<u-widget style="height: 400px"></u-widget>
+
+<!-- a long table scrolls inside 240px instead of overflowing the card -->
+<u-widget style="max-height: 240px"></u-widget>
+```
+
+| Widget | What a host height reaches | Height without a constraint |
+|---|---|---|
+| `chart.*` | the chart canvas, which resizes with it | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
+| `table` | the row area — the search box and pager stay put, rows scroll | grows to fit every row |
+| `code` | the code body — the language header stays put, lines scroll | grows to fit every line (`options.maxHeight` caps it independently) |
+
+Other widgets still grow past a host height: constrain them with a wrapper of your own that
+clips or scrolls.
+
 ## Table Options
 
 | Option | Type | Description |
@@ -117,6 +140,15 @@ When `mapping` is omitted, the renderer infers it from data structure:
   "options": { "pageSize": 20 }
 }
 ```
+
+## Code Options
+
+| Option | Type | Description |
+|---|---|---|
+| `lineNumbers` | `boolean` | Show line numbers (default: true) |
+| `wrap` | `boolean` | Wrap long lines instead of scrolling horizontally (default: false) |
+| `maxHeight` | `string` | CSS length capping the code body, e.g. `"320px"`. Independent of any host height |
+| `highlight` | `number[]` | 1-based line numbers to emphasise |
 
 ## Chart Options
 

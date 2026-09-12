@@ -32,18 +32,32 @@ function normalizeColumnVariant(variant: unknown): UWidgetColumnDefinition['vari
 export class UwTable extends LitElement {
   static styles = [themeStyles, css`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-table / inline-size;
     }
 
+    /* 제약 전달 사슬: 호스트 → .table-container → .table-wrapper.
+       ⚠.table-container 는 종전에 선언이 아예 없었다(렌더에만 존재) — 제약이 바로 여기서
+       끊겨, 호스트에 max-height 를 줘도 표가 원래 높이로 그려지며 상자 밖으로 샜다. */
+    .table-container {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
     /* ── table ── */
     .table-wrapper {
+      flex: 1 1 auto;
+      min-height: 0;
       overflow-x: auto;
+      overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: var(--u-widget-border, #e2e8f0) transparent;
     }
-    .table-wrapper::-webkit-scrollbar { height: 4px; }
+    .table-wrapper::-webkit-scrollbar { height: 4px; width: 4px; }
     .table-wrapper::-webkit-scrollbar-thumb {
       background: var(--u-widget-border, #e2e8f0);
       border-radius: 2px;
@@ -231,6 +245,7 @@ export class UwTable extends LitElement {
 
     /* ── search ── */
     .search-box {
+      flex: none;
       margin-bottom: 8px;
     }
 
@@ -253,6 +268,7 @@ export class UwTable extends LitElement {
 
     /* ── pagination ── */
     .pagination {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: center;

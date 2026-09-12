@@ -78,7 +78,10 @@ since `u-widgets` is designed to be usable standalone without that package insta
 
 | Property | Value | Description |
 |----------|-------|--------------|
-| `--u-widget-chart-height` | `300px` | `uw-chart` height at normal container width |
+| `--u-widget-chart-height` | `300px` | `uw-chart` height **when nothing constrains the host** |
+
+This is a default, not a cap. Give the host element a `height` or `max-height` and the chart follows
+that instead — the token only decides how tall the chart is when the host is free to grow.
 
 ## Shadow
 

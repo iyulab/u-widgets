@@ -238,18 +238,28 @@ function highlightJSON(code: string): string {
 export class UwCode extends LitElement {
   static styles = [themeStyles, css`
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-code / inline-size;
     }
 
+    /* 제약 전달 사슬: 호스트 → .code-block → .code-body(스크롤 주인).
+       ⚠.code-body 는 종전에도 overflow:auto 를 갖고 있었지만 높이 제약이 닿지 않아
+       스크롤이 생기지 않았다 — «overflow:auto 가 선언돼 있다» 는 «스크롤 컨테이너다» 를
+       뜻하지 않는다. spec 의 options.maxHeight 는 별개 경로로 계속 동작한다(그쪽은 상한). */
     .code-block {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
       border: 1px solid var(--u-widget-border, #e2e8f0);
       border-radius: 6px;
       overflow: hidden;
     }
 
     .code-header {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -296,6 +306,8 @@ export class UwCode extends LitElement {
     }
 
     .code-body {
+      flex: 1 1 auto;
+      min-height: 0;
       overflow: auto;
       background: var(--u-widget-bg);
     }

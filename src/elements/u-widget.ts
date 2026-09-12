@@ -33,9 +33,30 @@ export class UWidget extends LitElement {
   static styles = [
     themeStyles,
     css`
+      /* 세로 flex 인 이유: 이 엘리먼트는 라우터라 실제 위젯을 shadow 안에 «위임»하는데,
+         display:block 이면 그 자식이 flex item 이 아니어서 호스트 높이가 위젯에 닿지 않는다.
+         🔴실측(cycle-568): 자식 위젯이 스스로 수축할 준비를 갖춰도 이 줄이 block 인 동안에는
+         자식이 자기 높이(차트 300px)를 유지하며 상자 밖으로 샜고, 픽셀이 1도 움직이지 않았다
+         — 제약은 사슬 «최상단»에서 끊긴다. */
       :host {
-        display: block;
+        display: flex;
+        flex-direction: column;
         container: u-widget / inline-size;
+      }
+
+      /* 위임된 위젯이 남은 높이를 갖는다. 태그를 열거하지 않는 이유는 그 목록이 곧 낡아
+         새 위젯이 조용히 빠지는 자리가 되기 때문이다.
+         ⚠[part=widget-container] 는 display:contents 라 자기 박스가 없고 그 자식이 flex
+         item 이 된다 — 그래서 둘째 선택자가 필요하다. */
+      :host > *,
+      [part="widget-container"] > * {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      .widget-title,
+      .global-actions {
+        flex: none;
       }
 
       .error-card {
@@ -59,13 +80,28 @@ export class UWidget extends LitElement {
       .fallback-hint { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-primary, #4f46e5); margin-bottom: 6px; }
       .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); max-height: 200px; overflow-y: auto; }
 
+      /* 카드 모드는 사슬에 한 겹을 더하므로 그 겹도 제약을 통과시켜야 한다. */
       .card-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
         padding: 16px 20px;
         border-radius: var(--u-widget-radius, 6px);
         border: 1px solid var(--u-widget-border, #e2e8f0);
         background: var(--u-widget-bg, #fff);
         box-shadow: var(--u-widget-shadow);
         transition: box-shadow 0.2s;
+      }
+
+      .card-container > * {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      /* 위 규칙과 특이성이 같고 뒤에 오므로, 제목은 여기서 다시 고정해야 한다. */
+      .card-container > .widget-title {
+        flex: none;
       }
 
       /* ── shared action button styles ── */

@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.2] - 2026-09-12
+
+### Fixed
+
+- **A height given to `<u-widget>` never reached the widget inside it.** The router element laid its
+  delegated widget out as a block, so the widget kept its own height while the host box shrank to the
+  height that was asked for — and because no widget clips, the content painted *outside* that box and
+  over whatever followed it. Measured: every `chart.*` overhung a 200px host by 100px (the chart was
+  pinned to its 300px default), a 40-row `table` by 1234px, and a 120-line `code` block by 2203px.
+  Constraints now travel from the host through the card wrapper into the widget, where the chart
+  canvas, the table's row area and the code body take the remaining space. Unconstrained hosts render
+  exactly as before — the defaults are defaults, not caps. `--u-widget-chart-height` keeps its value
+  and now means "height when the host is free to grow".
+
+  Widgets other than these three still grow past a host height; that work is not in this release.
+
+### Documentation
+
+- **`## Sizing`** in `docs/widgets.md` (and a short form in the README) states which element owns a
+  widget's height, what a host `height`/`max-height` reaches, and what each widget does when nothing
+  constrains it.
+- **`## Code Options`** documents `lineNumbers`, `wrap`, `maxHeight` and `highlight`, which the `code`
+  widget has always read but which appeared in no document.
+
 ## [0.18.1] - 2026-09-10
 
 ### Fixed

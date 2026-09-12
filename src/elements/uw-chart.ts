@@ -42,13 +42,22 @@ export class UwChart extends LitElement {
   static styles = [
     themeStyles,
     css`
+      /* 세로 flex 인 이유: 소비자가 호스트에 높이를 주면 그 제약이 차트 영역까지 닿아야 한다.
+         종전에는 display:block 이라 아래 height 선언이 «고정 높이» 로 굳어, 대시보드 셀처럼
+         호스트를 200px 로 제약한 자리에서 차트가 300px 를 유지해 100px 가 상자 밖으로 샜다
+         (:host 에 overflow 가 없어 잘리지도 않고 이웃을 덮는다).
+         flex-basis 가 auto 이므로 height 선언은 그대로 «기본 높이» 로 남는다 — 제약이 없으면
+         300px 로 자라고, 있으면 그 높이를 채운다. ECharts 는 ResizeObserver 로 따라온다. */
       :host {
-        display: block;
+        display: flex;
+        flex-direction: column;
         container: uw-chart / inline-size;
       }
 
       .chart-container {
         width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
         height: var(--u-widget-chart-height, 300px);
       }
 
