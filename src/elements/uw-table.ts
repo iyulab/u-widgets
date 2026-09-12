@@ -351,13 +351,19 @@ export class UwTable extends LitElement {
         font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
+      /* 압축 모드의 셀은 포인터 타깃(정렬 가능한 th · 행 클릭 tr)이라 24px 하한(WCAG 2.2
+         SC 2.5.8)을 지켜야 하는데, line-height:normal 은 글꼴 메트릭을 따라간다 — 11px 글자에
+         Windows 는 16px, Linux 기본 글꼴은 14px 을 줘서 th 가 24 와 22 로 갈렸다(e2e 게이트가
+         CI 에서 처음 돈 날 드러났다). 명시 line-height 로 상자 높이를 글꼴에서 떼어 낸다. */
       th {
         padding: 4px 8px;
         font-size: var(--u-widget-font-size-overline, 0.6875rem);
+        line-height: 1.5;
       }
 
       td {
         padding: 4px 8px;
+        line-height: 1.5;
       }
 
       .list-item {

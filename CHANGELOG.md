@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.3] - 2026-09-12
+
+### Fixed
+
+- **Compact table cells could fall under the 24px pointer-target minimum on Linux.** In the
+  narrow (`≤ 30rem`) layout the header cells and rows used `line-height: normal`, which follows
+  the font's metrics: 24px with Windows fonts, 22px with the default Linux fonts. Both now carry an
+  explicit `line-height: 1.5`, so the WCAG 2.2 SC 2.5.8 floor holds on every platform (the e2e
+  gate caught it the first time it ran on Linux CI).
+
 ## [0.18.2] - 2026-09-12
 
 ### Fixed
