@@ -157,9 +157,14 @@ export class UwTable extends LitElement {
     }
 
     /* ── list ── */
+    /* 표의 .table-wrapper 와 같은 이유로 목록도 스크롤 주인이 된다 — 호스트 제약이 없으면
+       종전처럼 전체 항목 높이로 자란다(cycle-569). */
     .list-container {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     .list-item {

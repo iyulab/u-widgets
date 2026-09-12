@@ -53,8 +53,15 @@ function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg
 @customElement('uw-gauge')
 export class UwGauge extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다
+       (cycle-569). 200px 제약에서는 자연 높이 156px 이 작아 발동하지 않았고, 120px 에서 36px 가
+       샜다 — 미측정은 통과가 아니었다.
+       ⚠계기판 자체를 세로로 줄이지 않는다. 높이는 gauge-svg 의 종횡비에서 «가로로부터» 도출되므로
+       세로만 줄이면 그림이 왜곡된다 — 가로 상한(u-widget-gauge-size)을 낮추는 쪽은 시각 계약
+       변경이라 택하지 않고, 제약이 오면 상자를 스크롤로 넘긴다. */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-gauge / inline-size;
     }
@@ -64,6 +71,9 @@ export class UwGauge extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     .gauge-wrapper {

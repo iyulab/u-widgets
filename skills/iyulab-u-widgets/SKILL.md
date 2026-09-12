@@ -115,9 +115,11 @@ row area and the code body:
 <u-widget style="max-height: 240px"></u-widget>  <!-- table rows scroll instead of overflowing -->
 ```
 
-`--u-widget-chart-height` is the chart's height when nothing constrains the host, not a cap. Widgets
-other than these three still grow past a host height — wrap them yourself if you must clip.
-See [Widget Reference](../../docs/widgets.md#sizing) for the full contract.
+`--u-widget-chart-height` is the chart's height when nothing constrains the host, not a cap. Every
+widget honours a host height this way — the widget keeps its natural size and its own scroll area
+takes the constraint, so nothing is squashed and no content becomes unreachable. Media (`image`,
+`video`, `gauge`) keeps its aspect ratio and the box around it scrolls.
+See [Widget Reference](../../docs/widgets.md#sizing) for the per-widget table.
 
 ## Theming
 

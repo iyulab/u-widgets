@@ -62,7 +62,10 @@ async function measure(
           spec.data = Array.from({ length: repeat }, (_, i) => rows[i % rows.length]);
         } else if (spec.data && typeof spec.data === 'object') {
           const d = spec.data as Record<string, unknown>;
-          for (const k of ['content', 'text', 'code']) {
+          /* ⚠키 목록이 곧 커버리지다 — `message` 가 빠져 있어 `callout` 케이스가 내용을 한 번도
+             늘리지 못했고, 짧은 문장이 제약 안에 들어가 «스크롤이 안 된다» 로 빨개졌다.
+             위젯이 아니라 테스트가 공허했던 자리다(cycle-569). */
+          for (const k of ['content', 'text', 'code', 'message', 'caption']) {
             if (typeof d[k] === 'string') {
               d[k] = Array.from({ length: repeat }, (_, i) => `line ${i} of padding text`).join('\n');
             }
@@ -189,5 +192,87 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
     expect(capped.inner!).toBeLessThanOrEqual(200);
     expect(capped.scrolled, '`overflow:auto` 가 선언돼 있다는 것이 스크롤 컨테이너라는 뜻은 아니다')
       .toBe(true);
+  });
+
+  /* 나머지 위젯 — 렌더 루트가 곧 스크롤 주인이다. 실측(cycle-569)으로 «범인 = 그 루트 자신»
+     임을 확인한 뒤 같은 처방을 적용했고, 여기서 열 개를 한 표로 고정한다.
+     ⚠`stat-group` 은 가로 `overflow: hidden` 이 의도라(음수 margin 구분선 클립) 세로 축만
+     열었다 — 그래서 이 표의 다른 항목과 달리 가로 축도 함께 단언한다. */
+  /* 🔴제약은 «케이스마다» 다르게 줘야 한다. 목록·산문 위젯은 내용을 늘려 200px 를 넘기지만,
+     매체 위젯(video · image)은 늘릴 문자열이 없고 높이가 «파일의 고유 크기» 에서 온다 — 데모의
+     이미지는 600x200 이라 200px 제약을 4px 밖에 넘지 않아, 그 케이스는 사실상 아무것도 재지
+     못했다. ⇒ 픽스처를 합성하는 대신 **제약을 더 세게** 줘서 실물로 진짜 넘침을 만든다.
+     ⚠cycle-568 의 규율 그대로다: «제약이 발동조차 않은 것은 통과가 아니라 미측정이다». */
+  const ROOTS: [string, string, number, number][] = [
+    ['citation', '.citations', 40, 200],
+    ['markdown', '.markdown', 120, 200],
+    ['list', '.list-container', 40, 200],
+    ['steps', '.steps-vertical', 40, 200],
+    ['gallery', '.gallery-grid', 40, 200],
+    ['stat-group', '.stat-group-clip', 40, 200],
+    ['status', '.status-list', 40, 200],
+    ['callout', '.callout', 120, 200],
+    ['video', '.video-container', 1, 120],   // 자연 365 — 매체 고유 크기
+    ['form', '.form-container', 1, 120],     // 자연 324 — 필드 수가 높이를 정한다
+    ['image', '.image-container', 1, 120],   // 자연 204 — 600x200 이미지
+    /* 🔴이 둘은 cycle-568 이 «미측정» 으로 분류한 자리였다 — 200px 제약에서는 자연 높이가 더
+       작아 발동조차 하지 않았고, 120px 로 세게 주자 각각 72px · 36px 가 샜다.
+       ***미측정을 통과로 세지 않은 것이 이 둘을 찾아낸 이유다.*** */
+    /* ⚠데모의 compose spec 은 layout:'grid' 라 렌더 루트가 layout-grid 다 — 처음에 layout-stack
+       을 골랐더니 대상을 못 찾아 inner 가 null 로 왔고, 위에 넣은 «공허하면 빨개진다» 선행
+       단언이 정확히 그것을 잡았다(위젯 결함이 아니라 케이스 정의 오류였다). */
+    ['compose', '.layout-grid', 1, 120],     // 자연 192
+    ['gauge', '.gauge-container', 1, 120],   // 자연 156 — 종횡비로 가로에서 높이가 온다
+  ];
+
+  for (const [widget, sel, repeat, limit] of ROOTS) {
+    test(`${widget} — 호스트 제약이 ${sel} 에 닿고 스크롤로 넘긴다`, async ({ page }) => {
+      await ready(page);
+
+      // 제약이 없으면 종전처럼 내용 높이로 자란다(이 처방이 기본 모습을 바꾸지 않았다는 증거).
+      const nat = await measure(page, widget, '', sel, repeat);
+      expect(nat.overflowPx, `자연 성장 실측 ${JSON.stringify(nat)}`).toBeLessThanOrEqual(1);
+      expect(nat.inner!, `제약이 없을 때 ${limit}px 를 넘지 않으면 아래 단언이 공허해진다`)
+        .toBeGreaterThan(limit);
+
+      const capped = await measure(page, widget, `max-height:${limit}px`, sel, repeat);
+      expect(capped.overflowPx, `실측 ${JSON.stringify(capped)}`).toBeLessThanOrEqual(1);
+      expect(capped.inner!, `실측 ${JSON.stringify(capped)}`).toBeLessThanOrEqual(limit);
+      expect(capped.scrolled, '넘침이 0 이어도 스크롤이 안 되면 내용에 도달할 수 없다').toBe(true);
+    });
+  }
+
+  test('stat-group — 세로만 열고 가로 `hidden` 은 의도대로 남는다', async ({ page }) => {
+    await ready(page);
+    const axes = await page.evaluate(async () => {
+      const src = (Array.from(document.querySelectorAll('u-widget')) as (HTMLElement & {
+        spec?: { widget: string; data?: unknown };
+      })[]).find((h) => h.spec?.widget === 'stat-group');
+      if (!src?.spec) throw new Error('데모에 stat-group spec 이 없다 — 이 판정은 공허하다');
+      const stage = document.createElement('div');
+      stage.setAttribute('style', 'position:absolute;top:0;left:0;width:600px');
+      const host = document.createElement('u-widget') as HTMLElement & { spec?: unknown };
+      host.setAttribute('style', 'max-height:200px');
+      host.spec = JSON.parse(JSON.stringify(src.spec));
+      stage.appendChild(host);
+      document.body.appendChild(stage);
+      await new Promise((r) => setTimeout(r, 700));
+      const find = (root: ParentNode): HTMLElement | null => {
+        const hit = root.querySelector('.stat-group-clip');
+        if (hit) return hit as HTMLElement;
+        for (const el of Array.from(root.querySelectorAll('*'))) {
+          const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+          if (sr) { const d = find(sr); if (d) return d; }
+        }
+        return null;
+      };
+      const el = find(host.shadowRoot ?? host);
+      const cs = el ? getComputedStyle(el) : null;
+      const out = { x: cs?.overflowX ?? 'none', y: cs?.overflowY ?? 'none' };
+      stage.remove();
+      return out;
+    });
+    expect(axes.x, '가로 hidden 이 사라지면 행 선두 구분선이 왼쪽으로 새어 나온다').toBe('hidden');
+    expect(axes.y, '세로가 hidden 이면 wrap 된 행에 도달할 수 없다').toBe('auto');
   });
 });

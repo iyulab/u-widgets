@@ -12,13 +12,20 @@ interface GalleryItem {
 @customElement('uw-gallery')
 export class UwGallery extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 격자가 flex item 이어야 호스트 제약이 그것에 닿는다(cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-gallery / inline-size;
     }
 
+    /* 그리드 열 수는 컨테이너 쿼리가 정하고, 세로로 길어진 격자는 호스트 제약을 넘었다 ⇒
+       스크롤 주인이 된다. 열 수를 줄여 맞추는 쪽은 시각 계약 변경이라 택하지 않았다(cycle-569). */
     .gallery-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       display: grid;
       gap: 8px;
     }

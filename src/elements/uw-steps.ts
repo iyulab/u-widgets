@@ -38,16 +38,24 @@ function statusIcon(status: StepStatus, iconOverride?: string): TemplateResult {
 @customElement('uw-steps')
 export class UwSteps extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다
+       (cycle-569). 가로 배치는 세로로 길어지지 않아 같은 처방이 필요하지 않다. */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-steps / inline-size;
     }
 
     /* ── Vertical Layout ── */
+    /* 세로 배치만 스크롤 주인이다 — 가로 배치(.steps-horizontal)는 세로로 길어지지 않으므로
+       같은 처방이 필요하지 않다(cycle-569). */
     .steps-vertical {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       gap: 0;
     }
 

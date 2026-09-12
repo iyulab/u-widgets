@@ -7,15 +7,23 @@ import { themeStyles } from '../styles/tokens.js';
 @customElement('uw-form')
 export class UwForm extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 form-container 가 flex item 이어야 호스트 제약이 그것에 닿는다
+       (cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-form / inline-size;
     }
 
+    /* ⚠.multiselect-group 의 max-height 180px 와 다른 «층» 이다 — 그것은 한 필드 «안» 의
+       상한이고 이것은 폼 전체가 호스트 제약을 받는 축이다. 둘은 충돌하지 않는다(cycle-569). */
     .form-container {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       gap: 16px;
     }
 

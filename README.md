@@ -80,8 +80,10 @@ npm install @iyulab/u-widgets
 
 ## Sizing
 
-Widgets grow to fit their content. Give the host a height when it must fit a fixed box — the
-constraint reaches the chart canvas, the table’s row area and the code body:
+Widgets grow to fit their content. Give the host a height when it must fit a fixed box and the
+constraint reaches that widget’s own scroll area — the chart canvas, a table’s rows, a list’s items,
+a prose box, the field area of a form. Nothing is squashed to fit: the widget keeps its natural size
+and the box scrolls, so no content becomes unreachable.
 
 ```html
 <u-widget style="height: 400px"></u-widget>    <!-- chart fills the cell -->

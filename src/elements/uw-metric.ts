@@ -62,8 +62,11 @@ function toMetricData(
 @customElement('uw-metric')
 export class UwMetric extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트(metric · stat-group)가 flex item 이어야 호스트 제약이
+       그것에 닿는다(cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-metric / inline-size;
     }
@@ -151,8 +154,15 @@ export class UwMetric extends LitElement {
        셀 단위 container query 폰트 축소는 inline-size containment가 max-content 기여를 제거해
        콘텐츠 기반 사이징과 양립 불가 — wrap 방식 채택. */
     .stat-group-clip {
-      /* 행 선두 셀의 구분선은 음수 margin으로 왼쪽 바깥에 놓이므로 여기서 클립 */
-      overflow: hidden;
+      /* 🔴축을 «분리해서» 쓴다. 가로의 hidden 은 의도다 — 행 선두 셀의 구분선이 음수
+         margin 으로 왼쪽 바깥에 놓이므로 그것을 클립한다. 세로는 그 의도와 무관하고, 항목이
+         wrap 으로 여러 행이 되면 호스트 제약을 넘었다 ⇒ 세로만 스크롤로 연다.
+         ⚠overflow hidden 축약으로 되돌리면 가로 의도는 지켜지지만 세로가 다시 «잘려서
+         도달 불가» 가 된다(cycle-569). */
+      overflow-x: hidden;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     .stat-group {

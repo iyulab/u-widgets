@@ -6,14 +6,23 @@ import { themeStyles } from '../styles/tokens.js';
 @customElement('uw-content')
 export class UwContent extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트(markdown · image · callout)가 flex item 이어야 호스트
+       제약이 그것에 닿는다. display:block 이면 루트의 flex 선언이 무시된다(cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-content / inline-size;
     }
 
     /* ── markdown ── */
+    /* 이 파일은 세 위젯(markdown · image · callout)을 렌더하고, 셋의 렌더 루트가 각각
+       호스트 제약을 받아야 한다. 제약이 없으면 flex-basis 가 auto 라 종전처럼 내용 높이로
+       자란다(cycle-569). */
     .markdown {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       font-size: var(--u-widget-font-size, 0.875rem);
       line-height: 1.6;
       color: var(--u-widget-text, #1a1a2e);
@@ -109,7 +118,12 @@ export class UwContent extends LitElement {
     }
 
     /* ── image ── */
+    /* ⚠매체 자체를 축소하지 않는다 — img 는 max-width 로 가로만 제약되고, 세로까지 줄이면
+       종횡비·시각 계약이 바뀐다(그것은 별개 판단이다). 제약이 오면 스크롤로 정직하게 넘긴다. */
     .image-container {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       text-align: center;
     }
 
@@ -127,6 +141,9 @@ export class UwContent extends LitElement {
 
     /* ── callout ── */
     .callout {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       padding: 12px 16px;
       border-radius: 6px;
       border-left: 4px solid;

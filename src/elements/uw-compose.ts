@@ -6,21 +6,38 @@ import { themeStyles } from '../styles/tokens.js';
 @customElement('uw-compose')
 export class UwCompose extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다
+       (cycle-569). 이 위젯은 제약을 200px 로 줬을 때는 자연 높이가 그보다 작아 «발동조차 하지
+       않았고», 120px 로 세게 주자 72px 가 상자 밖으로 샜다 — 미측정은 통과가 아니었다. */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       container: uw-compose / inline-size;
     }
 
     .compose-container {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     .compose-title {
+      flex: none;
       font-size: 1.125rem;
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
       margin-bottom: 12px;
+    }
+
+    /* 레이아웃 층이 스크롤 주인이다 — 제목은 제자리에 두고 자식들만 넘긴다.
+       ⚠layout-row 의 자식 flex 는 «가로» 분배라 그대로 둔다. */
+    .layout-stack,
+    .layout-row,
+    .layout-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
     }
 
     .layout-stack {

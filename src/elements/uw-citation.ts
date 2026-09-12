@@ -19,15 +19,23 @@ interface CitationItem {
 @customElement('uw-citation')
 export class UwCitation extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다.
+       display:block 이면 루트의 flex 선언이 무시되고 픽셀이 1도 움직이지 않는다(cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-citation / inline-size;
     }
 
+    /* 호스트에 높이·max-height 가 주어지면 그 제약이 여기까지 닿아야 한다. 제약이 없으면
+       flex-basis 가 auto 라 종전처럼 항목 전체 높이로 자란다(cycle-569). */
     .citations {
       display: flex;
       flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       gap: 8px;
     }
 

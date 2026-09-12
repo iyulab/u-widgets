@@ -120,9 +120,16 @@ pane, a card of a set size — and that constraint reaches the widget’s own sc
 | `chart.*` | the chart canvas, which resizes with it | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
 | `table` | the row area — the search box and pager stay put, rows scroll | grows to fit every row |
 | `code` | the code body — the language header stays put, lines scroll | grows to fit every line (`options.maxHeight` caps it independently) |
+| `list` · `citation` · `steps` · `status` | the item area — items scroll | grows to fit every item |
+| `markdown` · `callout` | the prose box — text scrolls | grows to fit the text |
+| `gallery` | the image grid — rows of thumbnails scroll | grows to fit every row |
+| `stat-group` | the cell area — wrapped rows scroll vertically, and the horizontal clip that hides the leading divider stays in place | grows as cells wrap |
+| `form` | the field area — fields scroll | grows to fit every field |
+| `compose` | the layout area — the title stays put, children scroll | grows to fit its children |
+| `image` · `video` · `gauge` | the box around the media, which scrolls | the media’s own size (the media is never squashed, since that would change its aspect ratio) |
 
-Other widgets still grow past a host height: constrain them with a wrapper of your own that
-clips or scrolls.
+Every widget honours a host `height` or `max-height`. Nothing is squashed to fit: the widget keeps
+its natural size and the box scrolls, so no content becomes unreachable.
 
 ## Table Options
 

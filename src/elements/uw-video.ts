@@ -6,13 +6,20 @@ import { themeStyles } from '../styles/tokens.js';
 @customElement('uw-video')
 export class UwVideo extends LitElement {
   static styles = [themeStyles, css`
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다(cycle-569). */
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       font-family: system-ui, -apple-system, sans-serif;
       container: uw-video / inline-size;
     }
 
+    /* ⚠video 요소를 세로로 줄이지 않는다 — 종횡비가 바뀌면 그것은 시각 계약 변경이다.
+       제약이 오면 캡션까지 포함한 상자를 스크롤로 넘긴다(cycle-569). */
     .video-container {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       text-align: center;
     }
 

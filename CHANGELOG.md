@@ -18,7 +18,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   exactly as before — the defaults are defaults, not caps. `--u-widget-chart-height` keeps its value
   and now means "height when the host is free to grow".
 
-  Widgets other than these three still grow past a host height; that work is not in this release.
+- **The same break existed in every other widget, and they are fixed too.** A host constraint now
+  reaches each widget's own scroll area: the item area of `list`, `citation`, `steps` and `status`, the
+  prose box of `markdown` and `callout`, the thumbnail grid of `gallery`, the field area of `form`, the
+  layout area of `compose` (its title stays put), the cell area of `stat-group` — where the horizontal
+  clip that hides the leading divider is deliberately kept — and the box around `image`, `video` and
+  `gauge`. Media is never squashed to fit, since that would change its aspect ratio; the box scrolls
+  instead. Measured overhang before the fix, against a 200px host: 4254px for `citation`, 2501px for
+  `markdown`, 2119px for `list`, 1929px for `steps`, 1422px for `gallery`, 858px for `video`, 717px for
+  `callout`, 343px for `stat-group`, 234px for `status`, 324px for `form`, 204px for `image`. `compose`
+  and `gauge` needed a tighter constraint to show it at all — 72px and 36px against a 120px host —
+  which is why a widget that fits its constraint is recorded as untested rather than passing.
 
 ### Documentation
 
