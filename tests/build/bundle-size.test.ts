@@ -15,7 +15,29 @@ function rawSize(filePath: string): number {
   return statSync(filePath).size;
 }
 
+/** Newest mtime under a directory tree. */
+function newestMtime(dir: string): number {
+  const { readdirSync } = require('fs');
+  let newest = 0;
+  for (const entry of readdirSync(dir, { withFileTypes: true }) as { name: string; isDirectory(): boolean }[]) {
+    const full = resolve(dir, entry.name);
+    const t = entry.isDirectory() ? newestMtime(full) : statSync(full).mtimeMs;
+    if (t > newest) newest = t;
+  }
+  return newest;
+}
+
 describe('bundle size budget', () => {
+  it('dist is not older than src — a stale build makes every budget below meaningless', () => {
+    // These tests read dist without building it. That let the charts budget stay green locally
+    // for two cycles while CI (which always builds first) was red: the dist on disk predated the
+    // source it was supposed to measure. Fail loudly instead of measuring the wrong artifact.
+    const srcNewest = newestMtime(resolve(__dirname, '../../src'));
+    const distBuilt = statSync(resolve(DIST, 'u-widgets.js')).mtimeMs;
+    expect(distBuilt, 'dist/ is older than src/ — run `npm run build` before reading bundle sizes')
+      .toBeGreaterThanOrEqual(srcNewest);
+  });
+
   it('core bundle (u-widgets.js) gzip size check', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets.js'));
     // Core includes all sub-components (sideEffects registration)
