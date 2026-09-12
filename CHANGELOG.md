@@ -38,6 +38,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - **`## Code Options`** documents `lineNumbers`, `wrap`, `maxHeight` and `highlight`, which the `code`
   widget has always read but which appeared in no document.
 
+### Build
+
+- **Comments inside `css` templates no longer ship in the bundles.** A tagged template is a string
+  to the minifier, so every design note written inside one was delivered to consumers — the
+  `charts` entry alone carried 574 gzip bytes of them and crossed its size budget. The build now
+  strips block comments from `css` templates in shipped source; nothing else in the output changes.
+
 ## [0.18.1] - 2026-09-10
 
 ### Fixed

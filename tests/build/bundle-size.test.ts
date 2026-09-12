@@ -24,9 +24,13 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 7 KB gzip', () => {
+  it('charts bundle is under 7.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
-    expect(size).toBeLessThan(7 * 1024); // includes format.ts for axis label formatting
+    // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
+    // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
+    // left 13 bytes of headroom under the old budget. Comments inside css`` templates no longer
+    // count: the build strips them (see build/strip-css-template-comments.ts).
+    expect(size).toBeLessThan(7.5 * 1024);
   });
 
   it('tools bundle is under 13 KB gzip', () => {

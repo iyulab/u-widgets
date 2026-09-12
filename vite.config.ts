@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
+import { stripCssTemplateComments } from './build/strip-css-template-comments.ts';
 
 // Every element module under src/elements declares its own `declare global { interface
 // HTMLElementTagNameMap { '<tag>': <Class>; } }` merge (u-widget.ts also merges
@@ -90,6 +91,9 @@ function stripDeclareGlobalBlocks(content: string): string {
   return result;
 }
 
+// Vite hands plugins POSIX-style ids even on Windows; normalize once for the prefix test.
+const SRC_DIR = resolve(__dirname, 'src').replace(/\\/g, '/') + '/';
+
 const ENTRY = {
   'u-widgets': resolve(__dirname, 'src/index.ts'),
   'u-widgets-charts': resolve(__dirname, 'src/charts.ts'),
@@ -120,6 +124,19 @@ export default defineConfig({
     minify: true,
   },
   plugins: [
+    // Comments inside css`…` templates are string content, so esbuild ships them to every
+    // consumer. Strip them at source level (before esbuild) — they are design notes, and the
+    // charts bundle blew its 7 KB gzip budget on them alone (7705 → 7131 without).
+    {
+      name: 'strip-css-template-comments',
+      enforce: 'pre',
+      transform(code, id) {
+        // Shipped source only — never tests (this transform's own fixtures live there).
+        if (!id.startsWith(SRC_DIR) || !id.endsWith('.ts') || !code.includes('css`')) return null;
+        const out = stripCssTemplateComments(code);
+        return out === code ? null : { code: out, map: null };
+      },
+    },
     dts({
       include: ['src'],
       bundleTypes: true,
