@@ -35,7 +35,7 @@ export class UWidget extends LitElement {
     css`
       /* 세로 flex 인 이유: 이 엘리먼트는 라우터라 실제 위젯을 shadow 안에 «위임»하는데,
          display:block 이면 그 자식이 flex item 이 아니어서 호스트 높이가 위젯에 닿지 않는다.
-         🔴실측(cycle-568): 자식 위젯이 스스로 수축할 준비를 갖춰도 이 줄이 block 인 동안에는
+         🔴실측: 자식 위젯이 스스로 수축할 준비를 갖춰도 이 줄이 block 인 동안에는
          자식이 자기 높이(차트 300px)를 유지하며 상자 밖으로 샜고, 픽셀이 1도 움직이지 않았다
          — 제약은 사슬 «최상단»에서 끊긴다. */
       :host {

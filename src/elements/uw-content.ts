@@ -7,7 +7,7 @@ import { themeStyles } from '../styles/tokens.js';
 export class UwContent extends LitElement {
   static styles = [themeStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(markdown · image · callout)가 flex item 이어야 호스트
-       제약이 그것에 닿는다. display:block 이면 루트의 flex 선언이 무시된다(cycle-569). */
+       제약이 그것에 닿는다. display:block 이면 루트의 flex 선언이 무시된다. */
     :host {
       display: flex;
       flex-direction: column;
@@ -18,7 +18,7 @@ export class UwContent extends LitElement {
     /* ── markdown ── */
     /* 이 파일은 세 위젯(markdown · image · callout)을 렌더하고, 셋의 렌더 루트가 각각
        호스트 제약을 받아야 한다. 제약이 없으면 flex-basis 가 auto 라 종전처럼 내용 높이로
-       자란다(cycle-569). */
+       자란다. */
     .markdown {
       flex: 1 1 auto;
       min-height: 0;

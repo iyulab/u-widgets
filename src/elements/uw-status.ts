@@ -31,8 +31,8 @@ const LEVEL_ICONS: Record<StatusLevel, string> = {
 @customElement('uw-status')
 export class UwStatus extends LitElement {
   static styles = [themeStyles, css`
-    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다
-       (cycle-569). 안쪽 status-list 의 가로 wrap 설계와는 다른 축이다. */
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다.
+       안쪽 status-list 의 가로 wrap 설계와는 다른 축이다. */
     :host {
       display: flex;
       flex-direction: column;
@@ -40,8 +40,8 @@ export class UwStatus extends LitElement {
       container: uw-status / inline-size;
     }
 
-    /* ⚠flex-wrap 은 «가로» 축 설계라 그대로 둔다 — 여기서 여는 것은 «세로» 축뿐이다
-       (cycle-569). 항목이 여러 행으로 감기면서 길어진 높이가 호스트 제약을 넘던 자리다. */
+    /* ⚠flex-wrap 은 «가로» 축 설계라 그대로 둔다 — 여기서 여는 것은 «세로» 축뿐이다.
+       항목이 여러 행으로 감기면서 길어진 높이가 호스트 제약을 넘던 자리다. */
     .status-list {
       display: flex;
       flex-wrap: wrap;

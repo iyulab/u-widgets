@@ -63,7 +63,7 @@ function toMetricData(
 export class UwMetric extends LitElement {
   static styles = [themeStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(metric · stat-group)가 flex item 이어야 호스트 제약이
-       그것에 닿는다(cycle-569). */
+       그것에 닿는다. */
     :host {
       display: flex;
       flex-direction: column;
@@ -158,7 +158,7 @@ export class UwMetric extends LitElement {
          margin 으로 왼쪽 바깥에 놓이므로 그것을 클립한다. 세로는 그 의도와 무관하고, 항목이
          wrap 으로 여러 행이 되면 호스트 제약을 넘었다 ⇒ 세로만 스크롤로 연다.
          ⚠overflow hidden 축약으로 되돌리면 가로 의도는 지켜지지만 세로가 다시 «잘려서
-         도달 불가» 가 된다(cycle-569). */
+         도달 불가» 가 된다. */
       overflow-x: hidden;
       overflow-y: auto;
       flex: 1 1 auto;

@@ -6,8 +6,8 @@ import { themeStyles } from '../styles/tokens.js';
 @customElement('uw-compose')
 export class UwCompose extends LitElement {
   static styles = [themeStyles, css`
-    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다
-       (cycle-569). 이 위젯은 제약을 200px 로 줬을 때는 자연 높이가 그보다 작아 «발동조차 하지
+    /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다.
+       이 위젯은 제약을 200px 로 줬을 때는 자연 높이가 그보다 작아 «발동조차 하지
        않았고», 120px 로 세게 주자 72px 가 상자 밖으로 샜다 — 미측정은 통과가 아니었다. */
     :host {
       display: flex;

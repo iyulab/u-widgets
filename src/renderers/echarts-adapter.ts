@@ -923,7 +923,7 @@ function buildHistogram(
 
   // The X axis domain must cover referenceLines too, not just the data \u2014 otherwise an
   // out-of-domain reference (e.g. a spec limit outside the observed sample range) has no
-  // valid bin-index coordinate to draw at (docket #146).
+  // valid bin-index coordinate to draw at.
   const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
   const refXValues = Array.isArray(refLines)
     ? refLines
@@ -942,7 +942,7 @@ function buildHistogram(
 
   // Decimal places needed so adjacent bin boundaries (which differ by binWidth) don't
   // round to the same displayed label \u2014 fixed 1-decimal rounding showed "9.7\u20139.7" for
-  // bins narrower than 0.1 (docket #146 secondary repro).
+  // bins narrower than 0.1 (secondary repro).
   const labelDecimals = binWidth > 0 && binWidth < 1
     ? Math.min(10, Math.max(1, Math.ceil(-Math.log10(binWidth))))
     : 1;
@@ -977,7 +977,7 @@ function buildHistogram(
   // range label), so a raw domain value (e.g. 10.5) is not a valid coordinate: ECharts
   // reads a numeric xAxis coordinate on a category axis as a bin **index**, not a data
   // value. Convert to the fractional bin-index position the value falls at instead
-  // (docket #146 — previously every line landed at/near the same clamped edge index).
+  // (previously every line landed at/near the same clamped edge index).
   if (Array.isArray(refLines) && refLines.length > 0) {
     series.markLine = {
       silent: true,
