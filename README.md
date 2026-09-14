@@ -242,6 +242,26 @@ const Widget = dynamic(
 );
 ```
 
+## Accessibility
+
+The baseline is **WCAG 2.2**. The table lists what this package **measures in tests** — it is not a
+conformance claim for the success criteria it does not list.
+
+| Success criterion | Guarantee | Measured by |
+|---|---|---|
+| SC 2.5.8 Target Size (Minimum) | Every pointer target a widget renders in its own shadow tree — buttons, links, form controls (measured by their activating label), sortable headers, table rows and list items, the interactive rating's icons, citation links, collapsible sections — is at least 24×24 CSS px. Links inside `markdown` prose use the inline exception | `e2e/target-size.spec.ts` (real Chromium, on the demo page) |
+| SC 2.1.1 Keyboard (pointer-cursor check) | Nothing a widget renders shows a pointer cursor without also being a focusable, interactive element — a clickable `div` cannot slip in | `e2e/target-size.spec.ts` |
+
+What the gate does **not** cover:
+
+- **Spacing is not measured** — where a widget sits relative to other targets on the page is up to
+  the host application, so only size is checked.
+- **Chart interactions** (legend toggles, tooltips) are drawn on a canvas and have no DOM target to
+  measure.
+- **`video` controls** are the browser's native controls (the user-agent exception).
+- Widgets that render no pointer targets — `chart`, `gallery`, `gauge`, `kv`, `math`, `metric`,
+  `status`, `steps` — are listed by the gate as unmeasured rather than counted as passing.
+
 ## Documentation
 
 - [Widget Reference](docs/widgets.md) — Schema, mapping, options, theming

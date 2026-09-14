@@ -35,9 +35,16 @@ import { test, expect, type Page } from '@playwright/test';
  * 통과로 세면 무엇이든 통과한다).
  */
 
-/** 상호작용 요소 — 사용자가 활성화하는 것. */
+/**
+ * 상호작용 요소 — 사용자가 활성화하는 것.
+ *
+ * ⚠**역할로 드러나는 위젯 조각도 센다**(`radio`·`link` 등) — 로빙 탭인덱스 그룹은 한 조각만
+ * `tabindex="0"` 이라 탭인덱스만으로 세면 **나머지 조각이 조용히 빠진다**.
+ */
 const INTERACTIVE =
-  'button, a[href], input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])';
+  'button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), ' +
+  '[role="button"], [role="link"], [role="radio"], [role="checkbox"], [role="switch"], ' +
+  '[role="tab"], [role="menuitem"], [role="option"], [role="slider"]';
 
 const MIN = 24;
 
@@ -70,7 +77,8 @@ const UNDERSIZED_PINS = new Set<string>([]);
  * ***정당한 산문에 발화***한다. ⚠**면제는 `a[href]` 에만** 적용한다 — 같은 위젯 안의 버튼은
  * 인라인이 아니다.
  */
-const INLINE_PROSE = new Set(['uw-content', 'uw-citation']);
+const INLINE_PROSE = new Set(['uw-content']);
+// ⚠`uw-citation` 은 여기 없다 — 링크 항목이 카드 전체를 덮는 앵커가 되면서 더 이상 «문장 안의 링크»가 아니다.
 
 interface Target {
   owner: string;
@@ -244,6 +252,42 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
     }
   });
 
+  /* 🔴**이 게이트의 대상 도출은 «상호작용 선택자»에 기댄다 — 그 선택자에 걸리지 않는 클릭
+     대상은 크기를 재기 전에 시야에서 사라진다.** 실측: 링크 인용 항목이 클릭 핸들러만 가진
+     `div` 였고, 선택 모드 별점 아이콘은 `role="radio"` 였지만 탭 정지가 없었다 — 둘 다 이
+     게이트에 «미측정»으로만 보였고, 둘 다 **키보드로는 쓸 수 없었다**(SC 2.1.1).
+     ⇒ «누를 수 있게 보이는데(포인터 커서) 상호작용 요소가 아닌 것» 을 따로 찾는다. 가장 바깥
+     요소만 센다 — 자식은 커서를 상속하므로 한 대상이 여러 번 보고된다.
+     ⚠여기서는 `tabindex="-1"` 도 상호작용으로 친다 — 로빙 탭인덱스 그룹(표 행·목록 항목)의 나머지
+     조각은 화살표로 닿는다. 그 판정(키 처리가 실제로 있는가)은 이 검사가 못 재고 위젯 단위 테스트가 잰다. */
+  test('포인터 커서를 가진 요소는 전부 상호작용 요소다 — 클릭만 되는 div 는 없다', async ({ page }) => {
+    await load(page);
+    const orphans = await page.evaluate((sel) => {
+      const out: string[] = [];
+      const walk = (root: ParentNode, owner: string, parentPointer: boolean, insideInteractive: boolean) => {
+        for (const el of Array.from(root.children)) {
+          const tag = el.tagName.toLowerCase();
+          const nextOwner = tag.startsWith('uw-') || tag === 'u-widget' ? tag : owner;
+          const pointer = getComputedStyle(el).cursor === 'pointer';
+          const interactive = insideInteractive || el.matches(sel)
+            // 체크박스·라디오를 감싼 라벨은 누르면 입력이 토글된다 — 그 자체로 상호작용 대상이다.
+            || (tag === 'label' && !!el.querySelector('input'));
+          if (pointer && !parentPointer && !interactive && nextOwner !== 'page') {
+            const cls = (el.getAttribute('class') ?? '').trim().split(/\s+/)[0];
+            out.push(`${nextOwner}>${tag}${cls ? '.' + cls : ''}`);
+          }
+          walk(el, nextOwner, pointer, interactive);
+          const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+          if (sr) walk(sr, nextOwner, pointer, interactive);
+        }
+      };
+      walk(document.body, 'page', false, false);
+      return [...new Set(out)].sort();
+    }, `${INTERACTIVE}, [tabindex]`);
+
+    expect(orphans, '포인터 커서인데 키보드로 닿지 않는다 — 진짜 상호작용 요소로 바꿀 것').toEqual([]);
+  });
+
   test('📌커버리지를 보고한다 — 재지 못한 위젯은 「통과」가 아니다', async ({ page }) => {
     const registered = await load(page);
     const ours = (await collectTargets(page, INTERACTIVE)).filter((t) => t.owner !== 'page');
@@ -252,10 +296,10 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
 
     // 🔴이 단언은 «커버리지가 줄지 않았는가»를 지킨다. 데모가 위젯을 더 그리면 이 목록이
     //   줄고, 그때 이 줄을 함께 고치는 것이 그 작업의 완료 신호다.
-    expect(`측정 ${measured.size} · 미측정 ${unmeasured.length}(${unmeasured.join(' ')})`)
+    expect(`측정 ${measured.size}(${[...measured].sort().join(' ')}) · 미측정 ${unmeasured.length}(${unmeasured.join(' ')})`)
       .toBe(
-        '측정 5 · 미측정 12(uw-chart uw-citation uw-compose uw-gallery uw-gauge uw-kv ' +
-        'uw-math uw-metric uw-rating uw-status uw-steps uw-video)',
+        '측정 8(u-widget uw-citation uw-code uw-compose uw-content uw-form uw-rating uw-table) · ' +
+        '미측정 9(uw-chart uw-gallery uw-gauge uw-kv uw-math uw-metric uw-status uw-steps uw-video)',
       );
   });
 });

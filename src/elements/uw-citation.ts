@@ -49,9 +49,17 @@ export class UwCitation extends LitElement {
       cursor: default;
       transition: border-color 0.15s;
     }
-    .cite-item[data-link] { cursor: pointer; }
+    .cite-item[data-link] {
+      cursor: pointer;
+      color: inherit;
+      text-decoration: none;
+    }
     .cite-item[data-link]:hover {
       border-color: var(--u-widget-primary, #4f46e5);
+    }
+    .cite-item[data-link]:focus-visible {
+      outline: 2px solid var(--u-widget-primary, #4f46e5);
+      outline-offset: 2px;
     }
 
     .cite-num {
@@ -148,35 +156,50 @@ export class UwCitation extends LitElement {
   }
 
   private _renderItem(item: CitationItem, index: number, numbered: boolean) {
-    const hasLink = Boolean(item.url);
+    const safeUrl = this._safeUrl(item);
     const displayUrl = item.url ? this._extractDomain(item.url) : undefined;
 
+    const content = html`
+      ${numbered ? html`<span class="cite-num" part="cite-num">${index + 1}</span>` : nothing}
+      <div class="cite-body">
+        <div class="cite-title" part="cite-title">${item.title}</div>
+        ${displayUrl ? html`<div class="cite-url" part="cite-url">${displayUrl}</div>` : nothing}
+        ${item.snippet ? html`<div class="cite-snippet" part="cite-snippet">${item.snippet}</div>` : nothing}
+        ${item.source ? html`<div class="cite-source" part="cite-source">${item.source}</div>` : nothing}
+      </div>
+    `;
+
+    // 링크 항목은 진짜 앵커다 — 클릭 가능한 div 는 포커스를 받지 못하고(키보드로 열 수 없다)
+    // 보조기술에 링크로 드러나지도 않는다. listitem 역할은 앵커의 링크 역할을 덮어쓰므로 감싸는 쪽에 둔다.
     return html`
-      <div
-        class="cite-item"
-        part="cite-item"
-        role="listitem"
-        ?data-link=${hasLink}
-        @click=${hasLink ? () => this._handleClick(item) : undefined}
-      >
-        ${numbered ? html`<span class="cite-num" part="cite-num">${index + 1}</span>` : nothing}
-        <div class="cite-body">
-          <div class="cite-title" part="cite-title">${item.title}</div>
-          ${displayUrl ? html`<div class="cite-url" part="cite-url">${displayUrl}</div>` : nothing}
-          ${item.snippet ? html`<div class="cite-snippet" part="cite-snippet">${item.snippet}</div>` : nothing}
-          ${item.source ? html`<div class="cite-source" part="cite-source">${item.source}</div>` : nothing}
-        </div>
+      <div role="listitem">
+        ${safeUrl
+          ? html`<a
+              class="cite-item"
+              part="cite-item"
+              data-link
+              href=${safeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              @click=${() => this._handleClick(item, safeUrl)}
+            >${content}</a>`
+          : html`<div class="cite-item" part="cite-item">${content}</div>`}
       </div>
     `;
   }
 
-  private _handleClick(item: CitationItem) {
-    if (!item.url) return;
+  /** The item's URL when it is safe to link to, otherwise `undefined`. */
+  private _safeUrl(item: CitationItem): string | undefined {
+    if (!item.url) return undefined;
 
     // Sanitize URL — strip invisible chars and block dangerous protocols
     const safeUrl = item.url.replace(/[\s\u200B-\u200F\uFEFF\u00AD]/g, '');
-    if (/^(javascript|data|vbscript):/i.test(safeUrl)) return;
+    if (!safeUrl || /^(javascript|data|vbscript):/i.test(safeUrl)) return undefined;
+    return safeUrl;
+  }
 
+  /** Report the navigation — the anchor itself opens the page. */
+  private _handleClick(item: CitationItem, safeUrl: string) {
     this.dispatchEvent(
       new CustomEvent('u-widget-internal', {
         detail: {
@@ -190,8 +213,6 @@ export class UwCitation extends LitElement {
         composed: true,
       }),
     );
-
-    window.open(safeUrl, '_blank', 'noopener');
   }
 
   private _extractDomain(url: string): string {

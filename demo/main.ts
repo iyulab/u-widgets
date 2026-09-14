@@ -392,6 +392,11 @@ const specs = {
     widget: 'rating',
     data: { value: 4.2, count: 128 },
   },
+  ratingInteractive: {
+    widget: 'rating',
+    data: { value: 3.5 },
+    options: { interactive: true, label: 'Rate this answer' },
+  },
   citation: {
     widget: 'citation',
     data: [
@@ -489,6 +494,7 @@ bind('demo-code', specs.code);
 bind('demo-kv', specs.kv);
 bind('demo-steps', specs.steps);
 bind('demo-rating', specs.rating);
+bind('demo-rating-interactive', specs.ratingInteractive);
 bind('demo-citation', specs.citation);
 bind('demo-status', specs.status);
 bind('demo-actions', specs.actions);

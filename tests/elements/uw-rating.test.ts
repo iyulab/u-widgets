@@ -186,6 +186,76 @@ describe('uw-rating', () => {
       expect(rating?.getAttribute('role')).toBe('radiogroup');
     });
 
+    it('has a single tab stop, on the current value', () => {
+      const el = render({
+        widget: 'rating',
+        data: { value: 3 },
+        options: { interactive: true },
+      });
+      const stops = [...shadow(el).querySelectorAll('.rating-icon')].map((i) => i.getAttribute('tabindex'));
+      expect(stops).toEqual(['-1', '-1', '0', '-1', '-1']);
+    });
+
+    it('puts the tab stop on the first icon when there is no value', () => {
+      const el = render({ widget: 'rating', options: { interactive: true } });
+      expect(shadow(el).querySelector('.rating-icon')?.getAttribute('tabindex')).toBe('0');
+    });
+
+    it('arrow keys move the tab stop and preview without submitting', () => {
+      const el = render({ widget: 'rating', data: { value: 2 }, options: { interactive: true } });
+      const submitted: unknown[] = [];
+      el.addEventListener('u-widget-internal', (e) => submitted.push((e as CustomEvent).detail));
+
+      const icons = () => [...shadow(el).querySelectorAll<HTMLElement>('.rating-icon')];
+      icons()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, composed: true }));
+      (el as any).performUpdate();
+
+      expect(icons().map((i) => i.getAttribute('tabindex'))).toEqual(['-1', '-1', '0', '-1', '-1']);
+      expect(icons().slice(0, 3).every((i) => i.getAttribute('data-preview') !== null)).toBe(true);
+      expect(submitted).toEqual([]);
+    });
+
+    it('keeps each icon node when the preview changes its state — focus must not be dropped', () => {
+      const el = render({ widget: 'rating', data: { value: 3.5 }, options: { interactive: true } });
+      const before = [...shadow(el).querySelectorAll('.rating-icon')];
+      expect(before[3].getAttribute('data-state')).toBe('half');
+
+      before[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, composed: true }));
+      (el as any).performUpdate();
+
+      const after = [...shadow(el).querySelectorAll('.rating-icon')];
+      expect(after[3].getAttribute('data-state')).toBe('empty');
+      expect(after.every((node, i) => node === before[i])).toBe(true);
+    });
+
+    it('checks exactly one radio — the committed value, not the preview', () => {
+      const el = render({ widget: 'rating', data: { value: 3 }, options: { interactive: true } });
+      const checked = () => [...shadow(el).querySelectorAll('.rating-icon')].map((i) => i.getAttribute('aria-checked'));
+      expect(checked()).toEqual(['false', 'false', 'true', 'false', 'false']);
+
+      shadow(el).querySelectorAll('.rating-icon')[2]
+        .dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, composed: true }));
+      (el as any).performUpdate();
+      expect(checked()).toEqual(['false', 'false', 'true', 'false', 'false']);
+    });
+
+    it('Enter and Space submit the focused icon', () => {
+      const el = render({ widget: 'rating', options: { interactive: true } });
+      const submitted: { data: { value: number } }[] = [];
+      el.addEventListener('u-widget-internal', (e) => submitted.push((e as CustomEvent).detail));
+
+      const icons = [...shadow(el).querySelectorAll<HTMLElement>('.rating-icon')];
+      icons[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true }));
+      icons[1].dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, composed: true }));
+
+      expect(submitted.map((d) => d.data.value)).toEqual([4, 2]);
+    });
+
+    it('does not make display-mode icons focusable', () => {
+      const el = render({ widget: 'rating', data: { value: 3 } });
+      expect(shadow(el).querySelector('.rating-icon')?.hasAttribute('tabindex')).toBe(false);
+    });
+
     it('does not show value display when interactive', () => {
       const el = render({
         widget: 'rating',

@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.4] - 2026-09-15
+
+### Fixed
+
+- **Citation links could not be reached from the keyboard.** A linked citation was a clickable
+  `div`: it took no focus, could not be opened with Enter, and was not announced as a link. It is now
+  a real anchor (`target="_blank"`, `rel="noopener noreferrer"`) with a visible focus ring, still
+  reporting the `navigate` action. Items whose URL is unsafe render as plain cards, as before.
+- **The interactive `rating` could not be used from the keyboard, and its icons were below 24px.**
+  The icons are now one tab stop (on the current value): arrow keys, Home and End move a preview,
+  Enter or Space submits. Exactly one icon is `aria-checked` — the committed value — where previously
+  every filled icon was. Each interactive icon is at least 24×24 CSS px (WCAG 2.2 SC 2.5.8); the
+  glyph size is unchanged, so the icons sit slightly further apart. Display-only ratings are not
+  affected.
+
 ## [0.18.3] - 2026-09-12
 
 ### Fixed

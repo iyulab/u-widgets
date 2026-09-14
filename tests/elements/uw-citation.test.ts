@@ -143,6 +143,54 @@ describe('uw-citation', () => {
       const item = shadow(el).querySelector('.cite-item');
       expect(item?.hasAttribute('data-link')).toBe(false);
     });
+
+    it('renders a linked item as a real anchor that opens in a new tab', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Linked', url: 'https://example.com/a' }],
+      });
+      const item = shadow(el).querySelector('.cite-item');
+      expect(item?.tagName).toBe('A');
+      expect(item?.getAttribute('href')).toBe('https://example.com/a');
+      expect(item?.getAttribute('target')).toBe('_blank');
+      expect(item?.getAttribute('rel')).toBe('noopener noreferrer');
+    });
+
+    it('keeps the listitem role off the anchor so it stays a link', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Linked', url: 'https://example.com' }],
+      });
+      const item = shadow(el).querySelector('.cite-item');
+      expect(item?.hasAttribute('role')).toBe(false);
+      expect(item?.parentElement?.getAttribute('role')).toBe('listitem');
+    });
+
+    it('does not link a dangerous URL', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Bad', url: 'javascript:alert(1)' }],
+      });
+      const item = shadow(el).querySelector('.cite-item');
+      expect(item?.tagName).toBe('DIV');
+      expect(item?.hasAttribute('data-link')).toBe(false);
+      expect(shadow(el).querySelector('a')).toBeNull();
+    });
+
+    it('reports the navigation when the link is activated', () => {
+      const el = render({
+        widget: 'citation',
+        data: [{ title: 'Linked', url: 'https://example.com' }],
+      });
+      const events: { action: string; data: { url: string } }[] = [];
+      el.addEventListener('u-widget-internal', (e) => events.push((e as CustomEvent).detail));
+      const anchor = shadow(el).querySelector<HTMLAnchorElement>('a.cite-item')!;
+      anchor.addEventListener('click', (e) => e.preventDefault()); // 테스트 환경에서 실제 이동을 막는다
+      anchor.click();
+      expect(events).toHaveLength(1);
+      expect(events[0].action).toBe('navigate');
+      expect(events[0].data.url).toBe('https://example.com');
+    });
   });
 
   describe('accessibility', () => {
