@@ -46,6 +46,24 @@ describe('listTools', () => {
       expect(tool.inputSchema).toBeDefined();
     }
   });
+
+  it('every inputSchema forbids unknown arguments', async () => {
+    const { tools } = await client.listTools();
+    for (const tool of tools) {
+      expect({ tool: tool.name, additionalProperties: tool.inputSchema.additionalProperties })
+        .toEqual({ tool: tool.name, additionalProperties: false });
+    }
+  });
+
+  it('rejects an unknown argument instead of silently dropping it', async () => {
+    const result = await client.callTool({ name: 'template', arguments: { widget: 'metric', widgte: 'typo' } });
+    expect(result.isError).toBe(true);
+  });
+
+  it('reports the package version as the server version', async () => {
+    const { version } = await import('../package.json', { with: { type: 'json' } }).then((m) => m.default);
+    expect(client.getServerVersion()?.version).toBe(version);
+  });
 });
 
 // ── help ──────────────────────────────────────────────────────
