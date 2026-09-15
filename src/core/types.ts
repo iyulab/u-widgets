@@ -248,10 +248,12 @@ export interface UWidgetAction {
  *
  * | type | trigger | payload |
  * |---|---|---|
- * | `submit` | Form submit button | Form field values |
- * | `action` | Custom action button | Action data |
- * | `change` | Input value change | Changed field and value |
- * | `select` | Chart element click | Selected data point |
+ * | `submit` | Form/confirm submit · interactive rating pick | Field values · `{ value }` |
+ * | `action` | Action button · form cancel · citation link | `{ url }` / field values / `{ url, title }` |
+ * | `change` | Form field edited | `{ field, value }` |
+ * | `select` | Table row / list item · chart mark | Row fields + `_index` · `{ name, seriesName, value, dataIndex, _index? }` |
+ *
+ * The full table is in `docs/widgets.md` (Events).
  */
 export interface UWidgetEvent {
   /** Event category. */
@@ -265,9 +267,10 @@ export interface UWidgetEvent {
   /**
    * Event payload data.
    *
-   * For a chart `select`: `name`, `seriesName`, `value` and `dataIndex` (the mark's index within its
-   * series), plus `rowIndex` — the clicked mark's row in `spec.data` — on charts where a series
-   * index does not identify the row: `chart.gantt`, and `chart.scatter` with a `color` mapping.
+   * `select` on `table`/`list`: the row's fields plus `_index`, its index in `spec.data`. On a
+   * chart: `name`, `seriesName`, `value` and `dataIndex` (the mark's index within its series), plus
+   * `_index` where a series index does not identify the row — `chart.gantt`, and `chart.scatter`
+   * with a `color` mapping.
    */
   data?: Record<string, unknown>;
 }

@@ -305,19 +305,34 @@ interface UWidgetEvent {
 
 Listen via `u-widget-event` custom event on the `<u-widget>` element.
 
-A chart `select` (a click on a mark) carries `name`, `seriesName`, `value` and `dataIndex` — the
-mark's index **within its series**. Where that index does not identify a data row, the payload
-also has `rowIndex`, the clicked row's index in `spec.data`:
+| `type` | Emitted by | `action` | `data` |
+|---|---|---|---|
+| `submit` | `form` / `confirm` submit (after validation) | — | all field values |
+| `submit` | `rating` with `options.interactive` — a value picked | — | `{ value }` |
+| `change` | `form` field edited | — | `{ field, value }` |
+| `action` | `cancel` on a `form` / `confirm` (button or Escape) | `'cancel'` | — |
+| `action` | any other form action button | its `action` | all field values |
+| `action` | an action in the global action bar or an `actions` widget | its `action` | `{ url }` when the action has one |
+| `action` | a linked `citation` opened | `'navigate'` | `{ url, title }` |
+| `select` | `table` row / `list` item clicked (or Enter / Space) | — | the row's fields plus `_index` |
+| `select` | a chart mark clicked | — | `{ name, seriesName, value, dataIndex }`, plus `_index` on some charts (below) |
 
-| Chart | Why `dataIndex` is not the row | `rowIndex` |
-|---|---|---|
-| `chart.gantt` | segments are grouped by `color`, and rows without a finite start/end are skipped | always |
-| `chart.scatter` with `mapping.color` | one series per group | always |
+An action button whose `action` is `navigate` and has a `url` opens it in a new tab and emits no
+event.
+
+**`_index` is always the row's index in `spec.data`** — for a table it does not change with search,
+sort or paging. A chart's `dataIndex` is the mark's index **within its series**; where that does not
+identify a row, the payload adds `_index` too:
+
+| Chart | Why `dataIndex` is not the row |
+|---|---|
+| `chart.gantt` | segments are grouped by `color`, and rows without a finite start/end are skipped |
+| `chart.scatter` with `mapping.color` | one series per group |
 
 ```ts
 widget.addEventListener('u-widget-event', (e) => {
   const { type, data } = e.detail;
-  if (type === 'select' && typeof data.rowIndex === 'number') showJob(spec.data[data.rowIndex]);
+  if (type === 'select' && typeof data?._index === 'number') open(spec.data[data._index]);
 });
 ```
 

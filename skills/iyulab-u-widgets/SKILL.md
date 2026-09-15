@@ -93,10 +93,13 @@ carrying a [`UWidgetEvent`](../../src/core/types.ts) payload:
 
 | `type` | Trigger | Payload |
 |--------|---------|---------|
-| `submit` | Form submit button | Form field values |
-| `action` | Any action button (global action bar, standalone `actions` widget, or a widget's own) | Action `data` (e.g. `{ url }` for `navigate`) |
-| `change` | Input value change | Changed field and value |
-| `select` | Chart element click | Selected data point |
+| `submit` | Form / confirm submit · interactive `rating` pick | All field values · `{ value }` |
+| `action` | Action button (global bar, `actions` widget, form) · form cancel · `citation` link opened | `{ url }` if the action has one · form: field values (cancel: none) · citation: `{ url, title }` |
+| `change` | Form field edited | `{ field, value }` |
+| `select` | `table` row / `list` item · chart mark click | Row fields + `_index` · `{ name, seriesName, value, dataIndex }` (+ `_index` on `chart.gantt` and color-grouped `chart.scatter`) |
+
+`_index` is the row's index in `spec.data` (unchanged by table search, sort or paging). A `navigate`
+action with a `url` opens it and emits nothing. Full table: [Widget Reference](../../docs/widgets.md#events).
 
 ```ts
 el.addEventListener('u-widget-event', (e: CustomEvent<UWidgetEvent>) => {

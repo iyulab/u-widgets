@@ -214,6 +214,54 @@ describe('uw-table', () => {
     });
   });
 
+  describe('select _index after search and sort', () => {
+    it('reports the row index in spec.data, not the position in the sorted view', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [
+          { name: 'Charlie', value: 30 },
+          { name: 'Alice', value: 10 },
+          { name: 'Bob', value: 20 },
+        ],
+      });
+      const shadow = await render(el);
+      (shadow.querySelectorAll('th')[0] as HTMLElement).click();
+      await el.updateComplete;
+
+      const listener = vi.fn();
+      el.addEventListener('u-widget-internal', listener);
+      // First row on screen is now Alice, which is spec.data[1].
+      (shadow.querySelector('tbody tr') as HTMLElement).click();
+      const detail = listener.mock.calls[0][0].detail;
+      expect(detail.data.name).toBe('Alice');
+      expect(detail.data._index).toBe(1);
+    });
+
+    it('reports the row index in spec.data after a search narrows the rows', async () => {
+      const el = createElement({
+        widget: 'table',
+        data: [
+          { name: 'Alice', value: 10 },
+          { name: 'Bob', value: 20 },
+          { name: 'Carol', value: 30 },
+        ],
+        options: { searchable: true },
+      });
+      const shadow = await render(el);
+      const input = shadow.querySelector('.search-input') as HTMLInputElement;
+      input.value = 'carol';
+      input.dispatchEvent(new Event('input'));
+      await el.updateComplete;
+
+      const listener = vi.fn();
+      el.addEventListener('u-widget-internal', listener);
+      (shadow.querySelector('tbody tr') as HTMLElement).click();
+      const detail = listener.mock.calls[0][0].detail;
+      expect(detail.data.name).toBe('Carol');
+      expect(detail.data._index).toBe(2);
+    });
+  });
+
   describe('sorting', () => {
     it('sorts ascending on first header click', async () => {
       const el = createElement({

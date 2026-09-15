@@ -316,7 +316,7 @@ test.describe('Chart Widgets', () => {
     expect(errors).toEqual([]);
   });
 
-  test('clicking a gantt segment reports its spec.data row (rowIndex), not only the series-local index', async ({ page }) => {
+  test('clicking a gantt segment reports its spec.data row (_index), not only the series-local index', async ({ page }) => {
     // 좌표 클릭은 뷰포트 밖이면 아무것에도 닿지 않는다 — 카드를 먼저 화면에 들인다.
     await page.locator('#demo-chart-gantt').scrollIntoViewIfNeeded();
     await page.waitForTimeout(1000);
@@ -340,7 +340,7 @@ test.describe('Chart Widgets', () => {
     const events = await page.evaluate(() => (window as unknown as { __ganttEvents: { type: string; data: Record<string, unknown> }[] }).__ganttEvents);
     expect(events).toHaveLength(1);
     expect(events[0].type).toBe('select');
-    expect(events[0].data).toMatchObject({ rowIndex: 3, seriesName: 'J2', dataIndex: 1 });
+    expect(events[0].data).toMatchObject({ _index: 3, seriesName: 'J2', dataIndex: 1 });
   });
 
   test('custom series renders without unregistered-series warning', async ({ page }) => {

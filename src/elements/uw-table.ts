@@ -452,6 +452,10 @@ export class UwTable extends LitElement {
     const totalPages = pageSize > 0 ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
     const page = Math.min(this._page, totalPages - 1);
     const visible = pageSize > 0 ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted;
+    // select reports a row's index in spec.data — its position on screen changes with search, sort
+    // and paging. Filtering and sorting keep the row objects, so identity maps them back.
+    const sourceIndex = new Map<Record<string, unknown>, number>();
+    data.forEach((row, i) => { if (!sourceIndex.has(row)) sourceIndex.set(row, i); });
 
     const searchBox = searchable ? html`
       <div class="search-box" part="search">
@@ -508,11 +512,11 @@ export class UwTable extends LitElement {
               (row, idx) => html`
                 <tr part="tr"
                   tabindex=${idx === this._focusedIdx ? '0' : '-1'}
-                  @click=${() => this._onRowClick(row, pageSize > 0 ? page * pageSize + idx : idx)}
+                  @click=${() => this._onRowClick(row, sourceIndex.get(row) ?? idx)}
                   @keydown=${(e: KeyboardEvent) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      this._onRowClick(row, pageSize > 0 ? page * pageSize + idx : idx);
+                      this._onRowClick(row, sourceIndex.get(row) ?? idx);
                     }
                   }}
                 >

@@ -1081,8 +1081,8 @@ function buildGantt(
       bucket = { data: [], items: [] };
       groups.set(group, bucket);
     }
-    // rowIndex: the clicked segment's row in spec.data — series split by color and skipped rows make
-    // the series-local dataIndex unusable for that (uw-chart forwards it on select).
+    // rowIndex: the segment's row in spec.data — series split by color and skipped rows make the
+    // series-local dataIndex unusable for that (uw-chart forwards it on select as _index).
     bucket.data.push({
       name: label ?? name,
       value: [rowPosition.get(name)!, Math.min(a, b), Math.max(a, b)],

@@ -125,11 +125,12 @@ export class UwChart extends LitElement {
       },
     };
     // Charts that split rows across series (color groups) or skip rows tag each mark with its
-    // spec.data row, since dataIndex is then local to the series.
+    // spec.data row, since dataIndex is then local to the series. Reported as _index — the same key
+    // table and list use for the selected row's index in spec.data.
     const item = params.data;
     if (item && typeof item === 'object' && !Array.isArray(item)
       && typeof (item as Record<string, unknown>).rowIndex === 'number') {
-      detail.data!.rowIndex = (item as Record<string, unknown>).rowIndex;
+      detail.data!._index = (item as Record<string, unknown>).rowIndex;
     }
     this.dispatchEvent(
       new CustomEvent('u-widget-internal', {

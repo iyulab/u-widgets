@@ -17,16 +17,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   a row are separated by a gap, a zero-length interval is still drawn, and `referenceLines` on `x`
   mark a value or a date. `suggestMapping()` proposes it for data whose fields are named as an
   interval (`start`/`end`, `from`/`to`, …). The catalog, JSON schema and MCP `help` describe it.
-- **Chart `select` events carry `rowIndex` where `dataIndex` cannot identify the row.** `dataIndex`
-  is the mark's index within its series, so on `chart.gantt` (series per `color`, skipped rows) and
-  `chart.scatter` with a `color` mapping (series per group) it did not say which `spec.data` row was
-  clicked. Those charts now add `rowIndex`. `dataIndex` is unchanged. In the generated ECharts
-  option, grouped scatter points are `{ value, rowIndex }` objects instead of bare arrays.
+- **Chart `select` events carry `_index` where `dataIndex` cannot identify the row** — the same key
+  `table` and `list` already use for the row's index in `spec.data`. `dataIndex` is the mark's index
+  within its series, so on `chart.gantt` (series per `color`, skipped rows) and `chart.scatter` with
+  a `color` mapping (series per group) it did not say which row was clicked. `dataIndex` is
+  unchanged. In the generated ECharts option, grouped scatter points are `{ value, rowIndex }`
+  objects instead of bare arrays.
+- **Every `u-widget-event` payload is documented** (Widget Reference → Events): which widget emits
+  each `type`, and what `action` and `data` carry.
 - **JSON schema: `mapping.total`, `mapping.start`, `mapping.end`.** `total` (waterfall) was
   accepted by the renderer and `validate()` but rejected by the schema's closed mapping object.
 
 ### Fixed
 
+- **A table's `select` reported the row's position on screen as `_index` after search or sort.**
+  Paging was accounted for, but a searched or sorted table reported the index into the filtered,
+  sorted rows, so `spec.data[_index]` was a different row. `_index` is now the row's index in
+  `spec.data` in every state.
 - **`xFormat: { type: 'date' | 'datetime' }` on a time axis printed raw millisecond counts.** A time
   axis labels its ticks with timestamps, which the date formats passed through unchanged; they are
   now read as local wall-clock time, and overlapping labels are hidden.

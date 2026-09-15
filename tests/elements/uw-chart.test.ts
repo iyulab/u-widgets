@@ -249,12 +249,12 @@ describe('uw-chart', () => {
     expect(events[0].detail.data.name).toBe('A');
     expect(events[0].detail.data.dataIndex).toBe(0);
     // A plain value carries no row tag, so none is invented.
-    expect('rowIndex' in events[0].detail.data).toBe(false);
+    expect('_index' in events[0].detail.data).toBe(false);
 
     // A mark tagged by its builder (color groups, gantt) reports its spec.data row.
     clickHandler({ name: 'J2', seriesName: 'J2', value: [1, 0, 3], dataIndex: 0, data: { name: 'J2', value: [1, 0, 3], rowIndex: 2 } });
     expect(events[1].detail.data.dataIndex).toBe(0);
-    expect(events[1].detail.data.rowIndex).toBe(2);
+    expect(events[1].detail.data._index).toBe(2);
   });
 
   it('renders container for chart.line type', async () => {
