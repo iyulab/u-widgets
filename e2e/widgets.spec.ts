@@ -316,6 +316,33 @@ test.describe('Chart Widgets', () => {
     expect(errors).toEqual([]);
   });
 
+  test('clicking a gantt segment reports its spec.data row (rowIndex), not only the series-local index', async ({ page }) => {
+    // 좌표 클릭은 뷰포트 밖이면 아무것에도 닿지 않는다 — 카드를 먼저 화면에 들인다.
+    await page.locator('#demo-chart-gantt').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1000);
+    const target = await page.evaluate(() => {
+      const host = document.getElementById('demo-chart-gantt') as unknown as HTMLElement & { spec: { data: Record<string, unknown>[] } };
+      const chartEl = [...(host.shadowRoot?.querySelectorAll('*') ?? [])]
+        .find((el) => el.shadowRoot?.querySelector('canvas')) as unknown as { _chart?: any; shadowRoot: ShadowRoot } | undefined;
+      const chart = chartEl?._chart;
+      if (!chart) return null;
+      // Row 3 is M3 · J2 · 3→7 — the J2 series holds rows 2 and 3, so its dataIndex there is 1.
+      const row = host.spec.data[3];
+      const [x0, y] = chart.convertToPixel({ xAxisIndex: 0, yAxisIndex: 0 }, [row.start, row.machine]);
+      const x1 = chart.convertToPixel({ xAxisIndex: 0 }, row.end);
+      const box = chartEl!.shadowRoot.querySelector('canvas')!.getBoundingClientRect();
+      (window as unknown as { __ganttEvents: unknown[] }).__ganttEvents = [];
+      host.addEventListener('u-widget-event', (e) => (window as unknown as { __ganttEvents: unknown[] }).__ganttEvents.push((e as CustomEvent).detail));
+      return { x: box.left + (x0 + x1) / 2, y: box.top + y };
+    });
+    expect(target).not.toBeNull();
+    await page.mouse.click(target!.x, target!.y);
+    const events = await page.evaluate(() => (window as unknown as { __ganttEvents: { type: string; data: Record<string, unknown> }[] }).__ganttEvents);
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe('select');
+    expect(events[0].data).toMatchObject({ rowIndex: 3, seriesName: 'J2', dataIndex: 1 });
+  });
+
   test('custom series renders without unregistered-series warning', async ({ page }) => {
     // v0.12.0 CustomChart 등록 — 미등록이면 dev 경고 후 무음 미렌더된다
     const warnings: string[] = [];

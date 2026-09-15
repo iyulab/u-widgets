@@ -453,11 +453,13 @@ function buildScatter(
   if (colorField) {
     // Group data by color field → separate series per group
     const groups = new Map<string, unknown[]>();
-    for (const row of data) {
+    data.forEach((row, rowIndex) => {
       const key = String(row[colorField] ?? 'unknown');
       if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(toPoint(row));
-    }
+      // Split into series, a point's dataIndex is local to its group — carry the spec.data row.
+      const point = toPoint(row);
+      groups.get(key)!.push(Array.isArray(point) ? { value: point, rowIndex } : { ...(point as Record<string, unknown>), rowIndex });
+    });
     const seriesItems: Record<string, unknown>[] = [];
     for (const [name, points] of groups) {
       const series: Record<string, unknown> = { name, type: 'scatter', data: points };
@@ -1055,10 +1057,10 @@ function buildGantt(
 
   // Row order: explicit categories first, then rows in first-appearance order.
   const rows: string[] = [];
-  const rowIndex = new Map<string, number>();
+  const rowPosition = new Map<string, number>();
   const addRow = (name: string) => {
-    if (rowIndex.has(name)) return;
-    rowIndex.set(name, rows.length);
+    if (rowPosition.has(name)) return;
+    rowPosition.set(name, rows.length);
     rows.push(name);
   };
   if (Array.isArray(options.categories)) {
@@ -1067,10 +1069,10 @@ function buildGantt(
   for (const row of records) addRow(String(row[rowField] ?? ''));
 
   const groups = new Map<string, { data: Record<string, unknown>[]; items: GanttItem[] }>();
-  for (const row of records) {
+  records.forEach((row, sourceIndex) => {
     const a = toCoord(row[startField]);
     const b = toCoord(row[endField]);
-    if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return;
     const name = String(row[rowField] ?? '');
     const label = labelField != null && row[labelField] != null ? String(row[labelField]) : undefined;
     const group = colorField != null ? String(row[colorField] ?? '') : '';
@@ -1079,9 +1081,15 @@ function buildGantt(
       bucket = { data: [], items: [] };
       groups.set(group, bucket);
     }
-    bucket.data.push({ name: label ?? name, value: [rowIndex.get(name)!, Math.min(a, b), Math.max(a, b)] });
+    // rowIndex: the clicked segment's row in spec.data — series split by color and skipped rows make
+    // the series-local dataIndex unusable for that (uw-chart forwards it on select).
+    bucket.data.push({
+      name: label ?? name,
+      value: [rowPosition.get(name)!, Math.min(a, b), Math.max(a, b)],
+      rowIndex: sourceIndex,
+    });
     bucket.items.push({ row: name, label, rawStart: row[startField], rawEnd: row[endField] });
-  }
+  });
 
   const showLabel = options.showLabel !== false;
   const refLines = options.referenceLines as ReferenceLineOption[] | undefined;

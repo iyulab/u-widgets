@@ -17,6 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   a row are separated by a gap, a zero-length interval is still drawn, and `referenceLines` on `x`
   mark a value or a date. `suggestMapping()` proposes it for data whose fields are named as an
   interval (`start`/`end`, `from`/`to`, …). The catalog, JSON schema and MCP `help` describe it.
+- **Chart `select` events carry `rowIndex` where `dataIndex` cannot identify the row.** `dataIndex`
+  is the mark's index within its series, so on `chart.gantt` (series per `color`, skipped rows) and
+  `chart.scatter` with a `color` mapping (series per group) it did not say which `spec.data` row was
+  clicked. Those charts now add `rowIndex`. `dataIndex` is unchanged. In the generated ECharts
+  option, grouped scatter points are `{ value, rowIndex }` objects instead of bare arrays.
 - **JSON schema: `mapping.total`, `mapping.start`, `mapping.end`.** `total` (waterfall) was
   accepted by the renderer and `validate()` but rejected by the schema's closed mapping object.
 

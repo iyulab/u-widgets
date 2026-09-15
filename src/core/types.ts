@@ -262,7 +262,13 @@ export interface UWidgetEvent {
   id?: string;
   /** Action identifier (for `"action"` type events). */
   action?: string;
-  /** Event payload data. */
+  /**
+   * Event payload data.
+   *
+   * For a chart `select`: `name`, `seriesName`, `value` and `dataIndex` (the mark's index within its
+   * series), plus `rowIndex` — the clicked mark's row in `spec.data` — on charts where a series
+   * index does not identify the row: `chart.gantt`, and `chart.scatter` with a `color` mapping.
+   */
   data?: Record<string, unknown>;
 }
 

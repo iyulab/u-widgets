@@ -220,9 +220,28 @@ describe('toEChartsOption', () => {
       }));
       const series = result.series as ObjArray;
       expect(series.length).toBe(2);
-      expect((series[0].data as number[][])[0]).toEqual([1, 10, 100]);
+      expect((series[0].data as ObjArray)[0].value).toEqual([1, 10, 100]);
       expect(series[0].symbolSize).toBeDefined();
       expect(series[1].symbolSize).toBeDefined();
+    });
+
+    it('color groups tag each point with its spec.data row — dataIndex is local to the group', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.scatter',
+        data: [
+          { x: 1, y: 10, cat: 'A' },
+          { x: 2, y: 20, cat: 'B' },
+          { x: 3, y: 30, cat: 'A' },
+        ],
+        mapping: { x: 'x', y: 'y', color: 'cat' },
+        options: { conditionalStyles: [{ field: 'y', above: 25, color: '#f00' }] },
+      }));
+      const series = result.series as ObjArray;
+      const a = series[0].data as ObjArray;
+      expect(a.map((p) => p.rowIndex)).toEqual([0, 2]);
+      // A conditionally styled point keeps its style next to the row tag.
+      expect(a[1]).toMatchObject({ value: [3, 30], itemStyle: { color: '#f00' }, rowIndex: 2 });
+      expect((series[1].data as ObjArray)[0]).toEqual({ value: [2, 20], rowIndex: 1 });
     });
 
     it('without size mapping, data points are 2D and no symbolSize', () => {

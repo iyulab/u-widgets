@@ -208,6 +208,21 @@ describe('chart.gantt', () => {
     expect((item.label as Obj).position).toBe('start');
   });
 
+  it('tags each segment with its spec.data row, across color groups and skipped rows', () => {
+    const result = gantt({
+      data: [
+        { r: 'M1', job: 'J1', s: 0, e: 2 },
+        { r: 'M2', job: 'J2', s: null, e: 3 },
+        { r: 'M2', job: 'J2', s: 0, e: 3 },
+        { r: 'M1', job: 'J1', s: 3, e: 5 },
+      ],
+      mapping: { y: 'r', start: 's', end: 'e', color: 'job' },
+    });
+    const series = result.series as ObjArray;
+    expect((series[0].data as ObjArray).map((d) => d.rowIndex)).toEqual([0, 3]);
+    expect((series[1].data as ObjArray).map((d) => d.rowIndex)).toEqual([2]);
+  });
+
   it('returns an empty option when no row or interval fields can be found', () => {
     expect(gantt({ data: [{ a: 'x' }] })).toEqual({});
   });

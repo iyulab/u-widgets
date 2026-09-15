@@ -305,6 +305,22 @@ interface UWidgetEvent {
 
 Listen via `u-widget-event` custom event on the `<u-widget>` element.
 
+A chart `select` (a click on a mark) carries `name`, `seriesName`, `value` and `dataIndex` — the
+mark's index **within its series**. Where that index does not identify a data row, the payload
+also has `rowIndex`, the clicked row's index in `spec.data`:
+
+| Chart | Why `dataIndex` is not the row | `rowIndex` |
+|---|---|---|
+| `chart.gantt` | segments are grouped by `color`, and rows without a finite start/end are skipped | always |
+| `chart.scatter` with `mapping.color` | one series per group | always |
+
+```ts
+widget.addEventListener('u-widget-event', (e) => {
+  const { type, data } = e.detail;
+  if (type === 'select' && typeof data.rowIndex === 'number') showJob(spec.data[data.rowIndex]);
+});
+```
+
 ## Composition
 
 ```json

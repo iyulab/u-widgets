@@ -124,6 +124,13 @@ export class UwChart extends LitElement {
         dataIndex: params.dataIndex as number,
       },
     };
+    // Charts that split rows across series (color groups) or skip rows tag each mark with its
+    // spec.data row, since dataIndex is then local to the series.
+    const item = params.data;
+    if (item && typeof item === 'object' && !Array.isArray(item)
+      && typeof (item as Record<string, unknown>).rowIndex === 'number') {
+      detail.data!.rowIndex = (item as Record<string, unknown>).rowIndex;
+    }
     this.dispatchEvent(
       new CustomEvent('u-widget-internal', {
         detail,
