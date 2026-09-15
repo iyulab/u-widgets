@@ -259,31 +259,43 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
      ⇒ «누를 수 있게 보이는데(포인터 커서) 상호작용 요소가 아닌 것» 을 따로 찾는다. 가장 바깥
      요소만 센다 — 자식은 커서를 상속하므로 한 대상이 여러 번 보고된다.
      ⚠여기서는 `tabindex="-1"` 도 상호작용으로 친다 — 로빙 탭인덱스 그룹(표 행·목록 항목)의 나머지
-     조각은 화살표로 닿는다. 그 판정(키 처리가 실제로 있는가)은 이 검사가 못 재고 위젯 단위 테스트가 잰다. */
+     조각은 화살표로 닿는다. 그 판정(키 처리가 실제로 있는가)은 이 검사가 못 재고 위젯 단위 테스트가 잰다.
+     🔴규칙은 형제 패키지 브라우저 게이트의 `pointerOrphans`(components 정본)와 같다 — `display:none` 가지 제외 · `label` 은
+     컨트롤의 대리자 · 섀도 여러 겹 호스트 · 컨트롤을 품은 래퍼 면제 · **면제는 컨트롤 안쪽으로만 물려주고 `tabindex` 만 가진
+     컨테이너는 자기만 면제**(그 컨테이너 뒤에 클릭 전용 조각이 숨었던 실측이 형제 게이트에 있다). */
   test('포인터 커서를 가진 요소는 전부 상호작용 요소다 — 클릭만 되는 div 는 없다', async ({ page }) => {
     await load(page);
     const orphans = await page.evaluate((sel) => {
       const out: string[] = [];
+      const controlSel = sel.replace('[tabindex]:not([tabindex="-1"]), ', '');
+      const interactiveHost = (el: Element): boolean => {
+        const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+        if (!sr) return false;
+        if (sr.querySelector(`${sel}, [tabindex]`)) return true;
+        return Array.from(sr.querySelectorAll('*')).some((d) => d.localName.includes('-') && interactiveHost(d));
+      };
       const walk = (root: ParentNode, owner: string, parentPointer: boolean, insideInteractive: boolean) => {
         for (const el of Array.from(root.children)) {
+          const style = getComputedStyle(el);
+          if (style.display === 'none') continue;
           const tag = el.tagName.toLowerCase();
           const nextOwner = tag.startsWith('uw-') || tag === 'u-widget' ? tag : owner;
-          const pointer = getComputedStyle(el).cursor === 'pointer';
-          const interactive = insideInteractive || el.matches(sel)
-            // 체크박스·라디오를 감싼 라벨은 누르면 입력이 토글된다 — 그 자체로 상호작용 대상이다.
-            || (tag === 'label' && !!el.querySelector('input'));
+          const pointer = style.cursor === 'pointer';
+          const control = el.matches(controlSel) || tag === 'label';
+          const interactive = insideInteractive || control || el.matches('[tabindex]') || interactiveHost(el)
+            || !!el.querySelector(`${sel}, [tabindex]`);
           if (pointer && !parentPointer && !interactive && nextOwner !== 'page') {
             const cls = (el.getAttribute('class') ?? '').trim().split(/\s+/)[0];
             out.push(`${nextOwner}>${tag}${cls ? '.' + cls : ''}`);
           }
-          walk(el, nextOwner, pointer, interactive);
+          walk(el, nextOwner, pointer, insideInteractive || control);
           const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
-          if (sr) walk(sr, nextOwner, pointer, interactive);
+          if (sr) walk(sr, nextOwner, pointer, insideInteractive || control);
         }
       };
       walk(document.body, 'page', false, false);
       return [...new Set(out)].sort();
-    }, `${INTERACTIVE}, [tabindex]`);
+    }, INTERACTIVE);
 
     expect(orphans, '포인터 커서인데 키보드로 닿지 않는다 — 진짜 상호작용 요소로 바꿀 것').toEqual([]);
   });
