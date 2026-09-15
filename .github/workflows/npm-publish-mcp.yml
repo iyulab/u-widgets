@@ -58,6 +58,22 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # 🔴코어 게시 «완료» ≠ 코어 «설치 가능». npm 은 게시 직후 "Your package is being processed and may take a
+      #   few minutes to become available" 을 내고, 이 워크플로는 부모가 끝난 바로 그 순간 시작된다 — 코어 범위를
+      #   막 올린 판(`^0.19.0`)에서 Install 이 `ETARGET` 으로 죽었다(2026-09-15 실측, 재실행은 성공).
+      #   ⇒ 선언된 범위를 만족하는 판이 레지스트리에 보일 때까지 기다린다. 범위를 안 올린 판에서는 첫 조회로 끝난다.
+      - name: Wait for the core range to be installable
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          RANGE=$(node -p 'require("./package.json").dependencies["@iyulab/u-widgets"]')
+          for i in $(seq 1 40); do
+            if [ -n "$(npm view "@iyulab/u-widgets@${RANGE}" version 2>/dev/null)" ]; then
+              echo "@iyulab/u-widgets@${RANGE} is available"; exit 0
+            fi
+            echo "waiting for @iyulab/u-widgets@${RANGE} (${i}/40)"; sleep 15
+          done
+          echo "::error::@iyulab/u-widgets@${RANGE} did not become available within 10 minutes"; exit 1
+
       - name: Install dependencies
         if: steps.check.outputs.exists == 'false'
         run: npm install --package-lock-only && npm ci
