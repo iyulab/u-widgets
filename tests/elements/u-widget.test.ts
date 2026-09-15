@@ -194,6 +194,68 @@ describe('u-widget', () => {
     expect(shadow.querySelector('[part="fallback"]')).not.toBeNull();
   });
 
+  // ── known widget whose entry point is not imported ──
+
+  it('names the missing entry instead of showing the spec title as the label', async () => {
+    const el = createElement({
+      widget: 'chart.waterfall',
+      title: 'Cost Breakdown',
+      data: [{ x: 'A', y: 1 }],
+    });
+    const shadow = await render(el);
+    const card = shadow.querySelector('[part="fallback"]')!;
+    expect(card.getAttribute('data-missing-entry')).toBe('@iyulab/u-widgets/charts');
+    expect(shadow.querySelector('.fallback-label')!.textContent).toBe('Widget module not loaded: chart.waterfall');
+    expect(shadow.querySelector('.fallback-hint')!.textContent).toContain("import '@iyulab/u-widgets/charts'");
+  });
+
+  it('names the math entry for math', async () => {
+    const el = createElement({ widget: 'math', data: { expression: 'E = mc^2' } });
+    const shadow = await render(el);
+    expect(shadow.querySelector('[part="fallback"]')!.getAttribute('data-missing-entry')).toBe('@iyulab/u-widgets/math');
+  });
+
+  it('warns once per widget type about the missing entry', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      await render(createElement({ widget: 'chart.funnel', data: [{ x: 'A', y: 1 }] }));
+      await render(createElement({ widget: 'chart.funnel', data: [{ x: 'B', y: 2 }] }));
+      await render(createElement({ widget: 'chart.treemap', data: [{ x: 'A', y: 1 }] }));
+      const lines = warn.mock.calls.map((c) => String(c[0])).filter((l) => l.includes('needs import'));
+      expect(lines).toEqual([
+        `[u-widget] "chart.funnel" needs import '@iyulab/u-widgets/charts'`,
+        `[u-widget] "chart.treemap" needs import '@iyulab/u-widgets/charts'`,
+      ]);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('keeps the generic fallback for an unknown chart type (a typo is not a missing entry)', async () => {
+    const el = createElement({ widget: 'chart.barr', data: [{ x: 'A', y: 1 }] });
+    const shadow = await render(el);
+    expect(shadow.querySelector('[part="fallback"]')!.hasAttribute('data-missing-entry')).toBe(false);
+    expect(shadow.querySelector('.fallback-hint')!.textContent).toContain('chart.bar');
+  });
+
+  it('suggests the catalog types the typo list used to miss', async () => {
+    const shadow = await render(createElement({ widget: 'chart.histogrm', data: [1, 2, 3] }));
+    expect(shadow.querySelector('.fallback-hint')!.textContent).toContain('chart.histogram');
+  });
+
+  it('renders the widget once its entry element is registered later (lazy import)', async () => {
+    // 이 파일에서 uw-math 를 쓰는 마지막 테스트여야 한다 — 등록은 되돌릴 수 없다.
+    const el = createElement({ widget: 'math', data: { expression: 'x' } });
+    const shadow = await render(el);
+    expect(shadow.querySelector('[part="fallback"]')).not.toBeNull();
+
+    customElements.define('uw-math', class extends HTMLElement {});
+    await new Promise((r) => setTimeout(r, 0));
+    await el.updateComplete;
+    expect(shadow.querySelector('uw-math')).not.toBeNull();
+    expect(shadow.querySelector('[part="fallback"]')).toBeNull();
+  });
+
   // ── JSON Attribute Parsing ──
 
   it('parses spec from JSON attribute', async () => {

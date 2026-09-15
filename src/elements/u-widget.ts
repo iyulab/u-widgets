@@ -5,6 +5,7 @@ import { validate } from '../core/schema.js';
 import { normalize } from '../core/normalize.js';
 import { infer } from '../core/infer.js';
 import { suggestWidget } from '../core/suggest.js';
+import { widgetEntry, type WidgetEntry } from '../core/entries.js';
 import { resolveLocale } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import './uw-metric.js';
@@ -21,6 +22,9 @@ import './uw-steps.js';
 import './uw-rating.js';
 import './uw-video.js';
 import './uw-gallery.js';
+
+/** Widget types already warned about a missing entry point — one console line per type per page. */
+const warnedMissingEntries = new Set<string>();
 
 /**
  * <u-widget> — Entry point router element.
@@ -270,6 +274,9 @@ export class UWidget extends LitElement {
   @property({ type: String, reflect: true })
   locale: string | null = null;
 
+  /** Entry-point elements this instance is waiting on, so it re-renders once each is registered. */
+  private _awaitedElements = new Set<string>();
+
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('u-widget-internal', this._handleInternalEvent as EventListener);
@@ -398,6 +405,10 @@ export class UWidget extends LitElement {
           widgetHtml = html`<uw-math .spec=${resolved} theme=${t ?? nothing}></uw-math>`;
           break;
         }
+        {
+          const needed = widgetEntry(widget);
+          if (needed) return this.renderMissingEntry(resolved, needed);
+        }
         return this.renderFallback(resolved);
     }
 
@@ -501,6 +512,30 @@ export class UWidget extends LitElement {
         composed: true,
       }),
     );
+  }
+
+  /**
+   * A known widget whose element lives in an entry point that has not been imported. Says which
+   * entry is missing — in the card and once per type in the console — instead of a generic fallback
+   * whose label (the spec title) reads like a rendered widget. Re-renders when the element is
+   * registered later, so a lazily imported entry takes over without the host doing anything.
+   */
+  private renderMissingEntry(spec: UWidgetSpec, needed: WidgetEntry) {
+    if (!warnedMissingEntries.has(spec.widget)) {
+      warnedMissingEntries.add(spec.widget);
+      console.warn(`[u-widget] "${spec.widget}" needs import '${needed.entry}'`);
+    }
+    if (!this._awaitedElements.has(needed.element)) {
+      this._awaitedElements.add(needed.element);
+      void customElements.whenDefined(needed.element).then(() => this.requestUpdate());
+    }
+    return html`
+      <div class="fallback-card" part="fallback" data-missing-entry=${needed.entry}>
+        <div class="fallback-label">Widget module not loaded: ${spec.widget}</div>
+        <div class="fallback-hint">Add <code>import '${needed.entry}'</code> to render this widget.</div>
+        <pre part="json"><code>${JSON.stringify(spec, null, 2)}</code></pre>
+      </div>
+    `;
   }
 
   private renderFallback(spec: UWidgetSpec) {

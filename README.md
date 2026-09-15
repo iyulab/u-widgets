@@ -40,6 +40,18 @@ npm install @iyulab/u-widgets
 <u-widget .spec=${{ widget: 'metric', data: { value: 42, unit: 'users' } }}></u-widget>
 ```
 
+A `chart.*` or `math` widget rendered without its entry imported shows a "Widget module not loaded"
+card naming the import, and warns once per widget type in the console. It renders as soon as the entry
+is imported, including by a later dynamic `import()`. To check this at build time, `widgetEntry(type)`
+returns the entry a widget type needs:
+
+```ts
+import { widgetEntry } from '@iyulab/u-widgets';
+
+widgetEntry('chart.waterfall'); // { entry: '@iyulab/u-widgets/charts', element: 'uw-chart' }
+widgetEntry('metric');          // undefined — the core entry renders it
+```
+
 ### CDN
 
 ```html

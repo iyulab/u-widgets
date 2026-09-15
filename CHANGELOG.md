@@ -4,10 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.18.4] - 2026-09-15
+## [0.19.0] - 2026-09-15
+
+### Added
+
+- **`widgetEntry(type)`** returns the entry point a widget type needs beyond the core import
+  (`chart.*` → `@iyulab/u-widgets/charts`, `math` → `@iyulab/u-widgets/math`), or `undefined`, so a
+  build step can check that every rendered widget type has its entry imported.
 
 ### Fixed
 
+- **A known `chart.*` or `math` widget whose entry was not imported rendered as a silent JSON dump.**
+  The fallback card used the spec's title as its label, so it read like a rendered chart, and nothing
+  was logged. It now reads "Widget module not loaded: chart.waterfall", names the import to add, and
+  warns once per widget type. When the entry is imported later (a dynamic `import()`), the widget
+  re-renders on its own. Unknown types such as `chart.barr` keep the "Unknown widget" card and its
+  suggestion.
+- **"Did you mean" could not suggest `chart.histogram` or `math`** — the typo list had drifted from
+  the widget catalog. It now matches the catalog, and a test keeps it that way.
 - **Citation links could not be reached from the keyboard.** A linked citation was a clickable
   `div`: it took no focus, could not be opened with Enter, and was not announced as a link. It is now
   a real anchor (`target="_blank"`, `rel="noopener noreferrer"`) with a visible focus ring, still

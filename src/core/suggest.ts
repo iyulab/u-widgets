@@ -5,14 +5,19 @@
  * using Levenshtein distance and returns the closest match.
  */
 
-/** All known widget type identifiers. */
-const KNOWN_WIDGETS: readonly string[] = [
+/**
+ * All known widget type identifiers.
+ *
+ * Kept here rather than derived from the catalog so the core entry does not bundle the catalog;
+ * a test pins it to the catalog's widget list.
+ */
+export const KNOWN_WIDGETS: readonly string[] = [
   'chart.bar', 'chart.line', 'chart.area', 'chart.pie',
   'chart.scatter', 'chart.radar', 'chart.heatmap', 'chart.box',
-  'chart.funnel', 'chart.waterfall', 'chart.treemap',
+  'chart.funnel', 'chart.waterfall', 'chart.treemap', 'chart.histogram',
   'metric', 'stat-group', 'gauge', 'progress',
   'table', 'list', 'form', 'confirm', 'compose',
-  'markdown', 'image', 'callout',
+  'markdown', 'image', 'callout', 'math',
   'kv', 'code', 'citation', 'status', 'steps', 'rating',
   'video', 'gallery', 'actions', 'divider', 'header',
 ];

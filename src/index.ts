@@ -40,6 +40,8 @@ export { parseFormdown, registerFormdownParser, getFormdownParser } from './core
 export type { FormdownResult, FormdownParser } from './core/formdown.js';
 export { formatValue } from './core/format.js';
 export { suggestWidget } from './core/suggest.js';
+export { widgetEntry } from './core/entries.js';
+export type { WidgetEntry } from './core/entries.js';
 export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale } from './core/locale.js';
 export type { UWidgetLocaleStrings } from './core/locale.js';
 export { getPrimaryDataField } from './core/primary-field.js';
