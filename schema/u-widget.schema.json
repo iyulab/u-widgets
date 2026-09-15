@@ -16,6 +16,7 @@
         "chart.bar", "chart.line", "chart.area", "chart.pie",
         "chart.scatter", "chart.radar", "chart.heatmap", "chart.box",
         "chart.funnel", "chart.waterfall", "chart.treemap", "chart.histogram",
+        "chart.gantt",
         "form", "confirm",
         "markdown", "image", "callout",
         "kv", "code", "citation", "status", "steps",
@@ -221,6 +222,18 @@
         "axis": {
           "type": "string",
           "description": "Axis field (radar)"
+        },
+        "total": {
+          "type": "string",
+          "description": "Total-flag field — truthy rows draw as absolute totals (waterfall)"
+        },
+        "start": {
+          "type": "string",
+          "description": "Interval start field — number or date-like (gantt)"
+        },
+        "end": {
+          "type": "string",
+          "description": "Interval end field — number or date-like (gantt)"
         },
         "columns": {
           "type": "array",

@@ -37,6 +37,8 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.funnel` | 깔때기 차트 | `label`, `value` |
 | `chart.waterfall` | 폭포 차트 | `x`, `y`, `total?` |
 | `chart.treemap` | 트리맵 | `label`, `value` |
+| `chart.histogram` | Histogram (auto-binning) | `value` (or a flat `number[]`) |
+| `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
 | `gauge` | Gauge with thresholds | — (uses `data.value`) |
@@ -165,7 +167,8 @@ its natural size and the box scrolls, so no content becomes unreachable.
 | `horizontal` | `boolean` | bar, line, scatter | Swap axes |
 | `smooth` | `boolean` | line, area | Smooth curves |
 | `donut` | `boolean` | pie | Donut chart |
-| `showLabel` | `boolean` | pie | Show data labels |
+| `showLabel` | `boolean` | pie, gantt | Show data labels (gantt: in-bar segment labels, default on) |
+| `categories` | `string[]` | gantt | Row order top to bottom; listed rows stay on the axis without intervals |
 | `echarts` | `object` | all charts | Raw ECharts option passthrough (recursively deep-merged; see below) |
 | `colorRange` | `[string, string]` | heatmap | 색상 범위 `["#e0f2fe","#0c4a6e"]` |
 
@@ -188,6 +191,49 @@ waterfall (unchanged default).
     { step: 'Profit',  amount: 220, isTotal: true },   // closing total, from 0 (not 2×)
   ],
   mapping: { x: 'step', y: 'amount', total: 'isTotal' },
+}
+```
+
+### Gantt / interval charts
+
+`chart.gantt` draws rows × `[start, end]` segments — schedules, shift plans, project timelines.
+Each data row is one interval; a row name (`mapping.y`) can repeat to put several intervals on
+the same row.
+
+- **Rows run top to bottom in the order they first appear.** `options.categories` fixes that
+  order and keeps a listed row on the axis even when it has no intervals (an idle machine).
+  Rows not listed there follow in data order.
+- **`start` / `end` are numbers** (a value axis) **or date-like strings / timestamps** (a time
+  axis). An end before its start is drawn in order; a row without a finite start or end is
+  skipped (its row name still appears).
+- **Segments on one row are separated by a 1px gap**, and a zero-length interval is drawn as a
+  2px sliver. Overlapping intervals are both drawn; the later one is on top.
+- **`mapping.label`** is written inside a segment when the segment is wide enough (truncated
+  to fit). `options.showLabel: false` turns in-bar labels off. The tooltip shows
+  `row / label: start → end`.
+- **`mapping.color`** splits intervals into one series per value — each gets a palette color
+  and a legend entry.
+- **`options.referenceLines`** with `axis: 'x'` draws a vertical line at a value or date
+  (makespan, due date). `options.xFormat` formats the value/time axis — e.g.
+  `{ type: 'date' }` on a time axis.
+
+When `mapping` is omitted: first string → `y`, first two number or date-like fields →
+`start`/`end`, next string → `label`.
+
+```ts
+{
+  widget: 'chart.gantt',
+  data: [
+    { machine: 'M1', job: 'J1', start: 0, end: 3 },
+    { machine: 'M2', job: 'J1', start: 3, end: 5 },
+    { machine: 'M2', job: 'J2', start: 0, end: 3 },
+    { machine: 'M1', job: 'J3', start: 3, end: 6 },
+  ],
+  mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job' },
+  options: {
+    categories: ['M1', 'M2', 'M3'],   // M3 has no work but stays on the axis
+    referenceLines: [{ axis: 'x', value: 6, label: 'Makespan', style: 'dashed' }],
+  },
 }
 ```
 

@@ -21,6 +21,10 @@ export interface MappingSuggestion {
   reason: string;
 }
 
+/** Field names that read as an interval's start / end. */
+const GANTT_START = /^(start|begin|from)([A-Z_]|$)|(Start|Begin|From|_start|_begin|_from)$/;
+const GANTT_END = /^(end|finish|to|until)([A-Z_]|$)|(End|Finish|To|Until|_end|_finish|_to|_until)$/;
+
 /**
  * Suggest widget type and mapping from data alone.
  *
@@ -245,6 +249,21 @@ export function suggestMapping(
         mapping,
         confidence: 0.45,
         reason: 'Label + value pattern can display as a funnel',
+      });
+    }
+  }
+
+  // Array with a start/end field pair → chart.gantt (interval names, not just any two numbers)
+  if (isArray && stringKeys.length >= 1) {
+    const startKey = keys.find((k) => GANTT_START.test(k));
+    const endKey = keys.find((k) => k !== startKey && GANTT_END.test(k));
+    const mapping = startKey && endKey ? infer('chart.gantt', data) : undefined;
+    if (mapping) {
+      suggestions.push({
+        widget: 'chart.gantt',
+        mapping: { ...mapping, start: startKey, end: endKey },
+        confidence: 0.75,
+        reason: `"${startKey}" / "${endKey}" fields describe intervals — a gantt chart shows them per row`,
       });
     }
   }

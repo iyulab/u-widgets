@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.20.0] - 2026-09-15
+
+### Added
+
+- **`chart.gantt` — interval (Gantt) charts.** Rows × `[start, end]` segments on a value axis
+  (numbers) or a time axis (date-like strings or timestamps), for schedules, shift plans and
+  project timelines. Map `y` (row), `start`, `end`, and optionally `label` (written inside a
+  segment when it fits) and `color` (one series and legend entry per value); the mapping is
+  inferred when omitted. Rows stay top to bottom in the order they first appear, and
+  `options.categories` fixes that order and keeps rows that have no intervals. Adjacent segments on
+  a row are separated by a gap, a zero-length interval is still drawn, and `referenceLines` on `x`
+  mark a value or a date. `suggestMapping()` proposes it for data whose fields are named as an
+  interval (`start`/`end`, `from`/`to`, …). The catalog, JSON schema and MCP `help` describe it.
+- **JSON schema: `mapping.total`, `mapping.start`, `mapping.end`.** `total` (waterfall) was
+  accepted by the renderer and `validate()` but rejected by the schema's closed mapping object.
+
+### Fixed
+
+- **`xFormat: { type: 'date' | 'datetime' }` on a time axis printed raw millisecond counts.** A time
+  axis labels its ticks with timestamps, which the date formats passed through unchanged; they are
+  now read as local wall-clock time, and overlapping labels are hidden.
+
 ## [0.19.0] - 2026-09-15
 
 ### Added

@@ -75,7 +75,7 @@ inline by `<u-widget>` itself and have no separate tag.
 | `video` | `uw-video` | Embedded video player |
 | `gallery` | `uw-gallery` | Image gallery |
 | `math` | `uw-math` | Rendered math expression (`u-widgets/math`) |
-| `chart.bar`, `.line`, `.area`, `.pie`, `.scatter`, `.radar`, `.heatmap`, `.box`, `.funnel`, `.waterfall`, `.treemap`, `.histogram` | `uw-chart` | ECharts-backed chart (`u-widgets/charts`) |
+| `chart.bar`, `.line`, `.area`, `.pie`, `.scatter`, `.radar`, `.heatmap`, `.box`, `.funnel`, `.waterfall`, `.treemap`, `.histogram`, `.gantt` | `uw-chart` | ECharts-backed chart (`u-widgets/charts`) |
 | `actions` | *(inline)* | Standalone group of action buttons |
 | `divider` | *(inline)* | Horizontal rule, optionally labeled |
 | `header` | *(inline)* | Inline heading (`data.level` 1–6) |

@@ -106,6 +106,23 @@ describe('infer', () => {
     });
   });
 
+  describe('chart.gantt', () => {
+    it('infers row, start/end and label from strings and numbers', () => {
+      const mapping = infer('chart.gantt', [{ machine: 'M1', job: 'J1', start: 0, end: 3 }]);
+      expect(mapping).toEqual({ y: 'machine', start: 'start', end: 'end', label: 'job' });
+    });
+
+    it('treats date-like strings as endpoints, not as the row or label', () => {
+      const mapping = infer('chart.gantt', [{ from: '2026-01-01', task: 'Design', to: '2026-01-10' }]);
+      expect(mapping).toEqual({ y: 'task', start: 'from', end: 'to' });
+    });
+
+    it('returns undefined without a row field or two endpoints', () => {
+      expect(infer('chart.gantt', [{ task: 'A', start: 1 }])).toBeUndefined();
+      expect(infer('chart.gantt', [{ start: 1, end: 2 }])).toBeUndefined();
+    });
+  });
+
   describe('chart.radar', () => {
     it('infers axis and y fields', () => {
       const data = [{ skill: 'JS', score: 80 }];

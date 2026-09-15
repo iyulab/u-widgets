@@ -219,6 +219,22 @@ const specs = {
       },
     },
   },
+  chartGantt: {
+    widget: 'chart.gantt',
+    data: [
+      { machine: 'M1', job: 'J1', start: 0, end: 3 },
+      { machine: 'M2', job: 'J1', start: 3, end: 5 },
+      { machine: 'M2', job: 'J2', start: 0, end: 3 },
+      { machine: 'M3', job: 'J2', start: 3, end: 7 },
+      { machine: 'M1', job: 'J3', start: 3, end: 6 },
+      { machine: 'M3', job: 'J3', start: 7, end: 12 },
+    ],
+    mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job' },
+    options: {
+      categories: ['M1', 'M2', 'M3', 'M4'],
+      referenceLines: [{ axis: 'x', value: 12, label: 'Makespan', style: 'dashed' }],
+    },
+  },
   form: {
     widget: 'form',
     fields: [
@@ -476,6 +492,7 @@ bind('demo-chart-box', specs.chartBox);
 bind('demo-chart-heatmap', specs.chartHeatmap);
 bind('demo-chart-radar', specs.chartRadar);
 bind('demo-chart-custom', specs.chartCustom);
+bind('demo-chart-gantt', specs.chartGantt);
 bind('demo-form', specs.form);
 bind('demo-formdown', specs.formdownForm);
 bind('demo-confirm', specs.confirm);

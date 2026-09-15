@@ -46,18 +46,24 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 7.5 KB gzip', () => {
+  it('charts bundle is under 8.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
     // left 13 bytes of headroom under the old budget. Comments inside css`` templates no longer
     // count: the build strips them (see build/strip-css-template-comments.ts).
-    expect(size).toBeLessThan(7.5 * 1024);
+    // Re-baselined from 7.5 KB for chart.gantt (0.20.0): measured 8.16 KB with it, the interval
+    // builder itself (render item, tooltip, row ordering — infer() was already a shared chunk).
+    // The four reference-line copies were merged into one helper first; that saved 37 bytes.
+    expect(size).toBeLessThan(8.5 * 1024);
   });
 
-  it('tools bundle is under 13 KB gzip', () => {
+  it('tools bundle is under 13.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js'));
-    expect(size).toBeLessThan(13 * 1024); // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE
+    // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE.
+    // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
+    // measured 13.17 KB) — the examples are what `help('chart.gantt')` hands an author.
+    expect(size).toBeLessThan(13.5 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {

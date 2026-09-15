@@ -248,6 +248,7 @@ test.describe('Chart Widgets', () => {
     'demo-chart-funnel',
     'demo-chart-waterfall',
     'demo-chart-treemap',
+    'demo-chart-gantt',
   ];
 
   test('treemap renders visible tiles (not blank)', async ({ page }) => {
@@ -273,6 +274,46 @@ test.describe('Chart Widgets', () => {
       return -1;
     });
     expect(coloredRatio).toBeGreaterThan(0.1);
+  });
+
+  test('gantt draws each interval at its row and endpoints, rows top-to-bottom, labels inside', async ({ page }) => {
+    // 캔버스 존재나 픽셀 비율로는 «막대가 엉뚱한 행에 그려짐»(이중 반전)을 못 잡는다 — 실제 ECharts 가
+    // 그린 요소(zrender 표시 목록)의 기하를 축 변환값과 대조한다.
+    const errors: string[] = [];
+    page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
+    await page.waitForTimeout(1000);
+    const probe = await page.evaluate(() => {
+      const host = document.getElementById('demo-chart-gantt');
+      const chartEl = [...(host?.shadowRoot?.querySelectorAll('*') ?? [])]
+        .find((el) => el.shadowRoot?.querySelector('canvas')) as unknown as { _chart?: any } | undefined;
+      const chart = chartEl?._chart;
+      if (!chart) return null;
+      const option = chart.getOption();
+      const rows: string[] = option.yAxis[0].data;
+      const rowY = rows.map((r: string) => chart.convertToPixel({ yAxisIndex: 0 }, r));
+      const display = chart.getZr().storage.getDisplayList();
+      const rects = display.filter((el: any) => el.type === 'rect' && el.shape && el.shape.width > 0 && el.shape.height > 0);
+      const texts = display.flatMap((el: any) => (el.getTextContent?.() ? [el.getTextContent().style.text] : []));
+      // ⚠기대값은 option 이 아니라 «원본 스펙 데이터»에서 뽑는다 — option 의 행 인덱스에서 뽑으면 결함과
+      //   함께 움직여 아무것도 잡지 못한다(행 인덱스를 뒤집는 네거티브 컨트롤이 그렇게 통과했다).
+      const spec = (host as unknown as { spec: { data: Record<string, unknown>[]; mapping: Record<string, string> } }).spec;
+      const m = spec.mapping;
+      const matched = spec.data.map((d) => {
+        const y = chart.convertToPixel({ yAxisIndex: 0 }, d[m.y]);
+        const x0 = chart.convertToPixel({ xAxisIndex: 0 }, d[m.start]);
+        const x1 = chart.convertToPixel({ xAxisIndex: 0 }, d[m.end]);
+        return rects.some((r: any) => Math.abs(r.shape.x - x0) <= 1.5 && Math.abs(r.shape.x + r.shape.width - x1) <= 1.5
+          && Math.abs(r.shape.y + r.shape.height / 2 - y) <= 1.5);
+      });
+      return { rows, rowY, matched, texts };
+    });
+    expect(probe).not.toBeNull();
+    expect(probe!.rows).toEqual(['M1', 'M2', 'M3', 'M4']);
+    // Rows run top to bottom in the given order; the idle row M4 is still on the axis.
+    expect([...probe!.rowY].sort((a, b) => a - b)).toEqual(probe!.rowY);
+    expect(probe!.matched.every(Boolean)).toBe(true);
+    expect(probe!.texts).toEqual(expect.arrayContaining(['J1', 'J2', 'J3']));
+    expect(errors).toEqual([]);
   });
 
   test('custom series renders without unregistered-series warning', async ({ page }) => {

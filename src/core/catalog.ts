@@ -63,6 +63,7 @@ const CATALOG: readonly WidgetInfo[] = [
   { widget: 'chart.waterfall', category: 'chart', description: 'Waterfall chart for cumulative values', mappingKeys: ['x', 'y'], dataShape: 'array' },
   { widget: 'chart.treemap', category: 'chart', description: 'Treemap for hierarchical data', mappingKeys: [], dataShape: 'array' },
   { widget: 'chart.histogram', category: 'chart', description: 'Histogram for frequency distribution with auto-binning', mappingKeys: ['value'], dataShape: 'array' },
+  { widget: 'chart.gantt', category: 'chart', description: 'Gantt / interval chart — rows × [start, end] segments on a value or time axis', mappingKeys: ['y', 'start', 'end', 'label', 'color'], dataShape: 'array' },
   // Display
   { widget: 'metric', category: 'display', description: 'Single KPI value with optional trend', mappingKeys: [], dataShape: 'object' },
   { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array' },
@@ -190,6 +191,15 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   'chart.histogram': {
     widget: 'chart.histogram',
     data: [12, 15, 22, 28, 35, 42, 48, 55, 62, 68, 72, 78] as unknown as Record<string, unknown>[],
+  },
+  'chart.gantt': {
+    widget: 'chart.gantt',
+    data: [
+      { machine: 'M1', job: 'J1', start: 0, end: 3 },
+      { machine: 'M2', job: 'J2', start: 0, end: 2 },
+      { machine: 'M1', job: 'J3', start: 3, end: 7 },
+    ],
+    mapping: { y: 'machine', start: 'start', end: 'end', label: 'job' },
   },
   'metric': {
     widget: 'metric',
@@ -500,6 +510,42 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
           referenceLines: [
             { axis: 'y', value: 4, label: 'Expected', color: '#6366f1', style: 'dashed' },
           ],
+        },
+      },
+    },
+  ],
+  'chart.gantt': [
+    {
+      label: 'Job-shop schedule — color by job, makespan line',
+      spec: {
+        widget: 'chart.gantt',
+        data: [
+          { machine: 'M1', job: 'J1', start: 0, end: 3 },
+          { machine: 'M2', job: 'J1', start: 3, end: 5 },
+          { machine: 'M2', job: 'J2', start: 0, end: 3 },
+          { machine: 'M3', job: 'J2', start: 3, end: 7 },
+          { machine: 'M1', job: 'J3', start: 3, end: 6 },
+          { machine: 'M3', job: 'J3', start: 7, end: 12 },
+        ],
+        mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job' },
+        options: {
+          categories: ['M1', 'M2', 'M3'],
+          referenceLines: [{ axis: 'x', value: 12, label: 'Makespan', style: 'dashed' }],
+        },
+      },
+    },
+    {
+      label: 'Project timeline — dates on a time axis',
+      spec: {
+        widget: 'chart.gantt',
+        data: [
+          { task: 'Design', from: '2026-03-02', to: '2026-03-13' },
+          { task: 'Build', from: '2026-03-09', to: '2026-04-03' },
+          { task: 'Test', from: '2026-03-30', to: '2026-04-10' },
+        ],
+        options: {
+          xFormat: { type: 'date' },
+          referenceLines: [{ axis: 'x', value: '2026-04-06', label: 'Due', color: '#dc2626' }],
         },
       },
     },

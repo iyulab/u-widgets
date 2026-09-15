@@ -11,6 +11,7 @@ import { isDateLikeString } from './utils.js';
  * - **chart.radar:** first string → `axis`, number fields → `y`
  * - **chart.heatmap:** two string fields + number → `x`, `y`, `value`
  * - **chart.box:** string → `x`, five number fields (min/q1/median/q3/max) → `y`
+ * - **chart.gantt:** first string → `y` (row), first two number or date-like fields → `start`/`end`, next string → `label`
  * - **table:** all keys → `columns`
  * - **list:** first string → `primary`, second string → `secondary`
  * - **metric/gauge/progress/form:** no mapping needed (returns `undefined`)
@@ -97,6 +98,19 @@ function inferChart(
       return { axis: axisField, y: numFields.length === 1 ? numFields[0] : numFields };
     }
     debugInfer(widget, 'needs 1 string (axis) + 1+ number field');
+    return undefined;
+  }
+
+  if (widget === 'chart.gantt') {
+    const isEndpoint = (v: unknown) => typeof v === 'number' || (typeof v === 'string' && isDateLikeString(v));
+    const endpoints = keys.filter((k) => isEndpoint(sample[k]));
+    const texts = keys.filter((k) => typeof sample[k] === 'string' && !endpoints.includes(k));
+    if (texts.length > 0 && endpoints.length >= 2) {
+      const mapping: UWidgetMapping = { y: texts[0], start: endpoints[0], end: endpoints[1] };
+      if (texts[1]) mapping.label = texts[1];
+      return mapping;
+    }
+    debugInfer(widget, 'needs 1 string (row) + 2 number or date-like fields (start, end)');
     return undefined;
   }
 

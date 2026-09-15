@@ -1,6 +1,8 @@
 import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption } from '../core/types.js';
 import { formatValue } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
+import { isDateLikeString } from '../core/utils.js';
+import { infer } from '../core/infer.js';
 
 interface ConditionalStyleRule {
   field: string;
@@ -89,6 +91,9 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
       break;
     case 'chart.histogram':
       result = buildHistogram(data, mapping, options);
+      break;
+    case 'chart.gantt':
+      result = buildGantt(data, mapping, options);
       break;
     default:
       return {};
@@ -233,6 +238,36 @@ function warnUnregisteredSeriesTypes(series: unknown): void {
   }
 }
 
+/**
+ * `options.referenceLines` → an ECharts `markLine` (placed on the first series).
+ *
+ * @param toX - Maps an `axis: 'x'` value to the axis coordinate (a histogram's bin index, a
+ *   gantt's timestamp). Identity by default.
+ * @param xLabelPosition - Where an x line's label sits; `'end'` unless the y axis is inverted.
+ */
+function buildMarkLine(
+  refLines: ReferenceLineOption[],
+  toX: (value: number | string) => unknown = (v) => v,
+  xLabelPosition = 'end',
+): Record<string, unknown> {
+  return {
+    silent: true,
+    symbol: 'none',
+    data: refLines.map((rl) => {
+      const item: Record<string, unknown> = rl.axis === 'x' ? { xAxis: toX(rl.value) } : { yAxis: rl.value };
+      if (rl.label) {
+        item.name = rl.label;
+        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'end' };
+      }
+      const lineStyle: Record<string, unknown> = {};
+      if (rl.color) lineStyle.color = rl.color;
+      if (rl.style) lineStyle.type = rl.style;
+      if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
+      return item;
+    }),
+  };
+}
+
 function buildCartesian(
   data: unknown,
   mapping: NormalizedMapping | undefined,
@@ -334,25 +369,7 @@ function buildCartesian(
   // Reference lines → ECharts markLine on first series
   const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
   if (Array.isArray(refLines) && refLines.length > 0 && seriesItems.length > 0) {
-    seriesItems[0].markLine = {
-      silent: true,
-      symbol: 'none',
-      data: refLines.map((rl) => {
-        const item: Record<string, unknown> = {};
-        if (rl.axis === 'x') {
-          item.xAxis = rl.value;
-        } else {
-          item.yAxis = rl.value;
-        }
-        if (rl.label) item.name = rl.label;
-        const lineStyle: Record<string, unknown> = {};
-        if (rl.color) lineStyle.color = rl.color;
-        if (rl.style) lineStyle.type = rl.style;
-        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
-        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
-        return item;
-      }),
-    };
+    seriesItems[0].markLine = buildMarkLine(refLines);
   }
 
   return result;
@@ -461,22 +478,7 @@ function buildScatter(
   const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
   if (Array.isArray(refLines) && refLines.length > 0) {
     const firstSeries = (result.series as Record<string, unknown>[])[0];
-    firstSeries.markLine = {
-      silent: true,
-      symbol: 'none',
-      data: refLines.map((rl) => {
-        const item: Record<string, unknown> = {};
-        if (rl.axis === 'x') item.xAxis = rl.value;
-        else item.yAxis = rl.value;
-        if (rl.label) item.name = rl.label;
-        const lineStyle: Record<string, unknown> = {};
-        if (rl.color) lineStyle.color = rl.color;
-        if (rl.style) lineStyle.type = rl.style;
-        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
-        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
-        return item;
-      }),
-    };
+    firstSeries.markLine = buildMarkLine(refLines);
   }
 
   return result;
@@ -979,25 +981,188 @@ function buildHistogram(
   // value. Convert to the fractional bin-index position the value falls at instead
   // (previously every line landed at/near the same clamped edge index).
   if (Array.isArray(refLines) && refLines.length > 0) {
-    series.markLine = {
-      silent: true,
-      symbol: 'none',
-      data: refLines.map((rl) => {
-        const item: Record<string, unknown> = {};
-        if (rl.axis === 'x' && typeof rl.value === 'number') item.xAxis = (rl.value - min) / binWidth;
-        else if (rl.axis === 'x') item.xAxis = rl.value;
-        else item.yAxis = rl.value;
-        if (rl.label) item.name = rl.label;
-        const lineStyle: Record<string, unknown> = {};
-        if (rl.color) lineStyle.color = rl.color;
-        if (rl.style) lineStyle.type = rl.style;
-        if (Object.keys(lineStyle).length > 0) item.lineStyle = lineStyle;
-        if (rl.label) item.label = { formatter: rl.label, position: 'end' };
-        return item;
-      }),
-    };
+    series.markLine = buildMarkLine(refLines, (v) => (typeof v === 'number' ? (v - min) / binWidth : v));
   }
 
+  return result;
+}
+
+/** Gap between adjacent segments on one row, and the narrowest drawn segment (px). */
+const GANTT_SEGMENT_GAP = 1;
+const GANTT_MIN_WIDTH = 2;
+/** Fraction of the row band a segment fills, and the narrowest bar that still gets an in-bar label (px). */
+const GANTT_BAR_FILL = 0.6;
+const GANTT_LABEL_MIN_WIDTH = 24;
+const GANTT_LABEL_PADDING = 4;
+
+interface GanttItem {
+  row: string;
+  label?: string;
+  rawStart: unknown;
+  rawEnd: unknown;
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Interval (Gantt) chart: rows × [start, end] segments.
+ *
+ * Not a bar chart with options — a floating bar needs both ends as coordinates, a row order that
+ * stays as given, and per-segment separation, none of which a category-bar series expresses. Drawn
+ * as a custom series whose geometry comes from the axes (`api.coord`), so zoom-free layout, axis
+ * formatting and theme colors keep working as they do for the other cartesian builders.
+ *
+ * - Rows run top to bottom in first-appearance order (`options.categories` fixes the order and
+ *   adds rows with no intervals). The category axis is inverted once so index 0 is on top.
+ * - `start`/`end` are numbers (value axis) or date-like strings / timestamps (time axis).
+ * - `mapping.color` splits intervals into one series per group, which gives each group a palette
+ *   color and a legend entry.
+ */
+function buildGantt(
+  data: unknown,
+  mapping: NormalizedMapping | undefined,
+  options: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!Array.isArray(data) || data.length === 0) return {};
+  const records = data as Record<string, unknown>[];
+
+  const inferred = mapping ? undefined : infer('chart.gantt', records);
+  const m = mapping ?? (inferred ? normalizeMapping(inferred) : undefined);
+  const rowField = m?.y?.[0];
+  const startField = m?.start;
+  const endField = m?.end;
+  if (!rowField || !startField || !endField) return {};
+  const labelField = m?.label;
+  const colorField = m?.color;
+
+  // Time axis when the first present start value is a Date or a date-like string.
+  const firstStart = records.map((r) => r[startField]).find((v) => v != null && v !== '');
+  const isTime = firstStart instanceof Date || (typeof firstStart === 'string' && isDateLikeString(firstStart));
+  const toCoord = (v: unknown): number => {
+    if (v == null || v === '') return NaN;
+    if (typeof v === 'number') return v;
+    if (v instanceof Date) return v.getTime();
+    if (isTime) return Date.parse(String(v));
+    return Number(v);
+  };
+
+  // Row order: explicit categories first, then rows in first-appearance order.
+  const rows: string[] = [];
+  const rowIndex = new Map<string, number>();
+  const addRow = (name: string) => {
+    if (rowIndex.has(name)) return;
+    rowIndex.set(name, rows.length);
+    rows.push(name);
+  };
+  if (Array.isArray(options.categories)) {
+    for (const c of options.categories as unknown[]) addRow(String(c));
+  }
+  for (const row of records) addRow(String(row[rowField] ?? ''));
+
+  const groups = new Map<string, { data: Record<string, unknown>[]; items: GanttItem[] }>();
+  for (const row of records) {
+    const a = toCoord(row[startField]);
+    const b = toCoord(row[endField]);
+    if (!Number.isFinite(a) || !Number.isFinite(b)) continue;
+    const name = String(row[rowField] ?? '');
+    const label = labelField != null && row[labelField] != null ? String(row[labelField]) : undefined;
+    const group = colorField != null ? String(row[colorField] ?? '') : '';
+    let bucket = groups.get(group);
+    if (!bucket) {
+      bucket = { data: [], items: [] };
+      groups.set(group, bucket);
+    }
+    bucket.data.push({ name: label ?? name, value: [rowIndex.get(name)!, Math.min(a, b), Math.max(a, b)] });
+    bucket.items.push({ row: name, label, rawStart: row[startField], rawEnd: row[endField] });
+  }
+
+  const showLabel = options.showLabel !== false;
+  const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
+  const seriesItems: GanttItem[][] = [];
+
+  const series = [...groups.entries()].map(([group, bucket], seriesIndex) => {
+    seriesItems.push(bucket.items);
+    const s: Record<string, unknown> = {
+      type: 'custom',
+      encode: { x: [1, 2], y: 0 },
+      clip: true,
+      data: bucket.data,
+      renderItem: (params: { dataIndex: number }, api: {
+        value: (dim: number) => unknown;
+        coord: (point: number[]) => number[];
+        size: (delta: number[]) => number[];
+        visual: (key: string) => unknown;
+      }) => {
+        const row = Number(api.value(0));
+        const from = api.coord([Number(api.value(1)), row]);
+        const to = api.coord([Number(api.value(2)), row]);
+        const height = Math.max(api.size([0, 1])[1] * GANTT_BAR_FILL, 1);
+        let x = from[0] + GANTT_SEGMENT_GAP / 2;
+        let width = to[0] - from[0] - GANTT_SEGMENT_GAP;
+        if (width < GANTT_MIN_WIDTH) {
+          x = (from[0] + to[0]) / 2 - GANTT_MIN_WIDTH / 2;
+          width = GANTT_MIN_WIDTH;
+        }
+        const el: Record<string, unknown> = {
+          type: 'rect',
+          shape: { x, y: from[1] - height / 2, width, height },
+          style: { fill: api.visual('color') },
+        };
+        const label = bucket.items[params.dataIndex]?.label;
+        if (showLabel && label && width >= GANTT_LABEL_MIN_WIDTH) {
+          el.textContent = {
+            style: { text: label, overflow: 'truncate', width: width - GANTT_LABEL_PADDING * 2 },
+          };
+          el.textConfig = { position: 'inside' };
+        }
+        return el;
+      },
+    };
+    if (colorField != null) s.name = group;
+    if (seriesIndex === 0 && Array.isArray(refLines) && refLines.length > 0) {
+      // The row axis is inverted (first row on top), which also flips a vertical line's ends:
+      // 'start' is the top there, while 'end' would sit on the value axis's tick labels.
+      s.markLine = buildMarkLine(refLines, (v) => (typeof v === 'number' ? v : toCoord(v)), 'start');
+    }
+    return s;
+  });
+
+  const xFormat = options.xFormat as AxisFormatOption | undefined;
+  const endpointFormatter = xFormat ? buildAxisFormatter(xFormat, options.locale as string | undefined, isTime) : undefined;
+  const endpointText = (raw: unknown): string => {
+    if (!endpointFormatter) return String(raw);
+    // A date string is formatted as written; a number or Date goes through the axis's own reading.
+    if (typeof raw === 'string' && isTime) return endpointFormatter(raw);
+    const coord = toCoord(raw);
+    return Number.isFinite(coord) ? endpointFormatter(coord) : String(raw);
+  };
+
+  const result: Record<string, unknown> = {
+    // A time axis picks its ticks for ECharts' own short labels; a date format (xFormat) is wider,
+    // and without hideOverlap neighbouring labels print over each other.
+    xAxis: isTime ? { type: 'time', axisLabel: { hideOverlap: true } } : { type: 'value' },
+    yAxis: { type: 'category', data: rows, inverse: true },
+    series,
+    tooltip: {
+      trigger: 'item',
+      formatter: (p: { seriesIndex: number; dataIndex: number }) => {
+        const item = seriesItems[p.seriesIndex]?.[p.dataIndex];
+        if (!item) return '';
+        const head = item.label != null ? `${escapeHtml(item.row)}<br/>${escapeHtml(item.label)}: ` : `${escapeHtml(item.row)}<br/>`;
+        return `${head}${escapeHtml(endpointText(item.rawStart))} → ${escapeHtml(endpointText(item.rawEnd))}`;
+      },
+    },
+  };
+  if (colorField != null && series.length > 0) {
+    result.legend = { data: series.map((s) => s.name as string) };
+  }
   return result;
 }
 
@@ -1033,12 +1198,26 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
 }
 
+/** A timestamp as a local wall-clock ISO string (`YYYY-MM-DDTHH:mm:ss.sss`) — no UTC shift. */
+function localIsoString(ms: number): string {
+  const offset = new Date(ms).getTimezoneOffset() * 60_000;
+  return new Date(ms - offset).toISOString().slice(0, 23);
+}
+
 /**
  * Build a formatter string or function for ECharts axis labels
  * based on an AxisFormatOption.
+ *
+ * `timestamps`: the axis is a time axis, so a numeric label value is epoch milliseconds. Date
+ * formats read it as local wall-clock time — `formatValue` alone passes numbers through as-is, and
+ * a UTC ISO string would label a local-midnight tick with the previous day east of UTC.
  */
-function buildAxisFormatter(fmt: AxisFormatOption, locale?: string): (value: number | string) => string {
-  return (value: number | string) => {
+function buildAxisFormatter(fmt: AxisFormatOption, locale?: string, timestamps = false): (value: number | string) => string {
+  const isDateFormat = fmt.type === 'date' || fmt.type === 'datetime';
+  return (raw: number | string) => {
+    const value = timestamps && isDateFormat && typeof raw === 'number' && Number.isFinite(raw)
+      ? localIsoString(raw)
+      : raw;
     let result: string;
     // Compact notation short-circuits formatValue — Intl.NumberFormat handles both
     // number and currency compact formatting (e.g. `₩1.2억`, `$1.2M`).
@@ -1104,8 +1283,8 @@ function applyAxisFormat(
 ): void {
   if (!fmt || !result[axisKey]) return;
 
-  const formatter = buildAxisFormatter(fmt, locale);
   const axis = result[axisKey];
+  const formatter = buildAxisFormatter(fmt, locale, isPlainObject(axis) && axis.type === 'time');
 
   if (Array.isArray(axis)) {
     // Dual axis — apply to all value-type axes

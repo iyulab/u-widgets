@@ -20,7 +20,8 @@ export type ChartType =
   | 'chart.funnel'
   | 'chart.waterfall'
   | 'chart.treemap'
-  | 'chart.histogram';
+  | 'chart.histogram'
+  | 'chart.gantt';
 
 /**
  * All supported widget type identifiers.
@@ -92,6 +93,7 @@ export interface UWidgetColumnDefinition {
  * - **chart.pie/funnel:** `label`, `value`
  * - **chart.scatter:** `x`, `y`, `color`, `size`
  * - **chart.radar:** `axis`, `value`
+ * - **chart.gantt:** `y` (row), `start`, `end`, `label`, `color`
  * - **table:** `columns`
  * - **list:** `primary`, `secondary`, `avatar`, `icon`, `trailing`
  *
@@ -102,7 +104,14 @@ export interface UWidgetMapping {
   x?: string;
   /** Value axis field(s). A string for single series, string[] for multi-series. */
   y?: string | string[];
-  /** Label field (pie/funnel charts). */
+  /**
+   * Interval start field (gantt charts). A number, or a date-like string / timestamp for a time
+   * axis. Rows come from `y`; a row can hold several intervals.
+   */
+  start?: string;
+  /** Interval end field (gantt charts). Same kind as `start`; an end before its start is drawn in order. */
+  end?: string;
+  /** Label field (pie/funnel charts; in-bar segment label for gantt charts). */
   label?: string;
   /** Value field (pie/funnel/heatmap). */
   value?: string;

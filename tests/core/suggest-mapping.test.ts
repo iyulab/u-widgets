@@ -115,6 +115,23 @@ describe('suggestMapping', () => {
     expect(suggestions.some((s) => s.widget === 'chart.funnel')).toBe(true);
   });
 
+  it('suggests chart.gantt when fields are named as an interval (start/end, from/to)', () => {
+    const jobs = suggestMapping([
+      { machine: 'M1', duration: 3, start: 0, end: 3 },
+      { machine: 'M2', duration: 2, start: 0, end: 2 },
+    ]);
+    const gantt = jobs.find((s) => s.widget === 'chart.gantt');
+    expect(gantt?.mapping).toMatchObject({ y: 'machine', start: 'start', end: 'end' });
+
+    const dates = suggestMapping([{ task: 'Design', from: '2026-01-01', to: '2026-01-10' }]);
+    expect(dates.find((s) => s.widget === 'chart.gantt')?.mapping).toMatchObject({ y: 'task', start: 'from', end: 'to' });
+  });
+
+  it('does not suggest chart.gantt for two arbitrary numeric fields', () => {
+    const suggestions = suggestMapping([{ region: 'East', sales: 10, cost: 4 }]);
+    expect(suggestions.some((s) => s.widget === 'chart.gantt')).toBe(false);
+  });
+
   it('suggests chart.waterfall for category + value', () => {
     const data = [
       { item: 'Revenue', amount: 100 },

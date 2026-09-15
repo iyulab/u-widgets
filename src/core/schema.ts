@@ -26,7 +26,7 @@ const ARRAY_DATA = new Set([
   'stat-group', 'table', 'list', 'steps', 'gallery',
   'chart.bar', 'chart.line', 'chart.area', 'chart.pie',
   'chart.scatter', 'chart.radar', 'chart.heatmap', 'chart.box',
-  'chart.funnel', 'chart.waterfall', 'chart.treemap',
+  'chart.funnel', 'chart.waterfall', 'chart.treemap', 'chart.gantt',
 ]);
 
 /** Widgets that expect an object for `data`. */
@@ -152,7 +152,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
 
     if (dataKeys) {
       // Check scalar mapping fields
-      for (const key of ['x', 'y', 'label', 'value', 'color', 'size', 'axis', 'total', 'primary', 'secondary', 'icon', 'avatar', 'trailing'] as const) {
+      for (const key of ['x', 'y', 'label', 'value', 'color', 'size', 'axis', 'total', 'start', 'end', 'primary', 'secondary', 'icon', 'avatar', 'trailing'] as const) {
         const val = mapping[key];
         if (typeof val === 'string' && !dataKeys.has(val)) {
           warnings.push(`mapping.${key} references "${val}" which is not found in data keys [${[...dataKeys].join(', ')}]`);

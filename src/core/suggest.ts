@@ -15,6 +15,7 @@ export const KNOWN_WIDGETS: readonly string[] = [
   'chart.bar', 'chart.line', 'chart.area', 'chart.pie',
   'chart.scatter', 'chart.radar', 'chart.heatmap', 'chart.box',
   'chart.funnel', 'chart.waterfall', 'chart.treemap', 'chart.histogram',
+  'chart.gantt',
   'metric', 'stat-group', 'gauge', 'progress',
   'table', 'list', 'form', 'confirm', 'compose',
   'markdown', 'image', 'callout', 'math',

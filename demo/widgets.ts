@@ -882,6 +882,60 @@ const catalog: Record<string, WidgetDoc> = {
     },
   },
 
+  'chart.gantt': {
+    label: 'Gantt',
+    group: 'Charts',
+    ...meta('chart.gantt'),
+    variants: {
+      'Job-shop schedule': {
+        widget: 'chart.gantt',
+        data: [
+          { machine: 'M1', job: 'J1', start: 0, end: 3 },
+          { machine: 'M2', job: 'J1', start: 3, end: 5 },
+          { machine: 'M2', job: 'J2', start: 0, end: 3 },
+          { machine: 'M3', job: 'J2', start: 3, end: 7 },
+          { machine: 'M1', job: 'J3', start: 3, end: 6 },
+          { machine: 'M3', job: 'J3', start: 7, end: 12 },
+        ],
+        mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job' },
+        options: {
+          categories: ['M1', 'M2', 'M3'],
+          referenceLines: [{ axis: 'x', value: 12, label: 'Makespan', style: 'dashed' }],
+        },
+      },
+      'Project timeline (dates)': {
+        widget: 'chart.gantt',
+        data: [
+          { task: 'Design', from: '2026-03-02', to: '2026-03-13' },
+          { task: 'Build', from: '2026-03-09', to: '2026-04-03' },
+          { task: 'Test', from: '2026-03-30', to: '2026-04-10' },
+        ],
+        options: {
+          xFormat: { type: 'date' },
+          referenceLines: [{ axis: 'x', value: '2026-04-06', label: 'Due', color: '#dc2626' }],
+        },
+      },
+      'One color, adjacent segments': {
+        widget: 'chart.gantt',
+        data: [
+          { machine: 'M1', job: 'J1', start: 0, end: 4 },
+          { machine: 'M1', job: 'J2', start: 4, end: 9 },
+          { machine: 'M1', job: 'J3', start: 9, end: 14 },
+          { machine: 'M2', job: 'J4', start: 0, end: 6 },
+          { machine: 'M2', job: 'J5', start: 6, end: 11 },
+        ],
+      },
+      'Idle row + zero-length': {
+        widget: 'chart.gantt',
+        data: [
+          { line: 'Line A', batch: 'B1', start: 0, end: 5 },
+          { line: 'Line B', batch: 'Check', start: 5, end: 5 },
+        ],
+        options: { categories: ['Line A', 'Line B', 'Line C'] },
+      },
+    },
+  },
+
   // ── Content ──
   markdown: {
     label: 'Markdown',
