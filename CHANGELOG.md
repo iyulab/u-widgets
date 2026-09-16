@@ -4,6 +4,55 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.21.0] - 2026-09-16
+
+### Fixed
+
+- **`themes/shadcn.css` never applied.** It set the widget tokens on `:root`, and a custom
+  property set on `:root` reaches a widget as an *inherited* value — which can never beat a
+  declaration on the element itself, and the token sheet writes exactly that
+  (`:host { --u-widget-*: … }`). Importing the theme therefore changed nothing, silently: no
+  error, no warning, just the defaults. The selector is now the element list, wrapped in
+  `:where()` so an application's own rules still win. The dark block is scoped the same way.
+
+  Nothing could see this. The unit suite runs on happy-dom, which does not resolve the
+  cascade at all, so a sheet that loses and a sheet that wins look identical to it.
+
+### Added
+
+- **`themes/components.css`** — an optional sheet that binds the widget tokens to
+  `@iyulab/components`' token axis, so a page using both stops rendering two palettes, two
+  type families and two radii. Measured before this release: five axes disagreed on a single
+  screen (primary color, body text, secondary text, font family, corner radius).
+
+  It is a **bridge, not a copy**. Every declaration is
+  `var(<the components token>, <this package's default>)`, which means the widgets follow that
+  sheet as it changes rather than freezing a snapshot of it — and when the sheet is absent, the
+  fallback keeps the standalone defaults exactly as they were. That fallback is load-bearing,
+  not defensive: omitting it would make the token guaranteed-invalid rather than falling back to
+  `:host`, because the outer declaration has already won.
+
+  Dark mode needs no separate block here, which is the point of a bridge: the referenced tokens
+  are themselves redefined for dark by the sheet being followed.
+
+  Left unmapped on purpose: the **chart palette** (eight colors whose ordering and mutual
+  distinctness are a design in themselves — approximating them from four role colors would
+  collide adjacent series) and the **font sizes** (the other axis is a four-tier scale carrying
+  size, weight, leading and tracking per tier, while this package has a single size per role, so
+  pairing them would mean choosing tiers on the consumer's behalf). The font *family* has no such
+  choice, so it is mapped.
+
+- **A browser (chromium) test project**, because the half of this package's theming contract that
+  is *cascade* cannot be judged by happy-dom — which is why the `shadcn.css` defect above lived
+  for as long as it did. 23 cases pin the three layers (`:host` default → theme sheet → the
+  application's own rule), the `var()` fallback, and — as a negative control — the fact that a
+  `:root` override loses.
+
+### Changed
+
+- The build's theme copy step now copies everything in the theme source directory instead of one
+  hard-coded filename, so adding a sheet no longer requires remembering to add it here too.
+
 ## [0.20.0] - 2026-09-15
 
 ### Added

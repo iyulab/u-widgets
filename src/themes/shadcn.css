@@ -11,7 +11,18 @@
  * Requires Shadcn/ui globals.css to define --primary, --background, etc.
  */
 
-:root {
+ * 🔴**The selector must be a tag list — `:root` cannot win here.**
+ *   A custom property set on `:root` reaches a widget as an *inherited* value, and an
+ *   inherited value never beats a declaration on the element itself — which is what
+ *   `tokens.ts` writes (`:host { --u-widget-*: … }`). Measured in chromium: overriding
+ *   through `:root` leaves every default in place.
+ *   `:where()` keeps specificity at 0 and still wins over `:host`, because the shadow
+ *   cascade decides "outer tree beats inner tree" before it ever compares specificity.
+ *   So this sheet beats the defaults and still loses to your own `u-widget { … }` rules.
+ */
+:where(u-widget, uw-chart, uw-citation, uw-code, uw-compose, uw-content, uw-form,
+       uw-gallery, uw-gauge, uw-kv, uw-math, uw-metric, uw-rating, uw-status,
+       uw-steps, uw-table, uw-video) {
   --u-widget-bg: hsl(var(--background));
   --u-widget-surface: hsl(var(--muted));
   --u-widget-text: hsl(var(--foreground));
@@ -24,7 +35,12 @@
 }
 
 /* Dark mode: syncs with Shadcn .dark class */
-.dark {
+.dark :where(u-widget, uw-chart, uw-citation, uw-code, uw-compose, uw-content, uw-form,
+       uw-gallery, uw-gauge, uw-kv, uw-math, uw-metric, uw-rating, uw-status,
+       uw-steps, uw-table, uw-video),
+.dark:where(u-widget, uw-chart, uw-citation, uw-code, uw-compose, uw-content, uw-form,
+       uw-gallery, uw-gauge, uw-kv, uw-math, uw-metric, uw-rating, uw-status,
+       uw-steps, uw-table, uw-video) {
   --u-widget-bg: hsl(var(--background));
   --u-widget-surface: hsl(var(--muted));
   --u-widget-text: hsl(var(--foreground));

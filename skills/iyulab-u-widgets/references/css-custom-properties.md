@@ -3,6 +3,15 @@
 Every `u-widget`/`uw-*` element shares one token sheet (`styles/tokens.ts`, applied via `:host`).
 Override any of them by styling the element directly:
 
+> 🔴**Style the element, not `:root`.** A custom property set on `:root` reaches a widget as an
+> *inherited* value, and an inherited value never beats a declaration on the element itself —
+> which is exactly what the token sheet writes (`:host { --u-widget-*: … }`). Measured in
+> chromium: a `:root` override leaves every default in place, with no error. Use a tag
+> selector (`u-widget { … }`), or a tag list wrapped in `:where()` if you want a preset that
+> an application can still override — `:where()` keeps specificity at 0 and *still* wins over
+> `:host`, because the shadow cascade decides "outer tree beats inner tree" before it ever
+> compares specificity.
+
 ```css
 u-widget {
   --u-widget-primary: #7c3aed;
@@ -16,6 +25,21 @@ one mode. `light-dark()` is deliberately **not** used for color tokens: `getComp
 getPropertyValue()` returns the raw function string instead of the resolved color, which would
 break imperative consumers like ECharts that read tokens at runtime (`uw-chart`'s
 `_readCSSVar`).
+
+## Ready-made theme sheets
+
+Two optional sheets ship with the package. Both are opt-in: import neither and the defaults
+below apply unchanged, which is what keeps the package usable standalone.
+
+```js
+import '@iyulab/u-widgets/themes/components.css';  // follow @iyulab/components' tokens
+import '@iyulab/u-widgets/themes/shadcn.css';      // follow Shadcn/ui + Tailwind v4
+```
+
+`themes/components.css` is a **bridge, not a copy**: every declaration reads
+`var(<the other package's token>, <the default below>)`, so the widgets follow that sheet as it
+changes, and fall back to their own defaults when it is not loaded. It deliberately leaves the
+chart palette and the font *sizes* alone — there is no corresponding axis to map them onto.
 
 ## Colors
 

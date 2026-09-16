@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
@@ -32,11 +32,14 @@
       "types": "./dist/u-widgets-react.d.ts",
       "import": "./dist/u-widgets-react.js"
     },
-    "./themes/shadcn.css": "./dist/themes/shadcn.css"
+    "./themes/shadcn.css": "./dist/themes/shadcn.css",
+    "./themes/components.css": "./dist/themes/components.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
-    "./dist/*.js"
+    "./dist/*.js",
+    "./src/themes/*.css",
+    "./dist/themes/*.css"
   ],
   "files": [
     "dist",
@@ -54,7 +57,7 @@
     "preversion": "node -e \"if(require('fs').existsSync('../../scripts/preversion-check.mjs'))require('child_process').execFileSync('node',['../../scripts/preversion-check.mjs'],{stdio:'inherit'})\"",
     "dev": "vite",
     "build": "npm run typecheck && vite build",
-    "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/themes',{recursive:true});fs.copyFileSync('src/themes/shadcn.css','dist/themes/shadcn.css')\"",
+    "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/themes',{recursive:true});for(const f of fs.readdirSync('src/themes'))fs.copyFileSync('src/themes/'+f,'dist/themes/'+f)\"",
     "build:cdn": "vite build --config vite.cdn.config.ts",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview": "vite preview",
@@ -116,6 +119,7 @@
     "@open-wc/testing": "^5.0.0",
     "@playwright/test": "^1.61.1",
     "@types/react": "^19.2.17",
+    "@vitest/browser-playwright": "^5.0.0",
     "echarts": "^6.1.0",
     "eslint": "^10.1.0",
     "globals": "^17.7.0",
