@@ -2,6 +2,21 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
 import dts from 'vite-plugin-dts';
+import { createRequire } from 'node:module';
+import { dirname } from 'node:path';
+
+// api-extractor bundles its own TypeScript, but the plugin hands it the
+// *project's* TypeScript lib folder. With a newer project compiler the bundled analyzer
+// cannot read the newer lib files and fails on standard symbols such as `AsyncGenerator`
+// ("Unable to follow symbol"). A workspace hides this because both resolve to the same hoisted
+// TypeScript; a standalone install exposes it. Point api-extractor at the TypeScript it actually
+// loads so the two agree.
+const requireFromHere = createRequire(import.meta.url);
+const extractorTypescript = dirname(
+  requireFromHere.resolve('typescript/package.json', {
+    paths: [dirname(requireFromHere.resolve('@microsoft/api-extractor/package.json'))],
+  }),
+);
 import { stripCssTemplateComments } from './build/strip-css-template-comments.ts';
 
 // Every element module under src/elements declares its own `declare global { interface
@@ -139,7 +154,7 @@ export default defineConfig({
     },
     dts({
       include: ['src'],
-      bundleTypes: true,
+      bundleTypes: { invokeOptions: { typescriptCompilerFolder: extractorTypescript } },
       afterBuild() {
         for (const name of Object.keys(ENTRY)) {
           const dtsPath = resolve(__dirname, 'dist', `${name}.d.ts`);
