@@ -178,7 +178,7 @@ export class UwCompose extends LitElement {
     const options = (this.spec?.options ?? {}) as Record<string, unknown>;
     const isCard = Boolean(options.card);
 
-    const widgetHtml = html`<u-widget .spec=${child as UWidgetSpec} theme=${t ?? nothing}></u-widget>`;
+    const widgetHtml = html`<u-widget .spec=${child as UWidgetSpec} theme=${t ?? nothing} nested></u-widget>`;
 
     // Collapsed child: wrap in <details>/<summary>
     if (child.collapsed) {

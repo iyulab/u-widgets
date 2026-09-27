@@ -121,3 +121,71 @@ describe('게시되는 테마 시트가 실제로 적용된다', () => {
     });
   }
 });
+
+/**
+ * 🔴**실제 사용 경로로 잰다** — `<u-widget spec>` 은 `uw-*` 를 **자기 섀도 안에** 렌더한다. 위 스위트처럼 태그를 문서에
+ * 직접 붙이면 문서 시트가 그 요소에 바로 닿으므로, 섀도 경계 하나를 건너뛴 모형이 된다 — 그 모형에서 이 브리지는
+ * 17/17 초록이었지만 실제 경로에서는 안쪽 `uw-*` 가 자기 `:host` 기본값을 다시 선언해 **다섯 축 전부** 되돌아갔다.
+ */
+describe('실제 경로 — 테마가 `<u-widget>` 섀도 안의 `uw-*` 까지 닿는다', () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+    sheets.splice(0).forEach((s) => s.remove());
+  });
+
+  const inner = async (spec: Record<string, unknown>) => {
+    const w = document.createElement('u-widget') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    w.spec = spec;
+    document.body.appendChild(w);
+    await w.updateComplete;
+    await settle();
+    const el = w.shadowRoot!.querySelector('[nested]') as HTMLElement | null;
+    return { w, el };
+  };
+
+  it('🔴브리지 값이 섀도 안 `uw-metric` 에 닿는다 — 색·글자·패밀리', async () => {
+    addSheet(':root { --u-primary-color: rgb(25, 118, 210); --u-txt-color: rgb(1, 2, 3); --u-font-base: "Probe Sans"; }');
+    addSheet(`:where(${TAG_LIST}) {
+      --u-widget-primary: var(--u-primary-color, #4f46e5);
+      --u-widget-text: var(--u-txt-color, #1a1a2e);
+      --u-widget-font-family: var(--u-font-base, system-ui);
+    }`);
+    const { el } = await inner({ widget: 'metric', data: { value: 1 } });
+    expect(el, '안쪽 요소가 nested 로 표시된다').not.toBeNull();
+    const cs = getComputedStyle(el!);
+    expect(cs.getPropertyValue('--u-widget-primary').trim()).toBe('rgb(25, 118, 210)');
+    expect(cs.getPropertyValue('--u-widget-text').trim()).toBe('rgb(1, 2, 3)');
+    expect(cs.getPropertyValue('--u-widget-font-family').trim()).toBe('"Probe Sans"');
+  });
+
+  it('🔴소비자가 `u-widget` 에 준 브랜드 값도 안쪽까지 간다', async () => {
+    addSheet('u-widget { --u-widget-primary: rgb(0, 0, 255); }');
+    const { el } = await inner({ widget: 'metric', data: { value: 1 } });
+    expect(getComputedStyle(el!).getPropertyValue('--u-widget-primary').trim()).toBe('rgb(0, 0, 255)');
+  });
+
+  it('다크 문서에서 `u-widget` 의 다크 기본값을 안쪽이 물려받는다(안쪽이 라이트로 되돌리지 않는다)', async () => {
+    // 이 패키지는 문서의 `data-theme` 을 각 `u-widget` 의 `theme` 으로 동기화한다 — 그 경로 그대로 잰다.
+    document.documentElement.setAttribute('data-theme', 'dark');
+    try {
+      const { w, el } = await inner({ widget: 'metric', data: { value: 1 } });
+      expect(w.getAttribute('theme')).toBe('dark');
+      expect(getComputedStyle(el!).getPropertyValue('--u-widget-primary').trim()).toBe('#818cf8');
+    } finally {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  });
+
+  it('⚪NEGATIVE — 단독으로 쓴 `uw-*` 는 여전히 자기 기본값을 가진다(standalone 계약)', async () => {
+    const el = document.createElement('uw-metric');
+    document.body.appendChild(el);
+    await settle();
+    expect(el.hasAttribute('nested')).toBe(false);
+    expect(getComputedStyle(el).getPropertyValue('--u-widget-primary').trim()).toBe('#4f46e5');
+  });
+
+  it('⚪NEGATIVE — 테마 시트가 없으면 안쪽도 바깥의 기본값(=standalone 기본값)을 쓴다', async () => {
+    const { el } = await inner({ widget: 'metric', data: { value: 1 } });
+    expect(getComputedStyle(el!).getPropertyValue('--u-widget-primary').trim()).toBe('#4f46e5');
+  });
+});

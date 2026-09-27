@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- **A theme applied to `<u-widget>` now reaches the widget it renders.** `<u-widget spec>` draws
+  its `uw-*` inside its own shadow root, and each of those declared the default tokens on its own
+  `:host` again. A value inherited from the outer element can never beat that declaration, so a
+  theme sheet (`themes/components.css`, `themes/shadcn.css`) or a brand rule on `u-widget` stopped
+  at the shadow boundary: the outer element had the right colours and the chart, metric or table
+  inside it drew the defaults — primary colour, text, secondary text, font family and radius all
+  reverted. The inner element is now marked `nested` and declares no defaults, so it inherits what
+  the outer element resolved. A `uw-*` used on its own still carries the defaults.
+
 ## [0.21.0] - 2026-09-16
 
 ### Fixed

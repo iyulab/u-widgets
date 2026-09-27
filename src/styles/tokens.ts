@@ -24,11 +24,23 @@ import { css } from 'lit';
  *
  * Host applications can override any `--u-widget-*` variable by styling the
  * element directly (e.g., `u-widget { --u-widget-text: blue; }`).
+ *
+ * **Defaults live on the outermost widget only.** `<u-widget>` renders its
+ * `uw-*` inside its own shadow root and marks each with a `nested` attribute.
+ * A nested element declares no token defaults, so it *inherits* whatever the
+ * outer element resolved — including a theme sheet or brand rule applied to
+ * the outer element from the page. Without this, every nested element would
+ * redeclare the defaults on its own `:host`, and an inherited value never
+ * beats an element's own declaration: a theme applied to `<u-widget>` would
+ * stop at its shadow boundary. A `uw-*` used on its own (not nested) keeps
+ * the defaults, so it still works standalone.
  */
 export const themeStyles = css`
   :host {
     color-scheme: light dark;
+  }
 
+  :host(:not([nested])) {
     /* ── Colors (light defaults) ── */
     --u-widget-bg: #fff;
     --u-widget-surface: #f1f5f9;
@@ -80,7 +92,7 @@ export const themeStyles = css`
 
   /* ── Dark mode (auto via prefers-color-scheme) ── */
   @media (prefers-color-scheme: dark) {
-    :host(:not([theme="light"])) {
+    :host(:not([theme="light"]):not([nested])) {
       --u-widget-bg: #1e1e2e;
       --u-widget-surface: #2a2a3e;
       --u-widget-text: #e2e8f0;
@@ -115,6 +127,9 @@ export const themeStyles = css`
   /* ── Dark mode (manual via theme attribute) ── */
   :host([theme="dark"]) {
     color-scheme: dark;
+  }
+
+  :host([theme="dark"]:not([nested])) {
     --u-widget-bg: #1e1e2e;
     --u-widget-surface: #2a2a3e;
     --u-widget-text: #e2e8f0;

@@ -339,51 +339,51 @@ export class UWidget extends LitElement {
     switch (widget) {
       case 'metric':
       case 'stat-group':
-        widgetHtml = html`<uw-metric .spec=${resolved} theme=${t ?? nothing}></uw-metric>`;
+        widgetHtml = html`<uw-metric .spec=${resolved} theme=${t ?? nothing} nested></uw-metric>`;
         break;
       case 'gauge':
       case 'progress':
-        widgetHtml = html`<uw-gauge .spec=${resolved} theme=${t ?? nothing}></uw-gauge>`;
+        widgetHtml = html`<uw-gauge .spec=${resolved} theme=${t ?? nothing} nested></uw-gauge>`;
         break;
       case 'table':
       case 'list':
-        widgetHtml = html`<uw-table .spec=${resolved} theme=${t ?? nothing}></uw-table>`;
+        widgetHtml = html`<uw-table .spec=${resolved} theme=${t ?? nothing} nested></uw-table>`;
         break;
       case 'form':
       case 'confirm':
-        widgetHtml = html`<uw-form .spec=${resolved} theme=${t ?? nothing}></uw-form>`;
+        widgetHtml = html`<uw-form .spec=${resolved} theme=${t ?? nothing} nested></uw-form>`;
         break;
       case 'compose':
-        widgetHtml = html`<uw-compose .spec=${resolved} theme=${t ?? nothing}></uw-compose>`;
+        widgetHtml = html`<uw-compose .spec=${resolved} theme=${t ?? nothing} nested></uw-compose>`;
         break;
       case 'markdown':
       case 'image':
       case 'callout':
-        widgetHtml = html`<uw-content .spec=${resolved} theme=${t ?? nothing}></uw-content>`;
+        widgetHtml = html`<uw-content .spec=${resolved} theme=${t ?? nothing} nested></uw-content>`;
         break;
       case 'kv':
-        widgetHtml = html`<uw-kv .spec=${resolved} theme=${t ?? nothing}></uw-kv>`;
+        widgetHtml = html`<uw-kv .spec=${resolved} theme=${t ?? nothing} nested></uw-kv>`;
         break;
       case 'code':
-        widgetHtml = html`<uw-code .spec=${resolved} theme=${t ?? nothing}></uw-code>`;
+        widgetHtml = html`<uw-code .spec=${resolved} theme=${t ?? nothing} nested></uw-code>`;
         break;
       case 'citation':
-        widgetHtml = html`<uw-citation .spec=${resolved} theme=${t ?? nothing}></uw-citation>`;
+        widgetHtml = html`<uw-citation .spec=${resolved} theme=${t ?? nothing} nested></uw-citation>`;
         break;
       case 'status':
-        widgetHtml = html`<uw-status .spec=${resolved} theme=${t ?? nothing}></uw-status>`;
+        widgetHtml = html`<uw-status .spec=${resolved} theme=${t ?? nothing} nested></uw-status>`;
         break;
       case 'steps':
-        widgetHtml = html`<uw-steps .spec=${resolved} theme=${t ?? nothing}></uw-steps>`;
+        widgetHtml = html`<uw-steps .spec=${resolved} theme=${t ?? nothing} nested></uw-steps>`;
         break;
       case 'rating':
-        widgetHtml = html`<uw-rating .spec=${resolved} theme=${t ?? nothing}></uw-rating>`;
+        widgetHtml = html`<uw-rating .spec=${resolved} theme=${t ?? nothing} nested></uw-rating>`;
         break;
       case 'video':
-        widgetHtml = html`<uw-video .spec=${resolved} theme=${t ?? nothing}></uw-video>`;
+        widgetHtml = html`<uw-video .spec=${resolved} theme=${t ?? nothing} nested></uw-video>`;
         break;
       case 'gallery':
-        widgetHtml = html`<uw-gallery .spec=${resolved} theme=${t ?? nothing}></uw-gallery>`;
+        widgetHtml = html`<uw-gallery .spec=${resolved} theme=${t ?? nothing} nested></uw-gallery>`;
         break;
       case 'actions':
         widgetHtml = this.renderActionsWidget(resolved);
@@ -397,12 +397,12 @@ export class UWidget extends LitElement {
       default:
         // chart.* types are handled by uw-chart if loaded (separate entry point)
         if (widget.startsWith('chart.') && customElements.get('uw-chart')) {
-          widgetHtml = html`<uw-chart .spec=${resolved} theme=${t ?? nothing}></uw-chart>`;
+          widgetHtml = html`<uw-chart .spec=${resolved} theme=${t ?? nothing} nested></uw-chart>`;
           break;
         }
         // math is handled by uw-math if loaded (separate entry point)
         if (widget === 'math' && customElements.get('uw-math')) {
-          widgetHtml = html`<uw-math .spec=${resolved} theme=${t ?? nothing}></uw-math>`;
+          widgetHtml = html`<uw-math .spec=${resolved} theme=${t ?? nothing} nested></uw-math>`;
           break;
         }
         {
