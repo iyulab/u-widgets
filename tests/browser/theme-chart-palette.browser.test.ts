@@ -22,12 +22,10 @@ async function chartColors(): Promise<string[]> {
   w.spec = { widget: 'chart.bar', data: [{ name: 'a', value: 1 }, { name: 'b', value: 2 }] };
   document.body.appendChild(w);
   await w.updateComplete;
-  let chart: { _chart?: { getOption(): { color: string[] } } } | null = null;
-  for (let i = 0; i < 50 && !chart?._chart; i++) {
-    chart = w.shadowRoot!.querySelector('uw-chart') as typeof chart;
-    await new Promise((r) => setTimeout(r, 40));
-  }
-  return chart!._chart!.getOption().color;
+  type Chart = { _chart?: { getOption(): { color: string[] } } };
+  const find = () => w.shadowRoot!.querySelector('uw-chart') as unknown as Chart | null;
+  for (let i = 0; i < 50 && !find()?._chart; i++) await new Promise((r) => setTimeout(r, 40));
+  return find()!._chart!.getOption().color;
 }
 
 describe('차트 팔레트 브리지 — 실제 경로', () => {
