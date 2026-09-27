@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- **`themes/components.css` bridges the chart palette.** Charts drew the widgets' own palette
+  even with the components theme loaded, because the components tokens had no chart axis. With
+  `@iyulab/components` 1.47 or later, series colours now follow its `--u-chart-color-1…8`, slot
+  for slot and in order; with an older version the widgets' palette is kept.
+
 ### Fixed
 
 - **A theme applied to `<u-widget>` now reaches the widget it renders.** `<u-widget spec>` draws

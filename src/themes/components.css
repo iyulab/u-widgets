@@ -34,9 +34,10 @@
  * 잇는 것 / 잇지 않는 것
  * ──────────────────────────────────────────────────────────────────────────
  *   잇는다     색 역할 · 면 · 테두리 · 타이포 패밀리 · 반경 · 엘리베이션
- *   안 잇는다  **차트 팔레트**(`--u-widget-chart-color-*`) — 하우스에 대응 축이 없다.
- *              여덟 색의 «순서와 구분성» 은 그 자체가 설계이고, 역할색 넷을 늘려
- *              흉내 내면 인접 계열이 겹친다. 별도 판단이 필요한 축이라 남겨 둔다.
+ *   잇는다     **차트 팔레트** 여덟 칸 — `@iyulab/components` 가 `--u-chart-color-1..8` 을 연 뒤부터.
+ *              여덟 색의 «순서와 구분성» 은 그 자체가 설계라, 역할색으로 흉내 내지 않고
+ *              **한 벌로 검증된** 하우스 축을 칸 대 칸으로 잇는다. 그 축이 없는 판(components
+ *              1.46 이하)에서는 폴백이 종전 위젯 팔레트를 그대로 낸다.
  *   안 잇는다  **글자 «크기»**(`--u-widget-font-size*`) — 하우스의 타이포 축은 단마다
  *              size·weight·leading·tracking 넷을 갖는 4단 스케일인데 위젯 쪽은 size
  *              하나뿐이라, 단을 짝지으려면 «어느 단인가» 를 우리가 정해야 한다.
@@ -58,6 +59,16 @@
   --u-widget-positive:       var(--u-success-color,     #15803d);
   --u-widget-negative:       var(--u-danger-color,      #dc2626);
   --u-widget-warning:        var(--u-warning-color,     #d97706);
+
+  /* ── 차트 팔레트 — 칸 대 칸, 순서 그대로 ── */
+  --u-widget-chart-color-1:  var(--u-chart-color-1, #4f46e5);
+  --u-widget-chart-color-2:  var(--u-chart-color-2, #0ea5e9);
+  --u-widget-chart-color-3:  var(--u-chart-color-3, #10b981);
+  --u-widget-chart-color-4:  var(--u-chart-color-4, #f59e0b);
+  --u-widget-chart-color-5:  var(--u-chart-color-5, #ef4444);
+  --u-widget-chart-color-6:  var(--u-chart-color-6, #8b5cf6);
+  --u-widget-chart-color-7:  var(--u-chart-color-7, #ec4899);
+  --u-widget-chart-color-8:  var(--u-chart-color-8, #06b6d4);
 
   /* ★on-color 는 «칠해진 면 위의 글자» 다 — 하우스도 같은 개념을 갖는다.
      positive·negative 는 하우스에서 각각 success·danger 계열이다. */
