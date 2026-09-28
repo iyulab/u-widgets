@@ -11,7 +11,7 @@ import { test, expect, type Page } from '@playwright/test';
  * `--u-widget-chart-height:` 라는 **문자열이 시트에 있다**를 단언하고 `uw-chart.test.ts` 는
  * ECharts 를 mock 한다. ***emit 되는 문자열은 배치가 아니다.***
  *
- * ## 무엇이 결함이었나 (cycle-568 실측)
+ * ## 무엇이 결함이었나
  *
  * 전 위젯이 `:host { display: block }` 이고 내부 컨테이너가 호스트 높이를 받지 않아,
  * 호스트에 `max-height: 200px` 를 주면 **레이아웃은 200px 로 계산되는데 페인트는 원래 높이**가
@@ -64,7 +64,7 @@ async function measure(
           const d = spec.data as Record<string, unknown>;
           /* ⚠키 목록이 곧 커버리지다 — `message` 가 빠져 있어 `callout` 케이스가 내용을 한 번도
              늘리지 못했고, 짧은 문장이 제약 안에 들어가 «스크롤이 안 된다» 로 빨개졌다.
-             위젯이 아니라 테스트가 공허했던 자리다(cycle-569). */
+             위젯이 아니라 테스트가 공허했던 자리다. */
           for (const k of ['content', 'text', 'code', 'message', 'caption']) {
             if (typeof d[k] === 'string') {
               d[k] = Array.from({ length: repeat }, (_, i) => `line ${i} of padding text`).join('\n');
@@ -88,8 +88,8 @@ async function measure(
 
       /* 🔴클립 경계를 넘어서 세지 않는다. overflow 가 visible 이 아닌 요소의 «안쪽»은 그
          상자로 잘리므로, 그것까지 세면 **정상 동작하는 스크롤 컨테이너가 「유출」로 잡힌다**
-         — 실측(cycle-568): `.code-body` 가 161px 로 수축하고 scrollTop 도 남는데 2202px
-         유출로 보고됐다. ***넘침 측정은 클리핑을 증명하지 않는다***(cycle-563 「넘침 측정은
+         — 실측: `.code-body` 가 161px 로 수축하고 scrollTop 도 남는데 2202px
+         유출로 보고됐다. ***넘침 측정은 클리핑을 증명하지 않는다***(「넘침 측정은
          스크롤 컨테이너를 증명하지 않는다」의 거울상).
          ⚠클립하는 상자 «자신» 은 여전히 센다 — 수축에 실패하면 그 상자가 호스트를 넘고,
          그것이 바로 이 회귀가 잡아야 하는 결함이다(네거티브 컨트롤이 여기서 성립한다). */
@@ -194,7 +194,7 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
       .toBe(true);
   });
 
-  /* 나머지 위젯 — 렌더 루트가 곧 스크롤 주인이다. 실측(cycle-569)으로 «범인 = 그 루트 자신»
+  /* 나머지 위젯 — 렌더 루트가 곧 스크롤 주인이다. 실측으로 «범인 = 그 루트 자신»
      임을 확인한 뒤 같은 처방을 적용했고, 여기서 열 개를 한 표로 고정한다.
      ⚠`stat-group` 은 가로 `overflow: hidden` 이 의도라(음수 margin 구분선 클립) 세로 축만
      열었다 — 그래서 이 표의 다른 항목과 달리 가로 축도 함께 단언한다. */
@@ -202,7 +202,7 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
      매체 위젯(video · image)은 늘릴 문자열이 없고 높이가 «파일의 고유 크기» 에서 온다 — 데모의
      이미지는 600x200 이라 200px 제약을 4px 밖에 넘지 않아, 그 케이스는 사실상 아무것도 재지
      못했다. ⇒ 픽스처를 합성하는 대신 **제약을 더 세게** 줘서 실물로 진짜 넘침을 만든다.
-     ⚠cycle-568 의 규율 그대로다: «제약이 발동조차 않은 것은 통과가 아니라 미측정이다». */
+     ⚠앞의 규율 그대로다: «제약이 발동조차 않은 것은 통과가 아니라 미측정이다». */
   const ROOTS: [string, string, number, number][] = [
     ['citation', '.citations', 40, 200],
     ['markdown', '.markdown', 120, 200],
@@ -215,7 +215,7 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
     ['video', '.video-container', 1, 120],   // 자연 365 — 매체 고유 크기
     ['form', '.form-container', 1, 120],     // 자연 324 — 필드 수가 높이를 정한다
     ['image', '.image-container', 1, 120],   // 자연 204 — 600x200 이미지
-    /* 🔴이 둘은 cycle-568 이 «미측정» 으로 분류한 자리였다 — 200px 제약에서는 자연 높이가 더
+    /* 🔴이 둘은 처음에 «미측정» 으로 분류한 자리였다 — 200px 제약에서는 자연 높이가 더
        작아 발동조차 하지 않았고, 120px 로 세게 주자 각각 72px · 36px 가 샜다.
        ***미측정을 통과로 세지 않은 것이 이 둘을 찾아낸 이유다.*** */
     /* ⚠데모의 compose spec 은 layout:'grid' 라 렌더 루트가 layout-grid 다 — 처음에 layout-stack

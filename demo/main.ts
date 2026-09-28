@@ -18,7 +18,7 @@ const specs = {
       { value: 7, label: 'Errors', trend: 'flat' },
     ],
   },
-  // 회귀 케이스: 항목 7개 × 12자리+ 값 — 셀 겹침 방지 (ISSUE-20260713-uwidgets-statgroup-overlap)
+  // 회귀 케이스: 항목 7개 × 12자리+ 값 — 셀 겹침 방지
   statGroupLong: {
     widget: 'stat-group',
     data: [

@@ -124,7 +124,7 @@ test.describe('Display Widgets', () => {
   });
 
   test('stat-group: 7 items with long values never overlap', async ({ page }) => {
-    // 회귀 가드: ISSUE-20260713-uwidgets-statgroup-overlap
+    // 회귀 가드: 긴 값의 stat-group 셀이 겹치지 않는다
     // 항목 7개 × 12자리+ 값에서 값 텍스트가 셀 폭을 넘으면(=이웃 셀 침범) 실패.
     const result = await page.evaluate(() => {
       const host = document.getElementById('demo-stat-group-long');
