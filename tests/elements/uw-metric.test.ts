@@ -189,7 +189,7 @@ describe('uw-metric', () => {
     });
 
     it('CSS: cells never shrink below content (overlap regression)', () => {
-      // ISSUE-20260713-uwidgets-statgroup-overlap — 셀이 값보다 좁아지면
+      // 셀이 값보다 좁아지면
       // nowrap 값이 이웃 셀 위로 겹쳐 그려진다. min-width가 콘텐츠 기반이어야 함.
       const styles = (customElements.get('uw-metric') as any).styles;
       const cssText = Array.isArray(styles)

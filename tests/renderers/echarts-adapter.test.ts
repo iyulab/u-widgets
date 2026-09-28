@@ -1517,7 +1517,7 @@ describe('toEChartsOption', () => {
       expect(result).toEqual({});
     });
 
-    it('extends the X-axis domain to cover out-of-domain x referenceLines (docket #146)', () => {
+    it('extends the X-axis domain to cover out-of-domain x referenceLines', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.histogram',
         data: [9.9, 9.95, 10.0, 10.05, 10.1] as unknown as Record<string, unknown>[],
@@ -1537,7 +1537,7 @@ describe('toEChartsOption', () => {
       expect(lastHi).toBeCloseTo(10.5, 5);
     });
 
-    it('places x referenceLines at distinct bin-index coordinates, not the same clamped edge (docket #146)', () => {
+    it('places x referenceLines at distinct bin-index coordinates, not the same clamped edge', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.histogram',
         data: [9.9, 9.95, 10.0, 10.05, 10.1] as unknown as Record<string, unknown>[],
@@ -1558,7 +1558,7 @@ describe('toEChartsOption', () => {
       expect(new Set(coords).size).toBe(3);
     });
 
-    it('produces distinguishable bin labels for bin widths under 0.1 (docket #146 secondary repro)', () => {
+    it('produces distinguishable bin labels for bin widths under 0.1', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.histogram',
         data: [9.7, 9.75, 9.8, 9.85, 9.9] as unknown as Record<string, unknown>[],

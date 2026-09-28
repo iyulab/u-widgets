@@ -5,7 +5,7 @@ import type { UWidgetSpec } from '../../src/core/types.js';
 /**
  * options.echarts passthrough의 false affordance 방지 검증.
  *
- * 배경(ISSUE-20260609-uwidgets-echarts-datazoom-passthrough):
+ * 배경:
  * passthrough는 옵션 객체만 병합할 뿐 해당 옵션이 요구하는 ECharts 컴포넌트
  * 모듈을 등록하지 않는다. dataZoom/toolbox 등 미등록 컴포넌트 키를 전달하면
  * 옵션은 들어가지만 런타임에 동작하지 않으므로, 소비자가 원인을 알 수 있도록
@@ -88,7 +88,7 @@ describe('echarts passthrough — 미등록 컴포넌트 키 경고', () => {
 /**
  * series type false affordance 방지 검증.
  *
- * 배경(ISSUE-20260705-uwidgets-customchart-not-registered):
+ * 배경:
  * options.series[i].type 오버라이드 또는 options.echarts.series[].type passthrough로
  * 미등록 series type(graph/sankey/gauge 등)을 요청하면 옵션은 병합되지만 런타임에
  * 미렌더된다(ECharts가 자체 "Series X is used but not imported" 경고). 컴포넌트 키
