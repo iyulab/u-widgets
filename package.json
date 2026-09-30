@@ -1,6 +1,6 @@
 {
   "name": "@iyulab/u-widgets",
-  "version": "0.22.0",
+  "version": "0.22.1",
   "description": "Declarative, data-driven widget system for visualization and input",
   "type": "module",
   "module": "./dist/u-widgets.js",
@@ -90,7 +90,7 @@
     "lit": "^3.3.3"
   },
   "peerDependencies": {
-    "@formdown/core": "^0.4.0",
+    "@formdown/core": ">=0.4.0 <0.11.0",
     "@lit/react": "^1.0.8",
     "echarts": "^5.5.0 || ^6.0.0",
     "katex": ">=0.17.0 <0.19.0",
@@ -118,6 +118,7 @@
     }
   },
   "devDependencies": {
+    "@formdown/core": "^0.10.0",
     "@lit/react": "^1.0.8",
     "@microsoft/api-extractor": "^7.58.8",
     "@open-wc/testing": "^5.0.0",

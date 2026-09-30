@@ -150,6 +150,19 @@ describe('mapActions', () => {
     expect(result[0].style).toBeUndefined();
   });
 
+  it('reads the button kind from attributes.type — what @formdown/core actually emits (random names)', () => {
+    const actions: FormdownField[] = [
+      { name: 'submit_4obbsfkyw', type: 'button', label: 'Save', attributes: { type: 'submit' } },
+      { name: 'reset_2atjluky9', type: 'button', label: 'Clear', attributes: { type: 'reset' } },
+      { name: 'reset_x', type: 'button', attributes: { type: 'reset' } },
+    ];
+    expect(mapActions(actions)).toEqual([
+      { action: 'submit', label: 'Save', style: 'primary' },
+      { action: 'cancel', label: 'Clear', style: 'default' },
+      { action: 'cancel', label: 'reset', style: 'default' },
+    ]);
+  });
+
   it('uses name as fallback label', () => {
     const actions: FormdownField[] = [
       { name: 'submit', type: 'button' },

@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.22.1] - 2026-09-30
+
+### Fixed
+
+- **`u-widgets/forms`: the submit and reset buttons of a formdown form are recognized again.**
+  `@formdown/core` names a shorthand button `@[submit "Save"]` `submit_<random>` and puts its kind in
+  `attributes.type`; the adapter compared the name, so with `@formdown/core` installed the Save button
+  was not styled as primary, and the reset button became an action called `reset_…` instead of
+  `cancel`. The kind is now read from `attributes.type` (the name is still used for named buttons).
+
+### Changed
+
+- Peer range of `@formdown/core` is `>=0.4.0 <0.11.0` (was `^0.4.0`, which excluded every release
+  after 0.4). The part of `@formdown/core` this package uses behaves the same from 0.4.0 to 0.10.0, and
+  the tests now run against the real package.
+- Peer range of `@lit/react` is `^1.0.8` (was `^1.0.0 || ^2.0.0` — there is no 2.x to test against).
+
 ## [0.22.0] - 2026-09-28
 
 ### Added

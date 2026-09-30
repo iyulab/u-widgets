@@ -63,14 +63,24 @@ export function mapFields(fields: FormdownField[]): UWidgetFieldDefinition[] {
   });
 }
 
+/**
+ * 버튼의 종류 — `@formdown/core` 는 단축형 `@[submit "Save"]` 의 이름을 `submit_<무작위>` 로 만들고
+ * 종류를 `attributes.type` 에 싣는다(0.4 ~ 0.10 실측). 이름으로 판정하면 저장·초기화를 알아보지 못한다.
+ */
+function actionKind(a: FormdownField): string {
+  const declared = a.attributes?.type;
+  return typeof declared === 'string' && declared ? declared : a.name;
+}
+
 export function mapActions(actions: FormdownField[]): UWidgetAction[] {
   return actions.map((a) => {
+    const kind = actionKind(a);
     const action: UWidgetAction = {
-      action: a.name === 'reset' ? 'cancel' : a.name,
-      label: a.label || a.name,
+      action: kind === 'reset' ? 'cancel' : kind === 'submit' ? 'submit' : a.name,
+      label: a.label || (kind === 'submit' || kind === 'reset' ? kind : a.name),
     };
-    if (a.name === 'submit') action.style = 'primary';
-    else if (a.name === 'reset') action.style = 'default';
+    if (kind === 'submit') action.style = 'primary';
+    else if (kind === 'reset') action.style = 'default';
     return action;
   });
 }

@@ -18,6 +18,8 @@ declare module '@formdown/core/form-manager' {
       name: string;
       type: string;
       label?: string;
+      /** 단축형 버튼의 종류(`submit`·`reset`) — 이름은 `submit_<무작위>` 가 된다 */
+      attributes?: Record<string, string>;
     }>;
   }
 }
