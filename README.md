@@ -275,6 +275,8 @@ What the gate does **not** cover:
 - Widgets that render no pointer targets — `chart`, `gallery`, `gauge`, `kv`, `math`, `metric`,
   `status`, `steps` — are listed by the gate as unmeasured rather than counted as passing.
 
+For **KWCAG 2.2** (the Korean web accessibility standard), the `@iyulab/components` README has a table of all 33 check items — which are guaranteed by a test across the sibling packages, which are shared with the app, and which do not apply: [KWCAG 2.2 대응표](https://github.com/iyulab/node-components#kwcag-22-대응표).
+
 ## Documentation
 
 - [Widget Reference](docs/widgets.md) — Schema, mapping, options, theming

@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   visually hidden. The text is the new `opensInNewTab` locale string — register a translation with
   `registerLocale(lang, { opensInNewTab })`; it is inserted as text, never as HTML.
 
+### Documentation
+
+- README: the Accessibility section links the KWCAG 2.2 table in `@iyulab/components`.
+
 ## [0.22.1] - 2026-09-30
 
 ### Fixed
