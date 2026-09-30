@@ -25,7 +25,7 @@ jobs:
       run:
         working-directory: mcp
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # 🔴lock 기반 캐싱을 쓰지 않는다 — `mcp/package-lock.json` 은 2026-09-09 부터
       #   추적되지 않는다(리포 공통 정책, `.gitignore`). `cache: npm` +
@@ -34,10 +34,11 @@ jobs:
       #   **이 단계에서 죽는다.** 아래 Install 이 lock 을 «스스로 생성한 뒤» `npm ci` 를
       #   쓰지만, 그것은 이 단계보다 **뒤**다.
       #   ⚠마지막 성공 실행은 2026-09-08 — 추적 해제 «이전» 이라 아직 드러난 적이 없다.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Get package version
         id: pkg
