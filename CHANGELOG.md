@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- **`video` takes subtitle / caption tracks** — `data.tracks: [{ src, srclang?, label?, kind?, default? }]`
+  (WebVTT; `kind` defaults to `subtitles`). The `<video>` is inside the widget's shadow tree, so the spec
+  is the only place a `<track>` can come from. Track URLs go through the same filter as `src`.
+
 ### Fixed
 
 - **Links that open a new tab now say so to screen readers.** Citation cards (`citation`) and links

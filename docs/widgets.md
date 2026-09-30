@@ -50,7 +50,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `status` | Inline status badge | — (uses `data.label`, `data.variant`) |
 | `steps` | Multi-step progress | — (uses data array) |
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
-| `video` | HTML5 video player | — (uses `data.src`) |
+| `video` | HTML5 video player | — (uses `data.src`; subtitle / caption tracks in `data.tracks`: `[{ src, srclang?, label?, kind?, default? }]`, WebVTT) |
 | `gallery` | Image gallery grid | — (uses data array) |
 | `kv` | Key-value pairs | — (uses data object) |
 | `math` | LaTeX math expression | — (uses `data.expression`) |

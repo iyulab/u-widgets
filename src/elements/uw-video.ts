@@ -3,6 +3,14 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 
+interface VideoTrack {
+  src: string;
+  kind: string;
+  srclang?: string;
+  label?: string;
+  default: boolean;
+}
+
 @customElement('uw-video')
 export class UwVideo extends LitElement {
   static styles = [themeStyles, css`
@@ -66,6 +74,7 @@ export class UwVideo extends LitElement {
     const poster = data.poster ? this._sanitizeUrl(String(data.poster)) : undefined;
     const alt = String(data.alt ?? '');
     const caption = data.caption as string | undefined;
+    const tracks = this._tracks(data.tracks);
 
     const opts = (this.spec.options ?? {}) as Record<string, unknown>;
     const controls = opts.controls !== false; // default true
@@ -86,10 +95,42 @@ export class UwVideo extends LitElement {
           playsinline
           preload="metadata"
           part="video-element"
-        ></video>
+        >${tracks.map((t) => html`<track
+            src=${t.src}
+            kind=${t.kind}
+            srclang=${t.srclang ?? nothing}
+            label=${t.label ?? nothing}
+            ?default=${t.default}
+          />`)}</video>
         ${caption ? html`<div class="video-caption" part="caption">${caption}</div>` : nothing}
       </div>
     `;
+  }
+
+  /**
+   * Subtitle / caption tracks (WebVTT). A video drawn inside this shadow tree cannot receive a
+   * `<track>` from the page, so the spec is the only place captions can come from.
+   * Entries without a usable `src` are dropped; `kind` defaults to `subtitles`.
+   */
+  private _tracks(raw: unknown): VideoTrack[] {
+    if (!Array.isArray(raw)) return [];
+    const kinds = new Set(['subtitles', 'captions', 'descriptions', 'chapters', 'metadata']);
+    const out: VideoTrack[] = [];
+    for (const item of raw) {
+      if (!item || typeof item !== 'object') continue;
+      const t = item as Record<string, unknown>;
+      const src = this._sanitizeUrl(String(t.src ?? ''));
+      if (!src) continue;
+      const kind = typeof t.kind === 'string' && kinds.has(t.kind) ? t.kind : 'subtitles';
+      out.push({
+        src,
+        kind,
+        srclang: typeof t.srclang === 'string' ? t.srclang : undefined,
+        label: typeof t.label === 'string' ? t.label : undefined,
+        default: t.default === true,
+      });
+    }
+    return out;
   }
 
   private _sanitizeUrl(url: string): string {

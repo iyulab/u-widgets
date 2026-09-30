@@ -285,6 +285,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'poster', type: 'string', desc: 'Poster image URL' },
     { key: 'alt', type: 'string', desc: 'Accessible description' },
     { key: 'caption', type: 'string', desc: 'Caption text' },
+    { key: 'tracks', type: 'Array<{ src, srclang?, label?, kind?, default? }>', desc: 'Subtitle / caption tracks (WebVTT). kind: subtitles (default) | captions | descriptions | chapters | metadata' },
   ],
   'gallery': [
     { key: 'src', type: 'string', desc: 'Image URL', required: true },
@@ -346,7 +347,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
   'status': 'No mapping. data is {label, value, level?} or array of those. level: info/success/warning/error/neutral.',
-  'video': 'No mapping. data is {src, poster?, alt?, caption?}. autoplay/controls/loop/muted in options.',
+  'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',
   'gallery': 'No mapping. data is [{src, alt?, caption?}]. columns/aspectRatio in options.',
   'steps': 'No mapping. data is [{label, status?, description?, icon?}]. status: done/active/pending/error. icon: emoji/text override. layout: vertical/horizontal.',
   'rating': 'No mapping. data is {value?, max?}. options: interactive, icon (star/heart/thumb), max, label.',
