@@ -263,6 +263,7 @@ conformance claim for the success criteria it does not list.
 |---|---|---|
 | SC 2.5.8 Target Size (Minimum) | Every pointer target a widget renders in its own shadow tree — buttons, links, form controls (measured by their activating label), sortable headers, table rows and list items, the interactive rating's icons, citation links, collapsible sections — is at least 24×24 CSS px. Links inside `markdown` prose use the inline exception | `e2e/target-size.spec.ts` (real Chromium, on the demo page) |
 | SC 2.1.1 Keyboard (pointer-cursor check) | Nothing a widget renders shows a pointer cursor without also being a focusable, interactive element — a clickable `div` cannot slip in | `e2e/target-size.spec.ts` |
+| SC 3.2.5 Change on Request (new tabs) | Citation links and `markdown` links open a new tab and end their accessible name with a visually hidden "(opens in a new tab)" (`opensInNewTab` locale string) | `tests/browser/new-tab-link-name.browser.test.ts` |
 
 What the gate does **not** cover:
 

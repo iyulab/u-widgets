@@ -20,6 +20,8 @@ export interface UWidgetLocaleStrings {
   nextPage: string;
   tablePagination: string;
   dataTable: string;
+  /** Appended (visually hidden) to the accessible name of links that open a new tab — citations, markdown links. */
+  opensInNewTab: string;
 
   // Validation messages — form (templates with {label}, {min}, {max})
   required: string;
@@ -44,6 +46,7 @@ const EN: UWidgetLocaleStrings = {
   nextPage: 'Next page',
   tablePagination: 'Table pagination',
   dataTable: 'Data table',
+  opensInNewTab: '(opens in a new tab)',
 
   // Validation
   required: '{label} is required',

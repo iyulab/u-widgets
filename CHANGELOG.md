@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- **Links that open a new tab now say so to screen readers.** Citation cards (`citation`) and links
+  in `markdown` open in a new tab; their accessible name now ends with "(opens in a new tab)",
+  visually hidden. The text is the new `opensInNewTab` locale string — register a translation with
+  `registerLocale(lang, { opensInNewTab })`; it is inserted as text, never as HTML.
+
 ## [0.22.1] - 2026-09-30
 
 ### Fixed

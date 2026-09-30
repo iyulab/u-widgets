@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetEvent } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { getLocaleStrings } from '../core/locale.js';
 
 interface CitationItem {
   title: string;
@@ -130,6 +131,19 @@ export class UwCitation extends LitElement {
       .cite-title { font-size: var(--u-widget-font-size-label, 0.8125rem); }
       .cite-snippet { font-size: var(--u-widget-font-size-caption, 0.75rem); }
     }
+
+    /* 새 창 알림 — 화면에는 없고 링크의 접근성 이름에만 붙는다(KWCAG 7.2.1). */
+    .new-tab-hint {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
   `];
 
   @property({ type: Object })
@@ -182,10 +196,15 @@ export class UwCitation extends LitElement {
               target="_blank"
               rel="noopener noreferrer"
               @click=${() => this._handleClick(item, safeUrl)}
-            >${content}</a>`
+            >${content}<span class="new-tab-hint">${this._locale.opensInNewTab}</span></a>`
           : html`<div class="cite-item" part="cite-item">${content}</div>`}
       </div>
     `;
+  }
+
+  private get _locale() {
+    const locale = this.spec?.options?.locale;
+    return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
   /** The item's URL when it is safe to link to, otherwise `undefined`. */

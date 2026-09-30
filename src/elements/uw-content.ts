@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { getLocaleStrings } from '../core/locale.js';
 
 @customElement('uw-content')
 export class UwContent extends LitElement {
@@ -198,6 +199,19 @@ export class UwContent extends LitElement {
         font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
     }
+
+    /* 새 창 알림 — 화면에는 없고 링크의 접근성 이름에만 붙는다(KWCAG 7.2.1). */
+    .new-tab-hint {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
   `];
 
   @property({ type: Object })
@@ -327,7 +341,8 @@ export class UwContent extends LitElement {
       /\[([^\]]+)\]\(([^)]+)\)/g,
       (_match, text: string, href: string) => {
         const safe = this.sanitizeUrl(href);
-        return `<a href="${safe}" target="_blank" rel="noopener">${text}</a>`;
+        const hint = this.escapeHtml(this._locale.opensInNewTab);
+        return `<a href="${safe}" target="_blank" rel="noopener">${text}<span class="new-tab-hint">${hint}</span></a>`;
       },
     );
 
@@ -363,6 +378,11 @@ export class UwContent extends LitElement {
     const stripped = url.replace(/[\s\u200B\u200C\u200D\uFEFF\u00AD\u200E\u200F]/g, '');
     if (/^(javascript|data|vbscript):/i.test(stripped)) return '';
     return url;
+  }
+
+  private get _locale() {
+    const locale = this.spec?.options?.locale;
+    return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
   private escapeHtml(text: string): string {
