@@ -48,7 +48,7 @@ export class UwCitation extends LitElement {
       border: 1px solid var(--u-widget-border, #e2e8f0);
       background: var(--u-widget-bg, #fff);
       cursor: default;
-      transition: border-color 0.15s;
+      transition: border-color var(--u-widget-duration-fast, 150ms);
     }
     .cite-item[data-link] {
       cursor: pointer;

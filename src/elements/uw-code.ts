@@ -294,7 +294,7 @@ export class UwCode extends LitElement {
       cursor: pointer;
       font-size: var(--u-widget-font-size-overline, 0.6875rem);
       font-family: inherit;
-      transition: all 0.15s;
+      transition: all var(--u-widget-duration-fast, 150ms);
     }
     .code-copy:hover {
       background: var(--u-widget-bg, #fff);

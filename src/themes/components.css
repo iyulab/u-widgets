@@ -33,7 +33,7 @@
  * ──────────────────────────────────────────────────────────────────────────
  * 잇는 것 / 잇지 않는 것
  * ──────────────────────────────────────────────────────────────────────────
- *   잇는다     색 역할 · 면 · 테두리 · 타이포 패밀리 · 반경 · 엘리베이션
+ *   잇는다     색 역할 · 면 · 테두리 · 타이포 패밀리 · 반경 · 엘리베이션 · 모션 지속시간
  *   잇는다     **차트 팔레트** 여덟 칸 — `@iyulab/components` 가 `--u-chart-color-1..8` 을 연 뒤부터.
  *              여덟 색의 «순서와 구분성» 은 그 자체가 설계라, 역할색으로 흉내 내지 않고
  *              **한 벌로 검증된** 하우스 축을 칸 대 칸으로 잇는다. 그 축이 없는 판(components
@@ -85,6 +85,25 @@
   /* ── 엘리베이션 ── */
   --u-widget-shadow:         var(--u-shadow-sm, 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06));
   --u-widget-shadow-hover:   var(--u-shadow-md, 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06));
+
+  /* ── 모션 — 하우스의 지속시간 축(동작 줄이기면 하우스 시트가 0 으로 누른다) ── */
+  --u-widget-duration-fast:   var(--u-duration-fast,   150ms);
+  --u-widget-duration-normal: var(--u-duration-normal, 200ms);
+  --u-widget-duration-slow:   var(--u-duration-slow,   300ms);
+}
+
+/*
+ * ⚠**동작 줄이기는 여기서도 다시 쓴다** — 위 선언은 바깥 트리라 위젯 자신의 `:host` 동작 줄이기
+ * 규칙을 이긴다. 하우스 시트 없이 이 파일만 실리면 폴백(150ms…)이 남아 움직임이 멈추지 않는다.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :where(u-widget, uw-chart, uw-citation, uw-code, uw-compose, uw-content, uw-form,
+         uw-gallery, uw-gauge, uw-kv, uw-math, uw-metric, uw-rating, uw-status,
+         uw-steps, uw-table, uw-video) {
+    --u-widget-duration-fast:   0ms;
+    --u-widget-duration-normal: 0ms;
+    --u-widget-duration-slow:   0ms;
+  }
 }
 
 /*

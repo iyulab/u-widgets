@@ -72,7 +72,7 @@ export class UwCompose extends LitElement {
       border: 1px solid var(--u-widget-border, #e2e8f0);
       background: var(--u-widget-bg, #fff);
       box-shadow: var(--u-widget-shadow);
-      transition: box-shadow 0.2s;
+      transition: box-shadow var(--u-widget-duration-normal, 200ms);
     }
 
     /* ── collapsed child (details/summary) ── */
@@ -101,7 +101,7 @@ export class UwCompose extends LitElement {
     details.child-collapsed > summary::before {
       content: '\\25B6';
       font-size: 0.625rem;
-      transition: transform 0.15s;
+      transition: transform var(--u-widget-duration-fast, 150ms);
     }
 
     details.child-collapsed[open] > summary::before {

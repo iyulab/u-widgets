@@ -54,7 +54,7 @@ export class UwForm extends LitElement {
       color: var(--u-widget-text, #1a1a2e);
       background: var(--u-widget-bg, #fff);
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color var(--u-widget-duration-fast, 150ms);
     }
 
     input:focus,
@@ -81,7 +81,7 @@ export class UwForm extends LitElement {
       background: var(--u-widget-border, #e2e8f0);
       cursor: pointer;
       position: relative;
-      transition: background 0.2s;
+      transition: background var(--u-widget-duration-normal, 200ms);
     }
 
     .toggle-track[data-on='true'] {
@@ -96,7 +96,7 @@ export class UwForm extends LitElement {
       position: absolute;
       top: 2px;
       left: 2px;
-      transition: transform 0.2s;
+      transition: transform var(--u-widget-duration-normal, 200ms);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
@@ -153,7 +153,7 @@ export class UwForm extends LitElement {
       border: 1px solid var(--u-widget-border, #e2e8f0);
       background: var(--u-widget-bg, #fff);
       color: var(--u-widget-text, #1a1a2e);
-      transition: all 0.15s;
+      transition: all var(--u-widget-duration-fast, 150ms);
     }
 
     button:hover {

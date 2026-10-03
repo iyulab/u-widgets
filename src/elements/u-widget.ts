@@ -95,7 +95,7 @@ export class UWidget extends LitElement {
         border: 1px solid var(--u-widget-border, #e2e8f0);
         background: var(--u-widget-bg, #fff);
         box-shadow: var(--u-widget-shadow);
-        transition: box-shadow 0.2s;
+        transition: box-shadow var(--u-widget-duration-normal, 200ms);
       }
 
       .card-container > * {
@@ -122,7 +122,7 @@ export class UWidget extends LitElement {
         border: 1px solid var(--u-widget-border, #e2e8f0);
         background: var(--u-widget-bg, #fff);
         color: var(--u-widget-text, #1a1a2e);
-        transition: all 0.15s;
+        transition: all var(--u-widget-duration-fast, 150ms);
         font-family: inherit;
       }
 

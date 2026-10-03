@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Motion tokens `--u-widget-duration-fast` / `-normal` / `-slow`, and reduced motion is honoured.**
+  Every widget transition (hover lift, focus ring, rating icons, gauge fill, form controls) now reads
+  these tokens instead of fixed durations, and they drop to `0ms` under
+  `prefers-reduced-motion: reduce` — standalone, with the `themes/components.css` bridge alone, and with
+  the `@iyulab/components` sheet (the bridge links them to its `--u-duration-*` axis). Durations stay
+  what they were (150 / 200 / 300 ms) unless the bridge links them to the house scale.
+
 ## [0.23.0] - 2026-09-30
 
 ### Added

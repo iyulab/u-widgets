@@ -41,7 +41,7 @@ export class UwRating extends LitElement {
       font-size: 1.25rem;
       cursor: default;
       user-select: none;
-      transition: transform 0.1s;
+      transition: transform var(--u-widget-duration-fast, 150ms);
       position: relative;
       line-height: 1;
       display: inline-flex;

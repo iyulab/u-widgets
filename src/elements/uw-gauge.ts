@@ -143,7 +143,7 @@ export class UwGauge extends LitElement {
     .progress-bar-fill {
       height: 100%;
       border-radius: 4px;
-      transition: width 0.3s ease;
+      transition: width var(--u-widget-duration-slow, 300ms) ease;
     }
 
     .progress-info {
