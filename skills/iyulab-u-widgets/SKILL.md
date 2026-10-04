@@ -4,7 +4,6 @@ description: Declarative, JSON-spec-driven widget system for visualization and i
 license: MIT
 metadata:
   author: iyulab
-  version: "0.16.1"
 ---
 
 # @iyulab/u-widgets
