@@ -5,12 +5,20 @@
  * Verifies that each public entry point (index, charts, tools)
  * exports the expected symbols. This prevents accidental export
  * removal or renaming that would break consumers.
+ *
+ * The entries are imported statically, not with `await import()` inside a test: loading an entry
+ * transforms its whole module graph, and inside a test that cost counts against the test's 5s
+ * timeout. Alone it is ~0.5s; in the full parallel run it went past 5s ("exports core functions").
+ * A static import loads during collection, which has no per-test limit.
  */
 import { describe, it, expect } from 'vitest';
+import * as index from '../../src/index.js';
+import * as tools from '../../src/tools.js';
+import * as react from '../../src/react.js';
 
 describe('entry point: u-widgets (index)', () => {
-  it('exports core functions', async () => {
-    const mod = await import('../../src/index.js');
+  it('exports core functions', () => {
+    const mod = index;
 
     // Validation
     expect(typeof mod.validate).toBe('function');
@@ -38,16 +46,16 @@ describe('entry point: u-widgets (index)', () => {
     expect(typeof mod.getDefaultLocale).toBe('function');
   });
 
-  it('exports UWidget class', async () => {
-    const mod = await import('../../src/index.js');
+  it('exports UWidget class', () => {
+    const mod = index;
     expect(mod.UWidget).toBeDefined();
     expect(typeof mod.UWidget).toBe('function');
   });
 });
 
 describe('entry point: u-widgets/tools', () => {
-  it('exports tool functions', async () => {
-    const mod = await import('../../src/tools.js');
+  it('exports tool functions', () => {
+    const mod = tools;
 
     expect(typeof mod.help).toBe('function');
     expect(typeof mod.template).toBe('function');
@@ -55,15 +63,15 @@ describe('entry point: u-widgets/tools', () => {
     expect(typeof mod.autoSpec).toBe('function');
   });
 
-  it('help() returns widget catalog', async () => {
-    const mod = await import('../../src/tools.js');
+  it('help() returns widget catalog', () => {
+    const mod = tools;
     const result = mod.help();
     expect(result).toBeDefined();
     expect(Array.isArray(result) || typeof result === 'object').toBe(true);
   });
 
-  it('template() returns a valid spec', async () => {
-    const mod = await import('../../src/tools.js');
+  it('template() returns a valid spec', () => {
+    const mod = tools;
     const spec = mod.template('metric');
     expect(spec).toBeDefined();
     expect(spec!.widget).toBe('metric');
@@ -71,10 +79,10 @@ describe('entry point: u-widgets/tools', () => {
 });
 
 describe('entry point: u-widgets/react', () => {
-  it('exports UWidget React component', async () => {
-    // Import react entry — elements are already registered from index tests above,
-    // so we rely on the module cache via vite alias (no double-registration error).
-    const mod = await import('../../src/react.js');
+  it('exports UWidget React component', () => {
+    // The index import above registered the elements; the react entry shares that module
+    // instance through the vite alias, so nothing registers twice.
+    const mod = react;
     expect(mod.UWidget).toBeDefined();
     // createComponent returns a React.forwardRef object with $$typeof and render
     expect(mod.UWidget).toHaveProperty('render');
