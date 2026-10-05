@@ -1,9 +1,10 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
+import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent, FieldType } from '../core/types.js';
 import { getLocaleStrings, formatTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import { optionValue, optionLabel } from '../core/field-option.js';
+import { getFieldControl } from '../core/field-controls.js';
 
 @customElement('uw-form')
 export class UwForm extends LitElement {
@@ -317,6 +318,19 @@ export class UwForm extends LitElement {
     errorId?: string,
   ) {
     const hasError = !!this._errors[field.field];
+
+    // An optional entry point (`u-widgets/components`) may have replaced this type's control.
+    const control = getFieldControl(type as FieldType);
+    if (control) {
+      return control({
+        field,
+        value,
+        id: `input-${field.field}`,
+        hasError,
+        errorId,
+        onChange: (next) => this._onChange(field.field, next),
+      });
+    }
 
     switch (type) {
       case 'textarea':

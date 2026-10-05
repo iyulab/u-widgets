@@ -381,6 +381,19 @@ Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An opti
 (`\,` and `\=` keep a comma or `=` inside an option). In a `fields` array the same option is
 `{ "value": "hw", "label": "Hardware" }`; a plain string is a value shown as itself.
 
+### Date fields in an `@iyulab/components` app
+
+`date` and `datetime` fields use the browser's native inputs, whose display follows the browser's
+language. An app that already uses `@iyulab/components` can opt in to its date picker:
+
+```ts
+import '@iyulab/u-widgets';
+import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 1.58
+```
+
+The fields then render `<u-date-picker>` (typed entry, calendar, the app's locale). What the form
+submits does not change: `YYYY-MM-DD` for `date`, `YYYY-MM-DDTHH:mm` (local time) for `datetime`.
+
 ## Theming
 
 CSS custom properties on any ancestor element:

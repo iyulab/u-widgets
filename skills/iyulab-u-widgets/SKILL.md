@@ -44,6 +44,7 @@ auto-inferred from the data shape when omitted — see
 | `u-widgets/charts` | `chart.*` types (`uw-chart`) | `echarts` |
 | `u-widgets/math` | `math` type (`uw-math`) | `katex` |
 | `u-widgets/forms` | Swaps the built-in formdown parser for the full `@formdown/core` one | `@formdown/core` |
+| `u-widgets/components` | `uw-form` draws `date` / `datetime` fields with `<u-date-picker>` (typed entry, calendar, app locale); submitted values keep the native shape | `@iyulab/components` |
 | `u-widgets/cdn` | Single `<script>` bundle (core + charts), for non-bundler usage | — |
 
 Chart and math widgets are split out because their rendering libraries (`echarts`, `katex`) are

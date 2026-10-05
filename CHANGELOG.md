@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.25.0] - 2026-10-06
 
 ### Added
 
@@ -13,12 +13,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   strings (a string is still a value shown as itself). Formdown writes the same option as
   `@kind{hw=Hardware,sw=Software}: s[]` — the built-in parser now reads that grammar exactly as
   `@formdown/core` does, `\,` and `\=` included. New type: `UWidgetFieldOption`.
+- **`u-widgets/components` — date fields with `<u-date-picker>`.** An app that uses
+  `@iyulab/components` imports this entry and `uw-form` draws `date` and `datetime` fields with its
+  date picker (typed entry, calendar, the app's locale) instead of the browser's native inputs.
+  Submitted values keep the native shape — `YYYY-MM-DD`, and `YYYY-MM-DDTHH:mm` in local time — so
+  opting in changes how the field looks, not what the form sends. Without the import nothing
+  changes and u-widgets still runs without `@iyulab/components`.
 
 ### Changed
 
 - **`u-widgets/forms` requires `@formdown/core` 0.15** (optional peer `>=0.15.0 <0.16.0`, was
   `>=0.4.0 <0.11.0`). 0.15 reports options as `{ value, label? }`; they reach the form as above, so a
   `value=Label` option no longer shows as `hw=Hardware`.
+- **The optional `@iyulab/components` peer starts at 1.58** (was 1.41) — the first release whose
+  `u-date-picker` takes a typed date and time with the chosen time's UTC offset. The theme bridge
+  (`themes/components.css`) works with it unchanged.
 
 ### Fixed
 

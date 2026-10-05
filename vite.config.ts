@@ -116,6 +116,7 @@ const ENTRY = {
   'u-widgets-tools': resolve(__dirname, 'src/tools.ts'),
   'u-widgets-math': resolve(__dirname, 'src/math.ts'),
   'u-widgets-react': resolve(__dirname, 'src/react.ts'),
+  'u-widgets-components': resolve(__dirname, 'src/components.ts'),
 };
 
 export default defineConfig({
@@ -125,7 +126,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex', 'react', /^react\//, '@lit/react', /^@lit\/react\//, '@iyulab/u-widgets'],
+      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex', 'react', /^react\//, '@lit/react', /^@lit\/react\//, '@iyulab/u-widgets', '@iyulab/components', /^@iyulab\/components\//],
       output: {
         globals: {
           lit: 'Lit',
