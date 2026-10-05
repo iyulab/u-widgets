@@ -170,6 +170,48 @@ describe('uw-form', () => {
       expect(detail.data.value).toEqual(['TS', 'JS']);
     });
 
+    it('{ value, label } options show the label and submit the value — all four choice types', async () => {
+      const kinds = [{ value: 'hw', label: 'Hardware' }, 'other'];
+      const el = createElement({
+        widget: 'form',
+        data: { sel: 'hw', rad: 'hw', chk: ['hw'], multi: ['hw'] },
+        fields: [
+          { field: 'sel', type: 'select', options: kinds },
+          { field: 'rad', type: 'radio', options: kinds },
+          { field: 'chk', type: 'checkbox', options: kinds },
+          { field: 'multi', type: 'multiselect', options: kinds },
+        ],
+      });
+      const shadow = await render(el);
+
+      const select = shadow.querySelector('select') as HTMLSelectElement;
+      const opts = [...select.options].slice(1); // after the empty "--"
+      expect(opts.map((o) => [o.value, o.textContent?.trim()])).toEqual([['hw', 'Hardware'], ['other', 'other']]);
+      // the pre-filled select value is measured in the browser project (happy-dom differs)
+
+      for (const group of ['.radio-group', '.checkbox-group', '.multiselect-group']) {
+        const labels = [...shadow.querySelectorAll(`${group} label`)];
+        expect(labels.map((l) => l.textContent?.trim()), group).toEqual(['Hardware', 'other']);
+        const inputs = [...shadow.querySelectorAll(`${group} input`)] as HTMLInputElement[];
+        expect(inputs.map((i) => i.value), group).toEqual(['hw', 'other']);
+        expect(inputs[0].checked, group).toBe(true);
+      }
+
+      const listener = vi.fn();
+      el.addEventListener('u-widget-internal', listener);
+      const radios = shadow.querySelectorAll('.radio-group input') as NodeListOf<HTMLInputElement>;
+      radios[1].checked = true;
+      radios[1].dispatchEvent(new Event('change', { bubbles: true }));
+      const multi = shadow.querySelectorAll('.multiselect-group input') as NodeListOf<HTMLInputElement>;
+      multi[1].checked = true;
+      multi[1].dispatchEvent(new Event('change', { bubbles: true }));
+      await el.updateComplete;
+      expect(listener.mock.calls.map((c) => c[0].detail.data)).toEqual([
+        { field: 'rad', value: 'other' },
+        { field: 'multi', value: ['hw', 'other'] },
+      ]);
+    });
+
     it('pre-fills from data defaults', async () => {
       const el = createElement({
         widget: 'form',

@@ -67,11 +67,22 @@ describe('mapFields', () => {
     });
   });
 
-  it('maps options', () => {
+  it('maps options — an option without its own label becomes a plain value', () => {
     const fields: FormdownField[] = [
-      { name: 'color', type: 'select', options: ['red', 'green', 'blue'] },
+      { name: 'color', type: 'select', options: [{ value: 'red' }, { value: 'green' }, { value: 'blue' }] },
     ];
     expect(mapFields(fields)[0].options).toEqual(['red', 'green', 'blue']);
+  });
+
+  it('keeps an option label apart from its value (@formdown/core 0.15 `value=Label`)', () => {
+    const fields: FormdownField[] = [
+      {
+        name: 'kind',
+        type: 'select',
+        options: [{ value: 'hw', label: 'Hardware' }, { value: 'other' }, { value: 'x', label: 'x' }],
+      },
+    ];
+    expect(mapFields(fields)[0].options).toEqual([{ value: 'hw', label: 'Hardware' }, 'other', 'x']);
   });
 
   it('does not include empty options array', () => {

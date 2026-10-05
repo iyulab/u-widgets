@@ -376,7 +376,10 @@ Forms can use [formdown](https://github.com/iyulab/formdown) syntax for compact 
 | `r[]` | radio |
 | `c[]` | checkbox |
 
-Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options.
+Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An option written
+`value=Label` submits `value` and shows `Label` — `@kind{hw=Hardware,sw=Software}(Kind): s[]`
+(`\,` and `\=` keep a comma or `=` inside an option). In a `fields` array the same option is
+`{ "value": "hw", "label": "Hardware" }`; a plain string is a value shown as itself.
 
 ## Theming
 

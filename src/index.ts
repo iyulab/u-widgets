@@ -25,6 +25,7 @@ export type {
   UWidgetMapping,
   UWidgetAction,
   UWidgetFieldDefinition,
+  UWidgetFieldOption,
   UWidgetColumnDefinition,
   UWidgetEvent,
   WidgetType,

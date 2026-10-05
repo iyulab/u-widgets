@@ -1,4 +1,5 @@
 import type { UWidgetFieldDefinition, UWidgetAction, FieldType } from './types.js';
+import { parseOptionList } from './field-option.js';
 
 /**
  * Parse a formdown string into fields and actions.
@@ -16,6 +17,7 @@ import type { UWidgetFieldDefinition, UWidgetAction, FieldType } from './types.j
  *   ms[]   multiselect
  *
  *   * = required, (Label) = display label, {a,b,c} = options
+ *   {hw=Hardware} = an option whose value (`hw`) differs from its label; `\,` and `\=` escape
  */
 export interface FormdownResult {
   fields: UWidgetFieldDefinition[];
@@ -109,7 +111,7 @@ export function parseFormdown(input: string, _data?: Record<string, unknown>): F
     if (label) field.label = label;
     if (required) field.required = true;
     if (optionsStr) {
-      field.options = optionsStr.split(',').map((o) => o.trim());
+      field.options = parseOptionList(optionsStr);
     }
 
     // Parse type marker

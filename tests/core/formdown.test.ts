@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
+import { parseOptionList as coreParseOptionList } from '@formdown/core';
 import { parseFormdown } from '../../src/core/formdown.js';
+import { parseOptionList } from '../../src/core/field-option.js';
 
 describe('parseFormdown', () => {
   it('parses basic text field', () => {
@@ -24,6 +26,30 @@ describe('parseFormdown', () => {
     const result = parseFormdown('@size{S,M,L}: r[]');
     expect(result.fields[0].options).toEqual(['S', 'M', 'L']);
     expect(result.fields[0].type).toBe('radio');
+  });
+
+  it('parses value=Label options — the value is submitted, the label shown', () => {
+    const result = parseFormdown('@kind{hw=Hardware,sw=Software,other}(Kind): s[]');
+    expect(result.fields[0].options).toEqual([
+      { value: 'hw', label: 'Hardware' },
+      { value: 'sw', label: 'Software' },
+      'other',
+    ]);
+  });
+
+  it('reads option lists exactly as @formdown/core does', () => {
+    const cases = [
+      'a,b,c',
+      'hw=Hardware,sw=Software,other',
+      'a\\,b,c',          // escaped comma stays in the option
+      'eq\\=sign,x=Y\\=Z', // escaped `=` in the value and in the label
+      ' p = Pea , q= ,=r', // spaces trimmed; an empty side means "shown as written"
+      'same=same',
+    ];
+    for (const written of cases) {
+      const ours = parseOptionList(written).map((o) => (typeof o === 'string' ? { value: o } : o));
+      expect(ours, written).toEqual(coreParseOptionList(written).options);
+    }
   });
 
   it('parses email field (@[])', () => {

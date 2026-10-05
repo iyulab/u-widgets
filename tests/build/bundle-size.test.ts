@@ -82,7 +82,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('shared chunks total is under 4 KB gzip', () => {
+  it('shared chunks total is under 6 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
     const chunks = files.filter(
@@ -92,6 +92,9 @@ describe('bundle size budget', () => {
       (sum: number, f: string) => sum + gzipSize(resolve(DIST, f)),
       0
     );
-    expect(totalGzip).toBeLessThan(5 * 1024); // shared chunks < 5 KB gzip (tokens + infer + formdown)
+    // Shared by the entries: format · decorate · infer · formdown (built-in parser + the option
+    // grammar `value=Label`). 5.2 KB measured when the option grammar landed — a jump past 6 KB
+    // means a dependency or a large module slipped into a shared chunk.
+    expect(totalGzip).toBeLessThan(6 * 1024);
   });
 });

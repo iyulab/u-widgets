@@ -3,6 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
 import { getLocaleStrings, formatTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
+import { optionValue, optionLabel } from '../core/field-option.js';
 
 @customElement('uw-form')
 export class UwForm extends LitElement {
@@ -348,14 +349,17 @@ export class UwForm extends LitElement {
         >
           <option value="">--</option>
           ${(field.options ?? []).map(
-            (opt) => html`<option value=${opt}>${opt}</option>`,
+            // `selected` per option, not only `.value` on the select: Lit commits the select's own
+            // bindings before its children, so on first render `.value` names an option that does
+            // not exist yet and a pre-filled value showed as "--".
+            (o) => html`<option value=${optionValue(o)} ?selected=${optionValue(o) === String(value ?? '')}>${optionLabel(o)}</option>`,
           )}
         </select>`;
 
       case 'multiselect':
         return html`<div class="multiselect-group" part="multiselect-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
-            (opt) => html`
+            (o) => { const opt = optionValue(o); return html`
               <label>
                 <input
                   type="checkbox"
@@ -370,9 +374,9 @@ export class UwForm extends LitElement {
                     );
                   }}
                 />
-                ${opt}
+                ${optionLabel(o)}
               </label>
-            `,
+            `; },
           )}
         </div>`;
 
@@ -401,7 +405,7 @@ export class UwForm extends LitElement {
       case 'radio':
         return html`<div class="radio-group" part="radio-group" role="radiogroup" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
-            (opt) => html`
+            (o) => { const opt = optionValue(o); return html`
               <label>
                 <input
                   type="radio"
@@ -410,16 +414,16 @@ export class UwForm extends LitElement {
                   ?checked=${value === opt}
                   @change=${() => this._onChange(field.field, opt)}
                 />
-                ${opt}
+                ${optionLabel(o)}
               </label>
-            `,
+            `; },
           )}
         </div>`;
 
       case 'checkbox':
         return html`<div class="checkbox-group" part="checkbox-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
           ${(field.options ?? []).map(
-            (opt) => html`
+            (o) => { const opt = optionValue(o); return html`
               <label>
                 <input
                   type="checkbox"
@@ -434,9 +438,9 @@ export class UwForm extends LitElement {
                     );
                   }}
                 />
-                ${opt}
+                ${optionLabel(o)}
               </label>
-            `,
+            `; },
           )}
         </div>`;
 

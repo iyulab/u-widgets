@@ -36,7 +36,7 @@ export const FIELD_PROP_DOCS: Readonly<Record<string, string>> = {
   type: 'Input type',
   required: 'Must be filled before submit',
   placeholder: 'Placeholder text',
-  options: 'Choices for select/radio/checkbox',
+  options: 'Choices for select/multiselect/radio/checkbox — string, or { value, label } to submit a value other than the text shown',
   minLength: 'Minimum character length',
   maxLength: 'Maximum character length',
   pattern: 'Custom regex pattern',

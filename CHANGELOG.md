@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Field options can submit a value other than the text they show.** `options` on a select,
+  multiselect, radio or checkbox field takes `{ "value": "hw", "label": "Hardware" }` alongside plain
+  strings (a string is still a value shown as itself). Formdown writes the same option as
+  `@kind{hw=Hardware,sw=Software}: s[]` — the built-in parser now reads that grammar exactly as
+  `@formdown/core` does, `\,` and `\=` included. New type: `UWidgetFieldOption`.
+
+### Changed
+
+- **`u-widgets/forms` requires `@formdown/core` 0.15** (optional peer `>=0.15.0 <0.16.0`, was
+  `>=0.4.0 <0.11.0`). 0.15 reports options as `{ value, label? }`; they reach the form as above, so a
+  `value=Label` option no longer shows as `hw=Hardware`.
+
+### Fixed
+
+- **A pre-filled select shows its value on first render.** The select got its value before its
+  options existed, so a form with `data` for a select field showed `--` and submitted nothing for it
+  until changed.
+
 ## [0.24.1] - 2026-10-05
 
 ### Changed

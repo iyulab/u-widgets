@@ -177,6 +177,21 @@ export type FieldType =
   | 'checkbox';
 
 /**
+ * A choice whose submitted value differs from the text shown for it.
+ *
+ * @example
+ * ```json
+ * { "value": "hw", "label": "Hardware" }
+ * ```
+ */
+export interface UWidgetFieldOption {
+  /** The value submitted when this choice is picked. */
+  value: string;
+  /** The text shown for it. Defaults to `value`. */
+  label?: string;
+}
+
+/**
  * Field definition for form/confirm input widgets.
  *
  * @example
@@ -195,8 +210,11 @@ export interface UWidgetFieldDefinition {
   required?: boolean;
   /** Placeholder text shown when the field is empty. */
   placeholder?: string;
-  /** Options for select, multiselect, radio, and checkbox types. */
-  options?: string[];
+  /**
+   * Choices for select, multiselect, radio, and checkbox types. A string is a value shown as
+   * itself; `{ value, label }` shows `label` and submits `value`.
+   */
+  options?: (string | UWidgetFieldOption)[];
   /** Minimum character length for text inputs. */
   minLength?: number;
   /** Maximum character length for text inputs. */

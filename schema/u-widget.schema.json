@@ -326,8 +326,21 @@
         },
         "options": {
           "type": "array",
-          "items": { "type": "string" },
-          "description": "Choices for select/multiselect/radio/checkbox"
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "required": ["value"],
+                "properties": {
+                  "value": { "type": "string", "description": "Value submitted when picked" },
+                  "label": { "type": "string", "description": "Text shown for it (defaults to value)" }
+                },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Choices for select/multiselect/radio/checkbox — a string, or { value, label } when the submitted value differs from the text shown"
         },
         "minLength": {
           "type": "integer",

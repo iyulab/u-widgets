@@ -10,7 +10,8 @@ export interface FormdownField {
   label?: string;
   required?: boolean;
   placeholder?: string;
-  options?: string[];
+  /** `@formdown/core` 0.15+: `value=Label` keeps the value apart from the text shown. */
+  options?: { value: string; label?: string }[];
   attributes?: Record<string, string>;
 }
 
@@ -47,7 +48,11 @@ export function mapFields(fields: FormdownField[]): UWidgetFieldDefinition[] {
     if (f.label) def.label = f.label;
     if (f.required) def.required = true;
     if (f.placeholder) def.placeholder = f.placeholder;
-    if (f.options && f.options.length > 0) def.options = f.options;
+    if (f.options && f.options.length > 0) {
+      def.options = f.options.map((o) =>
+        o.label !== undefined && o.label !== o.value ? { value: o.value, label: o.label } : o.value,
+      );
+    }
 
     // Extract numeric/string attributes
     if (f.attributes) {

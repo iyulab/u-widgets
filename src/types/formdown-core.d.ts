@@ -11,7 +11,8 @@ declare module '@formdown/core/form-manager' {
       label?: string;
       required?: boolean;
       placeholder?: string;
-      options?: string[];
+      /** 0.15+: `value=Label` 로 값과 보이는 글자를 가른다(라벨 없으면 값을 보인다) */
+      options?: { value: string; label?: string }[];
       attributes?: Record<string, string>;
     }>;
     getActions(): Array<{
