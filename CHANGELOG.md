@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.24.1] - 2026-10-05
+
+### Changed
+
+- **The optional `katex` peer accepts 0.19** (`>=0.17.0 <0.20.0`, was `<0.19.0`). `uw-math` renders
+  MathML only, which the 0.19 change (characters without metrics reported through `strict`) does not
+  touch.
+
 ## [0.24.0] - 2026-10-03
 
 ### Added
