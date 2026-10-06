@@ -561,7 +561,7 @@ export class UWidget extends LitElement {
     const [meanBefore, meanAfter] = splitTemplate(this._strings.didYouMean, 'suggestion');
     return html`
       <div class="fallback-card" part="fallback">
-        <div class="fallback-label">${spec.title ?? `Unknown widget: ${spec.widget}`}</div>
+        <div class="fallback-label">${spec.title ?? formatTemplate(this._strings.unknownWidget, { widget: spec.widget })}</div>
         ${suggestion ? html`<div class="fallback-hint">${meanBefore}<strong>${suggestion}</strong>${meanAfter}</div>` : ''}
         <pre part="json"><code>${JSON.stringify(spec, null, 2)}</code></pre>
       </div>

@@ -47,6 +47,7 @@ export interface UWidgetLocaleStrings {
   copied: string;
   // Fallback cards (a spec the page cannot render) — templates; {import} and {suggestion} render as code/strong
   moduleNotLoaded: string;
+  unknownWidget: string;
   addImportHint: string;
   didYouMean: string;
   invalidSpec: string;
@@ -89,6 +90,7 @@ const EN: UWidgetLocaleStrings = {
   copied: 'Copied!',
   // Fallback cards
   moduleNotLoaded: 'Widget module not loaded: {widget}',
+  unknownWidget: 'Unknown widget: {widget}',
   addImportHint: 'Add {import} to render this widget.',
   didYouMean: 'Did you mean {suggestion}?',
   invalidSpec: 'Invalid widget spec',

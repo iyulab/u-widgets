@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.1] - 2026-10-07
+
+### Fixed
+
+- **The "Unknown widget" fallback title goes through the locale table** (new key `unknownWidget`) — the last chrome
+  string that was English in every locale.
+
 ## [0.26.0] - 2026-10-07
 
 ### Added

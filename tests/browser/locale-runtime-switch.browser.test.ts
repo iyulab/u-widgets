@@ -84,7 +84,7 @@ describe('components bridge (@iyulab/u-widgets/components)', () => {
 
 describe('chrome strings go through the locale table', () => {
   it('region names, the copy button and the fallback hint follow the locale', async () => {
-    registerLocale('ko', { ...KO, keyValuePairs: '키-값', copy: '복사', didYouMean: '{suggestion}을(를) 찾으셨나요?' });
+    registerLocale('ko', { ...KO, keyValuePairs: '키-값', copy: '복사', didYouMean: '{suggestion}을(를) 찾으셨나요?', unknownWidget: '알 수 없는 위젯: {widget}' });
     setDefaultLocale('ko');
     const kv = document.createElement('u-widget') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
     kv.spec = { widget: 'kv', data: { a: 1 } };
@@ -100,5 +100,6 @@ describe('chrome strings go through the locale table', () => {
     expect(copy.textContent!.trim()).toBe('복사');
     const hint = typo.shadowRoot!.querySelector('.fallback-hint');
     expect(hint?.textContent?.replace(/\s+/g, '')).toBe('table을(를)찾으셨나요?');
+    expect(typo.shadowRoot!.querySelector('.fallback-label')!.textContent!.trim()).toBe('알 수 없는 위젯: tabel');
   });
 });
