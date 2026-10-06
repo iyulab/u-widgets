@@ -568,4 +568,8 @@ declare global {
   interface HTMLElementTagNameMap {
     'u-widget': UWidget;
   }
+  // Bubbles and is composed, so a listener on `document` or any ancestor sees it typed too.
+  interface GlobalEventHandlersEventMap {
+    'u-widget-event': CustomEvent<UWidgetEvent>;
+  }
 }

@@ -22,23 +22,58 @@ Define your data. Map it to visual channels. The renderer does the rest.
 
 That's a complete bar chart. Mapping is auto-inferred from data shape.
 
+## Quick Start
+
+A first page with a metric and a bar chart (Vite — `index.html` loads `src/main.ts` as a module):
+
+```bash
+npm install @iyulab/u-widgets echarts
+```
+
+```ts
+// src/main.ts
+import '@iyulab/u-widgets';
+import '@iyulab/u-widgets/charts';
+import type { UWidgetSpec } from '@iyulab/u-widgets';
+
+const specs: UWidgetSpec[] = [
+  { widget: 'metric', data: { value: 1284, unit: 'EA', change: 12.5, trend: 'up' } },
+  {
+    widget: 'chart.bar',
+    data: [
+      { name: 'A', value: 30 },
+      { name: 'B', value: 70 },
+      { name: 'C', value: 45 },
+    ],
+  },
+];
+
+for (const spec of specs) {
+  const widget = document.createElement('u-widget');
+  widget.spec = spec;
+  widget.style.cssText = 'display: block; max-width: 480px; margin: 16px';
+  document.body.append(widget);
+}
+
+document.addEventListener('u-widget-event', (e) => console.log(e.detail));
+```
+
 ## Installation
 
 ```bash
 npm install @iyulab/u-widgets
 ```
 
-```html
-<script type="module">
-  import '@iyulab/u-widgets';
-  // For chart support (requires echarts peer dependency):
-  // import '@iyulab/u-widgets/charts';
-  // For math expression support (requires katex peer dependency):
-  // import '@iyulab/u-widgets/math';
-</script>
-
-<u-widget .spec=${{ widget: 'metric', data: { value: 42, unit: 'users' } }}></u-widget>
+```ts
+import '@iyulab/u-widgets';
+// For chart support (requires echarts peer dependency):
+// import '@iyulab/u-widgets/charts';
+// For math expression support (requires katex peer dependency):
+// import '@iyulab/u-widgets/math';
 ```
+
+`spec` is a property, not an attribute — set it from script (`el.spec = {…}`) or with a framework binding
+(Lit `.spec=${…}`, React `spec={…}` via `@iyulab/u-widgets/react`).
 
 A `chart.*` or `math` widget rendered without its entry imported shows a "Widget module not loaded"
 card naming the import, and warns once per widget type in the console. It renders as soon as the entry

@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.1] - 2026-10-06
+
+### Fixed
+
+- **`u-widget-event` is typed for TypeScript listeners.** The event is now declared on the global event
+  map as `CustomEvent<UWidgetEvent>`, so `el.addEventListener('u-widget-event', (e) => e.detail.type)`
+  — on the element, `document` or any ancestor — type-checks without a cast. Before, `e` was a plain
+  `Event` and reading `e.detail` failed under `strict`.
+
+### Documentation
+
+- **Quick Start** — a first page (a metric and a bar chart) that builds, type-checks and renders as
+  written. The installation example no longer shows a Lit property binding inside plain HTML (it
+  rendered nothing when copied); it says `spec` is a property and how to set it. The Next.js guide
+  drops its casts.
+
 ## [0.25.0] - 2026-10-06
 
 ### Added

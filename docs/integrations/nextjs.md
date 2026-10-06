@@ -11,7 +11,7 @@ Next.js App Router(RSC)와 통합하려면 클라이언트 전용 컴포넌트�
 "use client";
 
 import { useRef, useEffect } from "react";
-import type { UWidgetSpec } from "@iyulab/u-widgets";
+import type { UWidgetSpec, UWidgetEvent } from "@iyulab/u-widgets";
 
 // Web Components 등록 (클라이언트 사이드에서만 실행)
 import "@iyulab/u-widgets";
@@ -20,23 +20,24 @@ import "@iyulab/u-widgets";
 
 interface Props {
   spec: UWidgetSpec;
-  onEvent?: (e: CustomEvent) => void;
+  onEvent?: (e: CustomEvent<UWidgetEvent>) => void;
 }
 
 export function UWidgetClient({ spec, onEvent }: Props) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElementTagNameMap["u-widget"]>(null);
 
   useEffect(() => {
     if (ref.current) {
-      (ref.current as any).spec = spec;
+      ref.current.spec = spec;
     }
   }, [spec]);
 
   useEffect(() => {
     const el = ref.current;
     if (!el || !onEvent) return;
-    el.addEventListener("u-widget-event", onEvent as EventListener);
-    return () => el.removeEventListener("u-widget-event", onEvent as EventListener);
+    // `u-widget-event` 은 전역 이벤트 맵에 선언돼 있어 캐스트가 필요 없다.
+    el.addEventListener("u-widget-event", onEvent);
+    return () => el.removeEventListener("u-widget-event", onEvent);
   }, [onEvent]);
 
   return <u-widget ref={ref} />;

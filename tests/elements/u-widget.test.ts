@@ -282,9 +282,10 @@ describe('u-widget', () => {
     await render(el);
 
     const received: UWidgetEvent[] = [];
-    el.addEventListener('u-widget-event', ((e: CustomEvent<UWidgetEvent>) => {
+    // No cast: the global event map types `e` as CustomEvent<UWidgetEvent> (typecheck guards it).
+    el.addEventListener('u-widget-event', (e) => {
       received.push(e.detail);
-    }) as EventListener);
+    });
 
     // Simulate internal event from child
     const internal = new CustomEvent('u-widget-internal', {
@@ -504,9 +505,9 @@ describe('u-widget', () => {
     const shadow = await render(el);
 
     const received: UWidgetEvent[] = [];
-    el.addEventListener('u-widget-event', ((e: CustomEvent<UWidgetEvent>) => {
+    el.addEventListener('u-widget-event', (e) => {
       received.push(e.detail);
-    }) as EventListener);
+    });
 
     const btn = shadow.querySelector('.actions-widget button') as HTMLButtonElement;
     btn.click();
@@ -657,9 +658,9 @@ describe('u-widget', () => {
     const shadow = await render(el);
 
     const received: UWidgetEvent[] = [];
-    el.addEventListener('u-widget-event', ((e: CustomEvent<UWidgetEvent>) => {
+    el.addEventListener('u-widget-event', (e) => {
       received.push(e.detail);
-    }) as EventListener);
+    });
 
     const btn = shadow.querySelector('.global-actions button') as HTMLButtonElement;
     btn.click();
