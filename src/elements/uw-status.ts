@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 type StatusLevel = 'info' | 'success' | 'warning' | 'error' | 'neutral';
@@ -117,7 +118,7 @@ export class UwStatus extends LitElement {
     if (items.length === 0) return nothing;
 
     return html`
-      <div class="status-list" part="status" role="list" aria-label=${this.spec.title ?? 'Status'}>
+      <div class="status-list" part="status" role="list" aria-label=${this.spec.title ?? localeStringsOf(this.spec).status}>
         ${items.map(item => html`
           <div class="status-item" part="status-item" role="listitem" data-level=${item.level}>
             <span class="status-icon" part="status-icon" aria-hidden="true">${LEVEL_ICONS[item.level]}</span>

@@ -32,6 +32,24 @@ export interface UWidgetLocaleStrings {
   invalidEmail: string;
   invalidUrl: string;
   invalidPattern: string;
+  // Accessible names of widget regions (used when the spec has no title)
+  actions: string;
+  citations: string;
+  gallery: string;
+  keyValuePairs: string;
+  status: string;
+  steps: string;
+  /** Rating with no label or title — template with {value}, {max}. */
+  ratingOutOf: string;
+  // Code block
+  code: string;
+  copy: string;
+  copied: string;
+  // Fallback cards (a spec the page cannot render) — templates; {import} and {suggestion} render as code/strong
+  moduleNotLoaded: string;
+  addImportHint: string;
+  didYouMean: string;
+  invalidSpec: string;
 }
 
 const EN: UWidgetLocaleStrings = {
@@ -57,9 +75,49 @@ const EN: UWidgetLocaleStrings = {
   invalidEmail: '{label} must be a valid email address',
   invalidUrl: '{label} must be a valid URL',
   invalidPattern: '{label} format is invalid',
+  // Region names
+  actions: 'Actions',
+  citations: 'Citations',
+  gallery: 'Gallery',
+  keyValuePairs: 'Key-value pairs',
+  status: 'Status',
+  steps: 'Steps',
+  ratingOutOf: 'Rating: {value} out of {max}',
+  // Code block
+  code: 'code',
+  copy: 'Copy',
+  copied: 'Copied!',
+  // Fallback cards
+  moduleNotLoaded: 'Widget module not loaded: {widget}',
+  addImportHint: 'Add {import} to render this widget.',
+  didYouMean: 'Did you mean {suggestion}?',
+  invalidSpec: 'Invalid widget spec',
 };
 
 const registry = new Map<string, UWidgetLocaleStrings>();
+
+// ── Change notification ──
+const listeners = new Set<() => void>();
+let revision = 0;
+function notify(): void {
+  revision++;
+  for (const listener of [...listeners]) listener();
+}
+
+/**
+ * Call `listener` whenever the locale changes — `setDefaultLocale()` to another value, or `registerLocale()`.
+ * Returns the unsubscribe function. `<u-widget>` subscribes while connected and re-renders, so a runtime language
+ * switch reaches what is already on screen.
+ */
+export function onLocaleChange(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
+/** A number that grows on every change — compare it to know whether the locale changed since you last looked. */
+export function getLocaleRevision(): number {
+  return revision;
+}
 
 /**
  * Register a locale for u-widgets chrome strings.
@@ -70,6 +128,7 @@ export function registerLocale(
   strings: Partial<UWidgetLocaleStrings>,
 ): void {
   registry.set(lang.toLowerCase(), { ...EN, ...strings });
+  notify();
 }
 
 /**
@@ -91,6 +150,21 @@ export function getLocaleStrings(lang?: string): UWidgetLocaleStrings {
   if (base !== key && registry.has(base)) return registry.get(base)!;
 
   return EN;
+}
+
+/** The strings for a widget's spec — its `options.locale` (which `<u-widget>` fills from `resolveLocale`). */
+export function localeStringsOf(spec?: { options?: Record<string, unknown> } | null): UWidgetLocaleStrings {
+  const locale = spec?.options?.locale;
+  return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
+}
+
+/**
+ * Split a template around one `{key}` placeholder — for templates whose placeholder renders as markup
+ * (`Add {import} to …` around a `<code>`). A template without it is all `before`.
+ */
+export function splitTemplate(template: string, key: string): [before: string, after: string] {
+  const i = template.indexOf(`{${key}}`);
+  return i < 0 ? [template, ''] : [template.slice(0, i), template.slice(i + key.length + 2)];
 }
 
 /**
@@ -132,7 +206,9 @@ let _defaultLocale: string | undefined;
  * ```
  */
 export function setDefaultLocale(lang: string | undefined): void {
+  if (lang === _defaultLocale) return;
   _defaultLocale = lang;
+  notify();
 }
 
 /**

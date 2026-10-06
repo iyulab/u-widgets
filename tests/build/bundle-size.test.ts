@@ -82,7 +82,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('shared chunks total is under 6 KB gzip', () => {
+  it('shared chunks total is under 7 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
     const chunks = files.filter(
@@ -95,6 +95,9 @@ describe('bundle size budget', () => {
     // Shared by the entries: format · decorate · infer · formdown (built-in parser + the option
     // grammar `value=Label`). 5.2 KB measured when the option grammar landed — a jump past 6 KB
     // means a dependency or a large module slipped into a shared chunk.
-    expect(totalGzip).toBeLessThan(6 * 1024);
+    // 0.26.0: + the locale module (English table, ~0.9 KB) — the `./components` entry calls `setDefaultLocale`, which
+    // must be the same module instance the elements read, so it moved out of the core entry into a shared chunk
+    // (6.3 KB measured). Bytes moved, not added.
+    expect(totalGzip).toBeLessThan(7 * 1024);
   });
 });

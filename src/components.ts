@@ -7,6 +7,9 @@
  * Requires `@iyulab/components` (optional peer). Without this import u-widgets stays native and
  * runs without it.
  *
+ * u-widgets also follows the `@iyulab/components` locale: its default locale becomes `Locale.get()` and moves with
+ * every `Locale.set()`, so one call switches the whole app. A widget's own `locale` still wins.
+ *
  * Submitted values keep the native shape: `YYYY-MM-DD` for `date`, `YYYY-MM-DDTHH:mm` (local time)
  * for `datetime` — turning this on changes how a field looks, not what the form sends.
  *
@@ -19,7 +22,9 @@
 
 import { html, nothing } from 'lit';
 import '@iyulab/components/dist/components/date-picker/UDatePicker.js';
+import { Locale } from '@iyulab/components/dist/utilities/Locale.js';
 import { registerFieldControl, type FieldControlContext } from './core/field-controls.js';
+import { setDefaultLocale } from './core/locale.js';
 
 /** `min`/`max` the picker reads: an ISO day (it bounds days, also in datetime mode). */
 function dayBound(bound: number | string | undefined): string | undefined {
@@ -49,3 +54,7 @@ function datePicker(mode: 'date' | 'datetime') {
 
 registerFieldControl('date', datePicker('date'));
 registerFieldControl('datetime', datePicker('datetime'));
+
+// One language for the app: u-widgets' default locale is the components locale, now and after every switch.
+setDefaultLocale(Locale.get());
+Locale.subscribe(() => setDefaultLocale(Locale.get()));

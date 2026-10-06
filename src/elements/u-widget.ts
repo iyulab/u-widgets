@@ -6,7 +6,7 @@ import { normalize } from '../core/normalize.js';
 import { infer } from '../core/infer.js';
 import { suggestWidget } from '../core/suggest.js';
 import { widgetEntry, type WidgetEntry } from '../core/entries.js';
-import { resolveLocale } from '../core/locale.js';
+import { resolveLocale, onLocaleChange, getLocaleRevision, getLocaleStrings, formatTemplate, splitTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import './uw-metric.js';
 import './uw-gauge.js';
@@ -277,14 +277,30 @@ export class UWidget extends LitElement {
   /** Entry-point elements this instance is waiting on, so it re-renders once each is registered. */
   private _awaitedElements = new Set<string>();
 
+  /** This widget's chrome strings — its own `locale`, else the default locale. */
+  private get _strings() {
+    return getLocaleStrings(resolveLocale(this.locale));
+  }
+
+  /** Locale subscription while connected, and the revision seen when detached (to catch up on re-attach). */
+  private _unsubscribeLocale?: () => void;
+  private _detachedLocaleRevision?: number;
+
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('u-widget-internal', this._handleInternalEvent as EventListener);
+    // A runtime language switch re-renders what is already on screen; a switch while detached is caught up now.
+    this._unsubscribeLocale = onLocaleChange(() => this.requestUpdate());
+    if (this._detachedLocaleRevision !== undefined && this._detachedLocaleRevision !== getLocaleRevision()) this.requestUpdate();
+    this._detachedLocaleRevision = undefined;
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener('u-widget-internal', this._handleInternalEvent as EventListener);
+    this._unsubscribeLocale?.();
+    this._unsubscribeLocale = undefined;
+    this._detachedLocaleRevision = getLocaleRevision();
   }
 
   private _handleInternalEvent = (e: CustomEvent<UWidgetEvent>) => {
@@ -451,7 +467,7 @@ export class UWidget extends LitElement {
     const layout = String(options.layout ?? 'wrap');
 
     return html`
-      <div class="actions-widget" data-layout=${layout} part="actions" role="group" aria-label=${spec.title ?? 'Actions'}>
+      <div class="actions-widget" data-layout=${layout} part="actions" role="group" aria-label=${spec.title ?? this._strings.actions}>
         ${actions.map((a) => html`
           <button
             data-style=${a.style ?? 'default'}
@@ -529,10 +545,12 @@ export class UWidget extends LitElement {
       this._awaitedElements.add(needed.element);
       void customElements.whenDefined(needed.element).then(() => this.requestUpdate());
     }
+    const [addBefore, addAfter] = splitTemplate(this._strings.addImportHint, 'import');
+    const importLine = `import '${needed.entry}'`; // code, not prose — it stays as written in every locale
     return html`
       <div class="fallback-card" part="fallback" data-missing-entry=${needed.entry}>
-        <div class="fallback-label">Widget module not loaded: ${spec.widget}</div>
-        <div class="fallback-hint">Add <code>import '${needed.entry}'</code> to render this widget.</div>
+        <div class="fallback-label">${formatTemplate(this._strings.moduleNotLoaded, { widget: spec.widget })}</div>
+        <div class="fallback-hint">${addBefore}<code>${importLine}</code>${addAfter}</div>
         <pre part="json"><code>${JSON.stringify(spec, null, 2)}</code></pre>
       </div>
     `;
@@ -540,10 +558,11 @@ export class UWidget extends LitElement {
 
   private renderFallback(spec: UWidgetSpec) {
     const suggestion = suggestWidget(spec.widget);
+    const [meanBefore, meanAfter] = splitTemplate(this._strings.didYouMean, 'suggestion');
     return html`
       <div class="fallback-card" part="fallback">
         <div class="fallback-label">${spec.title ?? `Unknown widget: ${spec.widget}`}</div>
-        ${suggestion ? html`<div class="fallback-hint">Did you mean <strong>${suggestion}</strong>?</div>` : ''}
+        ${suggestion ? html`<div class="fallback-hint">${meanBefore}<strong>${suggestion}</strong>${meanAfter}</div>` : ''}
         <pre part="json"><code>${JSON.stringify(spec, null, 2)}</code></pre>
       </div>
     `;
@@ -554,7 +573,7 @@ export class UWidget extends LitElement {
       <div class="error-card" part="error">
         <div class="error-header">
           <span aria-hidden="true">&#x26A0;</span>
-          <span>Invalid widget spec</span>
+          <span>${this._strings.invalidSpec}</span>
         </div>
         <ul class="error-list">
           ${errors.map((e) => html`<li>${e}</li>`)}

@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetEvent } from '../core/types.js';
+import { localeStringsOf, formatTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 type RatingIcon = 'star' | 'heart' | 'thumb';
@@ -172,7 +173,7 @@ export class UwRating extends LitElement {
 
     return html`
       <div class="rating" part="rating" role=${interactive ? 'radiogroup' : 'img'}
-           aria-label=${this.spec.title ?? labelText ?? `Rating: ${value} out of ${max}`}>
+           aria-label=${this.spec.title ?? labelText ?? formatTemplate(localeStringsOf(this.spec).ratingOutOf, { value, max })}>
         ${labelText ? html`<span class="rating-label" part="rating-label">${labelText}</span>` : nothing}
         <div class="rating-icons" part="rating-icons"
              @mouseleave=${interactive ? () => { this._hoverIdx = -1; } : undefined}

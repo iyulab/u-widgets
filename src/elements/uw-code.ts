@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 // ── Mini Syntax Highlighter ──
@@ -398,13 +399,13 @@ export class UwCode extends LitElement {
     return html`
       <div class="code-block" part="code">
         <div class="code-header" part="code-header">
-          <span class="code-lang">${language || 'code'}</span>
+          <span class="code-lang">${language || localeStringsOf(this.spec).code}</span>
           <button
             class="code-copy"
             part="code-copy"
             ?data-copied=${this._copied}
             @click=${this._copyCode}
-          >${this._copied ? 'Copied!' : 'Copy'}</button>
+          >${this._copied ? localeStringsOf(this.spec).copied : localeStringsOf(this.spec).copy}</button>
         </div>
         <div class="code-body" part="code-body" style=${bodyStyle}>
           <pre data-wrap=${String(wrapText)}><code .innerHTML=${linesHtml}></code></pre>

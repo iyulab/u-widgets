@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 type StepStatus = 'done' | 'active' | 'pending' | 'error';
@@ -303,7 +304,7 @@ export class UwSteps extends LitElement {
   private _renderVertical(items: StepItem[], compact: boolean) {
     return html`
       <div class="steps-vertical" part="steps" ?data-compact=${compact}
-           role="list" aria-label=${this.spec?.title ?? 'Steps'}>
+           role="list" aria-label=${this.spec?.title ?? localeStringsOf(this.spec).steps}>
         ${items.map(item => html`
           <div class="step-v" part="step" role="listitem" data-status=${item.status}>
             <div class="step-track">
@@ -323,7 +324,7 @@ export class UwSteps extends LitElement {
   private _renderHorizontal(items: StepItem[], compact: boolean) {
     return html`
       <div class="steps-horizontal" part="steps" ?data-compact=${compact}
-           role="list" aria-label=${this.spec?.title ?? 'Steps'}>
+           role="list" aria-label=${this.spec?.title ?? localeStringsOf(this.spec).steps}>
         ${items.map((item, i) => {
           const prevDone = i > 0 && items[i - 1].status === 'done';
           const isDone = item.status === 'done';

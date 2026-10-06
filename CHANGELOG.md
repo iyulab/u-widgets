@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.26.0] - 2026-10-07
+
+### Added
+
+- **Switching the locale at runtime reaches widgets on screen.** `setDefaultLocale()` (to another value) and
+  `registerLocale()` now notify, and every connected `<u-widget>` re-renders; one detached during the switch catches up
+  when attached again. `onLocaleChange(listener)` (returns the unsubscribe function) and `getLocaleRevision()` for your
+  own code.
+- **`@iyulab/u-widgets/components` follows the `@iyulab/components` locale** — u-widgets' default locale becomes
+  `Locale.get()` and moves with every `Locale.set()`, so one call switches the app. A widget's own `locale` still wins.
+  The optional peer is now `@iyulab/components` `>=2.8.0`.
+
+### Fixed
+
+- **A re-render of `<u-widget>` no longer wipes a form's input.** `u-widget` builds a new spec object on every render
+  and `uw-form` reset its data and errors on any new spec, so a theme switch threw away what the user had typed. Only
+  new `data` or `fields` from the caller starts a new form now; an error on screen is rewritten when the locale changes.
+- **Chrome strings that bypassed the locale table now go through it** — the accessible names of the actions, citations,
+  gallery, key-value, rating, status and steps regions (when the spec has no title), the code block's language fallback
+  and Copy/Copied! button, and the fallback and error cards. They were English in every locale. New
+  `UWidgetLocaleStrings` keys: `actions`, `citations`, `gallery`, `keyValuePairs`, `status`, `steps`, `ratingOutOf`,
+  `code`, `copy`, `copied`, `moduleNotLoaded`, `addImportHint`, `didYouMean`, `invalidSpec`.
+
 ## [0.25.3] - 2026-10-06
 
 ### Documentation

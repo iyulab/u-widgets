@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 interface GalleryItem {
@@ -96,7 +97,7 @@ export class UwGallery extends LitElement {
 
     return html`
       <div class="gallery-grid" part="gallery" role="list"
-        aria-label=${title ?? 'Gallery'}
+        aria-label=${title ?? localeStringsOf(this.spec).gallery}
         style="grid-template-columns: ${gridCols}">
         ${items.map((item) => this._renderItem(item, aspectStyle))}
       </div>

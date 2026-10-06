@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetEvent } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
-import { getLocaleStrings } from '../core/locale.js';
+import { getLocaleStrings, localeStringsOf } from '../core/locale.js';
 
 interface CitationItem {
   title: string;
@@ -163,7 +163,7 @@ export class UwCitation extends LitElement {
     const numbered = options.numbered !== false;
 
     return html`
-      <div class="citations" part="citations" ?data-compact=${compact} role="list" aria-label=${this.spec.title ?? 'Citations'}>
+      <div class="citations" part="citations" ?data-compact=${compact} role="list" aria-label=${this.spec.title ?? localeStringsOf(this.spec).citations}>
         ${items.map((item, i) => this._renderItem(item, i, numbered))}
       </div>
     `;

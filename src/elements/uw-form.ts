@@ -253,8 +253,17 @@ export class UwForm extends LitElement {
 
   willUpdate(changed: Map<string, unknown>) {
     if (changed.has('spec') && this.spec) {
-      this._formData = { ...(this.spec.data as Record<string, unknown> ?? {}) };
-      this._errors = {};
+      const prev = changed.get('spec') as UWidgetSpec | null | undefined;
+      // `u-widget` builds a new spec object on every render (locale propagation, inferred mapping) — only new
+      // `data` or `fields` from the caller is a new form. Resetting on any new object threw away what the user had
+      // typed whenever the host re-rendered (a theme or locale switch).
+      if (!prev || prev.data !== this.spec.data || prev.fields !== this.spec.fields) {
+        this._formData = { ...(this.spec.data as Record<string, unknown> ?? {}) };
+        this._errors = {};
+      } else if (prev.options?.locale !== this.spec.options?.locale && Object.keys(this._errors).length) {
+        // The messages on screen were written in the old locale — rewrite the ones still showing.
+        this._rewriteErrors();
+      }
     }
   }
 
@@ -625,6 +634,13 @@ export class UwForm extends LitElement {
 
     this._errors = errors;
     return Object.keys(errors).length === 0;
+  }
+
+  /** Re-runs validation for the fields whose error is showing — same verdicts, current locale's words. */
+  private _rewriteErrors(): void {
+    const showing = Object.keys(this._errors);
+    this._validate();
+    this._errors = Object.fromEntries(Object.entries(this._errors).filter(([field]) => showing.includes(field)));
   }
 
   private _onAction(action: UWidgetAction) {

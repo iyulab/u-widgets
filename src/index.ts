@@ -43,7 +43,7 @@ export { formatValue } from './core/format.js';
 export { suggestWidget } from './core/suggest.js';
 export { widgetEntry } from './core/entries.js';
 export type { WidgetEntry } from './core/entries.js';
-export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale } from './core/locale.js';
+export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale, onLocaleChange, getLocaleRevision } from './core/locale.js';
 export type { UWidgetLocaleStrings } from './core/locale.js';
 export { getPrimaryDataField } from './core/primary-field.js';
 

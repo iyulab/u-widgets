@@ -1,6 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
+import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 
 /**
@@ -132,7 +133,7 @@ export class UwKv extends LitElement {
         style=${gridStyle}
         part="kv"
         role="list"
-        aria-label=${this.spec.title ?? 'Key-value pairs'}
+        aria-label=${this.spec.title ?? localeStringsOf(this.spec).keyValuePairs}
       >
         ${pairs.map(([key, value]) => html`
           <div class="kv-pair" part="kv-pair" role="listitem">
