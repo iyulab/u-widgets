@@ -5,6 +5,14 @@ on:
     workflows: ["Publish to npm"]
     types: [completed]
     branches: [main]
+  # An MCP-only bump (e.g. following a new core range) changes `mcp/package.json` alone — "Publish to npm"
+  # watches the root `package.json`, so the chain above never fired and the bump sat unpublished (2026-10-07,
+  # 0.5.2 needed a manual dispatch). When both change in one push, the concurrency group serializes the two
+  # runs, the "wait for the core range" step below covers the race, and the second run skips as already published.
+  push:
+    branches: [main]
+    paths:
+      - mcp/package.json
   workflow_dispatch:
 
 concurrency:
