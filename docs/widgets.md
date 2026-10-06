@@ -486,8 +486,10 @@ React에서 ref를 통한 property 설정:
 ```tsx
 import { useRef, useEffect } from 'react';
 
-function Widget({ spec }) {
-  const ref = useRef(null);
+import type { UWidgetSpec } from '@iyulab/u-widgets';
+
+function Widget({ spec }: { spec: UWidgetSpec }) {
+  const ref = useRef<HTMLElementTagNameMap['u-widget']>(null);
   useEffect(() => {
     if (ref.current) ref.current.spec = spec;
   }, [spec]);

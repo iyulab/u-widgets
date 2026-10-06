@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.3] - 2026-10-06
+
+### Documentation
+
+- The React example that sets `spec` through a ref typed the ref as `null`, so `ref.current.spec` did not type-check. It now types the ref as the `<u-widget>` element (`HTMLElementTagNameMap['u-widget']`) and the prop as `UWidgetSpec`.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
