@@ -25,9 +25,12 @@ import { stripCssTemplateComments } from './build/strip-css-template-comments.ts
 // import each merge depends on but leaves the merge body behind, so every bundled entry ships
 // with dangling type references (bundleTypes scans the whole `src` tree for every entry, so this
 // affects all six, not just the ones that actually import the affected elements). `declare
-// global` has no other use anywhere in this package's src (see the grep in the elements/ and
-// types/ directories), so it's safe to strip every occurrence rollup-plugin-dts left behind and
-// append one correct, self-contained block instead.
+// global` is used only for these merges and the event map below, so it's safe to strip every
+// occurrence rollup-plugin-dts left behind and append one correct, self-contained block instead.
+// ⚠ That makes this block the published source of truth for every global merge: a `declare
+// global` added in src is stripped from the .d.ts unless it is mirrored here too (the
+// `u-widget-event` entry was lost that way once). tests/build/published-globals.test.ts checks
+// the built .d.ts.
 //
 // `u-widget` gets a real class reference (self-imported by package name, so it resolves the same
 // way regardless of which entry's .d.ts it's appended to) and a JSX declaration — it's the only
@@ -56,6 +59,9 @@ declare global {
   interface HTMLElementTagNameMap {
 ${typedEntries}
 ${opaqueEntries}
+  }
+  interface GlobalEventHandlersEventMap {
+    'u-widget-event': CustomEvent<import('@iyulab/u-widgets').UWidgetEvent>;
   }
 }
 

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
 /**
@@ -22,6 +22,12 @@ describe('echarts passthrough — 미등록 컴포넌트 키 경고', () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
   let toEChartsOption: typeof import('../../src/renderers/echarts-adapter.js').toEChartsOption;
 
+  // 첫 import 는 변환 비용을 치른다 — 전체 스위트 부하에서 10초 훅 제한을 넘긴 적이 있다. 그 비용을 한 번,
+  // 넉넉한 제한으로 먼저 치러 두면 아래 매 테스트의 재평가(변환 캐시 사용)는 빠르다.
+  beforeAll(async () => {
+    await import('../../src/renderers/echarts-adapter.js');
+  }, 60_000);
+
   beforeEach(async () => {
     // 모듈 스코프의 warn-once 상태 초기화를 위해 매 테스트 fresh import
     vi.resetModules();
@@ -30,7 +36,8 @@ describe('echarts passthrough — 미등록 컴포넌트 키 경고', () => {
   });
 
   afterEach(() => {
-    warnSpy.mockRestore();
+    // 훅이 실패했으면 spy 가 없다 — 그 실패를 가리는 두 번째 TypeError 를 내지 않는다.
+    warnSpy?.mockRestore();
   });
 
   it('dataZoom 전달 시 경고를 출력한다', () => {

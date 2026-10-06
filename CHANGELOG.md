@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.2] - 2026-10-06
+
+### Fixed
+
+- **The `u-widget-event` typing now reaches the published types.** 0.25.1 declared it in source, but
+  the build replaces every global declaration in the bundled `.d.ts` with its own block, which did not
+  carry the event map — so consumers still saw a plain `Event`. The block now includes it, and a build
+  test checks that every global key declared in source is present in the published `.d.ts`.
+
 ## [0.25.1] - 2026-10-06
 
 ### Fixed
