@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `uw-citation` and `uw-content` keep their visually hidden "opens in a new tab" hint inside the element — the
+  absolutely positioned hint escaped an unpositioned scroll container and could stretch the document.
+
 ## [0.26.1] - 2026-10-07
 
 ### Fixed

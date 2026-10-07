@@ -49,4 +49,29 @@ describe('u-widgets 새 창 링크의 접근성 이름', () => {
     const r = hint.getBoundingClientRect();
     expect(r.width <= 1 && r.height <= 1).toBe(true);
   });
+
+  /**
+   * 그 문구는 절대 위치 상자다 — 요소 안에 위치 지정된 조상이 없으면 포함 블록이 문서 전체가 되어 호스트의 `overflow` 감싸개를
+   * 건너뛰고 문서를 늘린다(채팅 목록처럼 위치 지정되지 않은 스크롤 상자 안에서). 판정: 문구의 `offsetParent` 가 `body` 가 아니다.
+   */
+  for (const [tag, spec] of [
+    ['uw-citation', { widget: 'citation', data: [{ title: 'Source A', url: 'https://example.com/a' }] }],
+    ['uw-content', { widget: 'markdown', data: { content: 'See [the guide](https://example.com/g).' } }],
+  ] as const) {
+    it(`${tag} — 문구는 요소 안에 갇힌다(스크롤 상자를 건너 문서를 늘리지 않는다)`, async () => {
+      const box = document.createElement('div');
+      box.style.cssText = 'height: 100px; overflow: auto;';
+      const spacer = document.createElement('div');
+      spacer.style.height = '3000px';
+      box.appendChild(spacer);
+      document.body.appendChild(box);
+      const el = document.createElement(tag) as HTMLElement & { spec: UWidgetSpec; updateComplete: Promise<unknown> };
+      el.spec = spec as UWidgetSpec;
+      box.appendChild(el);
+      await el.updateComplete;
+      const hint = el.shadowRoot!.querySelector('.new-tab-hint') as HTMLElement;
+      expect(hint.offsetParent).not.toBe(document.body);
+      expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight);
+    });
+  }
 });
