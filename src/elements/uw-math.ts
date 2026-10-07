@@ -79,11 +79,12 @@ export class UwMath extends LitElement {
       });
 
       return html`
+        <!-- html-sink: KaTeX MathML output (see SAFETY above) -->
         <div
+          .innerHTML=${rendered}
           class="math-block"
           part="math"
           data-display=${String(displayMode)}
-          .innerHTML=${rendered}
         ></div>
       `;
     } catch (e) {

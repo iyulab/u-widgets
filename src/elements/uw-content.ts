@@ -243,6 +243,7 @@ export class UwContent extends LitElement {
 
     if (!content) return nothing;
 
+    // html-sink: parseMarkdown escapes the whole text first, then adds its own formatting markup
     return html`<div class="markdown" part="markdown"
       .innerHTML=${this.parseMarkdown(content)}
     ></div>`;

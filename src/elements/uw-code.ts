@@ -408,6 +408,7 @@ export class UwCode extends LitElement {
           >${this._copied ? localeStringsOf(this.spec).copied : localeStringsOf(this.spec).copy}</button>
         </div>
         <div class="code-body" part="code-body" style=${bodyStyle}>
+          <!-- html-sink: highlighter output — every token passes esc() before its span is added -->
           <pre data-wrap=${String(wrapText)}><code .innerHTML=${linesHtml}></code></pre>
         </div>
       </div>
