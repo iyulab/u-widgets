@@ -89,7 +89,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iyulab/u-widgets"
+    "url": "git+https://github.com/iyulab/u-widgets.git"
   },
   "dependencies": {
     "lit": "^3.3.3"
