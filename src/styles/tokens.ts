@@ -42,6 +42,12 @@ export const themeStyles = css`
     color-scheme: light dark;
   }
 
+  /* Every element sets its own host display, which outranks the browser's [hidden] rule — without this a hidden
+     widget kept drawing. */
+  :host([hidden]) {
+    display: none !important;
+  }
+
   :host(:not([nested])) {
     /* ── Colors (light defaults) ── */
     --u-widget-bg: #fff;

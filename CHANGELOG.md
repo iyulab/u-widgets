@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **`hidden` hides a widget.** Every widget element sets its own host `display`, which outranked the browser's
+  `[hidden]` rule — a widget given `hidden` (by the page, or by a container that switches between views) kept drawing.
+  The shared theme sheet now carries `:host([hidden]) { display: none !important }`.
+
 ## [0.26.2] - 2026-10-08
 
 ### Fixed
