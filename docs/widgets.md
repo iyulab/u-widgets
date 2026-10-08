@@ -476,6 +476,28 @@ suggestMapping([{ name: 'A', value: 30 }]); // Suggest widget + mapping
 autoSpec(data);                      // One-call auto spec from data
 ```
 
+### 속성 편집기용 메타데이터
+
+위젯 spec을 사람이 고치는 편집기(속성 패널, 디자이너)는 위젯 지식을 복제하지 않고 이 메타데이터로 컨트롤을 만든다.
+
+```ts
+import { getWidgetOptions, WIDGET_DATA_FIELDS } from '@iyulab/u-widgets/tools';
+
+getWidgetOptions('gauge');
+// → [{ key: 'min', desc: 'Minimum range value', type: 'number', default: 0 },
+//    { key: 'max', ..., type: 'number', default: 100 },
+//    { key: 'unit', ..., type: 'string' },
+//    { key: 'thresholds', ..., type: '{ to: number, color: string, label?: string }[]' }, ...]
+
+WIDGET_DATA_FIELDS.status;
+// → [{ key: 'label', type: 'string', ... },
+//    { key: 'level', type: '"info" | "success" | ...', enum: ['info', 'success', 'warning', 'error', 'neutral'] }, ...]
+```
+
+- `type`은 TypeScript 표기(`number`, `string`, `boolean`, `string[]`, 리터럴 유니온 …). 선택지가 고정된 값은 `enum`으로도 준다.
+- `default`는 위젯 코드가 그 값을 정해 둔 옵션에만 있다 — 없으면 "생략 시 위젯이 알아서 정함"이다.
+- `help(widget).options`도 같은 목록이다. 옵션 이름의 위젯별 차이(예: `rating`의 `max`는 아이콘 개수)는 `desc`에 반영된다.
+
 ## Host Integration
 
 ### Attribute (JSON 문자열)

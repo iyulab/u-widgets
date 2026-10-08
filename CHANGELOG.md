@@ -2,8 +2,26 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Option value types for editors.** `OPTION_TYPES` gives every option in `OPTION_DOCS` a value type (in the notation
+  of `DataFieldInfo.type`), with `enum` for a fixed set of choices and `default` where the widget's code fixes one;
+  `getWidgetOptions(widget)` returns the options a widget reads with their description, type, choices and default,
+  adjusted per widget (gauge `min`/`max` default to 0/100, `kv` layouts, `rating` `max` is the number of icons). A
+  property panel can build its controls from these instead of keeping its own table. A test checks every option
+  the library's own examples set against the widget's list and type.
+- `DataFieldInfo.enum` — the values of a data field typed as a union of string literals (`status` `level`,
+  `metric` `trend`, …).
+
+### Changed
+
+- **`help(widget).options`** (`OptionInfo[]`: key, description, type, choices, default) replaces `optionDocs`
+  (key → description).
+
 ### Fixed
 
+- `WIDGET_OPTIONS` lists what the widgets read: `compose` no longer lists `layout` and `columns` (they are top-level
+  spec fields of compose, not options), and `divider` lists `label` and `spacing`, which it reads.
 - **A page that declares no theme gets auto mode.** The global theme sync read a missing `<html data-theme>` as
   "light" and wrote `theme="light"` on every `<u-widget>` — the attribute the dark tokens' selector excludes — so a
   visitor whose system was dark saw light widgets on a dark page (secondary text at 3.26:1). It now propagates only a

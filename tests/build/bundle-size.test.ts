@@ -58,12 +58,14 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(8.5 * 1024);
   });
 
-  it('tools bundle is under 13.5 KB gzip', () => {
+  it('tools bundle is under 14.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js'));
-    // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE.
+    // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE, OPTION_TYPES.
     // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
     // measured 13.17 KB) — the examples are what `help('chart.gantt')` hands an author.
-    expect(size).toBeLessThan(13.5 * 1024);
+    // Re-baselined from 13.5 KB for OPTION_TYPES and getWidgetOptions (measured 14.11 KB) — the option
+    // value types a property editor builds its controls from. The tools entry is separate from core.
+    expect(size).toBeLessThan(14.5 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {

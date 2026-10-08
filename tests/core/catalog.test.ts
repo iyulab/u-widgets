@@ -25,7 +25,7 @@ describe('help', () => {
     expect(detail.mappingKeys).toContain('y');
     // WidgetDetail-specific fields
     expect(detail.autoInference).toBeTruthy();
-    expect(detail.optionDocs).toBeDefined();
+    expect(detail.options).toBeDefined();
     expect(detail.events).toBeDefined();
     expect(detail.examples.length).toBeGreaterThan(0);
   });
@@ -80,10 +80,10 @@ describe('help', () => {
 });
 
 describe('help → WidgetDetail', () => {
-  it('chart.bar optionDocs includes stack but not donut', () => {
+  it('chart.bar options include stack but not donut', () => {
     const detail = help('chart.bar') as WidgetDetail;
-    expect(detail.optionDocs).toHaveProperty('stack');
-    expect(detail.optionDocs).not.toHaveProperty('donut');
+    expect(detail.options.map(o => o.key)).toContain('stack');
+    expect(detail.options.map(o => o.key)).not.toContain('donut');
   });
 
   it('metric dataFields includes value', () => {
@@ -131,7 +131,7 @@ describe('help → WidgetDetail', () => {
       expect(typeof detail.autoInference).toBe('string');
       expect(Array.isArray(detail.dataFields)).toBe(true);
       expect(typeof detail.mappingDocs).toBe('object');
-      expect(typeof detail.optionDocs).toBe('object');
+      expect(Array.isArray(detail.options)).toBe(true);
       expect(Array.isArray(detail.events)).toBe(true);
       expect(Array.isArray(detail.examples)).toBe(true);
       expect(detail.examples.length).toBeGreaterThan(0);

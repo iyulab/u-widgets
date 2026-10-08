@@ -162,6 +162,101 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   card: 'Render inside a card container with shadow and border',
 };
 
+/**
+ * What an option's value is.
+ *
+ * `type` uses the notation of `DataFieldInfo.type`. `enum` lists a choice's values and `default` is what
+ * the widget uses when the option is left out — present only where the widget's code fixes one.
+ */
+export interface OptionTypeInfo {
+  readonly type: string;
+  readonly enum?: readonly string[];
+  readonly default?: unknown;
+}
+
+const choice = (values: readonly string[], defaultValue?: string): OptionTypeInfo => ({
+  type: values.map(v => `"${v}"`).join(' | '),
+  enum: values,
+  ...(defaultValue !== undefined && { default: defaultValue }),
+});
+
+/** Value types of the options in OPTION_DOCS, as most widgets read them. */
+export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
+  min: { type: 'number' },
+  max: { type: 'number' },
+  unit: { type: 'string' },
+  thresholds: { type: '{ to: number, color: string, label?: string }[]' },
+  label: { type: 'string' },
+  smooth: { type: 'boolean', default: false },
+  stack: { type: 'boolean', default: false },
+  horizontal: { type: 'boolean', default: false },
+  donut: { type: 'boolean', default: false },
+  colors: { type: 'string[]' },
+  colorRange: { type: 'string[]' },
+  histogram: { type: 'boolean', default: false },
+  bins: { type: 'number' },
+  referenceLines: { type: 'object[]' },
+  categories: { type: 'string[]' },
+  series: { type: 'object[]' },
+  conditionalStyles: { type: 'object[]' },
+  subtitle: { type: 'string' },
+  step: { type: 'boolean | "start" | "middle" | "end"' },
+  legend: { type: 'boolean', default: true },
+  grid: { type: 'boolean', default: true },
+  animate: { type: 'boolean', default: true },
+  showLabel: { type: 'boolean' },
+  xFormat: { type: 'object' },
+  yFormat: { type: 'object' },
+  pageSize: { type: 'number' },
+  compact: { type: 'boolean', default: false },
+  searchable: { type: 'boolean', default: false },
+  locale: { type: 'string' },
+  lineNumbers: { type: 'boolean', default: true },
+  highlight: { type: 'number[]' },
+  maxHeight: { type: 'string' },
+  wrap: { type: 'boolean', default: false },
+  numbered: { type: 'boolean', default: true },
+  interactive: { type: 'boolean', default: false },
+  icon: choice(['star', 'heart', 'thumb'], 'star'),
+  autoplay: { type: 'boolean', default: false },
+  controls: { type: 'boolean', default: true },
+  loop: { type: 'boolean', default: false },
+  muted: { type: 'boolean', default: false },
+  aspectRatio: { type: 'string', default: 'auto' },
+  displayMode: { type: 'boolean', default: false },
+  layout: { type: 'string' },
+  columns: { type: 'number' },
+  widths: { type: '(number | "auto" | "stretch")[]' },
+  spacing: choice(['small', 'default', 'large'], 'default'),
+  card: { type: 'boolean', default: false },
+};
+
+/** Where an option's type, choices, default or meaning differ for one widget. */
+const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Partial<OptionTypeInfo> & { desc?: string }>>>> = {
+  gauge: { min: { default: 0 }, max: { default: 100 } },
+  progress: { min: { default: 0 }, max: { default: 100 } },
+  rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
+  kv: { layout: choice(['vertical', 'horizontal', 'grid'], 'vertical'), columns: { default: 2, desc: 'Number of grid columns (grid layout)' } },
+  steps: { layout: choice(['vertical', 'horizontal'], 'vertical') },
+  actions: { layout: choice(['wrap', 'column'], 'wrap') },
+  divider: { label: { desc: 'Text on the line' } },
+};
+
+/** An option a widget reads: its key, description and value type. */
+export interface OptionInfo extends OptionTypeInfo {
+  readonly key: string;
+  readonly desc: string;
+}
+
+/** The options `widget` reads, each with its description and value type (`OPTION_TYPES`, adjusted for the widget). */
+export function getWidgetOptions(widget: string): OptionInfo[] {
+  const keys = WIDGET_OPTIONS[widget] ?? [];
+  return keys.map(key => {
+    const { desc, ...override } = WIDGET_OPTION_OVERRIDES[widget]?.[key] ?? {};
+    return { key, desc: desc ?? OPTION_DOCS[key] ?? '', ...OPTION_TYPES[key], ...override };
+  });
+}
+
 /** Action property descriptions (from schema $defs/action). */
 export const ACTION_PROP_DOCS: Readonly<Record<string, string>> = {
   label: 'Button text',
@@ -179,6 +274,27 @@ export interface DataFieldInfo {
   readonly type: string;
   readonly desc: string;
   readonly required?: boolean;
+  /** The values of a field whose `type` is a union of string literals (`"up" | "down" | "flat"`). */
+  readonly enum?: readonly string[];
+}
+
+/** `"a" | "b"` → `['a', 'b']`; anything that is not purely string literals → `undefined`. */
+function literalUnion(type: string): string[] | undefined {
+  const parts = type.split('|').map(part => part.trim());
+  const values = parts.map(part => /^"([^"]*)"$/.exec(part)?.[1]);
+  return values.every(v => v !== undefined) ? (values as string[]) : undefined;
+}
+
+function withEnums(fields: Record<string, readonly DataFieldInfo[]>): Record<string, readonly DataFieldInfo[]> {
+  return Object.fromEntries(
+    Object.entries(fields).map(([widget, list]) => [
+      widget,
+      list.map(field => {
+        const values = literalUnion(field.type);
+        return values ? { ...field, enum: values } : field;
+      }),
+    ]),
+  );
 }
 
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
@@ -207,7 +323,8 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'markdown': [],
   'image': [],
   'callout': [],
-  'compose': ['layout', 'columns', 'widths', 'card'],
+  // `layout` and `columns` are top-level spec fields of compose, not options.
+  'compose': ['widths', 'card'],
   'kv': ['layout', 'columns'],
   'code': ['lineNumbers', 'highlight', 'maxHeight', 'wrap'],
   'citation': ['compact', 'numbered'],
@@ -218,7 +335,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'gallery': ['columns', 'aspectRatio'],
   'math': ['displayMode'],
   'actions': ['layout'],
-  'divider': [],
+  'divider': ['label', 'spacing'],
   'header': [],
 };
 
@@ -226,7 +343,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
  * Well-known data fields per widget type.
  * Charts/table/list use user-defined fields so they are omitted.
  */
-export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[]>> = {
+export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[]>> = withEnums({
   'metric': [
     { key: 'value', type: 'number | string', desc: 'Primary value', required: true },
     { key: 'label', type: 'string', desc: 'Display label' },
@@ -314,7 +431,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'value', type: 'string', desc: 'Status value', required: true },
     { key: 'level', type: '"info" | "success" | "warning" | "error" | "neutral"', desc: 'Severity level (default info)' },
   ],
-};
+});
 
 /** Auto-inference hints — tells LLM what can be omitted. */
 export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {

@@ -7,11 +7,11 @@
  */
 
 import type { UWidgetSpec } from './types.js';
-import type { DataFieldInfo } from './widget-meta.js';
+import type { DataFieldInfo, OptionInfo } from './widget-meta.js';
 import {
-  MAPPING_DOCS, OPTION_DOCS, FIELD_PROP_DOCS, ACTION_PROP_DOCS,
-  WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE,
-  getWidgetEvents,
+  MAPPING_DOCS, FIELD_PROP_DOCS, ACTION_PROP_DOCS,
+  WIDGET_DATA_FIELDS, WIDGET_INFERENCE,
+  getWidgetEvents, getWidgetOptions,
 } from './widget-meta.js';
 
 /** Describes a single widget type in the catalog. */
@@ -36,8 +36,8 @@ export interface WidgetDetail extends WidgetInfo {
   dataFields: DataFieldInfo[];
   /** Mapping key descriptions relevant to this widget. */
   mappingDocs: Record<string, string>;
-  /** Option key descriptions relevant to this widget. */
-  optionDocs: Record<string, string>;
+  /** The options this widget reads — description, value type, choices and default (`getWidgetOptions`). */
+  options: OptionInfo[];
   /** Field definition property docs (form/confirm only). */
   fieldDocs?: Record<string, string>;
   /** Action property docs (form/confirm only). */
@@ -963,12 +963,6 @@ function buildWidgetDetail(info: WidgetInfo): WidgetDetail {
     if (MAPPING_DOCS[key]) mappingDocs[key] = MAPPING_DOCS[key];
   }
 
-  // Option docs
-  const optionDocs: Record<string, string> = {};
-  for (const key of (WIDGET_OPTIONS[w] ?? [])) {
-    if (OPTION_DOCS[key]) optionDocs[key] = OPTION_DOCS[key];
-  }
-
   // Form/confirm-specific docs
   const isInput = w === 'form' || w === 'confirm';
 
@@ -990,7 +984,7 @@ function buildWidgetDetail(info: WidgetInfo): WidgetDetail {
     autoInference: WIDGET_INFERENCE[w] ?? '',
     dataFields: [...(WIDGET_DATA_FIELDS[w] ?? [])],
     mappingDocs,
-    optionDocs,
+    options: getWidgetOptions(w),
     ...(isInput ? { fieldDocs: { ...FIELD_PROP_DOCS } } : {}),
     ...(isInput ? { actionDocs: { ...ACTION_PROP_DOCS } } : {}),
     events: getWidgetEvents(w),

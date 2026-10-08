@@ -6,13 +6,15 @@ import {
   FIELD_PROP_DOCS,
   ACTION_PROP_DOCS,
   OPTION_DOCS,
+  OPTION_TYPES,
+  getWidgetOptions,
   WIDGET_OPTIONS,
   WIDGET_DATA_FIELDS,
   WIDGET_INFERENCE,
   WIDGET_EVENTS,
   getWidgetEvents,
 } from '../../src/core/widget-meta.js';
-import { help } from '../../src/core/catalog.js';
+import { help, type WidgetDetail } from '../../src/core/catalog.js';
 
 describe('MAPPING_DOCS', () => {
   it('covers all schema mapping properties', () => {
@@ -178,5 +180,77 @@ describe('WIDGET_DATA_FIELDS', () => {
         expect(f.desc, `empty desc for ${widget}.${f.key}`).toBeTruthy();
       }
     }
+  });
+});
+
+/** Whether `value` fits a type written in `DataFieldInfo.type` notation (top level only). */
+function fits(value: unknown, type: string): boolean {
+  return type.split(/\s*\|\s*(?![^{(]*[})])/).some(alt => {
+    const t = alt.trim();
+    if (/^".*"$/.test(t)) return value === t.slice(1, -1);
+    if (t.endsWith('[]')) return Array.isArray(value);
+    if (t === 'object') return typeof value === 'object' && value !== null && !Array.isArray(value);
+    return typeof value === t;
+  });
+}
+
+describe('option value types', () => {
+  it('types every option OPTION_DOCS describes, and nothing else', () => {
+    expect(Object.keys(OPTION_TYPES).sort()).toEqual(Object.keys(OPTION_DOCS).sort());
+  });
+
+  it('gives every option a widget lists its description and type', () => {
+    for (const widget of Object.keys(WIDGET_OPTIONS)) {
+      for (const option of getWidgetOptions(widget)) {
+        expect(option.desc, `${widget}.${option.key} desc`).not.toBe('');
+        expect(option.type, `${widget}.${option.key} type`).toBeTruthy();
+      }
+    }
+  });
+
+  it("matches the library's own examples: each option they set is listed for the widget and fits its type", () => {
+    for (const widget of Object.keys(WIDGET_OPTIONS)) {
+      const detail = help(widget);
+      if (Array.isArray(detail)) continue;
+      const options = new Map(getWidgetOptions(widget).map(o => [o.key, o]));
+      for (const { spec } of (detail as WidgetDetail).examples) {
+        for (const [key, value] of Object.entries((spec.options ?? {}) as Record<string, unknown>)) {
+          const option = options.get(key);
+          expect(option, `${widget} example sets options.${key}, which WIDGET_OPTIONS does not list`).toBeDefined();
+          expect(fits(value, option!.type), `${widget} options.${key} = ${JSON.stringify(value)} vs ${option!.type}`).toBe(true);
+          if (option!.enum) expect(option!.enum).toContain(value);
+        }
+      }
+    }
+  });
+
+  it('gives a default only where it fits the type', () => {
+    for (const widget of Object.keys(WIDGET_OPTIONS)) {
+      for (const option of getWidgetOptions(widget)) {
+        if (option.default !== undefined) expect(fits(option.default, option.type), `${widget}.${option.key}`).toBe(true);
+      }
+    }
+  });
+
+  it("lists the options a widget reads — not compose's top-level layout, and the divider's label and spacing", () => {
+    expect(WIDGET_OPTIONS.compose).not.toContain('layout');
+    expect(WIDGET_OPTIONS.compose).not.toContain('columns');
+    expect(WIDGET_OPTIONS.divider).toEqual(['label', 'spacing']);
+  });
+
+  it('adjusts an option per widget: its default, its choices, its meaning', () => {
+    const gauge = new Map(getWidgetOptions('gauge').map(o => [o.key, o]));
+    expect(gauge.get('min')).toMatchObject({ type: 'number', default: 0 });
+    expect(gauge.get('max')).toMatchObject({ type: 'number', default: 100 });
+    expect(getWidgetOptions('kv').find(o => o.key === 'layout')).toMatchObject({ enum: ['vertical', 'horizontal', 'grid'], default: 'vertical' });
+    expect(getWidgetOptions('rating').find(o => o.key === 'max')).toMatchObject({ default: 5, desc: 'Number of icons' });
+  });
+});
+
+describe('data field choices', () => {
+  it('lists the values of a field typed as a union of string literals', () => {
+    const level = WIDGET_DATA_FIELDS.status.find(f => f.key === 'level');
+    expect(level?.enum).toEqual(['info', 'success', 'warning', 'error', 'neutral']);
+    expect(WIDGET_DATA_FIELDS.status.find(f => f.key === 'label')?.enum).toBeUndefined();
   });
 });
