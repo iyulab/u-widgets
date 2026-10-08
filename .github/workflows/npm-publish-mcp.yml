@@ -29,6 +29,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: read
+      # Required for npm provenance (NPM_CONFIG_PROVENANCE below).
+      id-token: write
     defaults:
       run:
         working-directory: mcp
@@ -52,20 +54,25 @@ jobs:
         id: pkg
         run: echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
+      # Only npm's 404 means "not published yet"; any other failure (registry down, rate limit) stops
+      # here instead of trying to publish a version that may already exist.
       - name: Check if version already published
         id: check
-        run: |
-          PACKAGE_NAME=$(node -p 'require("./package.json").name')
-          VERSION=${{ steps.pkg.outputs.version }}
-          if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "⏭️ ${PACKAGE_NAME}@${VERSION} already published, skipping."
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "🚀 ${PACKAGE_NAME}@${VERSION} not found on npm, will publish."
-          fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.pkg.outputs.version }}
+        run: |
+          PACKAGE="$(node -p 'require("./package.json").name')@${VERSION}"
+          if out=$(npm view "${PACKAGE}" version 2>&1); then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️ ${PACKAGE} already published, skipping."
+          elif grep -q E404 <<< "${out}"; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "🚀 ${PACKAGE} not found on npm, will publish."
+          else
+            echo "${out}" >&2
+            echo "::error::Could not ask npm whether ${PACKAGE} is published"
+            exit 1
+          fi
 
       # 🔴코어 게시 «완료» ≠ 코어 «설치 가능». npm 은 게시 직후 "Your package is being processed and may take a
       #   few minutes to become available" 을 내고, 이 워크플로는 부모가 끝난 바로 그 순간 시작된다 — 코어 범위를
@@ -106,6 +113,7 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
 
       - name: Summary
         run: |

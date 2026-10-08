@@ -17,6 +17,8 @@
 
 - **`help(widget).options`** (`OptionInfo[]`: key, description, type, choices, default) replaces `optionDocs`
   (key → description).
+- Releases are published from the commit CI has verified — only after lint, types, build and tests pass on it — and
+  carry npm provenance (`npm view @iyulab/u-widgets dist.attestations`), as does the MCP server.
 
 ### Fixed
 

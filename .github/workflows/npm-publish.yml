@@ -1,10 +1,20 @@
 name: Publish to npm
 
+# Publishes the commit CI has just verified — never one it has not.
+#
+# This used to run on its own on every `package.json` push, beside `ci.yml` rather than after it, so a
+# version bump whose lint, types or tests failed was published all the same. It now starts when CI
+# finishes on a push to `main`, goes on only if CI passed, and checks out exactly the commit CI
+# verified. `ci.yml` itself stays the file it is in the sibling packages; the gate lives here.
+#
+# A manual run (`workflow_dispatch`, e.g. after npm itself failed) publishes the dispatched commit
+# only if CI passed on that same commit.
+
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
-    paths:
-      - package.json
   workflow_dispatch:
 
 concurrency:
@@ -15,10 +25,31 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     permissions:
       contents: read
+      actions: read
+      # Required for npm provenance (NPM_CONFIG_PROVENANCE below).
+      id-token: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The commit CI verified, not whatever `main` points at by now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Require a passing CI run for a manual publish
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow CI --commit "${GITHUB_SHA}" \
+            --json conclusion --jq '[.[] | select(.conclusion == "success")] | length')
+          if [ "${conclusion}" = "0" ]; then
+            echo "::error::CI has not passed on ${GITHUB_SHA}; not publishing it"
+            exit 1
+          fi
 
       # No lock-based caching: `package-lock.json` is not tracked in this repo, and
       # setup-node's `cache: npm` fails at this step ("Dependencies lock file is not
@@ -32,22 +63,28 @@ jobs:
 
       - name: Get package version
         id: pkg
-        run: echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "name=$(node -p 'require("./package.json").name')" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
 
+      # Only npm's 404 means "not published yet"; any other failure (registry down, rate limit) stops
+      # here instead of trying to publish a version that may already exist.
       - name: Check if version already published
         id: check
-        run: |
-          PACKAGE_NAME=$(node -p 'require("./package.json").name')
-          VERSION=${{ steps.pkg.outputs.version }}
-          if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "⏭️ ${PACKAGE_NAME}@${VERSION} already published, skipping."
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "🚀 ${PACKAGE_NAME}@${VERSION} not found on npm, will publish."
-          fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE: ${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}
+        run: |
+          if out=$(npm view "${PACKAGE}" version 2>&1); then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️ ${PACKAGE} already published, skipping."
+          elif grep -q E404 <<< "${out}"; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "🚀 ${PACKAGE} not found on npm, will publish."
+          else
+            echo "${out}" >&2
+            echo "::error::Could not ask npm whether ${PACKAGE} is published"
+            exit 1
+          fi
 
       - name: Install dependencies
         if: steps.check.outputs.exists == 'false'
@@ -62,15 +99,21 @@ jobs:
 
       - name: Publish
         if: steps.check.outputs.exists == 'false'
-        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+          VERSION: ${{ steps.pkg.outputs.version }}
+        run: |
+          # A prerelease goes out under `next`, never as `latest` (npm refuses one without a tag).
+          case "${VERSION}" in *-*) tag=next ;; *) tag=latest ;; esac
+          npm publish --tag "${tag}"
 
       - name: Summary
+        env:
+          VERSION: ${{ steps.pkg.outputs.version }}
         run: |
-          VERSION=${{ steps.pkg.outputs.version }}
           if [ "${{ steps.check.outputs.exists }}" == "true" ]; then
             echo "### ⏭️ Skipped — v${VERSION} already published" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "### ✅ Published v${VERSION} to npm" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ✅ Published v${VERSION} to npm (provenance)" >> "$GITHUB_STEP_SUMMARY"
           fi
