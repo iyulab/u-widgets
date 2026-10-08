@@ -56,4 +56,82 @@ describe('installGlobalThemeSync', () => {
       document.documentElement.removeAttribute('data-theme');
     });
   });
+
+  describe('선언이 없으면 auto 모드를 건드리지 않는다', () => {
+    // MutationObserver 콜백은 마이크로태스크로 돈다.
+    const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+    afterEach(() => {
+      document.documentElement.removeAttribute('data-theme');
+      document.querySelectorAll('u-widget').forEach(el => el.remove());
+    });
+
+    it('data-theme가 없으면 theme 속성을 쓰지 않는다 — prefers-color-scheme가 그대로 적용된다', async () => {
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+
+      const added = document.createElement('u-widget');
+      document.body.appendChild(added);
+      await flush();
+
+      expect(widget.hasAttribute('theme')).toBe(false);
+      expect(added.hasAttribute('theme')).toBe(false);
+    });
+
+    it('dark·light가 아닌 값(예: "system")도 선언이 아닌 것으로 본다', async () => {
+      document.documentElement.setAttribute('data-theme', 'system');
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      expect(widget.hasAttribute('theme')).toBe(false);
+    });
+
+    it('data-theme=light는 light로 전파하고, 선언이 사라지면 자기가 쓴 theme을 걷는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'light');
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      expect(widget.getAttribute('theme')).toBe('light');
+
+      document.documentElement.setAttribute('data-theme', 'dark');
+      await flush();
+      expect(widget.getAttribute('theme')).toBe('dark');
+
+      document.documentElement.removeAttribute('data-theme');
+      await flush();
+      expect(widget.hasAttribute('theme')).toBe(false);
+    });
+
+    it('페이지가 위젯에 직접 준 theme은 덮어쓰지도 걷지도 않는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const pinned = document.createElement('u-widget');
+      pinned.setAttribute('theme', 'light');
+      document.body.appendChild(pinned);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      expect(pinned.getAttribute('theme')).toBe('light');
+
+      document.documentElement.removeAttribute('data-theme');
+      await flush();
+      expect(pinned.getAttribute('theme')).toBe('light');
+    });
+
+    it('동기화가 쓴 뒤 페이지가 바꾼 theme도 페이지의 것으로 남는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      widget.setAttribute('theme', 'light');
+
+      document.documentElement.setAttribute('data-theme', 'light');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      await flush();
+      expect(widget.getAttribute('theme')).toBe('light');
+    });
+  });
 });

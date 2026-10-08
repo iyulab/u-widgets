@@ -437,9 +437,9 @@ CSS custom properties on any ancestor element:
 
 `u-widgets`를 import하면 `installGlobalThemeSync()`가 **자동 실행**된다(옵트인 불필요). 이 함수는:
 
-- `document.documentElement`의 `data-theme` 속성(`"dark"` | 그 외)을 `MutationObserver`로 감시
+- `document.documentElement`의 `data-theme` 속성을 `MutationObserver`로 감시
 - 새로 추가되는 `<u-widget>` 노드를 감시(`document.body` 하위 `childList`/`subtree`)
-- 감지 시 모든 `<u-widget>`에 `theme="dark"` 또는 `theme="light"` 속성을 자동 전파
+- 페이지가 테마를 **선언했을 때만**(`data-theme="dark"` 또는 `"light"`) 모든 `<u-widget>`에 같은 `theme` 속성을 전파
 
 ```html
 <html data-theme="dark">
@@ -447,7 +447,10 @@ CSS custom properties on any ancestor element:
 </html>
 ```
 
-**직접 `installGlobalThemeSync`를 호출하거나 동일한 `MutationObserver`를 재구현할 필요가 없다** — 별도의 테마 동기화 로직을 앱에서 구현하면 동일 DOM을 감시하는 옵저버가 중복 설치되어 오버헤드가 배가된다. `theme` 속성을 개별 위젯에 수동으로 지정하고 싶을 때만 `<u-widget theme="dark">`처럼 직접 설정하면 된다(자동 동기화보다 우선 적용되지 않으므로, 수동 관리가 필요하면 `data-theme` 자체를 쓰지 않는 편이 낫다).
+- **선언이 없으면**(`data-theme` 없음, 또는 `dark`·`light`가 아닌 값) `theme` 속성을 쓰지 않는다 — 위젯은 auto 모드로 `prefers-color-scheme`(와 페이지의 `color-scheme`)를 따른다. 선언이 사라지면 동기화가 썼던 `theme`을 걷어 auto로 돌아간다.
+- **위젯에 직접 준 `theme`은 페이지의 것**이다 — `<u-widget theme="light">`처럼 지정하면(동기화가 쓴 뒤 바꾼 경우 포함) 동기화가 덮어쓰거나 걷지 않는다.
+
+**직접 `installGlobalThemeSync`를 호출하거나 동일한 `MutationObserver`를 재구현할 필요가 없다** — 별도의 테마 동기화 로직을 앱에서 구현하면 동일 DOM을 감시하는 옵저버가 중복 설치되어 오버헤드가 배가된다.
 
 ### Shadcn/ui + Tailwind 통합
 

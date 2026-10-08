@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **A page that declares no theme gets auto mode.** The global theme sync read a missing `<html data-theme>` as
+  "light" and wrote `theme="light"` on every `<u-widget>` — the attribute the dark tokens' selector excludes — so a
+  visitor whose system was dark saw light widgets on a dark page (secondary text at 3.26:1). It now propagates only a
+  declared `data-theme="dark" | "light"`, writes nothing otherwise, and takes back what it wrote when the
+  declaration goes away.
+- **A `theme` the page sets on a widget is kept.** The sync no longer overwrites (or removes) a `theme` attribute it
+  did not write itself.
+
 ## [0.26.3] - 2026-10-08
 
 ### Fixed
