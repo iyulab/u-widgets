@@ -7,7 +7,8 @@ import { themeStyles } from '../styles/tokens.js';
 type StatusLevel = 'info' | 'success' | 'warning' | 'error' | 'neutral';
 
 interface StatusItem {
-  label: string;
+  /** Absent for a badge that shows the value alone ("● Running"). */
+  label?: string;
   value: string;
   level: StatusLevel;
 }
@@ -122,7 +123,7 @@ export class UwStatus extends LitElement {
         ${items.map(item => html`
           <div class="status-item" part="status-item" role="listitem" data-level=${item.level}>
             <span class="status-icon" part="status-icon" aria-hidden="true">${LEVEL_ICONS[item.level]}</span>
-            <span class="status-label" part="status-label">${item.label}</span>
+            ${item.label === undefined ? nothing : html`<span class="status-label" part="status-label">${item.label}</span>`}
             <span class="status-value" part="status-value">${item.value}</span>
           </div>
         `)}
@@ -130,32 +131,18 @@ export class UwStatus extends LitElement {
     `;
   }
 
+  /** Items with a `value`; `label` is optional — without one an item is a badge showing its value. */
   private _extractItems(): StatusItem[] {
     const data = this.spec?.data;
-    if (!data) return [];
-
-    // Array of status items
-    if (Array.isArray(data)) {
-      return data.filter((item): item is Record<string, unknown> =>
-        item != null && typeof item === 'object' && 'label' in item && 'value' in item,
-      ).map(item => ({
-        label: String(item.label),
+    if (!data || typeof data !== 'object') return [];
+    const rows = (Array.isArray(data) ? data : [data]) as unknown[];
+    return rows
+      .filter((item): item is Record<string, unknown> => item != null && typeof item === 'object' && 'value' in item)
+      .map(item => ({
+        ...(item.label !== undefined && item.label !== null && { label: String(item.label) }),
         value: String(item.value),
         level: this._resolveLevel(item.level),
       }));
-    }
-
-    // Single status item
-    if (typeof data === 'object' && 'label' in data && 'value' in data) {
-      const d = data as Record<string, unknown>;
-      return [{
-        label: String(d.label),
-        value: String(d.value),
-        level: this._resolveLevel(d.level),
-      }];
-    }
-
-    return [];
   }
 
   private _resolveLevel(level: unknown): StatusLevel {

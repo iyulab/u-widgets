@@ -427,7 +427,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'source', type: 'string', desc: 'Source name' },
   ],
   'status': [
-    { key: 'label', type: 'string', desc: 'Status label', required: true },
+    { key: 'label', type: 'string', desc: 'Status label' },
     { key: 'value', type: 'string', desc: 'Status value', required: true },
     { key: 'level', type: '"info" | "success" | "warning" | "error" | "neutral"', desc: 'Severity level (default info)' },
   ],

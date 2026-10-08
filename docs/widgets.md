@@ -47,7 +47,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `list` | Structured list | `primary`, `secondary`, `avatar`, `trailing` |
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
 | `citation` | Source/reference cards | — (uses data array) |
-| `status` | Inline status badge | — (uses `data.label`, `data.variant`) |
+| `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.level`) |
 | `steps` | Multi-step progress | — (uses data array) |
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
 | `video` | HTML5 video player | — (uses `data.src`; subtitle / caption tracks in `data.tracks`: `[{ src, srclang?, label?, kind?, default? }]`, WebVTT) |

@@ -22,6 +22,11 @@
 
 ### Fixed
 
+- **A `status` item without a `label` is drawn** — as a badge showing its value and level ("● Running"), with no
+  label and no colon. It used to be dropped silently, so `{ data: { value, level } }` drew nothing at all. An item
+  still needs a `value`; `validate()` now warns about one that has none. The widget table in the docs names the
+  fields `status` actually reads (`value`, `label?`, `level`), and `WIDGET_DATA_FIELDS` no longer marks `label`
+  required.
 - `WIDGET_OPTIONS` lists what the widgets read: `compose` no longer lists `layout` and `columns` (they are top-level
   spec fields of compose, not options), and `divider` lists `label` and `spacing`, which it reads.
 - **A page that declares no theme gets auto mode.** The global theme sync read a missing `<html data-theme>` as

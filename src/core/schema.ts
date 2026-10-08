@@ -145,6 +145,16 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     }
   }
 
+  // A status item without a `value` draws nothing; with none at all the widget is empty.
+  if (widget === 'status' && obj.data && typeof obj.data === 'object') {
+    const items = (Array.isArray(obj.data) ? obj.data : [obj.data]) as unknown[];
+    items.forEach((item, i) => {
+      if (item == null || typeof item !== 'object' || !('value' in item)) {
+        warnings.push(Array.isArray(obj.data) ? `data[${i}] has no "value" — the status item is not drawn` : 'data has no "value" — the status widget draws nothing');
+      }
+    });
+  }
+
   // Validate mapping fields against data
   if (obj.mapping && typeof obj.mapping === 'object' && obj.data) {
     const mapping = obj.mapping as Record<string, unknown>;

@@ -32,6 +32,22 @@ describe('uw-status', () => {
       expect(shadow(el).querySelector('.status-list')).toBeNull();
     });
 
+    it('renders an item without a label as a badge showing its value — no label, no colon', () => {
+      const el = render({ widget: 'status', data: { value: 'Running', level: 'success' } });
+      const item = shadow(el).querySelector('.status-item')!;
+      expect(item).not.toBeNull();
+      expect(item.querySelector('.status-label')).toBeNull();
+      expect(item.querySelector('.status-value')!.textContent).toBe('Running');
+      expect(item.getAttribute('data-level')).toBe('success');
+    });
+
+    it('keeps array items that have a value, labelled or not, and skips those without one', () => {
+      const el = render({ widget: 'status', data: [{ label: 'API', value: 'Up' }, { value: 'Idle' }, { label: 'DB' }] });
+      const items = shadow(el).querySelectorAll('.status-item');
+      expect(items).toHaveLength(2);
+      expect(items[1].querySelector('.status-label')).toBeNull();
+    });
+
     it('renders status items from array data', () => {
       const el = render({
         widget: 'status',
@@ -240,13 +256,14 @@ describe('uw-status', () => {
   });
 
   describe('data filtering', () => {
-    it('skips items without label', () => {
+    it('draws an item without a label as a value-only badge', () => {
       const el = render({
         widget: 'status',
         data: [{ label: 'Valid', value: 'OK' }, { value: 'No Label' }],
       });
       const items = shadow(el).querySelectorAll('.status-item');
-      expect(items.length).toBe(1);
+      expect(items.length).toBe(2);
+      expect(items[1].querySelector('.status-label')).toBeNull();
     });
 
     it('skips items without value', () => {
