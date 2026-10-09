@@ -8,6 +8,7 @@
 
 import type { UWidgetSpec } from './types.js';
 import type { DataFieldInfo, OptionInfo } from './widget-meta.js';
+import { getWidgetLabel } from './tool-labels.js';
 import {
   MAPPING_DOCS, FIELD_PROP_DOCS, ACTION_PROP_DOCS,
   WIDGET_DATA_FIELDS, WIDGET_INFERENCE,
@@ -18,6 +19,8 @@ import {
 export interface WidgetInfo {
   /** Widget type identifier (e.g., `"chart.bar"`). */
   widget: string;
+  /** Short English name (e.g., `"Bar chart"`) — `getWidgetLabel(widget, locale)` gives it in another language. */
+  label: string;
   /** Human-readable category. */
   category: 'chart' | 'display' | 'input' | 'content' | 'composition';
   /** Short description of the widget's purpose. */
@@ -48,7 +51,11 @@ export interface WidgetDetail extends WidgetInfo {
   examples: { label: string; spec: UWidgetSpec }[];
 }
 
-const CATALOG: readonly WidgetInfo[] = [
+function withLabels(entries: Omit<WidgetInfo, 'label'>[]): WidgetInfo[] {
+  return entries.map(entry => ({ ...entry, label: getWidgetLabel(entry.widget, 'en') }));
+}
+
+const CATALOG: readonly WidgetInfo[] = withLabels([
   // Charts
   // Charts
   { widget: 'chart.bar', category: 'chart', description: 'Bar chart for category × value comparison', mappingKeys: ['x', 'y'], dataShape: 'array' },
@@ -93,7 +100,7 @@ const CATALOG: readonly WidgetInfo[] = [
   { widget: 'header', category: 'content', description: 'Section heading (h1–h3)', mappingKeys: [], dataShape: 'object' },
   // Composition
   { widget: 'compose', category: 'composition', description: 'Combine multiple widgets with layout hints', mappingKeys: [], dataShape: 'none' },
-];
+]);
 
 /**
  * Get the widget catalog.

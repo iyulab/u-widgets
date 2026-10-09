@@ -40,6 +40,10 @@
       "types": "./dist/u-widgets-locale-ko.d.ts",
       "import": "./dist/u-widgets-locale-ko.js"
     },
+    "./tools/locales/ko": {
+      "types": "./dist/u-widgets-tools-locale-ko.d.ts",
+      "import": "./dist/u-widgets-tools-locale-ko.js"
+    },
     "./themes/shadcn.css": "./dist/themes/shadcn.css",
     "./themes/components.css": "./dist/themes/components.css"
   },

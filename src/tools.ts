@@ -28,6 +28,8 @@ export {
   MAPPING_DOCS, FIELD_PROP_DOCS, ACTION_PROP_DOCS,
   DATA_FIELD_DOCS, OPTION_DOCS, OPTION_TYPES,
   WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE,
-  WIDGET_EVENTS, getWidgetEvents, getWidgetOptions,
+  WIDGET_EVENTS, getWidgetEvents, getWidgetOptions, getWidgetDataFields,
 } from './core/widget-meta.js';
 export type { DataFieldInfo, OptionInfo, OptionTypeInfo } from './core/widget-meta.js';
+export { registerToolLabels, getToolLabels, getDefaultToolLabels, getWidgetLabel } from './core/tool-labels.js';
+export type { ToolLabels, ToolLabelsInput } from './core/tool-labels.js';

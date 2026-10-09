@@ -7,6 +7,8 @@
  * entry here — adding a schema key without a description causes a test failure.
  */
 
+import { dataFieldLabel, optionLabel } from './tool-labels.js';
+
 /** Mapping key descriptions (from schema $defs/mapping.properties). */
 export const MAPPING_DOCS: Readonly<Record<string, string>> = {
   x: 'X-axis / category field',
@@ -242,18 +244,23 @@ const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, P
   divider: { label: { desc: 'Text on the line' } },
 };
 
-/** An option a widget reads: its key, description and value type. */
+/** An option a widget reads: its key, short name, description and value type. */
 export interface OptionInfo extends OptionTypeInfo {
   readonly key: string;
+  /** A short name for a form label ("Minimum") — in the requested locale (see `getToolLabels`). */
+  readonly label: string;
   readonly desc: string;
 }
 
-/** The options `widget` reads, each with its description and value type (`OPTION_TYPES`, adjusted for the widget). */
-export function getWidgetOptions(widget: string): OptionInfo[] {
+/**
+ * The options `widget` reads, each with its name in `locale` (resolved as a widget's locale is), its
+ * description and its value type (`OPTION_TYPES`, adjusted for the widget).
+ */
+export function getWidgetOptions(widget: string, locale?: string): OptionInfo[] {
   const keys = WIDGET_OPTIONS[widget] ?? [];
   return keys.map(key => {
     const { desc, ...override } = WIDGET_OPTION_OVERRIDES[widget]?.[key] ?? {};
-    return { key, desc: desc ?? OPTION_DOCS[key] ?? '', ...OPTION_TYPES[key], ...override };
+    return { key, label: optionLabel(widget, key, locale), desc: desc ?? OPTION_DOCS[key] ?? '', ...OPTION_TYPES[key], ...override };
   });
 }
 
@@ -271,6 +278,8 @@ export const ACTION_PROP_DOCS: Readonly<Record<string, string>> = {
 /** Data field descriptor for well-known widget data properties. */
 export interface DataFieldInfo {
   readonly key: string;
+  /** A short name for a form label ("Value") — English in `WIDGET_DATA_FIELDS`, localized by `getWidgetDataFields`. */
+  readonly label: string;
   readonly type: string;
   readonly desc: string;
   readonly required?: boolean;
@@ -285,13 +294,14 @@ function literalUnion(type: string): string[] | undefined {
   return values.every(v => v !== undefined) ? (values as string[]) : undefined;
 }
 
-function withEnums(fields: Record<string, readonly DataFieldInfo[]>): Record<string, readonly DataFieldInfo[]> {
+/** Fills in each field's English name and, for a union of string literals, its `enum`. */
+function withNamesAndEnums(fields: Record<string, readonly Omit<DataFieldInfo, 'label' | 'enum'>[]>): Record<string, readonly DataFieldInfo[]> {
   return Object.fromEntries(
     Object.entries(fields).map(([widget, list]) => [
       widget,
       list.map(field => {
         const values = literalUnion(field.type);
-        return values ? { ...field, enum: values } : field;
+        return { ...field, label: dataFieldLabel(widget, field.key, 'en'), ...(values && { enum: values }) };
       }),
     ]),
   );
@@ -343,7 +353,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
  * Well-known data fields per widget type.
  * Charts/table/list use user-defined fields so they are omitted.
  */
-export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[]>> = withEnums({
+export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[]>> = withNamesAndEnums({
   'metric': [
     { key: 'value', type: 'number | string', desc: 'Primary value', required: true },
     { key: 'label', type: 'string', desc: 'Display label' },
@@ -432,6 +442,11 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'level', type: '"info" | "success" | "warning" | "error" | "neutral"', desc: 'Severity level (default info)' },
   ],
 });
+
+/** The data fields `widget` reads (`WIDGET_DATA_FIELDS`), each with its name in `locale` (resolved as a widget's locale is). */
+export function getWidgetDataFields(widget: string, locale?: string): DataFieldInfo[] {
+  return (WIDGET_DATA_FIELDS[widget] ?? []).map(field => ({ ...field, label: dataFieldLabel(widget, field.key, locale) }));
+}
 
 /** Auto-inference hints — tells LLM what can be omitted. */
 export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {

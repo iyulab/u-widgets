@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Korean ships with the package.** `import '@iyulab/u-widgets/locales/ko'` registers Korean for the text widgets
+  write themselves (table pagination and search, form validation, region names, the code block's copy button, the
+  fallback card); the module also exports the table as `ko`. The table is typed as complete, so a string added later
+  cannot stay English unnoticed. Docs gain a Locale section.
+- **Short, localizable names for editors.** `OptionInfo.label` and `DataFieldInfo.label` name each option and data
+  field for a form label ("Minimum", where the description reads "Minimum range value"), and `WidgetInfo.label` names
+  each widget ("Bar chart"). `getWidgetOptions(widget, locale)`, the new `getWidgetDataFields(widget, locale)` and
+  `getWidgetLabel(widget, locale)` give them in a language — resolved as a widget's locale is (`locale`, else
+  `setDefaultLocale()`, else `<html lang>`). Korean ships as `@iyulab/u-widgets/tools/locales/ko`; another language
+  registers its names with `registerToolLabels(lang, labels)`, anything left out staying English. A key that means
+  something narrower in one widget has its own name there (`rating` `max` is "Icons").
+
+### Changed
+
+- `DataFieldInfo` has a required `label`. Code that builds `DataFieldInfo` values itself supplies one.
+
 ## [0.27.0] - 2026-10-08
 
 ### Added

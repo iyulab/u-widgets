@@ -504,22 +504,26 @@ autoSpec(data);                      // One-call auto spec from data
 위젯 spec을 사람이 고치는 편집기(속성 패널, 디자이너)는 위젯 지식을 복제하지 않고 이 메타데이터로 컨트롤을 만든다.
 
 ```ts
-import { getWidgetOptions, WIDGET_DATA_FIELDS } from '@iyulab/u-widgets/tools';
+import { getWidgetOptions, getWidgetDataFields, getWidgetLabel } from '@iyulab/u-widgets/tools';
 
 getWidgetOptions('gauge');
-// → [{ key: 'min', desc: 'Minimum range value', type: 'number', default: 0 },
-//    { key: 'max', ..., type: 'number', default: 100 },
-//    { key: 'unit', ..., type: 'string' },
+// → [{ key: 'min', label: 'Minimum', desc: 'Minimum range value', type: 'number', default: 0 },
+//    { key: 'max', label: 'Maximum', ..., type: 'number', default: 100 },
+//    { key: 'unit', label: 'Unit', ..., type: 'string' },
 //    { key: 'thresholds', ..., type: '{ to: number, color: string, label?: string }[]' }, ...]
 
-WIDGET_DATA_FIELDS.status;
-// → [{ key: 'label', type: 'string', ... },
-//    { key: 'level', type: '"info" | "success" | ...', enum: ['info', 'success', 'warning', 'error', 'neutral'] }, ...]
+getWidgetDataFields('status');
+// → [{ key: 'label', label: 'Label', type: 'string', ... },
+//    { key: 'level', label: 'Level', type: '"info" | "success" | ...', enum: ['info', 'success', 'warning', 'error', 'neutral'] }, ...]
+
+getWidgetLabel('chart.bar');   // → 'Bar chart'
 ```
 
 - `type`은 TypeScript 표기(`number`, `string`, `boolean`, `string[]`, 리터럴 유니온 …). 선택지가 고정된 값은 `enum`으로도 준다.
 - `default`는 위젯 코드가 그 값을 정해 둔 옵션에만 있다 — 없으면 "생략 시 위젯이 알아서 정함"이다.
 - `help(widget).options`도 같은 목록이다. 옵션 이름의 위젯별 차이(예: `rating`의 `max`는 아이콘 개수)는 `desc`에 반영된다.
+- `label`은 폼 라벨로 쓰는 짧은 이름이다(`desc`는 설명). 위젯별 의미가 좁은 키는 그 위젯에서 이름이 따로 있다(`rating`의 `max` → "Icons").
+- 이름은 지역화된다. `getWidgetOptions(widget, locale)`·`getWidgetDataFields(widget, locale)`·`getWidgetLabel(widget, locale)`의 `locale`은 위젯의 로케일과 같은 순서로 정해진다(인자 → `setDefaultLocale()` → `<html lang>`). 한국어 이름은 `import '@iyulab/u-widgets/tools/locales/ko'`로 등록되고, 다른 언어는 `registerToolLabels(lang, { widgets, options, dataFields, widgetOptions, widgetDataFields })`로 등록한다(빠진 이름은 영어). `WIDGET_DATA_FIELDS`·`help()`의 이름은 영어다.
 
 ## Host Integration
 

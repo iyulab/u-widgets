@@ -124,6 +124,7 @@ const ENTRY = {
   'u-widgets-react': resolve(__dirname, 'src/react.ts'),
   'u-widgets-components': resolve(__dirname, 'src/components.ts'),
   'u-widgets-locale-ko': resolve(__dirname, 'src/locales/ko.ts'),
+  'u-widgets-tools-locale-ko': resolve(__dirname, 'src/locales/tools-ko.ts'),
 };
 
 export default defineConfig({

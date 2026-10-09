@@ -1,10 +1,17 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { readFileSync, statSync } from 'fs';
+import { readdirSync, readFileSync, statSync } from 'fs';
 import { resolve } from 'path';
 import { gzipSync } from 'zlib';
 
 const DIST = resolve(__dirname, '../../dist');
+
+/** The shared chunk holding the editor names (`src/core/tool-labels.ts`). */
+function toolLabelsChunk(): string {
+  const name = readdirSync(DIST).find(f => /^tool-labels-.*\.js$/.test(f));
+  if (!name) throw new Error('no tool-labels chunk in dist');
+  return name;
+}
 
 function gzipSize(filePath: string): number {
   const content = readFileSync(filePath);
@@ -58,14 +65,16 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(8.5 * 1024);
   });
 
-  it('tools bundle is under 14.5 KB gzip', () => {
-    const size = gzipSize(resolve(DIST, 'u-widgets-tools.js'));
+  it('tools bundle (with its names chunk) is under 16.5 KB gzip', () => {
+    const size = gzipSize(resolve(DIST, 'u-widgets-tools.js')) + gzipSize(resolve(DIST, toolLabelsChunk()));
     // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE, OPTION_TYPES.
     // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
     // measured 13.17 KB) — the examples are what `help('chart.gantt')` hands an author.
     // Re-baselined from 13.5 KB for OPTION_TYPES and getWidgetOptions (measured 14.11 KB) — the option
     // value types a property editor builds its controls from. The tools entry is separate from core.
-    expect(size).toBeLessThan(14.5 * 1024);
+    // Re-baselined from 14.5 KB for the editor names (English table and lookup, 1.7 KB in a chunk of
+    // its own, shared with `./tools/locales/ko`; measured 16.3 KB together).
+    expect(size).toBeLessThan(16.5 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {
@@ -78,6 +87,12 @@ describe('bundle size budget', () => {
     expect(gzipSize(file)).toBeLessThan(1.5 * 1024);
     // It registers into the registry the widgets read — a second copy would register into nothing.
     expect(readFileSync(file, 'utf-8')).not.toContain('Prev');
+  });
+
+  it('Korean editor-names bundle is under 2 KB gzip and carries no copy of the names registry', () => {
+    const file = resolve(DIST, 'u-widgets-tools-locale-ko.js');
+    expect(gzipSize(file)).toBeLessThan(2 * 1024);
+    expect(readFileSync(file, 'utf-8')).not.toContain('Bar chart');
   });
 
   it('forms bundle is under 2 KB gzip', () => {
@@ -94,8 +109,9 @@ describe('bundle size budget', () => {
   it('shared chunks total is under 7 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
+    // The editor names chunk is loaded only by `./tools` and its locales — counted in the tools budget.
     const chunks = files.filter(
-      (f: string) => f.endsWith('.js') && !f.startsWith('u-widgets') && !f.endsWith('.map')
+      (f: string) => f.endsWith('.js') && !f.startsWith('u-widgets') && !f.endsWith('.map') && f !== toolLabelsChunk()
     );
     const totalGzip = chunks.reduce(
       (sum: number, f: string) => sum + gzipSize(resolve(DIST, f)),
