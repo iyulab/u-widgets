@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- The build strips style comments with the shared transform from `@iyulab/components`
+  (`plugins/vite-plugin-strip-css-comments`) instead of its own copy. The published output is unchanged.
+
 ## [0.28.0] - 2026-10-09
 
 ### Added

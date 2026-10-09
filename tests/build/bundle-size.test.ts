@@ -58,7 +58,7 @@ describe('bundle size budget', () => {
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
     // left 13 bytes of headroom under the old budget. Comments inside css`` templates no longer
-    // count: the build strips them (see build/strip-css-template-comments.ts).
+    // count: the build strips them (see @iyulab/components/plugins/vite-plugin-strip-css-comments).
     // Re-baselined from 7.5 KB for chart.gantt (0.20.0): measured 8.16 KB with it, the interval
     // builder itself (render item, tooltip, row ordering — infer() was already a shared chunk).
     // The four reference-line copies were merged into one helper first; that saved 37 bytes.
