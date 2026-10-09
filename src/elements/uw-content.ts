@@ -122,9 +122,14 @@ export class UwContent extends LitElement {
     }
 
     /* ── image ── */
-    /* ⚠매체 자체를 축소하지 않는다 — img 는 max-width 로 가로만 제약되고, 세로까지 줄이면
-       종횡비·시각 계약이 바뀐다(그것은 별개 판단이다). 제약이 오면 스크롤로 정직하게 넘긴다. */
+    /* 호스트가 높이(height 또는 max-height)를 주면 그림을 종횡비 그대로 줄여 상자 안에 둔다
+       (스크롤하지 않는다). 세로는 flex 축소가 맡는다 — 제약이 없으면 줄 일이 없어 종전처럼 가로만
+       제약된다. 캡션은 줄지 않고(flex: none) 남은 높이를 그림이 갖는다. 비율은 object-fit 이 지킨다.
+       uw-gauge · uw-video 와 같은 규칙이다. */
     .image-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
@@ -132,12 +137,16 @@ export class UwContent extends LitElement {
     }
 
     .image-container img {
+      flex: 0 1 auto;
+      min-height: 0;
       max-width: 100%;
       height: auto;
+      object-fit: contain;
       border-radius: 6px;
     }
 
     .image-caption {
+      flex: none;
       margin-top: 6px;
       font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);

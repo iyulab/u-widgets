@@ -44,8 +44,12 @@ function matchConditionalStyle(
  * `toolbox`, or `title` (see UNREGISTERED_COMPONENT_KEYS) are merged but stay
  * inactive at runtime, and a one-time console warning is emitted. For heavy
  * interactions (zoom/pan/toolbox), use `@iyulab/flex-chart` instead.
+ *
+ * Pass `size` (the canvas in pixels) to lay the chart out for it: below about 320×260 a compact
+ * layout replaces ECharts' default margins, which otherwise leave a small canvas almost no plot.
+ * `<uw-chart>` passes its own size and rebuilds when the layout changes.
  */
-export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
+export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<string, unknown> {
   const widget = spec.widget;
   const data = spec.data;
   const mapping = spec.mapping ? normalizeMapping(spec.mapping) : undefined;
@@ -143,6 +147,8 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   // Axis config placed at options top-level (instead of options.echarts) is dropped — warn.
   warnMisplacedAxisOptions(options);
 
+  if (chartLayoutKey(size)) applyCompactLayout(result, widget, options, size!);
+
   // Apply echarts passthrough: recursive deep-merge onto the generated option.
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
@@ -155,6 +161,139 @@ export function toEChartsOption(spec: UWidgetSpec): Record<string, unknown> {
   warnUnregisteredSeriesTypes(result.series);
 
   return result;
+}
+
+/** The pixel size of the canvas a chart is drawn into. */
+export interface ChartSize {
+  width: number;
+  height: number;
+}
+
+/**
+ * Below these sizes ECharts' default layout leaves no room for the plot — the grid alone reserves
+ * 65px above and 80px below, so a 140px-tall line chart drew a plot about 0px high with its value
+ * labels stacked on each other. Charts this small get a compact layout instead.
+ */
+const COMPACT_MAX_HEIGHT = 260;
+const COMPACT_MAX_WIDTH = 320;
+/** Under this height a legend costs more plot than it explains; tooltips still name each series. */
+const LEGEND_MIN_HEIGHT = 140;
+/** A side legend next to a pie or funnel needs at least this much width to leave room for the shape. */
+const SIDE_LEGEND_MIN_WIDTH = 280;
+
+/**
+ * Which compact layout a canvas size calls for, as a stable key — `''` when none does. A host that
+ * re-renders on resize compares keys to rebuild the option only when the layout actually changes.
+ */
+export function chartLayoutKey(size: ChartSize | undefined): string {
+  if (!size || size.width <= 0 || size.height <= 0) return '';
+  if (size.height >= COMPACT_MAX_HEIGHT && size.width >= COMPACT_MAX_WIDTH) return '';
+  return [
+    'compact',
+    size.height < LEGEND_MIN_HEIGHT ? 'no-legend' : 'legend',
+    size.width < SIDE_LEGEND_MIN_WIDTH ? 'narrow' : 'wide',
+    size.height < 160 ? 'short' : 'tall',
+  ].join(':');
+}
+
+const COMPACT_LEGEND = {
+  itemWidth: 12,
+  itemHeight: 8,
+  itemGap: 8,
+  textStyle: { fontSize: 11 },
+};
+
+/**
+ * Re-lay a built option for a small canvas: tight margins that still contain the axis labels,
+ * fewer value ticks, overlapping category labels dropped, legends shrunk or hidden, and pie or
+ * funnel labels moved off the outside of the shape (where they ran past the canvas edge).
+ * Runs before the `options.echarts` passthrough, so anything the spec sets there still wins.
+ */
+function applyCompactLayout(
+  result: Record<string, unknown>,
+  widget: string,
+  options: Record<string, unknown>,
+  size: ChartSize,
+): void {
+  const showLegend = size.height >= LEGEND_MIN_HEIGHT;
+  const sideLegend = showLegend && size.width >= SIDE_LEGEND_MIN_WIDTH;
+  const legend = result.legend as Record<string, unknown> | undefined;
+  const legendVisible = !!legend && legend.show !== false;
+
+  if (result.xAxis && result.yAxis) {
+    const splitNumber = size.height < 160 ? 2 : 3;
+    const compactAxis = (axis: unknown): unknown => {
+      if (!axis || typeof axis !== 'object') return axis;
+      if (Array.isArray(axis)) return axis.map(compactAxis);
+      const a = axis as Record<string, unknown>;
+      const labels = (a.axisLabel as Record<string, unknown> | undefined) ?? {};
+      return a.type === 'category'
+        ? { ...a, axisLabel: { ...labels, hideOverlap: true } }
+        : { ...a, splitNumber, axisLabel: { ...labels, hideOverlap: true } };
+    };
+    result.xAxis = compactAxis(result.xAxis);
+    result.yAxis = compactAxis(result.yAxis);
+
+    const keepLegend = legendVisible && showLegend;
+    if (legend) result.legend = keepLegend ? { ...legend, top: 0, ...COMPACT_LEGEND } : { ...legend, show: false };
+    if (result.visualMap) result.visualMap = { ...(result.visualMap as Record<string, unknown>), show: false };
+    // A mark line's label (a reference line, gantt's makespan) sits above the plot's top edge.
+    const markLineLabel = (result.series as Record<string, unknown>[] | undefined)?.some((s) => s.markLine) ? 14 : 0;
+    // 'same' + 'all': the rect below is the outer bound, and the axis labels and names are fitted inside it.
+    result.grid = {
+      ...(result.grid as Record<string, unknown> | undefined),
+      top: (keepLegend ? 28 : 12) + markLineLabel,
+      right: 12,
+      bottom: 8,
+      left: 8,
+      outerBoundsMode: 'same',
+      outerBoundsContain: 'all',
+    };
+    return;
+  }
+
+  if (widget === 'chart.pie' || widget === 'chart.funnel') {
+    if (legend) {
+      result.legend = legendVisible && sideLegend
+        ? { ...legend, orient: 'vertical', left: 4, top: 'middle', ...COMPACT_LEGEND }
+        : { ...legend, show: false };
+    }
+    const offset = legendVisible && sideLegend;
+    result.series = (result.series as Record<string, unknown>[]).map((s) => {
+      if (widget === 'chart.pie') {
+        const outsideLabels = options.showLabel !== false;
+        return {
+          ...s,
+          radius: options.donut ? ['42%', '72%'] : '72%',
+          center: [offset ? '64%' : '50%', '50%'],
+          // Outside labels and their leader lines need room the canvas no longer has.
+          ...(outsideLabels ? { label: { show: false }, labelLine: { show: false } } : {}),
+        };
+      }
+      return { ...s, top: 8, bottom: 8, right: 8, left: offset ? '38%' : 8 };
+    });
+    return;
+  }
+
+  if (widget === 'chart.radar') {
+    const keepLegend = legendVisible && showLegend;
+    if (legend) result.legend = keepLegend ? { ...legend, top: 0, ...COMPACT_LEGEND } : { ...legend, show: false };
+    // With a legend on top, the chart moves down so the top axis name clears it.
+    const radar = result.radar as Record<string, unknown>;
+    result.radar = {
+      ...radar,
+      radius: keepLegend ? '56%' : '62%',
+      center: ['50%', keepLegend ? '58%' : '50%'],
+      axisName: { fontSize: 10 },
+    };
+    return;
+  }
+
+  if (widget === 'chart.treemap') {
+    result.series = (result.series as Record<string, unknown>[]).map((s) => ({
+      ...s, top: 0, bottom: 0, left: 0, right: 0, breadcrumb: { show: false },
+    }));
+  }
 }
 
 /**

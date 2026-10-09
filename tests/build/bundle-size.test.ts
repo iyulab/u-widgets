@@ -53,7 +53,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 8.5 KB gzip', () => {
+  it('charts bundle is under 9.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
@@ -62,7 +62,10 @@ describe('bundle size budget', () => {
     // Re-baselined from 7.5 KB for chart.gantt (0.20.0): measured 8.16 KB with it, the interval
     // builder itself (render item, tooltip, row ordering — infer() was already a shared chunk).
     // The four reference-line copies were merged into one helper first; that saved 37 bytes.
-    expect(size).toBeLessThan(8.5 * 1024);
+    // Re-baselined from 8.5 KB for the compact layout of small canvases: measured 9.01 KB with it
+    // (margins, ticks, legends and labels for cartesian, pie/funnel, radar, treemap, plus the
+    // resize check that rebuilds when the layout changes).
+    expect(size).toBeLessThan(9.5 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 16.5 KB gzip', () => {

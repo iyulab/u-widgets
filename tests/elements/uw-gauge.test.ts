@@ -31,14 +31,14 @@ describe('uw-gauge', () => {
       expect(shadow.querySelector('svg')).not.toBeNull();
     });
 
-    it('displays value as HTML overlay', async () => {
+    it('displays the value as SVG text, so it scales with the arc', async () => {
       const el = createElement({
         widget: 'gauge',
         data: { value: 73 },
         options: { min: 0, max: 100 },
       });
       const shadow = await render(el);
-      const valueEl = shadow.querySelector('.gauge-value');
+      const valueEl = shadow.querySelector('svg .gauge-value');
       expect(valueEl?.textContent).toBe('73');
     });
 
@@ -165,7 +165,7 @@ describe('uw-gauge', () => {
       const shadow = await render(el);
       const subtitle = shadow.querySelector('.gauge-subtitle');
       expect(subtitle?.textContent).toBe('Good');
-      expect(subtitle?.getAttribute('style')).toContain('#22c55e');
+      expect(subtitle?.getAttribute('fill')).toBe('#22c55e');
     });
 
     it('displays static subtitle from options', async () => {
@@ -231,7 +231,8 @@ describe('uw-gauge', () => {
       expect(container?.getAttribute('aria-valuetext')).toBe('85% Healthy');
     });
 
-    it('truncates long subtitle with ellipsis', async () => {
+    // The ellipsis needs text measurement, which happy-dom lacks — see tests/browser/gauge-fit.browser.test.ts.
+    it('keeps the full label when text cannot be measured', async () => {
       const el = createElement({
         widget: 'gauge',
         data: { value: 85 },
@@ -243,12 +244,7 @@ describe('uw-gauge', () => {
         },
       });
       const shadow = await render(el);
-      const subtitle = shadow.querySelector('.gauge-subtitle') as HTMLElement;
-      expect(subtitle).not.toBeNull();
-      const styles = getComputedStyle(subtitle);
-      expect(styles.overflow).toBe('hidden');
-      expect(styles.textOverflow).toBe('ellipsis');
-      expect(styles.whiteSpace).toBe('nowrap');
+      expect(shadow.querySelector('.gauge-subtitle')?.textContent).toBe('Excellent Working Condition Status');
     });
 
     it('hides SVG from screen readers', async () => {

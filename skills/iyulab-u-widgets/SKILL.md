@@ -119,9 +119,10 @@ row area and the code body:
 ```
 
 `--u-widget-chart-height` is the chart's height when nothing constrains the host, not a cap. Every
-widget honours a host height this way — the widget keeps its natural size and its own scroll area
-takes the constraint, so nothing is squashed and no content becomes unreachable. Media (`image`,
-`video`, `gauge`) keeps its aspect ratio and the box around it scrolls.
+widget honours a host height (`height` or `max-height`): content that runs on scrolls in its own
+area, so none of it becomes unreachable; a small chart switches to a compact layout (tight margins,
+fewer ticks, a smaller or no legend); media (`image`, `video`, `gauge`) scales down whole with its
+aspect ratio kept.
 See [Widget Reference](../../docs/widgets.md#sizing) for the per-widget table.
 
 ## Theming

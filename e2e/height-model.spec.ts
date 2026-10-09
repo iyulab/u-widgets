@@ -199,10 +199,9 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
      ⚠`stat-group` 은 가로 `overflow: hidden` 이 의도라(음수 margin 구분선 클립) 세로 축만
      열었다 — 그래서 이 표의 다른 항목과 달리 가로 축도 함께 단언한다. */
   /* 🔴제약은 «케이스마다» 다르게 줘야 한다. 목록·산문 위젯은 내용을 늘려 200px 를 넘기지만,
-     매체 위젯(video · image)은 늘릴 문자열이 없고 높이가 «파일의 고유 크기» 에서 온다 — 데모의
-     이미지는 600x200 이라 200px 제약을 4px 밖에 넘지 않아, 그 케이스는 사실상 아무것도 재지
-     못했다. ⇒ 픽스처를 합성하는 대신 **제약을 더 세게** 줘서 실물로 진짜 넘침을 만든다.
-     ⚠앞의 규율 그대로다: «제약이 발동조차 않은 것은 통과가 아니라 미측정이다». */
+     늘릴 문자열이 없는 위젯은 **제약을 더 세게** 줘서 실물로 진짜 넘침을 만든다.
+     ⚠앞의 규율 그대로다: «제약이 발동조차 않은 것은 통과가 아니라 미측정이다».
+     매체 위젯(video · image · gauge)은 스크롤하지 않고 줄어든다 — 아래 별도 표. */
   const ROOTS: [string, string, number, number][] = [
     ['citation', '.citations', 40, 200],
     ['markdown', '.markdown', 120, 200],
@@ -212,17 +211,14 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
     ['stat-group', '.stat-group-clip', 40, 200],
     ['status', '.status-list', 40, 200],
     ['callout', '.callout', 120, 200],
-    ['video', '.video-container', 1, 120],   // 자연 365 — 매체 고유 크기
     ['form', '.form-container', 1, 120],     // 자연 324 — 필드 수가 높이를 정한다
-    ['image', '.image-container', 1, 120],   // 자연 204 — 600x200 이미지
-    /* 🔴이 둘은 처음에 «미측정» 으로 분류한 자리였다 — 200px 제약에서는 자연 높이가 더
-       작아 발동조차 하지 않았고, 120px 로 세게 주자 각각 72px · 36px 가 샜다.
-       ***미측정을 통과로 세지 않은 것이 이 둘을 찾아낸 이유다.*** */
+    /* 🔴compose 는 처음에 «미측정» 으로 분류한 자리였다 — 200px 제약에서는 자연 높이가 더
+       작아 발동조차 하지 않았고, 120px 로 세게 주자 72px 가 샜다.
+       ***미측정을 통과로 세지 않은 것이 이것을 찾아낸 이유다.*** */
     /* ⚠데모의 compose spec 은 layout:'grid' 라 렌더 루트가 layout-grid 다 — 처음에 layout-stack
        을 골랐더니 대상을 못 찾아 inner 가 null 로 왔고, 위에 넣은 «공허하면 빨개진다» 선행
        단언이 정확히 그것을 잡았다(위젯 결함이 아니라 케이스 정의 오류였다). */
     ['compose', '.layout-grid', 1, 120],     // 자연 192
-    ['gauge', '.gauge-container', 1, 120],   // 자연 156 — 종횡비로 가로에서 높이가 온다
   ];
 
   for (const [widget, sel, repeat, limit] of ROOTS) {
@@ -241,6 +237,115 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
       expect(capped.scrolled, '넘침이 0 이어도 스크롤이 안 되면 내용에 도달할 수 없다').toBe(true);
     });
   }
+
+  /* 매체 위젯 — 제약이 오면 «스크롤» 이 아니라 종횡비 그대로 «축소» 한다. 매체는 줄여도 내용을
+     잃지 않으므로 스크롤바는 작은 상자에서 그림을 가리기만 했다(게이지는 120px 에서 36px 가
+     스크롤 뒤로 숨었다). height 와 max-height 를 둘 다 잰다 — 퍼센트 max-height 로 풀었던 첫
+     구현은 height 에서만 줄고 max-height 에서는 156px 그대로 스크롤됐다. */
+  const MEDIA: [string, string][] = [
+    ['image', 'img'],
+    ['video', 'video'],
+    ['gauge', 'svg.gauge-svg'],
+  ];
+
+  async function measureMedia(page: Page, widget: string, hostStyle: string, mediaSel: string) {
+    return page.evaluate(
+      async ({ widget, hostStyle, mediaSel }) => {
+        const found = (Array.from(document.querySelectorAll('u-widget')) as (HTMLElement & {
+          spec?: Spec;
+        })[]).find((h) => h.spec?.widget === widget);
+        if (!found?.spec) throw new Error(`데모에 ${widget} spec 이 없다 — 이 판정은 공허하다`);
+        const stage = document.createElement('div');
+        stage.setAttribute('style', 'position:absolute;top:0;left:0;width:300px');
+        const host = document.createElement('u-widget') as HTMLElement & { spec?: Spec };
+        if (hostStyle) host.setAttribute('style', hostStyle);
+        host.spec = JSON.parse(JSON.stringify(found.spec)) as Spec;
+        stage.appendChild(host);
+        document.body.appendChild(stage);
+        await new Promise((r) => setTimeout(r, 1200));
+        const find = (root: ParentNode): Element | null => {
+          const hit = root.querySelector(mediaSel);
+          if (hit) return hit;
+          for (const el of Array.from(root.querySelectorAll('*'))) {
+            const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+            if (sr) { const d = find(sr); if (d) return d; }
+          }
+          return null;
+        };
+        const media = find(host.shadowRoot ?? host);
+        if (!media) throw new Error(`${widget} 의 ${mediaSel} 를 못 찾았다 — 이 판정은 공허하다`);
+        let scrolled = false;
+        const walk = (root: ParentNode) => {
+          for (const el of Array.from(root.querySelectorAll('*'))) {
+            if (el.scrollHeight > el.clientHeight + 1 && getComputedStyle(el).overflowY !== 'visible') scrolled = true;
+            const sr = (el as HTMLElement & { shadowRoot?: ShadowRoot }).shadowRoot;
+            if (sr) walk(sr);
+          }
+        };
+        walk(host.shadowRoot ?? host);
+        const hr = host.getBoundingClientRect();
+        const mr = media.getBoundingClientRect();
+        stage.remove();
+        return { host: hr.height, bottom: mr.bottom - hr.bottom, width: mr.width, height: mr.height, scrolled };
+      },
+      { widget, hostStyle, mediaSel },
+    );
+  }
+
+  for (const [widget, mediaSel] of MEDIA) {
+    test(`${widget} — 호스트 제약에 맞춰 종횡비 그대로 줄고 스크롤하지 않는다`, async ({ page }) => {
+      await ready(page);
+      const nat = await measureMedia(page, widget, '', mediaSel);
+      const limit = Math.round(nat.height / 2);
+      expect(limit, `자연 높이 실측 ${JSON.stringify(nat)} — 절반 제약이 의미 있으려면 커야 한다`).toBeGreaterThan(40);
+      const ratio = nat.width / nat.height;
+
+      for (const style of [`height:${limit}px`, `max-height:${limit}px`]) {
+        const fit = await measureMedia(page, widget, style, mediaSel);
+        expect(fit.bottom, `${style} 실측 ${JSON.stringify(fit)}`).toBeLessThanOrEqual(1);
+        expect(fit.height, `${style} 실측 ${JSON.stringify(fit)}`).toBeLessThanOrEqual(limit);
+        expect(fit.scrolled, `${style} — 매체는 줄어야지 스크롤 뒤로 숨으면 안 된다`).toBe(false);
+        expect(Math.abs(fit.width / fit.height - ratio) / ratio, `${style} 비율 실측 ${JSON.stringify(fit)}`)
+          .toBeLessThan(0.05);
+      }
+    });
+  }
+
+  /* 차트 — 작은 캔버스에서 ECharts 기본 여백(위 65 · 아래 80px)이 플롯을 0 으로 만들던 결함.
+     넘침은 처음부터 0 이었으므로 넘침 측정은 이것을 못 잡는다 — 플롯 사각형 자체를 잰다. */
+  test('chart — 작은 호스트에서도 플롯이 남는다(조밀 배치)', async ({ page }) => {
+    await ready(page);
+    const plots = await page.evaluate(async () => {
+      const found = (Array.from(document.querySelectorAll('u-widget')) as (HTMLElement & {
+        spec?: Spec;
+      })[]).find((h) => h.spec?.widget === 'chart.line');
+      if (!found?.spec) throw new Error('데모에 chart.line spec 이 없다 — 이 판정은 공허하다');
+      const out: Record<string, number> = {};
+      for (const [w, h] of [[160, 140], [600, 300]]) {
+        const stage = document.createElement('div');
+        stage.setAttribute('style', `position:absolute;top:0;left:0;width:${w}px`);
+        const host = document.createElement('u-widget') as HTMLElement & { spec?: Spec };
+        host.setAttribute('style', `height:${h}px`);
+        host.spec = JSON.parse(JSON.stringify(found.spec)) as Spec;
+        stage.appendChild(host);
+        document.body.appendChild(stage);
+        await new Promise((r) => setTimeout(r, 1200));
+        type Grid = { coordinateSystem: { getRect(): { height: number; y: number } } };
+        const chartEl = host.shadowRoot?.querySelector('uw-chart') as (HTMLElement & {
+          _chart?: { getModel(): { getComponent(t: string): Grid } };
+        }) | null;
+        const rect = chartEl?._chart?.getModel().getComponent('grid').coordinateSystem.getRect();
+        if (!rect) throw new Error('차트 grid 를 읽지 못했다 — 이 판정은 공허하다');
+        out[`${w}x${h}`] = rect.height;
+        out[`${w}x${h}:top`] = rect.y;
+        stage.remove();
+      }
+      return out;
+    });
+    expect(plots['160x140'], `실측 ${JSON.stringify(plots)} — 종전에는 약 0px`).toBeGreaterThan(60);
+    // 큰 캔버스는 ECharts 기본 배치 그대로다(위 여백 65px) — 조밀 배치가 기본 모습을 바꾸지 않았다는 증거.
+    expect(plots['600x300:top'], `실측 ${JSON.stringify(plots)}`).toBe(65);
+  });
 
   test('stat-group — 세로만 열고 가로 `hidden` 은 의도대로 남는다', async ({ page }) => {
     await ready(page);

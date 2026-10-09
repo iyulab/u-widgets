@@ -1,5 +1,31 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **Media scales down to fit a host height instead of scrolling.** When the host is given a `height` or `max-height`
+  smaller than an `image`, `video` or `gauge`, the media now shrinks whole with its aspect ratio kept; before, it kept
+  its natural size and the box around it scrolled, so a gauge in a 120px cell hid a third of its dial. Without a host
+  height nothing changes.
+- **`gauge` draws its value, unit and label inside the SVG**, so they scale with the dial (they were an HTML overlay of
+  fixed size, which a smaller dial would have left spilling out). The `value`, `unit` and `subtitle` parts are now SVG
+  `<text>`: colour them with `fill`, not `color`. A label wider than the dial's inner span ends in an ellipsis, as
+  before.
+
+### Fixed
+
+- **Small charts keep a readable plot.** Below about 320×260px a chart switches to a compact layout — margins that
+  still contain the axis labels, fewer value ticks, overlapping category labels dropped, a smaller legend (none on a
+  canvas under 140px tall), the heatmap colour scale hidden, and pie labels moved off the outside of the pie. Before, a
+  140px-tall line chart kept ECharts' default 65px top and 80px bottom margins and drew a plot about 0px high with its
+  value labels on top of each other. Larger charts are unchanged, and `options.echarts` still overrides the layout.
+
+### Added
+
+- `toEChartsOption(spec, size)` takes the canvas size (`{ width, height }`) to lay the option out for it, and
+  `chartLayoutKey(size)` tells a host whether a resize changes that layout.
+
 ## [0.28.1] - 2026-10-09
 
 ### Fixed

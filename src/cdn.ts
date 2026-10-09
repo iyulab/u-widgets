@@ -30,4 +30,5 @@ export { parseFormdown } from './core/formdown.js';
 
 // Charts: registers <uw-chart> (only functional if echarts is available at runtime)
 export { UwChart } from './elements/uw-chart.js';
-export { toEChartsOption } from './renderers/echarts-adapter.js';
+export { toEChartsOption, chartLayoutKey } from './renderers/echarts-adapter.js';
+export type { ChartSize } from './renderers/echarts-adapter.js';

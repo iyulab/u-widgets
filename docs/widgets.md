@@ -106,8 +106,8 @@ When `mapping` is omitted, the renderer infers it from data structure:
 ## Sizing
 
 Every widget grows to fit its content, so a widget in normal page flow needs no height at all.
-Give the host a height only when the widget must fit a fixed box — a dashboard cell, a split
-pane, a card of a set size — and that constraint reaches the widget’s own scroll area:
+Give the host a height (`height` or `max-height`) only when the widget must fit a fixed box — a
+dashboard cell, a split pane, a card of a set size — and the widget stays inside it:
 
 ```html
 <!-- the chart fills the cell instead of staying at its 300px default -->
@@ -119,7 +119,7 @@ pane, a card of a set size — and that constraint reaches the widget’s own sc
 
 | Widget | What a host height reaches | Height without a constraint |
 |---|---|---|
-| `chart.*` | the chart canvas, which resizes with it | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
+| `chart.*` | the chart canvas, which resizes with it; below about 320×260px the chart switches to a compact layout (tight margins that keep the axis labels inside, fewer value ticks, a smaller legend — or none when the canvas is too short — and pie labels moved off the outside of the pie) | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
 | `table` | the row area — the search box and pager stay put, rows scroll | grows to fit every row |
 | `code` | the code body — the language header stays put, lines scroll | grows to fit every line (`options.maxHeight` caps it independently) |
 | `list` · `citation` · `steps` · `status` | the item area — items scroll | grows to fit every item |
@@ -128,10 +128,14 @@ pane, a card of a set size — and that constraint reaches the widget’s own sc
 | `stat-group` | the cell area — wrapped rows scroll vertically, and the horizontal clip that hides the leading divider stays in place | grows as cells wrap |
 | `form` | the field area — fields scroll | grows to fit every field |
 | `compose` | the layout area — the title stays put, children scroll | grows to fit its children |
-| `image` · `video` · `gauge` | the box around the media, which scrolls | the media’s own size (the media is never squashed, since that would change its aspect ratio) |
+| `image` · `video` · `gauge` | the media, which scales down whole — keeping its aspect ratio, and for `gauge` its value and label with it — rather than scroll | the media’s own size (`gauge` is `--u-widget-gauge-size` wide, 160px) |
 
-Every widget honours a host `height` or `max-height`. Nothing is squashed to fit: the widget keeps
-its natural size and the box scrolls, so no content becomes unreachable.
+Every widget honours a host `height` or `max-height`. Nothing is squashed out of shape: content that
+runs on scrolls, so none of it becomes unreachable, and media scales down with its aspect ratio kept.
+
+`toEChartsOption(spec, size)` (from `@iyulab/u-widgets/charts`) takes the canvas size as its second
+argument and returns the compact layout for a small one; `<uw-chart>` passes its own size and
+rebuilds the option when the layout changes. Anything set in `options.echarts` still wins.
 
 ## Table Options
 

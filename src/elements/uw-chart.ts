@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetEvent } from '../core/types.js';
-import { toEChartsOption } from '../renderers/echarts-adapter.js';
+import { toEChartsOption, chartLayoutKey, type ChartSize } from '../renderers/echarts-adapter.js';
 import { themeStyles } from '../styles/tokens.js';
 
 // Tree-shakeable ECharts imports
@@ -75,6 +75,8 @@ export class UwChart extends LitElement {
   private _chart: echarts.ECharts | null = null;
   private _container: HTMLDivElement | null = null;
   private _resizeObserver: ResizeObserver | null = null;
+  /** The layout the current option was built for (see chartLayoutKey) — a resize that changes it rebuilds. */
+  private _layoutKey = '';
 
   render() {
     if (!this.spec) return nothing;
@@ -86,7 +88,10 @@ export class UwChart extends LitElement {
     this._container = this.shadowRoot?.querySelector('.chart-container') as HTMLDivElement | null;
     this._initChart();
     if (this._container) {
-      this._resizeObserver = new ResizeObserver(() => this._chart?.resize());
+      this._resizeObserver = new ResizeObserver(() => {
+        this._chart?.resize();
+        if (chartLayoutKey(this._canvasSize()) !== this._layoutKey) this._updateChart();
+      });
       this._resizeObserver.observe(this._container);
     }
   }
@@ -144,7 +149,9 @@ export class UwChart extends LitElement {
   private _updateChart() {
     if (!this._chart || !this.spec) return;
 
-    const option = toEChartsOption(this.spec);
+    const size = this._canvasSize();
+    this._layoutKey = chartLayoutKey(size);
+    const option = toEChartsOption(this.spec, size);
 
     // Inject theme colors from CSS custom properties,
     // but only if the spec didn't provide explicit colors
@@ -168,6 +175,11 @@ export class UwChart extends LitElement {
     this._applyThemeStyle(option);
 
     this._chart.setOption(option, true);
+  }
+
+  private _canvasSize(): ChartSize | undefined {
+    if (!this._container) return undefined;
+    return { width: this._container.clientWidth, height: this._container.clientHeight };
   }
 
   private _applyThemeStyle(option: Record<string, unknown>) {

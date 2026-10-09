@@ -22,9 +22,13 @@ export class UwVideo extends LitElement {
       container: uw-video / inline-size;
     }
 
-    /* ⚠video 요소를 세로로 줄이지 않는다 — 종횡비가 바뀌면 그것은 시각 계약 변경이다.
-       제약이 오면 캡션까지 포함한 상자를 스크롤로 넘긴다. */
+    /* 호스트가 높이(height 또는 max-height)를 주면 영상을 종횡비 그대로 줄여 상자 안에 둔다
+       (uw-content 의 image 와 같은 규칙). 세로는 flex 축소가 맡고, video 의 object-fit 기본값이
+       contain 이라 화면이 왜곡되지 않는다. 제약이 없으면 줄 일이 없어 종전 크기 그대로다. */
     .video-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
@@ -32,12 +36,15 @@ export class UwVideo extends LitElement {
     }
 
     video {
+      flex: 0 1 auto;
+      min-height: 0;
       max-width: 100%;
       border-radius: 6px;
       background: #000;
     }
 
     .video-caption {
+      flex: none;
       margin-top: 6px;
       font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);

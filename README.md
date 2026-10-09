@@ -130,9 +130,10 @@ widgetEntry('metric');          // undefined — the core entry renders it
 ## Sizing
 
 Widgets grow to fit their content. Give the host a height when it must fit a fixed box and the
-constraint reaches that widget’s own scroll area — the chart canvas, a table’s rows, a list’s items,
-a prose box, the field area of a form. Nothing is squashed to fit: the widget keeps its natural size
-and the box scrolls, so no content becomes unreachable.
+constraint reaches the widget: content that runs on — a table’s rows, a list’s items, a prose box, the
+field area of a form — scrolls, so none of it becomes unreachable; a chart fills the box and switches to
+a compact layout when it is small; media (`image`, `video`, `gauge`) scales down whole, keeping its
+aspect ratio.
 
 ```html
 <u-widget style="height: 400px"></u-widget>    <!-- chart fills the cell -->
