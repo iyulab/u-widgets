@@ -73,6 +73,13 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(2 * 1024);
   });
 
+  it('Korean locale bundle is under 1.5 KB gzip and carries no copy of the locale registry', () => {
+    const file = resolve(DIST, 'u-widgets-locale-ko.js');
+    expect(gzipSize(file)).toBeLessThan(1.5 * 1024);
+    // It registers into the registry the widgets read — a second copy would register into nothing.
+    expect(readFileSync(file, 'utf-8')).not.toContain('Prev');
+  });
+
   it('forms bundle is under 2 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-forms.js'));
     expect(size).toBeLessThan(2 * 1024);

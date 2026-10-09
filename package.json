@@ -36,11 +36,16 @@
       "types": "./dist/u-widgets-react.d.ts",
       "import": "./dist/u-widgets-react.js"
     },
+    "./locales/ko": {
+      "types": "./dist/u-widgets-locale-ko.d.ts",
+      "import": "./dist/u-widgets-locale-ko.js"
+    },
     "./themes/shadcn.css": "./dist/themes/shadcn.css",
     "./themes/components.css": "./dist/themes/components.css"
   },
   "sideEffects": [
     "./src/elements/*.ts",
+    "./src/locales/*.ts",
     "./dist/*.js",
     "./src/themes/*.css",
     "./dist/themes/*.css"

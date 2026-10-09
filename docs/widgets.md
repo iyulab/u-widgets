@@ -398,6 +398,29 @@ The same import makes u-widgets follow the components locale: its default locale
 and moves with every `Locale.set()`, so one call switches the whole app. A widget's own `locale`
 still wins.
 
+## Locale
+
+The text a widget writes itself — table pagination, search, form validation messages, the accessible
+names of its regions, the code block's copy button, the fallback card — is English by default.
+Korean ships with the package:
+
+```ts
+import '@iyulab/u-widgets';
+import '@iyulab/u-widgets/locales/ko';
+```
+
+The import registers `ko`. A widget speaks it when its locale is `ko` or `ko-KR` — its own `locale`
+attribute, else `setDefaultLocale()`, else `<html lang>`. The module also exports the table as `ko`.
+
+For another language, register its strings; anything left out stays English:
+
+```ts
+import { registerLocale } from '@iyulab/u-widgets';
+registerLocale('ja', { prev: '前へ', next: '次へ' /* … */ });
+```
+
+Numbers and dates in a widget follow the same locale (`options.locale`, which `<u-widget>` fills in).
+
 ### Switching the locale at runtime
 
 `setDefaultLocale()` and `registerLocale()` reach widgets already on screen — every connected

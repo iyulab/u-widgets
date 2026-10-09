@@ -4,8 +4,9 @@
  * Scope: library-internal chrome strings only (validation messages,
  * pagination labels, ARIA labels). NOT a general i18n framework.
  *
- * English is the built-in default. Consumers register other locales:
- *   registerLocale('ko', { prev: '이전', next: '다음', ... });
+ * English is the built-in default. Korean ships as `@iyulab/u-widgets/locales/ko` (importing it
+ * registers `ko`); consumers register other locales:
+ *   registerLocale('ja', { prev: '前へ', next: '次へ', ... });
  */
 
 export interface UWidgetLocaleStrings {

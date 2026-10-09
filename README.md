@@ -70,6 +70,8 @@ import '@iyulab/u-widgets';
 // import '@iyulab/u-widgets/charts';
 // For math expression support (requires katex peer dependency):
 // import '@iyulab/u-widgets/math';
+// Korean for the text widgets write themselves (pagination, validation, region names):
+// import '@iyulab/u-widgets/locales/ko';
 ```
 
 `spec` is a property, not an attribute — set it from script (`el.spec = {…}`) or with a framework binding
