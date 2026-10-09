@@ -23,8 +23,16 @@ import './uw-rating.js';
 import './uw-video.js';
 import './uw-gallery.js';
 
-/** Widget types already warned about a missing entry point — one console line per type per page. */
-const warnedMissingEntries = new Set<string>();
+/** Widget types already checked for a missing entry point — at most one console line per type per page. */
+const checkedMissingEntries = new Set<string>();
+
+/**
+ * How long an entry point may take to register before its absence is reported. A host that imports
+ * the entry lazily (`import('@iyulab/u-widgets/charts')`, so it loads beside the app rather than in
+ * front of it) renders its first widgets before the entry arrives; that is correct, not a mistake to
+ * warn about. Only an entry still missing after this long is one the host never imported.
+ */
+const MISSING_ENTRY_GRACE_MS = 5000;
 
 /**
  * <u-widget> — Entry point router element.
@@ -532,14 +540,18 @@ export class UWidget extends LitElement {
 
   /**
    * A known widget whose element lives in an entry point that has not been imported. Says which
-   * entry is missing — in the card and once per type in the console — instead of a generic fallback
+   * entry is missing — in the card, and once per type in the console if it is still missing after a
+   * short grace (a lazily imported entry is on its way, not forgotten) — instead of a generic fallback
    * whose label (the spec title) reads like a rendered widget. Re-renders when the element is
    * registered later, so a lazily imported entry takes over without the host doing anything.
    */
   private renderMissingEntry(spec: UWidgetSpec, needed: WidgetEntry) {
-    if (!warnedMissingEntries.has(spec.widget)) {
-      warnedMissingEntries.add(spec.widget);
-      console.warn(`[u-widget] "${spec.widget}" needs import '${needed.entry}'`);
+    if (!checkedMissingEntries.has(spec.widget)) {
+      checkedMissingEntries.add(spec.widget);
+      const widget = spec.widget;
+      setTimeout(() => {
+        if (!customElements.get(needed.element)) console.warn(`[u-widget] "${widget}" needs import '${needed.entry}'`);
+      }, MISSING_ENTRY_GRACE_MS);
     }
     if (!this._awaitedElements.has(needed.element)) {
       this._awaitedElements.add(needed.element);

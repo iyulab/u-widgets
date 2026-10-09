@@ -8,6 +8,11 @@
   `display: none`) measured its label as 0 wide and left it uncut, so a long label ran past the dial once shown; one
   drawn before a web font loaded was cut for the fallback font. The label is now measured again when the gauge is
   shown and when the page's fonts are ready.
+- **No warning for an entry point that is loading.** A host that imports `@iyulab/u-widgets/charts` (or `/math`)
+  lazily, so it loads beside the app, rendered its first charts before the entry registered and got
+  `"chart.line" needs import '@iyulab/u-widgets/charts'` in the console on every page load, although nothing was
+  wrong. The warning now waits five seconds and is given only if the entry has still not registered. The "Widget
+  module not loaded" card and the re-render once the entry arrives are unchanged.
 
 ## [0.29.0] - 2026-10-09
 

@@ -215,18 +215,23 @@ describe('u-widget', () => {
     expect(shadow.querySelector('[part="fallback"]')!.getAttribute('data-missing-entry')).toBe('@iyulab/u-widgets/math');
   });
 
-  it('warns once per widget type about the missing entry', async () => {
+  it('warns once per widget type about an entry still missing after the grace', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.useFakeTimers();
     try {
       await render(createElement({ widget: 'chart.funnel', data: [{ x: 'A', y: 1 }] }));
       await render(createElement({ widget: 'chart.funnel', data: [{ x: 'B', y: 2 }] }));
       await render(createElement({ widget: 'chart.treemap', data: [{ x: 'A', y: 1 }] }));
-      const lines = warn.mock.calls.map((c) => String(c[0])).filter((l) => l.includes('needs import'));
-      expect(lines).toEqual([
+      const lines = () => warn.mock.calls.map((c) => String(c[0])).filter((l) => l.includes('needs import'));
+      // A lazily imported entry may still be loading — nothing is said yet.
+      expect(lines()).toEqual([]);
+      vi.advanceTimersByTime(5000);
+      expect(lines()).toEqual([
         `[u-widget] "chart.funnel" needs import '@iyulab/u-widgets/charts'`,
         `[u-widget] "chart.treemap" needs import '@iyulab/u-widgets/charts'`,
       ]);
     } finally {
+      vi.useRealTimers();
       warn.mockRestore();
     }
   });

@@ -78,8 +78,9 @@ import '@iyulab/u-widgets';
 (Lit `.spec=${…}`, React `spec={…}` via `@iyulab/u-widgets/react`).
 
 A `chart.*` or `math` widget rendered without its entry imported shows a "Widget module not loaded"
-card naming the import, and warns once per widget type in the console. It renders as soon as the entry
-is imported, including by a later dynamic `import()`. To check this at build time, `widgetEntry(type)`
+card naming the import, and — if the entry is still missing five seconds later — warns once per widget
+type in the console. It renders as soon as the entry is imported, including by a later dynamic `import()`,
+so a host that loads the entry lazily sees no warning. To check this at build time, `widgetEntry(type)`
 returns the entry a widget type needs:
 
 ```ts
