@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.28.1] - 2026-10-09
+
+### Fixed
+
+- **A theme a framework gives a widget is kept.** On a page that declares `<html data-theme>`, a `<u-widget>`
+  rendered by React (`@lit/react`, which sets the `theme` property right after adding the element and before it
+  reflects to the attribute) had its theme replaced by the page's: the theme sync saw no attribute yet and wrote
+  the declared one. The sync now reads the widget's property too, so `theme="dark"` given that way stays dark.
 
 ### Changed
 
