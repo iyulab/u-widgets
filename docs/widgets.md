@@ -185,6 +185,7 @@ rebuilds the option when the layout changes. Anything set in `options.echarts` s
 | `stacked` | `boolean` | bar, line, area | Stack series |
 | `horizontal` | `boolean` | bar, line, scatter | Swap axes |
 | `smooth` | `boolean` | line, area | Smooth curves |
+| `series` | `object[]` | bar, line, area | Per-series settings, in `mapping.y` order: `label` (the name in the legend and tooltip — the field name otherwise, which is often a source's code such as `PM`), `color`, `lineStyle`, `symbol`, `type`, `yAxisIndex` |
 | `donut` | `boolean` | pie | Donut chart |
 | `showLabel` | `boolean` | pie, gantt | Show data labels (gantt: in-bar segment labels, default on) |
 | `categories` | `string[]` | gantt | Row order top to bottom; listed rows stay on the axis without intervals |

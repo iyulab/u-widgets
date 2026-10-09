@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- `docs/widgets.md` lists the charts' `series` option — `label` names a series in the legend and tooltip where the
+  field name would show (a source's code such as `PM`).
+
 ## [0.30.0] - 2026-10-09
 
 ### Added
