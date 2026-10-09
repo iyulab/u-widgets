@@ -53,6 +53,30 @@ describe('u-widget', () => {
     expect(items[0].textContent).toContain('widget');
   });
 
+  it('lists the errors in the widget’s locale, not only the heading', async () => {
+    await import('../../src/locales/ko.js');
+    const el = createElement({ widget: 'chart.line', data: 'x' });
+    el.locale = 'ko';
+    const shadow = await render(el);
+    expect(shadow.querySelector('.error-header')?.textContent).toContain('잘못된 위젯 명세');
+    expect(shadow.querySelector('.error-list li')?.textContent).toBe('"chart.line"의 "data"는 배열이어야 하는데 받은 값은 string입니다');
+  });
+
+  it('draws columns (one array per field) as table rows', async () => {
+    const el = createElement({ widget: 'table', data: { time: ['00:00', '01:00'], temperature: [15.5, 17.5] } });
+    const shadow = await render(el);
+    expect(shadow.querySelector('[part="error"]')).toBeNull();
+    const table = shadow.querySelector('uw-table') as HTMLElement & { spec: { data: unknown } };
+    expect(table.spec.data).toEqual([{ time: '00:00', temperature: 15.5 }, { time: '01:00', temperature: 17.5 }]);
+  });
+
+  it('gives a table nested fields as dotted columns', async () => {
+    const el = createElement({ widget: 'table', data: [{ id: 'a', properties: { mag: 4.8 } }] });
+    const shadow = await render(el);
+    const table = shadow.querySelector('uw-table') as HTMLElement & { spec: { data: unknown } };
+    expect(table.spec.data).toEqual([{ id: 'a', 'properties.mag': 4.8 }]);
+  });
+
   it('renders data type error for wrong data shape', async () => {
     const el = createElement({ widget: 'table', data: { name: 'Alice' } });
     const shadow = await render(el);

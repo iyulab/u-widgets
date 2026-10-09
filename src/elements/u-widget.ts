@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetAction, UWidgetEvent } from '../core/types.js';
-import { validate } from '../core/schema.js';
+import { validate, specErrorMessage, type ValidationIssue } from '../core/schema.js';
 import { normalize } from '../core/normalize.js';
 import { infer } from '../core/infer.js';
 import { suggestWidget } from '../core/suggest.js';
@@ -329,7 +329,7 @@ export class UWidget extends LitElement {
 
     const result = validate(this.spec);
     if (!result.valid) {
-      return this.renderError(result.errors);
+      return this.renderError(result.issues);
     }
 
     const spec = normalize(this.spec);
@@ -580,7 +580,7 @@ export class UWidget extends LitElement {
     `;
   }
 
-  private renderError(errors: string[]) {
+  private renderError(issues: ValidationIssue[]) {
     return html`
       <div class="error-card" part="error">
         <div class="error-header">
@@ -588,7 +588,7 @@ export class UWidget extends LitElement {
           <span>${this._strings.invalidSpec}</span>
         </div>
         <ul class="error-list">
-          ${errors.map((e) => html`<li>${e}</li>`)}
+          ${issues.map((issue) => html`<li>${specErrorMessage(issue, this._strings)}</li>`)}
         </ul>
       </div>
     `;

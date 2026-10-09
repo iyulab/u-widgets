@@ -52,6 +52,26 @@ export interface UWidgetLocaleStrings {
   addImportHint: string;
   didYouMean: string;
   invalidSpec: string;
+  // Spec validation errors listed under `invalidSpec` — templates; see `SpecErrorCode` for what each is about
+  specErrorNotObject: string;
+  /** {max} — the nesting limit. */
+  specErrorTooDeep: string;
+  specErrorWidgetRequired: string;
+  specErrorTypeInvalid: string;
+  specErrorFieldsFormdownExclusive: string;
+  /** {widget}, {got} — the JavaScript type it got. */
+  specErrorDataNotArray: string;
+  /** {widget}, {got} — the JavaScript type it got, or `array`. */
+  specErrorDataNotObject: string;
+  specErrorChildrenRequired: string;
+  /** {index} */
+  specErrorChildInvalid: string;
+  /** {options} — the layouts, comma-separated. */
+  specErrorLayoutInvalid: string;
+  /** {index} */
+  specErrorFieldInvalid: string;
+  /** {index} */
+  specErrorActionInvalid: string;
 }
 
 const EN: UWidgetLocaleStrings = {
@@ -95,6 +115,18 @@ const EN: UWidgetLocaleStrings = {
   addImportHint: 'Add {import} to render this widget.',
   didYouMean: 'Did you mean {suggestion}?',
   invalidSpec: 'Invalid widget spec',
+  specErrorNotObject: 'Spec must be a non-null object',
+  specErrorTooDeep: 'compose children exceed maximum nesting depth ({max})',
+  specErrorWidgetRequired: 'Required field "widget" must be a non-empty string',
+  specErrorTypeInvalid: '"type" must be "u-widget" if specified',
+  specErrorFieldsFormdownExclusive: '"fields" and "formdown" are mutually exclusive',
+  specErrorDataNotArray: '"{widget}" expects "data" to be an array, got {got}',
+  specErrorDataNotObject: '"{widget}" expects "data" to be an object, got {got}',
+  specErrorChildrenRequired: '"compose" widget requires a "children" array',
+  specErrorChildInvalid: 'children[{index}] must be an object with a "widget" field',
+  specErrorLayoutInvalid: '"layout" must be one of: {options}',
+  specErrorFieldInvalid: 'fields[{index}] must have a "field" string property',
+  specErrorActionInvalid: 'actions[{index}] must have "label" and "action" string properties',
 };
 
 const registry = new Map<string, UWidgetLocaleStrings>();

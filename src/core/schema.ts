@@ -1,14 +1,66 @@
 import type { UWidgetSpec, FieldType } from './types.js';
 import { getFormdownParser } from './formdown.js';
+import { formatTemplate, getDefaultLocale, type UWidgetLocaleStrings } from './locale.js';
+import { ARRAY_DATA, isColumnar, toRows } from './tabular.js';
+
+/** What a validation error is about — stable for code to branch on, while its text follows the locale. */
+export type SpecErrorCode =
+  | 'not-object'
+  | 'too-deep'
+  | 'widget-required'
+  | 'type-invalid'
+  | 'fields-formdown-exclusive'
+  | 'data-not-array'
+  | 'data-not-object'
+  | 'children-required'
+  | 'child-invalid'
+  | 'layout-invalid'
+  | 'field-invalid'
+  | 'action-invalid';
+
+/** One validation error, as data: its message is {@link specErrorMessage} of it in a locale. */
+export interface ValidationIssue {
+  code: SpecErrorCode;
+  /** Values the message names — the widget, the type it got, an index. */
+  params: Record<string, string | number>;
+  /** Where in a compose tree the error is (`["children[1]", "children[0]"]`); empty at the top level. */
+  path: string[];
+}
 
 /** Result of spec validation via {@link validate}. */
 export interface ValidationResult {
   /** Whether the spec passed all validation checks. */
   valid: boolean;
-  /** Error messages — issues that prevent correct rendering. */
+  /** Error messages (English) — issues that prevent correct rendering. */
   errors: string[];
+  /** The same errors as data, in the same order — for showing them in the reader's language. */
+  issues: ValidationIssue[];
   /** Warning messages — non-fatal issues or recommendations. */
   warnings: string[];
+}
+
+const MESSAGE_KEY: Record<SpecErrorCode, keyof UWidgetLocaleStrings> = {
+  'not-object': 'specErrorNotObject',
+  'too-deep': 'specErrorTooDeep',
+  'widget-required': 'specErrorWidgetRequired',
+  'type-invalid': 'specErrorTypeInvalid',
+  'fields-formdown-exclusive': 'specErrorFieldsFormdownExclusive',
+  'data-not-array': 'specErrorDataNotArray',
+  'data-not-object': 'specErrorDataNotObject',
+  'children-required': 'specErrorChildrenRequired',
+  'child-invalid': 'specErrorChildInvalid',
+  'layout-invalid': 'specErrorLayoutInvalid',
+  'field-invalid': 'specErrorFieldInvalid',
+  'action-invalid': 'specErrorActionInvalid',
+};
+
+/** The message for `issue` in `strings` (English by default), prefixed with its place in a compose tree. */
+export function specErrorMessage(issue: ValidationIssue, strings: UWidgetLocaleStrings = getDefaultLocale()): string {
+  return [...issue.path, formatTemplate(strings[MESSAGE_KEY[issue.code]], issue.params)].join(': ');
+}
+
+function result(issues: ValidationIssue[], warnings: string[]): ValidationResult {
+  return { valid: issues.length === 0, errors: issues.map((issue) => specErrorMessage(issue)), issues, warnings };
 }
 
 /** Valid field types for form fields. */
@@ -20,14 +72,6 @@ const VALID_FIELD_TYPES = new Set<string>([
 
 /** Maximum recursion depth for compose children. */
 const MAX_COMPOSE_DEPTH = 10;
-
-/** Widgets that expect an array for `data`. */
-const ARRAY_DATA = new Set([
-  'stat-group', 'table', 'list', 'steps', 'gallery',
-  'chart.bar', 'chart.line', 'chart.area', 'chart.pie',
-  'chart.scatter', 'chart.radar', 'chart.heatmap', 'chart.box',
-  'chart.funnel', 'chart.waterfall', 'chart.treemap', 'chart.gantt',
-]);
 
 /** Widgets that expect an object for `data`. */
 const OBJECT_DATA = new Set(['metric', 'gauge', 'progress', 'header', 'code', 'rating', 'video', 'math']);
@@ -49,58 +93,61 @@ const OBJECT_DATA = new Set(['metric', 'gauge', 'progress', 'header', 'code', 'r
  * ```
  */
 export function validate(spec: unknown, _depth = 0): ValidationResult {
-  const errors: string[] = [];
+  const issues: ValidationIssue[] = [];
   const warnings: string[] = [];
+  const fail = (code: SpecErrorCode, params: Record<string, string | number> = {}) => {
+    issues.push({ code, params, path: [] });
+  };
 
   if (_depth > MAX_COMPOSE_DEPTH) {
-    return { valid: false, errors: ['compose children exceed maximum nesting depth (' + MAX_COMPOSE_DEPTH + ')'], warnings };
+    fail('too-deep', { max: MAX_COMPOSE_DEPTH });
+    return result(issues, warnings);
   }
 
   if (spec == null || typeof spec !== 'object') {
-    return { valid: false, errors: ['Spec must be a non-null object'], warnings };
+    fail('not-object');
+    return result(issues, warnings);
   }
 
   const obj = spec as Record<string, unknown>;
 
   if (typeof obj.widget !== 'string' || obj.widget.length === 0) {
-    errors.push('Required field "widget" must be a non-empty string');
-    return { valid: false, errors, warnings };
+    fail('widget-required');
+    return result(issues, warnings);
   }
 
   const widget = obj.widget as string;
 
   if (_depth === 0 && obj.type !== undefined && obj.type !== 'u-widget') {
-    errors.push('"type" must be "u-widget" if specified');
+    fail('type-invalid');
   }
 
   if (obj.fields !== undefined && obj.formdown !== undefined) {
-    errors.push('"fields" and "formdown" are mutually exclusive');
+    fail('fields-formdown-exclusive');
   }
 
-  // Data type validation
+  // Data type validation — columns (one array per field) are an array widget's rows (see tabular.ts)
   if (obj.data !== undefined) {
-    if (ARRAY_DATA.has(widget) && !Array.isArray(obj.data)) {
-      errors.push(`"${widget}" expects "data" to be an array, got ${typeof obj.data}`);
+    if (ARRAY_DATA.has(widget) && !Array.isArray(obj.data) && !isColumnar(obj.data)) {
+      fail('data-not-array', { widget, got: typeof obj.data });
     }
     if (OBJECT_DATA.has(widget) && (Array.isArray(obj.data) || typeof obj.data !== 'object')) {
-      errors.push(`"${widget}" expects "data" to be an object, got ${Array.isArray(obj.data) ? 'array' : typeof obj.data}`);
+      fail('data-not-object', { widget, got: Array.isArray(obj.data) ? 'array' : typeof obj.data });
     }
   }
 
   if (widget === 'compose') {
     if (!Array.isArray(obj.children)) {
-      errors.push('"compose" widget requires a "children" array');
+      fail('children-required');
     } else {
       for (let i = 0; i < obj.children.length; i++) {
         const child = obj.children[i];
         if (child == null || typeof child !== 'object' || typeof (child as Record<string, unknown>).widget !== 'string') {
-          errors.push(`children[${i}] must be an object with a "widget" field`);
+          fail('child-invalid', { index: i });
         } else {
           // Recursively validate children with depth tracking
           const childResult = validate(child, _depth + 1);
-          if (!childResult.valid) {
-            errors.push(...childResult.errors.map(e => `children[${i}]: ${e}`));
-          }
+          issues.push(...childResult.issues.map((issue) => ({ ...issue, path: [`children[${i}]`, ...issue.path] })));
           warnings.push(...childResult.warnings.map(w => `children[${i}]: ${w}`));
         }
       }
@@ -109,7 +156,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     if (obj.layout !== undefined) {
       const validLayouts = ['stack', 'row', 'grid'];
       if (!validLayouts.includes(obj.layout as string)) {
-        errors.push(`"layout" must be one of: ${validLayouts.join(', ')}`);
+        fail('layout-invalid', { options: validLayouts.join(', ') });
       }
     }
   }
@@ -119,7 +166,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     for (let i = 0; i < (obj.fields as unknown[]).length; i++) {
       const f = (obj.fields as unknown[])[i] as Record<string, unknown> | null;
       if (f == null || typeof f !== 'object' || typeof f.field !== 'string') {
-        errors.push(`fields[${i}] must have a "field" string property`);
+        fail('field-invalid', { index: i });
       } else if (f.type != null && !VALID_FIELD_TYPES.has(f.type as string)) {
         warnings.push(`fields[${i}].type "${f.type}" is not a recognized field type`);
       }
@@ -140,7 +187,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     for (let i = 0; i < (obj.actions as unknown[]).length; i++) {
       const a = (obj.actions as unknown[])[i] as Record<string, unknown> | null;
       if (a == null || typeof a !== 'object' || typeof a.label !== 'string' || typeof a.action !== 'string') {
-        errors.push(`actions[${i}] must have "label" and "action" string properties`);
+        fail('action-invalid', { index: i });
       }
     }
   }
@@ -158,7 +205,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
   // Validate mapping fields against data
   if (obj.mapping && typeof obj.mapping === 'object' && obj.data) {
     const mapping = obj.mapping as Record<string, unknown>;
-    const dataKeys = getDataKeys(obj.data);
+    const dataKeys = getDataKeys(toRows(widget, obj.data));
 
     if (dataKeys) {
       // Check scalar mapping fields
@@ -178,7 +225,7 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     }
   }
 
-  return { valid: errors.length === 0, errors, warnings };
+  return result(issues, warnings);
 }
 
 /** Extract the set of data field keys from a spec's data. */

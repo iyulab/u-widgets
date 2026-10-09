@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-09
+
+### Added
+
+- **`data` as an API returns it.** A widget that takes an array of records now also reads *columns* — one array per
+  field, all of one length (`{ "time": [...], "temp": [...] }`), the usual shape of a time series — as one row per
+  index; it was rejected with `"chart.line" expects "data" to be an array, got object`. A chart's or table's rows with
+  nested fields (GeoJSON `properties`) are read by dotted path, `"mapping": { "y": "properties.mag" }`, and a table
+  without `columns` shows them as `properties.mag` columns instead of `[object Object]`. `validate`, `infer` and
+  `suggestMapping` read `data` the same way.
+- **Validation errors as data.** `validate()` returns `issues` — `{ code, params, path }` for each error, in the order of
+  `errors` — and `specErrorMessage(issue, strings)` gives its text in a locale. The "Invalid widget spec" card now lists
+  its errors in the widget's locale (only its heading was translated); `@iyulab/u-widgets/locales/ko` includes them.
+  `errors` keeps its English text.
+
 ### Fixed
 
 - **A gauge's label is fitted once it can be measured.** A gauge first drawn while hidden (inside a closed tab or

@@ -33,8 +33,8 @@ export type {
   FieldType,
 } from './core/types.js';
 
-export { validate, isWidgetSpec } from './core/schema.js';
-export type { ValidationResult } from './core/schema.js';
+export { validate, isWidgetSpec, specErrorMessage } from './core/schema.js';
+export type { ValidationResult, ValidationIssue, SpecErrorCode } from './core/schema.js';
 export { infer } from './core/infer.js';
 export { normalize } from './core/normalize.js';
 export { parseFormdown, registerFormdownParser, getFormdownParser } from './core/formdown.js';

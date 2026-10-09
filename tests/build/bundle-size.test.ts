@@ -126,6 +126,8 @@ describe('bundle size budget', () => {
     // 0.26.0: + the locale module (English table, ~0.9 KB) — the `./components` entry calls `setDefaultLocale`, which
     // must be the same module instance the elements read, so it moved out of the core entry into a shared chunk
     // (6.3 KB measured). Bytes moved, not added.
-    expect(totalGzip).toBeLessThan(7 * 1024);
+    // 0.30.0: + spec validation messages as locale templates (they were inline English in `schema`, in the core entry)
+    // and `tabular` (columns → rows, nested → dotted paths) beside `infer` — 7.28 KB measured.
+    expect(totalGzip).toBeLessThan(8 * 1024);
   });
 });

@@ -1,5 +1,6 @@
 import type { UWidgetSpec, NormalizedMapping, UWidgetMapping } from './types.js';
 import { getFormdownParser } from './formdown.js';
+import { toRows } from './tabular.js';
 
 /**
  * Normalize a spec for internal processing.
@@ -7,6 +8,8 @@ import { getFormdownParser } from './formdown.js';
  * Transformations applied:
  * 1. Deprecated `mapping.fields` → top-level `fields`
  * 2. `formdown` string → parsed `fields` + `actions`
+ * 3. `data` → the shape the widget reads: columns become rows, and a chart's or table's nested
+ *    rows read by dotted path ({@link toRows})
  *
  * Returns a shallow copy; the original spec is not mutated.
  *
@@ -15,6 +18,10 @@ import { getFormdownParser } from './formdown.js';
  */
 export function normalize(spec: UWidgetSpec): UWidgetSpec {
   const result = { ...spec };
+
+  if (result.data !== undefined) {
+    result.data = toRows(result.widget, result.data) as UWidgetSpec['data'];
+  }
 
   // Normalize deprecated mapping.fields → top-level fields
   if (result.mapping && 'fields' in result.mapping && !result.fields) {

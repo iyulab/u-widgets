@@ -1,5 +1,6 @@
 import type { UWidgetMapping } from './types.js';
 import { isDateLikeString } from './utils.js';
+import { toRows } from './tabular.js';
 
 /**
  * Auto-infer a mapping from data shape and widget type.
@@ -31,6 +32,8 @@ export function infer(
   data: Record<string, unknown> | Record<string, unknown>[] | undefined,
 ): UWidgetMapping | undefined {
   if (data == null) return undefined;
+  // Columns and nested rows are read the way the widget reads them (tabular.ts).
+  data = toRows(widget, data) as typeof data;
 
   const records = Array.isArray(data) ? data : [data];
   if (records.length === 0) return undefined;

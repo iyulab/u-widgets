@@ -89,6 +89,21 @@ When `mapping` is omitted, the renderer infers it from data structure:
 "mapping": { "primary": "name", "secondary": "description", "avatar": "imageUrl", "trailing": "score" }
 ```
 
+### Data as an API returns it
+
+A widget that takes an array of records (charts, `table`, `list`, …) also reads the two other shapes an API
+commonly answers in, so `data` can be passed as it came:
+
+- **Columns** — one array per field, all of one length, as time series usually arrive. Read as one row per index:
+  `{ "time": ["00:00", "01:00"], "temp": [15.5, 17.5] }` is `[{ "time": "00:00", "temp": 15.5 }, …]`.
+  Columns hold values: an object wrapping an array of records (`{ "items": [{…}] }`) is not columns and is still an error.
+- **Nested records** — a chart's or table's rows with fields grouped in objects, as GeoJSON features carry them, are
+  read by dotted path: `"mapping": { "x": "properties.place", "y": "properties.mag" }`, and a table without
+  `columns` shows `properties.place` and `properties.mag` as columns. Arrays stay values. A key that already
+  contains a dot, as written, is kept over a flattened one.
+
+`validate`, `infer` and `suggestMapping` read `data` the same way.
+
 ## Format Hints
 
 | Format | Output |
@@ -502,6 +517,10 @@ template('metric');                  // Minimal template with sample data
 suggestMapping([{ name: 'A', value: 30 }]); // Suggest widget + mapping
 autoSpec(data);                      // One-call auto spec from data
 ```
+
+`validate(spec)` returns `errors` (English messages) and the same errors as `issues` — `{ code, params, path }` —
+so a host can branch on `code` or show the message in its reader's language with
+`specErrorMessage(issue, getLocaleStrings(lang))`. The "Invalid widget spec" card lists them in the widget's locale.
 
 ### 속성 편집기용 메타데이터
 

@@ -50,6 +50,18 @@ export const ko: UWidgetLocaleStrings = {
   addImportHint: '이 위젯을 그리려면 {import}을(를) 추가하세요.',
   didYouMean: '{suggestion}을(를) 찾으셨나요?',
   invalidSpec: '잘못된 위젯 명세',
+  specErrorNotObject: '명세는 null이 아닌 객체여야 합니다',
+  specErrorTooDeep: 'compose 자식이 최대 중첩 깊이({max})를 넘었습니다',
+  specErrorWidgetRequired: '필수 필드 "widget"은 비어 있지 않은 문자열이어야 합니다',
+  specErrorTypeInvalid: '"type"을 쓴다면 "u-widget"이어야 합니다',
+  specErrorFieldsFormdownExclusive: '"fields"와 "formdown"은 함께 쓸 수 없습니다',
+  specErrorDataNotArray: '"{widget}"의 "data"는 배열이어야 하는데 받은 값은 {got}입니다',
+  specErrorDataNotObject: '"{widget}"의 "data"는 객체여야 하는데 받은 값은 {got}입니다',
+  specErrorChildrenRequired: '"compose" 위젯에는 "children" 배열이 필요합니다',
+  specErrorChildInvalid: 'children[{index}]는 "widget" 필드가 있는 객체여야 합니다',
+  specErrorLayoutInvalid: '"layout"은 다음 중 하나여야 합니다: {options}',
+  specErrorFieldInvalid: 'fields[{index}]에는 문자열 "field" 속성이 있어야 합니다',
+  specErrorActionInvalid: 'actions[{index}]에는 문자열 "label"과 "action" 속성이 있어야 합니다',
 };
 
 registerLocale('ko', ko);

@@ -520,4 +520,30 @@ test.describe('Playground', () => {
     expect(text).toContain('9999');
     expect(text).toContain('Custom Test');
   });
+
+  test('playground draws a line chart from columns (one array per field), as a time-series API answers', async ({ page }) => {
+    const textarea = page.locator('#spec-input');
+    await textarea.fill(JSON.stringify({
+      widget: 'chart.line',
+      data: { time: ['00:00', '01:00', '02:00'], temperature: [15.5, 17.5, 19.6] },
+      mapping: { x: 'time', y: 'temperature' },
+    }));
+    await page.click('#render-btn');
+    await page.waitForTimeout(1500);
+
+    expect(await deepShadowHas(page, 'demo-custom', '[part="error"]')).toBe(false);
+    const drawn = await page.evaluate(() => {
+      const host = document.getElementById('demo-custom');
+      const find = (root: ParentNode): { _chart?: any } | undefined => {
+        for (const el of root.querySelectorAll('*')) {
+          if ((el as unknown as { _chart?: unknown })._chart) return el as unknown as { _chart?: any };
+          if (el.shadowRoot) { const hit = find(el.shadowRoot); if (hit) return hit; }
+        }
+        return undefined;
+      };
+      const option = host?.shadowRoot ? find(host.shadowRoot)?._chart?.getOption() : undefined;
+      return option ? { x: option.xAxis[0].data, y: option.series[0].data } : null;
+    });
+    expect(drawn).toEqual({ x: ['00:00', '01:00', '02:00'], y: [15.5, 17.5, 19.6] });
+  });
 });

@@ -8,6 +8,7 @@
 import type { UWidgetSpec, UWidgetMapping } from './types.js';
 import { infer } from './infer.js';
 import { isDateLikeString } from './utils.js';
+import { toRows } from './tabular.js';
 
 /** A widget + mapping recommendation. */
 export interface MappingSuggestion {
@@ -47,6 +48,8 @@ export function suggestMapping(
   widget?: string,
 ): MappingSuggestion[] {
   if (data == null) return [];
+  // Columns become rows and nested fields dotted paths, as a chart or table would read them (tabular.ts).
+  data = toRows('table', data) as typeof data;
 
   const records = Array.isArray(data) ? data : [data];
   if (records.length === 0) return [];
