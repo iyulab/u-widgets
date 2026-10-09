@@ -119,7 +119,7 @@ dashboard cell, a split pane, a card of a set size — and the widget stays insi
 
 | Widget | What a host height reaches | Height without a constraint |
 |---|---|---|
-| `chart.*` | the chart canvas, which resizes with it; below about 320×260px the chart switches to a compact layout (tight margins that keep the axis labels inside, fewer value ticks, a smaller legend — or none when the canvas is too short — and pie labels moved off the outside of the pie) | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
+| `chart.*` | the chart canvas, which resizes with it; below about 320×260px — the canvas size decides, whether a host height or a narrow container (the 200px default inside 20rem) made it small — the chart switches to a compact layout (tight margins that keep the axis labels inside, fewer value ticks, a smaller legend — or none when the canvas is too short — and pie labels moved off the outside of the pie) | `--u-widget-chart-height` (300px; 200px inside a 20rem container) |
 | `table` | the row area — the search box and pager stay put, rows scroll | grows to fit every row |
 | `code` | the code body — the language header stays put, lines scroll | grows to fit every line (`options.maxHeight` caps it independently) |
 | `list` · `citation` · `steps` · `status` | the item area — items scroll | grows to fit every item |

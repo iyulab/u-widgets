@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **A gauge's label is fitted once it can be measured.** A gauge first drawn while hidden (inside a closed tab or
+  `display: none`) measured its label as 0 wide and left it uncut, so a long label ran past the dial once shown; one
+  drawn before a web font loaded was cut for the fallback font. The label is now measured again when the gauge is
+  shown and when the page's fonts are ready.
+
 ## [0.29.0] - 2026-10-09
 
 ### Changed

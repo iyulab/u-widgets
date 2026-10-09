@@ -258,8 +258,32 @@ export class UwGauge extends LitElement {
   /** The gauge's centre label, written into its `<text>` after each render. */
   private _subtitle = '';
 
-  /** SVG text has no text-overflow, so a label wider than the arc's inner span is cut with an ellipsis here. */
+  private _resizeObserver?: ResizeObserver;
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Measuring needs the label laid out in its real font. A gauge first rendered hidden measures 0, and
+    // one rendered before a web font arrives measures the fallback — measure again once it is shown
+    // (its size changes from nothing) and once the page's fonts are ready.
+    if (typeof ResizeObserver === 'function') {
+      this._resizeObserver = new ResizeObserver(() => this._fitSubtitle());
+      this._resizeObserver.observe(this);
+    }
+    document.fonts?.ready.then(() => this._fitSubtitle(), () => {});
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = undefined;
+  }
+
   protected updated() {
+    this._fitSubtitle();
+  }
+
+  /** SVG text has no text-overflow, so a label wider than the arc's inner span is cut with an ellipsis here. */
+  private _fitSubtitle() {
     const subtitle = this.renderRoot.querySelector<SVGTextElement>('text.gauge-subtitle');
     if (!subtitle) return;
     const full = this._subtitle;
