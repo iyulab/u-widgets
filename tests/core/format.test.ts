@@ -78,6 +78,36 @@ describe('formatValue', () => {
     });
   });
 
+  // Many public APIs write times as digits (`202501151430`) or with a space (`2025-01-15 14:30`).
+  describe('dates as APIs write them', () => {
+    it('reads compact digits as a date and time', () => {
+      expect(formatValue('202501151430', 'datetime')).toBe('2025-01-15 14:30');
+      expect(formatValue('20250115143005', 'datetime')).toBe('2025-01-15 14:30');
+      expect(formatValue('20250115 1430', 'datetime')).toBe('2025-01-15 14:30');
+      expect(formatValue('20250115', 'date')).toBe('2025-01-15');
+      expect(formatValue('202501151430', 'date')).toBe('2025-01-15');
+    });
+
+    it('reads a space or dots between the parts', () => {
+      expect(formatValue('2025-01-15 14:30', 'datetime')).toBe('2025-01-15 14:30');
+      expect(formatValue('2025.01.15 14:30', 'datetime')).toBe('2025-01-15 14:30');
+    });
+
+    it('formats them in the locale, as the wall-clock time they write', () => {
+      const result = formatValue('202501151430', 'datetime', 'de-DE');
+      expect(result).toBe(new Intl.DateTimeFormat('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(2025, 0, 15, 14, 30)));
+    });
+
+    it('keeps a date-only value on its own day in the locale, whatever the time zone', () => {
+      expect(formatValue('2025-01-15', 'date', 'en-US')).toBe('01/15/2025');
+    });
+
+    it('leaves digits that are not a date as they are', () => {
+      expect(formatValue('202513151430', 'datetime')).toBe('202513151430');
+      expect(formatValue('12345678', 'date')).toBe('12345678');
+    });
+  });
+
   describe('bytes', () => {
     it('formats bytes', () => {
       expect(formatValue(500, 'bytes')).toBe('500 B');

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **`date` and `datetime` read dates as APIs write them.** Compact digits (`202501151430`, `20250115`,
+  `20250115 1430`) and a space or dots between the parts (`2025-01-15 14:30`, `2025.01.15`) are formatted — on a
+  chart axis (`xFormat: { type: 'datetime' }`), in a table column, in a metric — where they were shown as written.
+  A date alone (`2025-01-15`) formatted in a locale stays on its own day west of UTC (it was read as UTC midnight,
+  the day before there). Digits that are not a valid date are shown as written.
+
 ### Documentation
 
 - `docs/widgets.md` lists the charts' `series` option — `label` names a series in the legend and tooltip where the
