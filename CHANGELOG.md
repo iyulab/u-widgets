@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`time` format.** The time of day alone (`14:30`, in the locale's words when one is given) — for a chart axis
+  of hours (`xFormat: { type: 'time' }`), where `datetime` repeats the date on every label, or a table column. It
+  reads the same forms as `date` and `datetime`; a date with no time of day is shown as written.
+
 ## [0.30.1] - 2026-10-10
 
 ### Fixed

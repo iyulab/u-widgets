@@ -1,4 +1,4 @@
-type FormatType = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'bytes';
+type FormatType = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
@@ -12,7 +12,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * Format a value according to a format hint string.
  *
  * Supported formats: `"number"`, `"currency"`, `"currency:EUR"`, `"percent"`,
- * `"date"`, `"datetime"`, `"bytes"`. Returns `String(value)` for unknown formats.
+ * `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for unknown formats.
  *
  * @param value - The value to format (coerced to number where needed).
  * @param format - Format hint, optionally with a parameter after `:` (e.g., `"currency:USD"`).
@@ -46,6 +46,8 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
       return formatDate(value, locale);
     case 'datetime':
       return formatDatetime(value, locale);
+    case 'time':
+      return formatTime(value, locale);
     case 'bytes':
       return formatBytes(value);
     default:
@@ -187,6 +189,21 @@ function formatDatetime(value: unknown, locale?: string): string {
   }
   const date = `${parts.year}-${pad(parts.month)}-${pad(parts.day)}`;
   return parts.hour === undefined ? date : `${date} ${pad(parts.hour)}:${pad(parts.minute ?? 0)}`;
+}
+
+/** The time of day alone — what an axis of hours or a "last updated" cell needs. A date without a time of day
+ *  has none to show, and is shown as written. */
+function formatTime(value: unknown, locale?: string): string {
+  const parts = typeof value === 'string' ? dateParts(value) : null;
+  if (!parts || parts.hour === undefined) return String(value);
+  if (locale) {
+    try {
+      return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(instantOf(parts));
+    } catch {
+      // Invalid locale fallback
+    }
+  }
+  return `${pad(parts.hour)}:${pad(parts.minute ?? 0)}`;
 }
 
 function formatBytes(value: unknown): string {

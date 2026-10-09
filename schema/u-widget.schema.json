@@ -280,7 +280,7 @@
         },
         "format": {
           "type": "string",
-          "enum": ["number", "currency", "percent", "date", "datetime", "bytes"],
+          "enum": ["number", "currency", "percent", "date", "datetime", "time", "bytes"],
           "description": "Format hint"
         },
         "align": {

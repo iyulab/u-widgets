@@ -102,6 +102,16 @@ describe('formatValue', () => {
       expect(formatValue('2025-01-15', 'date', 'en-US')).toBe('01/15/2025');
     });
 
+    it('shows the time alone with the time format — an axis of hours', () => {
+      expect(formatValue('202501151430', 'time')).toBe('14:30');
+      expect(formatValue('2025-01-15T09:05:00', 'time')).toBe('09:05');
+      expect(formatValue('202501151430', 'time', 'en-US')).toBe(
+        new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' }).format(new Date(2025, 0, 15, 14, 30))
+      );
+      // A date with no time of day has no time to show.
+      expect(formatValue('2025-01-15', 'time')).toBe('2025-01-15');
+    });
+
     it('leaves digits that are not a date as they are', () => {
       expect(formatValue('202513151430', 'datetime')).toBe('202513151430');
       expect(formatValue('12345678', 'date')).toBe('12345678');

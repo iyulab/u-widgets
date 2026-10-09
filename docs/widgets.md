@@ -116,9 +116,10 @@ commonly answers in, so `data` can be passed as it came:
 | `percent` | `73%` |
 | `date` | `2025-01-15` |
 | `datetime` | `2025-01-15 14:30` |
+| `time` | `14:30` |
 | `bytes` | `1.2 GB` |
 
-`date` and `datetime` read a value written in ISO 8601 (`2025-01-15T14:30:00Z`), with a space or dots between
+`date`, `datetime` and `time` read a value written in ISO 8601 (`2025-01-15T14:30:00Z`), with a space or dots between
 its parts (`2025-01-15 14:30`, `2025.01.15`), or as compact digits (`20250115`, `202501151430`,
 `20250115 1430`) — the forms public APIs often use. A time without an offset is shown as the wall-clock time
 it writes; a value that is not a valid date is shown as it is.

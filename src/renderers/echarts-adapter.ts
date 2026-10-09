@@ -1360,7 +1360,7 @@ function localIsoString(ms: number): string {
  * a UTC ISO string would label a local-midnight tick with the previous day east of UTC.
  */
 function buildAxisFormatter(fmt: AxisFormatOption, locale?: string, timestamps = false): (value: number | string) => string {
-  const isDateFormat = fmt.type === 'date' || fmt.type === 'datetime';
+  const isDateFormat = fmt.type === 'date' || fmt.type === 'datetime' || fmt.type === 'time';
   return (raw: number | string) => {
     const value = timestamps && isDateFormat && typeof raw === 'number' && Number.isFinite(raw)
       ? localIsoString(raw)

@@ -74,7 +74,7 @@ export interface UWidgetColumnDefinition {
   /** Display header label. Defaults to the field name. */
   label?: string;
   /** Value formatting hint (e.g., `"currency"`, `"currency:EUR"`, `"percent"`). */
-  format?: 'number' | 'currency' | `currency:${string}` | 'percent' | 'date' | 'datetime' | 'bytes';
+  format?: 'number' | 'currency' | `currency:${string}` | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
   /**
@@ -326,7 +326,7 @@ export interface ReferenceLineOption {
  */
 export interface AxisFormatOption {
   /** Format type — delegates to `formatValue()`. */
-  type?: 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'bytes';
+  type?: 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
   /** Static prefix prepended to each label. */
   prefix?: string;
   /** Static suffix appended to each label. */
