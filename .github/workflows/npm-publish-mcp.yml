@@ -108,9 +108,23 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: npm test
 
+      # A run queued behind another that has just published the same version (a push changing both
+      # package.json files fires both triggers) still sees E404 above: the registry takes minutes to show a
+      # fresh version. npm then refuses with E409 "cannot publish over previously staged version" — that is
+      # the version this run would have published, so it is done, not failed (2026-10-10, 0.5.4).
       - name: Publish
         if: steps.check.outputs.exists == 'false'
-        run: npm publish
+        run: |
+          if out=$(npm publish 2>&1); then
+            echo "${out}"
+          else
+            echo "${out}"
+            if grep -q "E409" <<< "${out}" && grep -qi "cannot publish over" <<< "${out}"; then
+              echo "::notice::This version was published by another run moments ago."
+            else
+              exit 1
+            fi
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
