@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.30.1] - 2026-10-10
+
 ### Fixed
 
 - **`date` and `datetime` read dates as APIs write them.** Compact digits (`202501151430`, `20250115`,
