@@ -120,6 +120,21 @@ describe('installGlobalThemeSync', () => {
       expect(pinned.getAttribute('theme')).toBe('light');
     });
 
+    it('페이지가 속성(property)으로 준 theme은 attribute로 반영되기 전에 붙어도 덮어쓰지 않는다', async () => {
+      // React(@lit/react)는 요소를 붙인 직후 property를 쓰고, attribute 반영은 그 뒤 업데이트에서 일어난다.
+      document.documentElement.setAttribute('data-theme', 'light');
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      const widget = document.createElement('u-widget') as HTMLElement & { theme?: string };
+      document.body.appendChild(widget);
+      widget.theme = 'dark';
+      await flush();
+      expect(widget.theme).toBe('dark');
+      expect(widget.hasAttribute('theme')).toBe(false);
+      widget.remove();
+      document.documentElement.removeAttribute('data-theme');
+    });
+
     it('동기화가 쓴 뒤 페이지가 바꾼 theme도 페이지의 것으로 남는다', async () => {
       document.documentElement.setAttribute('data-theme', 'dark');
       const widget = document.createElement('u-widget');

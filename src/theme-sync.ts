@@ -30,8 +30,16 @@ export function installGlobalThemeSync(): void {
   // The value this sync last wrote on each widget. A `theme` that differs from it was set by the page.
   const written = new WeakMap<Element, string>()
 
+  // A widget's own theme: its property once it is upgraded — a framework (React through `@lit/react`)
+  // sets the property before the attribute reflects it, so a widget added with a theme can reach this
+  // sync with no attribute yet — else its attribute.
+  const themeOf = (el: Element): string | null => {
+    const property = (el as Element & { theme?: unknown }).theme
+    return typeof property === 'string' ? property : el.getAttribute('theme')
+  }
+
   const apply = (el: Element, theme: 'dark' | 'light' | null): void => {
-    const current = el.getAttribute('theme')
+    const current = themeOf(el)
     if (current !== null && current !== written.get(el)) return
     if (theme === null) {
       if (current !== null) el.removeAttribute('theme')
