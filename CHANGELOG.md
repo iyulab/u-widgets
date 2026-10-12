@@ -10,6 +10,9 @@
 
 ### Fixed
 
+- The Korean hidden new-tab hint reads `, 새 탭에서 열림` instead of `(새 탭에서 열림)`. NVDA's Korean symbol table speaks
+  parentheses at the default punctuation level, so a citation or content link that opens a new tab was announced
+  with «여는 괄호 … 닫는 괄호»; a comma is only a pause there.
 - **`chart.gantt` places a date alone at its local midnight.** A start or end like `2026-01-01` was read as UTC
   midnight, while the time axis puts its day ticks at local midnight — so a bar began nine hours into its day in
   Seoul and on the evening before west of UTC. Dates on the time axis now go through the same reader as the

@@ -18,7 +18,7 @@ export const ko: UWidgetLocaleStrings = {
   nextPage: '다음 페이지',
   tablePagination: '표 페이지 이동',
   dataTable: '데이터 표',
-  opensInNewTab: '(새 탭에서 열림)',
+  opensInNewTab: ', 새 탭에서 열림',
 
   // Validation messages — form
   required: '{label}을(를) 입력하세요',
