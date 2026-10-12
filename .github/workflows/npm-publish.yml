@@ -97,6 +97,22 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: npm run build
 
+      # Pack first and check the tarball that will be published — a module the source
+      # registers can drop out of the packed files while the local build looks fine.
+      - name: Pack
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          dest="${RUNNER_TEMP}/pack"
+          mkdir -p "${dest}"
+          tgz=$(npm pack --pack-destination "${dest}" --silent | tail -n 1)
+          tar -xzf "${dest}/${tgz}" -C "${dest}"
+          echo "PACKED_TARBALL=${dest}/${tgz}" >> "$GITHUB_ENV"
+          echo "PACKED_DIR=${dest}/package" >> "$GITHUB_ENV"
+
+      - name: Verify packed tarball
+        if: steps.check.outputs.exists == 'false'
+        run: node .github/scripts/verify-packed.mjs
+
       - name: Publish
         if: steps.check.outputs.exists == 'false'
         env:
@@ -106,7 +122,7 @@ jobs:
         run: |
           # A prerelease goes out under `next`, never as `latest` (npm refuses one without a tag).
           case "${VERSION}" in *-*) tag=next ;; *) tag=latest ;; esac
-          npm publish --tag "${tag}"
+          npm publish "${PACKED_TARBALL}" --tag "${tag}"
 
       - name: Summary
         env:
