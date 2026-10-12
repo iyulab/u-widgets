@@ -8,6 +8,14 @@
   of hours (`xFormat: { type: 'time' }`), where `datetime` repeats the date on every label, or a table column. It
   reads the same forms as `date` and `datetime`; a date with no time of day is shown as written.
 
+### Fixed
+
+- **`chart.gantt` places a date alone at its local midnight.** A start or end like `2026-01-01` was read as UTC
+  midnight, while the time axis puts its day ticks at local midnight — so a bar began nine hours into its day in
+  Seoul and on the evening before west of UTC. Dates on the time axis now go through the same reader as the
+  `date` and `datetime` formats: a date alone is local midnight, a date-time without an offset is local wall clock,
+  one with an offset is that moment.
+
 ## [0.30.1] - 2026-10-10
 
 ### Fixed

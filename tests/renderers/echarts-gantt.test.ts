@@ -132,7 +132,26 @@ describe('chart.gantt', () => {
     expect((result.xAxis as Obj).type).toBe('time');
     expect(((result.xAxis as Obj).axisLabel as Obj).hideOverlap).toBe(true);
     const value = ((result.series as ObjArray)[0].data as ObjArray)[0].value as number[];
-    expect(value).toEqual([0, Date.parse('2026-01-01'), Date.parse('2026-01-10')]);
+    expect(value).toEqual([0, new Date(2026, 0, 1).getTime(), new Date(2026, 0, 10).getTime()]);
+  });
+
+  it('🔴a date alone starts at its local midnight in any time zone — not UTC midnight (west of UTC: the evening before)', () => {
+    const original = process.env.TZ;
+    try {
+      for (const tz of ['America/New_York', 'Asia/Seoul']) {
+        process.env.TZ = tz;
+        const result = gantt({
+          data: [{ task: 'Design', from: '2026-01-01', to: '2026-01-10T12:00:00Z' }],
+          mapping: { y: 'task', start: 'from', end: 'to' },
+        });
+        const [, start, end] = ((result.series as ObjArray)[0].data as ObjArray)[0].value as number[];
+        const day = new Date(start);
+        expect([day.getDate(), day.getHours()], tz).toEqual([1, 0]);
+        expect(end, tz).toBe(Date.UTC(2026, 0, 10, 12));
+      }
+    } finally {
+      process.env.TZ = original;
+    }
   });
 
   it('draws referenceLines on the value/time axis at their data value', () => {

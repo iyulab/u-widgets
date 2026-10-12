@@ -158,6 +158,17 @@ function instantOf(p: DateParts): Date {
   return new Date(p.year, p.month - 1, p.day, p.hour ?? 0, p.minute ?? 0, p.second ?? 0);
 }
 
+/**
+ * Reads date text by the same rule the date formats use — `null` when it is not a real date in one of their
+ * shapes. A date alone is local midnight (`Date.parse('2026-01-01')` is UTC midnight: the previous evening west
+ * of UTC, nine hours into the day in Seoul); a date-time without an offset is local wall clock; one with an offset
+ * is that moment.
+ */
+export function parseDateText(value: string): Date | null {
+  const parts = dateParts(value);
+  return parts ? instantOf(parts) : null;
+}
+
 function formatDate(value: unknown, locale?: string): string {
   const parts = typeof value === 'string' ? dateParts(value) : null;
   if (!parts) return String(value);

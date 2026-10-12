@@ -1,5 +1,5 @@
 import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption } from '../core/types.js';
-import { formatValue } from '../core/format.js';
+import { formatValue, parseDateText } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
 import { isDateLikeString } from '../core/utils.js';
 import { infer } from '../core/infer.js';
@@ -1190,7 +1190,8 @@ function buildGantt(
     if (v == null || v === '') return NaN;
     if (typeof v === 'number') return v;
     if (v instanceof Date) return v.getTime();
-    if (isTime) return Date.parse(String(v));
+    // Day ticks sit at local midnight, so a day must too — `Date.parse` reads a date alone as UTC midnight.
+    if (isTime) return parseDateText(String(v))?.getTime() ?? Date.parse(String(v));
     return Number(v);
   };
 
