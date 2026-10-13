@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-13
+
 ### Added
 
 - **`time` format.** The time of day alone (`14:30`, in the locale's words when one is given) — for a chart axis
@@ -10,6 +12,12 @@
 
 ### Fixed
 
+- **A page's theme switch reaches charts already drawn.** The theme sync carried only `<html data-theme>` to widgets,
+  and a chart redrew only when its widget's own theme changed — so a page that switched with `@iyulab/components`'
+  `Theme` (`<html theme="dark">`), a `dark` class or the system colour scheme turned its cards dark while the charts
+  kept the light grid and axis text they were drawn with (white lines on a dark card). The sync now also reads
+  `<html theme>` (`data-theme` wins when both are set), and a chart re-reads the tokens it draws with when an attribute
+  on `<html>` or `<body>` or the colour scheme changes, redrawing only when they moved.
 - A searchable table does not filter on a syllable still being composed with an IME (Korean, Japanese, Chinese).
   Typing «서울» with a Korean IME emptied the table at «ㅅ» and showed «성남» at «성»; it now filters when the
   composition ends.

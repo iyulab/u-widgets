@@ -55,6 +55,29 @@ describe('installGlobalThemeSync', () => {
       widget.remove();
       document.documentElement.removeAttribute('data-theme');
     });
+
+    it('🔴@iyulab/components 의 `<html theme>` 도 선언이다 — 전환하면 따라가고, data-theme 가 함께 있으면 data-theme 가 이긴다', async () => {
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      const { installGlobalThemeSync } = await importFreshThemeSync();
+      installGlobalThemeSync();
+
+      document.documentElement.setAttribute('theme', 'dark');
+      await Promise.resolve();
+      expect(widget.getAttribute('theme')).toBe('dark');
+
+      document.documentElement.setAttribute('theme', 'light');
+      await Promise.resolve();
+      expect(widget.getAttribute('theme')).toBe('light');
+
+      document.documentElement.setAttribute('data-theme', 'dark');
+      await Promise.resolve();
+      expect(widget.getAttribute('theme')).toBe('dark');
+
+      widget.remove();
+      document.documentElement.removeAttribute('theme');
+      document.documentElement.removeAttribute('data-theme');
+    });
   });
 
   describe('선언이 없으면 auto 모드를 건드리지 않는다', () => {

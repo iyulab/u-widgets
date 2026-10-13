@@ -482,13 +482,13 @@ CSS custom properties on any ancestor element:
 }
 ```
 
-### `data-theme` 자동 동기화
+### 페이지 테마 자동 동기화 (`data-theme` · `theme`)
 
 `u-widgets`를 import하면 `installGlobalThemeSync()`가 **자동 실행**된다(옵트인 불필요). 이 함수는:
 
-- `document.documentElement`의 `data-theme` 속성을 `MutationObserver`로 감시
+- `document.documentElement`의 `data-theme` 속성과 `theme` 속성(`@iyulab/components`의 `Theme`이 쓰는 이름)을 `MutationObserver`로 감시 — 둘 다 있으면 `data-theme`이 이긴다
 - 새로 추가되는 `<u-widget>` 노드를 감시(`document.body` 하위 `childList`/`subtree`)
-- 페이지가 테마를 **선언했을 때만**(`data-theme="dark"` 또는 `"light"`) 모든 `<u-widget>`에 같은 `theme` 속성을 전파
+- 페이지가 테마를 **선언했을 때만**(`data-theme`/`theme`이 `"dark"` 또는 `"light"`) 모든 `<u-widget>`에 같은 `theme` 속성을 전파
 
 ```html
 <html data-theme="dark">
@@ -498,6 +498,7 @@ CSS custom properties on any ancestor element:
 
 - **선언이 없으면**(`data-theme` 없음, 또는 `dark`·`light`가 아닌 값) `theme` 속성을 쓰지 않는다 — 위젯은 auto 모드로 `prefers-color-scheme`(와 페이지의 `color-scheme`)를 따른다. 선언이 사라지면 동기화가 썼던 `theme`을 걷어 auto로 돌아간다.
 - **위젯에 직접 준 `theme`은 페이지의 것**이다 — `<u-widget theme="light">`처럼 지정하면(동기화가 쓴 뒤 바꾼 경우 포함) 동기화가 덮어쓰거나 걷지 않는다.
+- **이미 그린 차트도 따라온다.** 차트는 캔버스라 그릴 때 읽은 색을 쥐고 있다 — `<html>`·`<body>`의 속성이나 클래스(`dark` 등)가 바뀌거나 시스템 색 구성표(`prefers-color-scheme`)가 바뀌면 차트가 읽는 토큰(`--u-widget-chart-color-N` · `--u-widget-text` · `--u-widget-text-secondary` · `--u-widget-border` · `--u-widget-bg`)을 다시 읽고, 값이 달라졌을 때만 다시 그린다. 그래서 속성 이름이 무엇이든(클래스 기반 다크 모드 포함) 테마 브리지 시트를 쓰는 페이지의 전환이 차트에 닿는다.
 
 **직접 `installGlobalThemeSync`를 호출하거나 동일한 `MutationObserver`를 재구현할 필요가 없다** — 별도의 테마 동기화 로직을 앱에서 구현하면 동일 DOM을 감시하는 옵저버가 중복 설치되어 오버헤드가 배가된다.
 

@@ -1,13 +1,21 @@
 let installed = false
 
-/** The theme the page declares on `<html data-theme>`, or `null` when it declares none. */
+/**
+ * The theme the page declares on `<html data-theme>` — or on `<html theme>`, the attribute `@iyulab/components`'
+ * `Theme` writes — or `null` when it declares none. `data-theme` wins when both are present.
+ */
 function declaredTheme(): 'dark' | 'light' | null {
-  const value = document.documentElement.getAttribute('data-theme')
-  return value === 'dark' || value === 'light' ? value : null
+  for (const name of THEME_ATTRIBUTES) {
+    const value = document.documentElement.getAttribute(name)
+    if (value === 'dark' || value === 'light') return value
+  }
+  return null
 }
 
+const THEME_ATTRIBUTES = ['data-theme', 'theme']
+
 /**
- * Carries the page's declared theme (`<html data-theme="dark" | "light">`) to every `<u-widget>`.
+ * Carries the page's declared theme (`<html data-theme | theme="dark" | "light">`) to every `<u-widget>`.
  *
  * A page that declares no theme is left to auto mode: widgets follow `prefers-color-scheme` (and the
  * page's `color-scheme`) on their own, so no `theme` attribute is written — and one this sync wrote
@@ -57,7 +65,7 @@ export function installGlobalThemeSync(): void {
 
   new MutationObserver(syncAll).observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme'],
+    attributeFilter: THEME_ATTRIBUTES,
   })
 
   new MutationObserver(mutations => {

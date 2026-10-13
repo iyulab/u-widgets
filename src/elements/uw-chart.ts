@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetEvent } from '../core/types.js';
 import { toEChartsOption, chartLayoutKey, type ChartSize } from '../renderers/echarts-adapter.js';
 import { themeStyles } from '../styles/tokens.js';
+import { onPageThemeChange } from '../theme-watch.js';
 
 // Tree-shakeable ECharts imports
 import * as echarts from 'echarts/core';
@@ -77,6 +78,18 @@ export class UwChart extends LitElement {
   private _resizeObserver: ResizeObserver | null = null;
   /** The layout the current option was built for (see chartLayoutKey) — a resize that changes it rebuilds. */
   private _layoutKey = '';
+  /** The theme tokens the current option was built with (see _themeKey) — a page theme change that moves them redraws. */
+  private _themeKey = '';
+  private _unwatchTheme: (() => void) | null = null;
+
+  connectedCallback() {
+    super.connectedCallback();
+    // The canvas holds the colours it read when it drew; a page that switches its theme without touching this
+    // widget (a `theme` attribute on <html>, a `dark` class, the system scheme) leaves it painted in the old one.
+    this._unwatchTheme = onPageThemeChange(() => {
+      if (this._chart && this._themeKey !== this._readThemeKey()) this._updateChart();
+    });
+  }
 
   render() {
     if (!this.spec) return nothing;
@@ -151,6 +164,7 @@ export class UwChart extends LitElement {
 
     const size = this._canvasSize();
     this._layoutKey = chartLayoutKey(size);
+    this._themeKey = this._readThemeKey();
     const option = toEChartsOption(this.spec, size);
 
     // Inject theme colors from CSS custom properties,
@@ -238,8 +252,21 @@ export class UwChart extends LitElement {
     return getComputedStyle(this).getPropertyValue(name).trim();
   }
 
+  /** Every token _updateChart reads, in one string — equal keys draw the same chart. */
+  private _readThemeKey(): string {
+    return [
+      ...this._readThemeColors(),
+      this._readCSSVar('--u-widget-bg'),
+      this._readCSSVar('--u-widget-text'),
+      this._readCSSVar('--u-widget-text-secondary'),
+      this._readCSSVar('--u-widget-border'),
+    ].join('|');
+  }
+
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._unwatchTheme?.();
+    this._unwatchTheme = null;
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
     this._chart?.dispose();
