@@ -10,6 +10,9 @@
 
 ### Fixed
 
+- A searchable table does not filter on a syllable still being composed with an IME (Korean, Japanese, Chinese).
+  Typing «서울» with a Korean IME emptied the table at «ㅅ» and showed «성남» at «성»; it now filters when the
+  composition ends.
 - The Korean hidden new-tab hint reads `, 새 탭에서 열림` instead of `(새 탭에서 열림)`. NVDA's Korean symbol table speaks
   parentheses at the default punctuation level, so a citation or content link that opens a new tab was announced
   with «여는 괄호 … 닫는 괄호»; a comma is only a pause there.

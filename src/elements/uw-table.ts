@@ -466,6 +466,7 @@ export class UwTable extends LitElement {
           aria-label=${locale.searchTable}
           .value=${this._searchQuery}
           @input=${this._onSearch}
+          @compositionend=${this._onSearch}
         />
       </div>
     ` : nothing;
@@ -623,7 +624,12 @@ export class UwTable extends LitElement {
     });
   }
 
+  /**
+   * IME 조합 중인 음절(«서울» 의 가는 길 «ㅅ» · «성»)로는 거르지 않는다 — 찾는 행을 숨기고 빈 표를 보인다. 조합 중 `input` 은
+   * 건너뛰고(상자의 글자는 그대로 둔다 — 바인딩 값이 바뀌지 않으면 다시 쓰지 않는다), 조합이 끝나면 확정 글자로 거른다.
+   */
   private _onSearch = (e: Event) => {
+    if ((e as InputEvent).isComposing) return;
     this._searchQuery = (e.target as HTMLInputElement).value;
     this._page = 0;
   };
