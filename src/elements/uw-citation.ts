@@ -28,7 +28,7 @@ export class UwCitation extends LitElement {
          overflow 감싸개를 건너뛰고 그 정적 위치에서 문서를 늘렸다(위치 지정되지 않은 스크롤 상자 안에서). */
       position: relative;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-citation / inline-size;
     }
 

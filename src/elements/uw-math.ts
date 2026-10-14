@@ -15,7 +15,7 @@ export class UwMath extends LitElement {
   static styles = [themeStyles, css`
     :host {
       display: block;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-math / inline-size;
     }
 

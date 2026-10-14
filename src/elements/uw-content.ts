@@ -15,7 +15,7 @@ export class UwContent extends LitElement {
          overflow 감싸개를 건너뛰고 그 정적 위치에서 문서를 늘렸다(위치 지정되지 않은 스크롤 상자 안에서). */
       position: relative;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-content / inline-size;
     }
 
@@ -58,7 +58,7 @@ export class UwContent extends LitElement {
       padding: 0.15em 0.4em;
       border-radius: 3px;
       font-size: var(--u-widget-font-size-label, 0.8125rem);
-      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-family: var(--u-widget-font-mono);
     }
 
     .markdown pre {

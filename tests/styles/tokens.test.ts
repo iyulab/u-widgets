@@ -55,6 +55,7 @@ describe('themeStyles', () => {
 
     it('defines typography tokens', () => {
       expect(cssText).toContain('--u-widget-font-family:');
+      expect(cssText).toContain('--u-widget-font-mono:');
       expect(cssText).toContain('--u-widget-font-size:');
     });
 
@@ -71,7 +72,8 @@ describe('themeStyles', () => {
 
     it('defines shadow tokens', () => {
       expect(cssText).toContain('--u-widget-shadow:');
-      expect(cssText).toContain('--u-widget-shadow-hover:');
+      // 호버 그림자 토큰은 없다 — 위젯 카드는 상호작용 요소가 아니라 호버로 떠오르지 않는다(읽는 곳 없이 정의만 있었다).
+      expect(cssText).not.toContain('--u-widget-shadow-hover');
     });
 
     it('defines chart color palette tokens', () => {

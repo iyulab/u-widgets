@@ -241,7 +241,7 @@ export class UwCode extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-code / inline-size;
     }
 
@@ -316,7 +316,7 @@ export class UwCode extends LitElement {
     pre {
       margin: 0;
       padding: 12px;
-      font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Source Code Pro', Consolas, Monaco, monospace;
+      font-family: var(--u-widget-font-mono);
       font-size: var(--u-widget-font-size-label, 0.8125rem);
       line-height: 1.5;
       tab-size: 2;

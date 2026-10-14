@@ -13,7 +13,7 @@ export class UwForm extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-form / inline-size;
     }
 

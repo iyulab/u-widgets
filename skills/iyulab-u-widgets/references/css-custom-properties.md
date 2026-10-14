@@ -90,6 +90,7 @@ static `var()` in a stylesheet — this is why it's a numbered sequence rather t
 | Property | Value | Description |
 |----------|-------|--------------|
 | `--u-widget-font-family` | `system-ui, -apple-system, sans-serif` | Base font stack |
+| `--u-widget-font-mono` | `ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace` | Monospace stack (code, inline code) |
 | `--u-widget-font-size` | `0.875rem` | Body tier |
 | `--u-widget-font-size-label` | `0.8125rem` | Label tier |
 | `--u-widget-font-size-caption` | `0.75rem` | Caption tier |
@@ -112,7 +113,6 @@ that instead — the token only decides how tall the chart is when the host is f
 | Property | Light | Dark |
 |----------|-------|------|
 | `--u-widget-shadow` | `0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06)` | `0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2)` |
-| `--u-widget-shadow-hover` | `0 4px 12px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.06)` | `0 4px 12px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.2)` |
 
 ## Per-widget sizing (not in the shared sheet)
 

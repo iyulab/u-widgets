@@ -76,15 +76,15 @@
   --u-widget-on-positive:    var(--u-success-txt-color, #ffffff);
   --u-widget-on-negative:    var(--u-danger-txt-color,  #ffffff);
 
-  /* ── 타이포(패밀리만) ── */
+  /* ── 타이포(패밀리만 — 본문 · 고정폭) ── */
   --u-widget-font-family:    var(--u-font-base, system-ui, -apple-system, sans-serif);
+  --u-widget-font-mono:      var(--u-font-mono, ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace);
 
   /* ── 형태 ── */
   --u-widget-radius:         var(--u-radius-md, 6px);
 
   /* ── 엘리베이션 ── */
   --u-widget-shadow:         var(--u-shadow-sm, 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06));
-  --u-widget-shadow-hover:   var(--u-shadow-md, 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06));
 
   /* ── 모션 — 하우스의 지속시간 축(동작 줄이기면 하우스 시트가 0 으로 누른다) ── */
   --u-widget-duration-fast:   var(--u-duration-fast,   150ms);

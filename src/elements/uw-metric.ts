@@ -67,7 +67,7 @@ export class UwMetric extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: var(--u-widget-font-family);
       container: uw-metric / inline-size;
     }
 

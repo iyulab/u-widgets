@@ -81,6 +81,7 @@ export const themeStyles = css`
 
     /* ── Typography ── */
     --u-widget-font-family: system-ui, -apple-system, sans-serif;
+    --u-widget-font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
     --u-widget-font-size: 0.875rem;
     --u-widget-font-size-label: 0.8125rem;
     --u-widget-font-size-caption: 0.75rem;
@@ -98,9 +99,6 @@ export const themeStyles = css`
     --u-widget-shadow:
       0 1px 3px rgba(0,0,0,0.08),
       0 1px 2px rgba(0,0,0,0.06);
-    --u-widget-shadow-hover:
-      0 4px 12px rgba(0,0,0,0.10),
-      0 2px 4px rgba(0,0,0,0.06);
   }
 
   /* ── Dark mode (auto via prefers-color-scheme) ── */
@@ -131,9 +129,6 @@ export const themeStyles = css`
       --u-widget-shadow:
         0 1px 3px rgba(0,0,0,0.3),
         0 1px 2px rgba(0,0,0,0.2);
-      --u-widget-shadow-hover:
-        0 4px 12px rgba(0,0,0,0.4),
-        0 2px 4px rgba(0,0,0,0.2);
     }
   }
 
@@ -168,9 +163,6 @@ export const themeStyles = css`
     --u-widget-shadow:
       0 1px 3px rgba(0,0,0,0.3),
       0 1px 2px rgba(0,0,0,0.2);
-    --u-widget-shadow-hover:
-      0 4px 12px rgba(0,0,0,0.4),
-      0 2px 4px rgba(0,0,0,0.2);
   }
 
   :host([theme="light"]) {
