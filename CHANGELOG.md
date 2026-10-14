@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-14
+
+### Fixed
+
+- **Widgets draw with `--u-widget-font-family`.** The token had a default and a bridge (`themes/components.css` maps it
+  to `--u-font-base`), but every widget set `font-family: system-ui, …` on its own host, so neither the bridge nor an
+  override such as `u-widget { --u-widget-font-family: … }` changed the text. Both now do.
+
+### Added
+
+- `--u-widget-font-mono` — the monospace stack for code (`uw-code`) and inline code in markdown (`uw-content`), which
+  used two different hard-coded stacks. The components bridge maps it to `--u-font-mono`.
+
+### Removed
+
+- `--u-widget-shadow-hover`. Nothing read it — widget cards are not interactive and do not lift on hover — so setting
+  it had no effect.
+
 ## [0.31.1] - 2026-10-14
 
 ### Changed
