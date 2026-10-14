@@ -136,7 +136,6 @@
     "@iyulab/components": "^2.19.0",
     "@lit/react": "^1.0.8",
     "@microsoft/api-extractor": "^7.58.8",
-    "@open-wc/testing": "^5.0.0",
     "@playwright/test": "^1.61.1",
     "@types/react": "^19.3.0",
     "@vitest/browser-playwright": "^5.0.0",
