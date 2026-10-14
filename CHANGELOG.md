@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-10-14
+
+### Changed
+
+- `u-widgets/forms` accepts `@formdown/core` 0.16 (optional peer range `>=0.15.0 <0.17.0`). An app that had installed
+  0.16 could not install u-widgets next to it: the range stopped below 0.16. 0.16 adds an HTML-escaping option for
+  rendered form bodies, which u-widgets does not use (it reads the fields and actions and draws its own controls), and
+  fixes checkbox defaults given as a list.
+
 ## [0.31.0] - 2026-10-13
 
 ### Added
