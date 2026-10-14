@@ -3,11 +3,11 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
-// The build strips every `declare global` block from the bundled .d.ts and appends one hand-written
-// block (vite.config.ts → globalDeclarationsBlock). A merge declared in src but not mirrored there
-// is silently absent from the published types — `u-widget-event` shipped untyped in 0.25.1 that
-// way while the source typecheck was green. So the keys are derived from src and looked up in
-// the built files, which is what a consumer's compiler reads.
+// The build keeps the `declare global` merges from src and points each name an entry does not reach
+// at the public entry that exports it (vite.config.ts → fixPublishedDtsGlobals). A merge declared in
+// src must therefore reach the built entry — `u-widget-event` once shipped untyped while the source
+// typecheck was green. So the keys are derived from src and looked up in the built files, which is
+// what a consumer's compiler reads.
 const SRC = resolve(__dirname, '../../src');
 const DIST = resolve(__dirname, '../../dist');
 
@@ -40,7 +40,7 @@ describe('published global declarations', () => {
       const keys = globalKeys(iface);
       expect(keys.length, `no ${iface} merge found in src — the derivation broke`).toBeGreaterThan(0);
       const missing = keys.filter((k) => !new RegExp(`['"]${k}['"]\\s*:`).test(dts));
-      expect(missing, 'mirror these in vite.config.ts globalDeclarationsBlock').toEqual([]);
+      expect(missing, 'these src merges did not reach the built entry').toEqual([]);
     });
   }
 });

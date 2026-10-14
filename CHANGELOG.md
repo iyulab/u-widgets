@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The published declarations keep each element's own `HTMLElementTagNameMap` merge instead of one block written by hand
+  in the build config, through the shared `@iyulab/components` declaration step. The types a consumer sees are the same
+  (`u-widget`, `uw-chart` and `uw-math` keep their classes, composed-only elements stay `HTMLElement`), and a merge added
+  in source can no longer be left out of the published types.
+
 ## [0.32.0] - 2026-10-14
 
 ### Fixed

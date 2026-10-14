@@ -20,10 +20,7 @@ export interface UWidgetElementProps {
 }
 
 declare global {
-  interface HTMLElementTagNameMap {
-    'u-widget': import('../elements/u-widget.js').UWidget;
-  }
-
+  // The tag map entry lives with the class (elements/u-widget.ts).
   // JSX.IntrinsicElements 전역 증강은 namespace 선언만 가능 (ES module 문법 대체 불가)
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
@@ -33,3 +30,12 @@ declare global {
   }
 }
 
+// `@types/react` 19 dropped the global `JSX` namespace; the automatic runtime reads `React.JSX`.
+declare module 'react' {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'u-widget': UWidgetElementProps;
+    }
+  }
+}
