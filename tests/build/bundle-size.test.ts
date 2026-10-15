@@ -53,7 +53,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 9.75 KB gzip', () => {
+  it('charts bundle is under 10 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
@@ -67,7 +67,9 @@ describe('bundle size budget', () => {
     // resize check that rebuilds when the layout changes).
     // Re-baselined from 9.5 KB for series[].lineStyle keywords: measured 9.53 KB with them (9.41 KB
     // before) — most of it the console warning that names a lineStyle the chart ignores.
-    expect(size).toBeLessThan(9.75 * 1024);
+    // Re-baselined from 9.75 KB for reference lines past the data: measured 9.78 KB with them (9.53 KB at the
+    // previous re-baseline, then the horizontal category order) — the axis reaching a line the data does not.
+    expect(size).toBeLessThan(10 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 16.5 KB gzip', () => {

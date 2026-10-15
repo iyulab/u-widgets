@@ -389,6 +389,41 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('options: referenceLines past the data', () => {
+    const demand = [{ t: 'a', kw: 1031 }, { t: 'b', kw: 1262 }];
+    it('takes the value axis out to a round number just past a line the data does not reach', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' },
+        options: { valueAxisZero: false, referenceLines: [{ axis: 'y', value: 1500, label: 'Contract' }] },
+      }));
+      expect((result.yAxis as Obj).max).toBe(1600);
+      expect((result.yAxis as Obj).min).toBeUndefined();
+    });
+
+    it('leaves the axis to the data when every line is within it, and reaches a low line on a data-spanned axis', () => {
+      const within = toEChartsOption(spec({ widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' }, options: { referenceLines: [{ axis: 'y', value: 1100 }] } }));
+      expect((within.yAxis as Obj).max).toBeUndefined();
+      const low = toEChartsOption(spec({
+        widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' },
+        options: { valueAxisZero: false, referenceLines: [{ axis: 'y', value: 900 }] },
+      }));
+      expect((low.yAxis as Obj).min).toBe(890);
+      // On an axis from zero a line above zero is already in range at the bottom.
+      const zero = toEChartsOption(spec({ widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' }, options: { referenceLines: [{ axis: 'y', value: 900 }] } }));
+      expect((zero.yAxis as Obj).min).toBeUndefined();
+    });
+
+    it('follows the value axis of a horizontal chart, and leaves stacked series to the chart engine', () => {
+      const horizontal = toEChartsOption(spec({ widget: 'chart.bar', data: demand, mapping: { x: 't', y: 'kw' }, options: { horizontal: true, referenceLines: [{ axis: 'x', value: 1500 }] } }));
+      expect((horizontal.xAxis as Obj).max).toBe(1600);
+      const stacked = toEChartsOption(spec({
+        widget: 'chart.bar', data: [{ t: 'a', p: 60, q: 50 }], mapping: { x: 't', y: ['p', 'q'] },
+        options: { stack: true, referenceLines: [{ axis: 'y', value: 500 }] },
+      }));
+      expect((stacked.yAxis as Obj).max).toBeUndefined();
+    });
+  });
+
   describe('options: smooth', () => {
     it('sets smooth on line series', () => {
       const result = toEChartsOption(spec({

@@ -240,6 +240,8 @@ the same row.
   `row / label: start → end`.
 - **`mapping.color`** splits intervals into one series per value — each gets a palette color
   and a legend entry.
+- **`options.referenceLines`** on the value axis widen it to reach a line the data does not — a limit or target
+  past the data is drawn, at a round axis bound just beyond it.
 - **`options.referenceLines`** with `axis: 'x'` draws a vertical line at a value or date
   (makespan, due date). `options.xFormat` formats the value/time axis — e.g.
   `{ type: 'date' }` on a time axis.

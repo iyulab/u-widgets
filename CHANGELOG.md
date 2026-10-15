@@ -6,6 +6,8 @@
 
 - A **horizontal** bar, line or scatter chart lists its categories top to bottom in the data's order — a ranking's
   first entry on top, where it was drawn last. The category axis of a vertical chart is unchanged.
+- A **reference line** on the value axis that the data does not reach — a contract limit, a target ahead — is drawn:
+  the axis now reaches past it to a round number, where the line used to fall outside the axis and not show at all.
 - **`status`** keeps its rows together at the top of a host taller than its items, where the rows were spread over
   the extra height.
 

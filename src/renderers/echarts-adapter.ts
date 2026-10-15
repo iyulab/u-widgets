@@ -153,6 +153,8 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
     if (result[valueKey]) result[valueKey] = spanData(result[valueKey]);
   }
 
+  if (isCartesian) reachReferenceLines(result, options);
+
   // Axis config placed at options top-level (instead of options.echarts) is dropped — warn.
   warnMisplacedAxisOptions(options);
 
@@ -400,6 +402,36 @@ function seriesLineStyle(value: unknown, index: number): Record<string, unknown>
   if (typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>;
   console.warn(`[@iyulab/u-widgets] chart: options.series[${index}].lineStyle ${JSON.stringify(value)} is ignored — use ${LINE_STYLE_KEYWORDS.join(', ')} or a lineStyle object`);
   return undefined;
+}
+
+/**
+ * A reference line on the value axis is part of what the chart says — a contract limit, a target the data has
+ * not reached yet — but ECharts sizes the axis to the data alone, so a line beyond it is not drawn at all. Where
+ * one lies past the data, the axis is taken out to a round number just beyond it. Stacked series are left to
+ * ECharts: their extent is the stack's sum, not any one series'.
+ */
+function reachReferenceLines(result: Record<string, unknown>, options: Record<string, unknown>): void {
+  const key = options.horizontal ? 'xAxis' : 'yAxis';
+  const lines = ((options.referenceLines as ReferenceLineOption[] | undefined) ?? [])
+    .filter((rl) => rl.axis === key[0] && typeof rl.value === 'number')
+    .map((rl) => rl.value as number);
+  const series = (result.series as Record<string, unknown>[] | undefined) ?? [];
+  if (!lines.length || series.some((s) => s.stack)) return;
+  const data = series
+    .flatMap((s) => (Array.isArray(s.data) ? s.data : []).map((p) => (p && typeof p === 'object' ? (p as { value?: unknown }).value : p)))
+    .filter((v): v is number => typeof v === 'number');
+  const axis = [result[key]].flat()[0] as Record<string, unknown> | undefined;
+  if (!data.length || !axis) return;
+  const hi = Math.max(...lines), lo = Math.min(...lines), max = Math.max(...data), min = Math.min(...data);
+  if (hi > max) axis.max = roundAway(hi + (hi - Math.min(0, min)) / 50, 1);
+  if (lo < min && (axis.scale || lo < 0)) axis.min = roundAway(lo - (Math.max(0, max) - lo) / 50, -1);
+}
+
+/** A round number past `x` in `direction` (1 up, -1 down): to two significant figures, as axis labels read. */
+function roundAway(x: number, direction: 1 | -1): number {
+  if (x === 0) return 0;
+  const step = 10 ** (Math.floor(Math.log10(Math.abs(x))) - 1);
+  return (direction > 0 ? Math.ceil(x / step) : Math.floor(x / step)) * step;
 }
 
 /**
