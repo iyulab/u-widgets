@@ -1,8 +1,7 @@
 import { createRequire } from 'node:module';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { help, template, suggestMapping, autoSpec } from '@iyulab/u-widgets/tools';
-import { validate } from '@iyulab/u-widgets';
+import { help, template, suggestMapping, autoSpec, checkSpec } from '@iyulab/u-widgets/tools';
 
 // src/ and dist/ sit at the same depth, so both the tsx and the built entry resolve the manifest.
 const { version } = createRequire(import.meta.url)('../package.json') as { version: string };
@@ -80,14 +79,14 @@ export function createServer(): McpServer {
   server.registerTool(
     'validate',
     {
-      description: 'Validate a u-widget spec. Returns errors (fatal) and warnings (non-fatal). Use this to check if a spec is correct before rendering.',
+      description: 'Validate a u-widget spec against its structure and the catalog: a widget that does not exist is an error; a key no widget reads, an option the widget does not have or of the wrong type are warnings naming what that place takes. Returns errors (fatal) and warnings (non-fatal). Use this to check a spec before rendering.',
       inputSchema: z.strictObject({
         spec: record().describe('The u-widget spec object to validate. Must be a plain object with a "widget" field.'),
       }),
     },
     async ({ spec }) => {
       try {
-        const result = validate(spec);
+        const result = checkSpec(spec);
         return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
       } catch (err) {
         return errorResult(err);

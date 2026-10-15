@@ -158,6 +158,15 @@ describe('validate tool', () => {
     expect(validation.errors.length).toBeGreaterThan(0);
   });
 
+  it('refuses a widget that does not exist and warns of options the widget does not have', async () => {
+    const unknown = parseText(await client.callTool({ name: 'validate', arguments: { spec: { widget: 'lst', data: [] } } })) as { valid: boolean; errors: string[]; warnings: string[] };
+    expect(unknown.valid).toBe(false);
+    expect(unknown.warnings).toContain('did you mean "list"?');
+    const option = parseText(await client.callTool({ name: 'validate', arguments: { spec: { widget: 'list', data: [], options: { dense: true } } } })) as { valid: boolean; warnings: string[] };
+    expect(option.valid).toBe(true);
+    expect(option.warnings).toEqual(['options.dense is not an option of list — it takes compact']);
+  });
+
   it('returns errors for wrong data type', async () => {
     const result = await client.callTool({
       name: 'validate',

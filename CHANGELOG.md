@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-16
+
 ### Added
 
 - **`checkSpec(spec)`** in `./tools` — `validate` plus what the catalog knows, for a spec written by hand (an editor,
@@ -16,6 +18,8 @@
   a full locale adds it.
 - `validate` moved from the core entry into a chunk shared with `./tools` (the core entry is 1.3 KB smaller, the
   shared chunk 1.8 KB).
+- MCP server 0.6.0: `validate` uses `checkSpec` — a widget that does not exist is an error, and keys, options and
+  option types the catalog does not know are warnings.
 
 ## [0.33.2] - 2026-10-15
 
