@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`valueAxisZero`** for bar, line and area charts. `false` spans the value axis over the data instead of always
+  reaching zero, so values that move far from zero — a control chart around its centre line, a temperature near 180 °C
+  — are drawn as a trend rather than a flat line. Default `true` (unchanged). It follows the value axis of a horizontal
+  chart, reaches both axes of a two-axis chart, and is listed in the `./tools` option metadata (`값 축을 0부터` in Korean).
+
 ### Changed
 
 - The published declarations keep each element's own `HTMLElementTagNameMap` merge instead of one block written by hand

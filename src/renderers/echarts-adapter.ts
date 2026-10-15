@@ -144,6 +144,15 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
     applyAxisFormat(result, catKey, options.categoryAxisFormat as AxisFormatOption | undefined, locale);
   }
 
+  // valueAxisZero: false — the value axis spans the data instead of always reaching zero, for a series that
+  // moves far from zero (a control chart around its centre line, a process temperature). ECharts calls it `scale`.
+  if (isCartesian && options.valueAxisZero === false) {
+    const valueKey: 'xAxis' | 'yAxis' = options.horizontal ? 'xAxis' : 'yAxis';
+    const spanData = (axis: unknown): unknown =>
+      Array.isArray(axis) ? axis.map(spanData) : axis && typeof axis === 'object' ? { ...(axis as Record<string, unknown>), scale: true } : axis;
+    if (result[valueKey]) result[valueKey] = spanData(result[valueKey]);
+  }
+
   // Axis config placed at options top-level (instead of options.echarts) is dropped — warn.
   warnMisplacedAxisOptions(options);
 

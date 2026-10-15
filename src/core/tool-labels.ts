@@ -92,6 +92,7 @@ const EN: ToolLabels = {
     showLabel: 'Value labels',
     xFormat: 'X-axis format',
     yFormat: 'Y-axis format',
+    valueAxisZero: 'Value axis from zero',
     pageSize: 'Rows per page',
     compact: 'Compact',
     searchable: 'Search box',

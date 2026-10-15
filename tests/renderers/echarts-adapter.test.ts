@@ -71,6 +71,44 @@ describe('toEChartsOption', () => {
     });
   });
 
+  describe('valueAxisZero', () => {
+    const near = [{ t: 'a', v: 25.002 }, { t: 'b', v: 24.997 }, { t: 'c', v: 25.004 }];
+
+    it('leaves the value axis reaching zero unless told otherwise', () => {
+      const result = toEChartsOption(spec({ widget: 'chart.line', data: near, mapping: { x: 't', y: 'v' } }));
+      expect((result.yAxis as Obj).scale).toBeUndefined();
+    });
+
+    it('spans the data on the value axis when false', () => {
+      const result = toEChartsOption(spec({ widget: 'chart.line', data: near, mapping: { x: 't', y: 'v' }, options: { valueAxisZero: false } }));
+      expect((result.yAxis as Obj).scale).toBe(true);
+      expect((result.xAxis as Obj).scale).toBeUndefined();
+    });
+
+    it('follows the value axis when the chart is horizontal', () => {
+      const result = toEChartsOption(spec({ widget: 'chart.bar', data: near, mapping: { x: 't', y: 'v' }, options: { valueAxisZero: false, horizontal: true } }));
+      expect((result.xAxis as Obj).scale).toBe(true);
+      expect((result.yAxis as Obj).scale).toBeUndefined();
+    });
+
+    it('reaches every value axis of a chart with two', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: near.map(r => ({ ...r, w: r.v * 2 })),
+        mapping: { x: 't', y: ['v', 'w'] },
+        options: { valueAxisZero: false, series: [{}, { yAxisIndex: 1 }] },
+      }));
+      const axes = result.yAxis as ObjArray;
+      expect(Array.isArray(axes)).toBe(true);
+      expect(axes.every(axis => axis.scale === true)).toBe(true);
+    });
+
+    it('is left to the raw ECharts option when both are given', () => {
+      const result = toEChartsOption(spec({ widget: 'chart.line', data: near, mapping: { x: 't', y: 'v' }, options: { valueAxisZero: false, echarts: { yAxis: { scale: false } } } }));
+      expect((result.yAxis as Obj).scale).toBe(false);
+    });
+  });
+
   describe('chart.area', () => {
     it('builds area chart (line with areaStyle)', () => {
       const result = toEChartsOption(spec({
