@@ -420,7 +420,7 @@ const catalog: Record<string, WidgetDoc> = {
           series: [
             { color: '#f97316' },
             { color: '#8b5cf6' },
-            { color: '#3b82f6', lineStyle: { type: 'dashed' } },
+            { color: '#3b82f6', lineStyle: 'dashed' },
           ],
         },
       },

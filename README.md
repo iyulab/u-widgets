@@ -172,13 +172,13 @@ XY charts (`chart.bar`, `chart.line`, `chart.area`, `chart.scatter`) support dec
     "series": [
       { "color": "#f97316" },
       { "color": "#8b5cf6" },
-      { "color": "#3b82f6", "lineStyle": { "type": "dashed" } }
+      { "color": "#3b82f6", "lineStyle": "dashed" }
     ]
   }
 }
 ```
 
-Each entry in `options.series` maps 1:1 to the `mapping.y` array. Supported overrides: `color`, `lineStyle`, `symbol`, `label`, `type`, `yAxisIndex`.
+Each entry in `options.series` maps 1:1 to the `mapping.y` array. Supported overrides: `color`, `lineStyle`, `symbol`, `label`, `type`, `yAxisIndex`. `lineStyle` takes the keyword `referenceLines` uses (`'solid'`, `'dashed'`, `'dotted'`) or an ECharts `lineStyle` object for finer control (`{ "type": "dashed", "width": 2 }`); any other value is ignored with a console warning.
 
 The `type` override (and `options.echarts.series[].type` passthrough) may only request a registered series: `bar`, `line`, `pie`, `scatter`, `radar`, `heatmap`, `boxplot`, `funnel`, `treemap`, `custom`. Any other type (`graph`, `sankey`, `gauge`, `sunburst`, …) merges into the option but does not render — u-widgets emits a dev warning pointing to [`@iyulab/flex-chart`](https://www.npmjs.com/package/@iyulab/flex-chart) for advanced chart types (this is the same tree-shakeable boundary as heavy interaction components like `dataZoom`/`toolbox`).
 

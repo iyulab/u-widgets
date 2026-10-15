@@ -9,6 +9,13 @@
   — are drawn as a trend rather than a flat line. Default `true` (unchanged). It follows the value axis of a horizontal
   chart, reaches both axes of a two-axis chart, and is listed in the `./tools` option metadata (`값 축을 0부터` in Korean).
 
+### Fixed
+
+- **`series[].lineStyle`** takes the line style keyword `referenceLines[].style` already uses — `'solid'`, `'dashed'`,
+  `'dotted'` — besides an ECharts `lineStyle` object. Before, a keyword was spread into the series as if it were an
+  object and the line stayed solid with no sign why; a value it cannot read is now ignored with a console warning.
+  The option metadata, `docs/widgets.md` and the README name both forms.
+
 ### Changed
 
 - Console diagnostics begin with `[@iyulab/u-widgets]`, so a message in a console shared by several packages says which one wrote it (several also say what to do next).

@@ -309,7 +309,31 @@ export interface ReferenceLineOption {
   /** Line color (CSS color or named color). */
   color?: string;
   /** Line style. Default: `'solid'`. */
-  style?: 'solid' | 'dashed' | 'dotted';
+  style?: LineStyleKeyword;
+}
+
+/** Line style keyword, shared by `referenceLines[].style` and `series[].lineStyle`. */
+export type LineStyleKeyword = 'solid' | 'dashed' | 'dotted';
+
+/**
+ * Per-series settings in `options.series`, in `mapping.y` order (bar, line, area).
+ */
+export interface ChartSeriesOption {
+  /** Name in the legend and tooltip. Default: the field name. */
+  label?: string;
+  /** Series color (CSS color). */
+  color?: string;
+  /**
+   * A line style keyword, as `referenceLines[].style` takes, or an ECharts `lineStyle` object
+   * for finer control (`{ type: 'dashed', width: 2 }`).
+   */
+  lineStyle?: LineStyleKeyword | Record<string, unknown>;
+  /** Point symbol (`'none'` hides the points). */
+  symbol?: string;
+  /** Series type override — a registered series only. */
+  type?: string;
+  /** Value axis index on a two-axis chart. */
+  yAxisIndex?: number;
 }
 
 /**

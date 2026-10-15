@@ -925,6 +925,35 @@ describe('toEChartsOption', () => {
       expect((series[1].lineStyle as Obj).width).toBe(2);
     });
 
+    it('takes a line style keyword, the vocabulary referenceLines uses', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20, v3: 30 }],
+        mapping: { x: 'x', y: ['v1', 'v2', 'v3'] },
+        options: { series: [{ lineStyle: 'dashed' }, { lineStyle: 'dotted', color: '#ff0000' }, { lineStyle: 'solid' }] },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].lineStyle).toEqual({ type: 'dashed' });
+      expect(series[1].lineStyle).toEqual({ color: '#ff0000', type: 'dotted' });
+      expect(series[2].lineStyle).toEqual({ type: 'solid' });
+    });
+
+    it('ignores a lineStyle it cannot read, with a warning, instead of spreading it', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const result = toEChartsOption(spec({
+        widget: 'chart.line',
+        data: [{ x: 'A', v1: 10, v2: 20 }],
+        mapping: { x: 'x', y: ['v1', 'v2'] },
+        options: { series: [{ lineStyle: 'dash' }, { lineStyle: ['dashed'] }] },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].lineStyle).toBeUndefined();
+      expect(series[1].lineStyle).toBeUndefined();
+      expect(warn).toHaveBeenCalledTimes(2);
+      expect(String(warn.mock.calls[0][0])).toContain('options.series[0].lineStyle "dash" is ignored');
+      warn.mockRestore();
+    });
+
     it('merges color and lineStyle correctly', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.line',

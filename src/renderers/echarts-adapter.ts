@@ -1,4 +1,4 @@
-import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption } from '../core/types.js';
+import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption, ChartSeriesOption, LineStyleKeyword } from '../core/types.js';
 import { formatValue, parseDateText } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
 import { isDateLikeString } from '../core/utils.js';
@@ -386,6 +386,22 @@ function warnUnregisteredSeriesTypes(series: unknown): void {
   }
 }
 
+const LINE_STYLE_KEYWORDS: readonly LineStyleKeyword[] = ['solid', 'dashed', 'dotted'];
+
+/**
+ * `options.series[i].lineStyle` → an ECharts `lineStyle` object. A keyword (`'dashed'`) is the
+ * same vocabulary `referenceLines[].style` takes; an object passes through. Anything else is
+ * dropped with a dev warning — spread as-is, a string would become `{0: 'd', 1: 'a', …}` and the
+ * line would stay solid with no sign why.
+ */
+function seriesLineStyle(value: unknown, index: number): Record<string, unknown> | undefined {
+  if (value == null) return undefined;
+  if (LINE_STYLE_KEYWORDS.includes(value as LineStyleKeyword)) return { type: value };
+  if (typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>;
+  console.warn(`[@iyulab/u-widgets] chart: options.series[${index}].lineStyle ${JSON.stringify(value)} is ignored — use ${LINE_STYLE_KEYWORDS.join(', ')} or a lineStyle object`);
+  return undefined;
+}
+
 /**
  * `options.referenceLines` → an ECharts `markLine` (placed on the first series).
  *
@@ -432,7 +448,7 @@ function buildCartesian(
   const categories = data.map((row) => String(row[xField] ?? ''));
   const horizontal = !!options.horizontal;
 
-  const seriesOverrides = Array.isArray(options.series) ? options.series as Record<string, unknown>[] : [];
+  const seriesOverrides = Array.isArray(options.series) ? options.series as ChartSeriesOption[] : [];
   const condStyles = options.conditionalStyles as ConditionalStyleRule[] | undefined;
 
   const seriesItems = yFields.map((field, i) => {
@@ -464,12 +480,11 @@ function buildCartesian(
         s.itemStyle = { color: override.color };
         s.lineStyle = { ...(s.lineStyle as Record<string, unknown> ?? {}), color: override.color };
       }
-      if (override.lineStyle) {
-        s.lineStyle = { ...(s.lineStyle as Record<string, unknown> ?? {}), ...(override.lineStyle as Record<string, unknown>) };
-      }
+      const lineStyle = seriesLineStyle(override.lineStyle, i);
+      if (lineStyle) s.lineStyle = { ...(s.lineStyle as Record<string, unknown> ?? {}), ...lineStyle };
       if (override.symbol !== undefined) s.symbol = override.symbol;
-      if (override.label) s.name = override.label as string;
-      if (override.type) s.type = override.type as string;
+      if (override.label) s.name = override.label;
+      if (override.type) s.type = override.type;
       if (override.yAxisIndex !== undefined) s.yAxisIndex = override.yAxisIndex;
     }
     return s;

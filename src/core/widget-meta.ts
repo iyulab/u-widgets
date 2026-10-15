@@ -122,7 +122,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   bins: 'Number of histogram bins (auto: Sturges rule)',
   referenceLines: 'Reference/threshold lines',
   categories: 'Row order top to bottom; listed rows show even without intervals (gantt)',
-  series: 'Per-series overrides [{color?, lineStyle?, symbol?, label?}]',
+  series: "Per-series overrides in mapping.y order [{label?, color?, lineStyle?: 'solid'|'dashed'|'dotted'|{ECharts lineStyle}, symbol?, type?, yAxisIndex?}]",
   conditionalStyles: 'Per-point conditional styling rules [{field, above?, below?, color, symbol?, symbolSize?}]',
   subtitle: 'Static subtitle text (gauge)',
   step: 'Step interpolation (line)',
