@@ -304,7 +304,7 @@ export interface ReferenceLineOption {
   axis: 'x' | 'y';
   /** Position value on the axis. */
   value: number | string;
-  /** Label text displayed at the line endpoint. */
+  /** Label text — for a `y` line inside the plot above its right end, for an `x` line at its end. */
   label?: string;
   /** Line color (CSS color or named color). */
   color?: string;

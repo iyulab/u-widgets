@@ -453,7 +453,9 @@ function buildMarkLine(
       const item: Record<string, unknown> = rl.axis === 'x' ? { xAxis: toX(rl.value) } : { yAxis: rl.value };
       if (rl.label) {
         item.name = rl.label;
-        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'end' };
+        // A y line's label goes inside the plot, above the line's right end: at 'end' it sits outside the plot's
+        // right edge, which the grid leaves no room for, and a label longer than the margin was cut off.
+        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'insideEndTop' };
       }
       const lineStyle: Record<string, unknown> = {};
       if (rl.color) lineStyle.color = rl.color;

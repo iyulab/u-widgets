@@ -865,6 +865,8 @@ describe('toEChartsOption', () => {
       expect(mlData.length).toBe(1);
       expect(mlData[0].yAxis).toBe(10);
       expect(mlData[0].name).toBe('Threshold');
+      // Inside the plot, above the line's right end — outside the plot's edge it was cut off.
+      expect((mlData[0].label as Obj).position).toBe('insideEndTop');
       expect((mlData[0].lineStyle as Obj).color).toBe('red');
       expect((mlData[0].lineStyle as Obj).type).toBe('dashed');
     });

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.33.2] - 2026-10-15
+
+### Fixed
+
+- A **reference line**’s label on the value axis is drawn inside the plot, above the line’s right end. It sat outside
+  the plot’s right edge, where the chart leaves little room, so a label longer than a few characters was cut off — on a
+  short chart, down to its first letter.
+
 ## [0.33.1] - 2026-10-15
 
 ### Fixed
