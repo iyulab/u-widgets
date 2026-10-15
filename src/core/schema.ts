@@ -8,6 +8,7 @@ export type SpecErrorCode =
   | 'not-object'
   | 'too-deep'
   | 'widget-required'
+  | 'widget-unknown'
   | 'type-invalid'
   | 'fields-formdown-exclusive'
   | 'data-not-array'
@@ -43,6 +44,7 @@ const MESSAGE_KEY: Record<SpecErrorCode, keyof UWidgetLocaleStrings> = {
   'not-object': 'specErrorNotObject',
   'too-deep': 'specErrorTooDeep',
   'widget-required': 'specErrorWidgetRequired',
+  'widget-unknown': 'specErrorWidgetUnknown',
   'type-invalid': 'specErrorTypeInvalid',
   'fields-formdown-exclusive': 'specErrorFieldsFormdownExclusive',
   'data-not-array': 'specErrorDataNotArray',
@@ -59,7 +61,8 @@ export function specErrorMessage(issue: ValidationIssue, strings: UWidgetLocaleS
   return [...issue.path, formatTemplate(strings[MESSAGE_KEY[issue.code]], issue.params)].join(': ');
 }
 
-function result(issues: ValidationIssue[], warnings: string[]): ValidationResult {
+/** A result from issues and warnings — the shape every spec check answers in. */
+export function result(issues: ValidationIssue[], warnings: string[]): ValidationResult {
   return { valid: issues.length === 0, errors: issues.map((issue) => specErrorMessage(issue)), issues, warnings };
 }
 

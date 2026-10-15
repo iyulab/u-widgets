@@ -53,6 +53,7 @@ export const ko: UWidgetLocaleStrings = {
   specErrorNotObject: '명세는 null이 아닌 객체여야 합니다',
   specErrorTooDeep: 'compose 자식이 최대 중첩 깊이({max})를 넘었습니다',
   specErrorWidgetRequired: '필수 필드 "widget"은 비어 있지 않은 문자열이어야 합니다',
+  specErrorWidgetUnknown: '"{widget}" 위젯은 없습니다 — help()가 위젯 목록을 줍니다',
   specErrorTypeInvalid: '"type"을 쓴다면 "u-widget"이어야 합니다',
   specErrorFieldsFormdownExclusive: '"fields"와 "formdown"은 함께 쓸 수 없습니다',
   specErrorDataNotArray: '"{widget}"의 "data"는 배열이어야 하는데 받은 값은 {got}입니다',

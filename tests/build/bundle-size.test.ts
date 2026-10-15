@@ -72,7 +72,7 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(10 * 1024);
   });
 
-  it('tools bundle (with its names chunk) is under 16.5 KB gzip', () => {
+  it('tools bundle (with its names chunk) is under 17 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js')) + gzipSize(resolve(DIST, toolLabelsChunk()));
     // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE, OPTION_TYPES.
     // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
@@ -81,7 +81,9 @@ describe('bundle size budget', () => {
     // value types a property editor builds its controls from. The tools entry is separate from core.
     // Re-baselined from 14.5 KB for the editor names (English table and lookup, 1.7 KB in a chunk of
     // its own, shared with `./tools/locales/ko`; measured 16.3 KB together).
-    expect(size).toBeLessThan(16.5 * 1024);
+    // 0.34.0: + `checkSpec` (a spec held to the catalog — unknown widget, keys, options, option types), 0.8 KB;
+    // measured 16.75 KB together.
+    expect(size).toBeLessThan(17 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {
@@ -113,7 +115,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('shared chunks total is under 7 KB gzip', () => {
+  it('shared chunks total is under 10 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
     // The editor names chunk is loaded only by `./tools` and its locales — counted in the tools budget.
@@ -132,6 +134,8 @@ describe('bundle size budget', () => {
     // (6.3 KB measured). Bytes moved, not added.
     // 0.30.0: + spec validation messages as locale templates (they were inline English in `schema`, in the core entry)
     // and `tabular` (columns → rows, nested → dotted paths) beside `infer` — 7.28 KB measured.
-    expect(totalGzip).toBeLessThan(8 * 1024);
+    // 0.34.0: + `schema` (validate), now shared by the core entry and `./tools` (`checkSpec` runs it first) — the core
+    // entry shrank by 1.3 KB, the chunk is 1.8 KB; 9.6 KB measured.
+    expect(totalGzip).toBeLessThan(10 * 1024);
   });
 });

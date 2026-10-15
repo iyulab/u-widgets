@@ -533,6 +533,18 @@ autoSpec(data);                      // One-call auto spec from data
 so a host can branch on `code` or show the message in its reader's language with
 `specErrorMessage(issue, getLocaleStrings(lang))`. The "Invalid widget spec" card lists them in the widget's locale.
 
+`checkSpec(spec)` (in `./tools`) answers in the same shape and also holds a hand-written spec to the catalog — for an
+editor or a tool that writes specs, before showing one. A widget the library does not have is an error
+(`widget-unknown`, with a "did you mean" warning for a near spelling); a top-level key no widget reads, an option the
+widget does not have and an option value of the wrong type are warnings, each naming what that place takes:
+
+```ts
+import { checkSpec } from '@iyulab/u-widgets/tools';
+
+checkSpec({ widget: 'list', data: [], options: { compact: 'yes', dense: true } }).warnings;
+// → ['options.compact should be a boolean, not "yes"', 'options.dense is not an option of list — it takes compact']
+```
+
 ### 속성 편집기용 메타데이터
 
 위젯 spec을 사람이 고치는 편집기(속성 패널, 디자이너)는 위젯 지식을 복제하지 않고 이 메타데이터로 컨트롤을 만든다.

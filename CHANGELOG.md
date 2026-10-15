@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`checkSpec(spec)`** in `./tools` — `validate` plus what the catalog knows, for a spec written by hand (an editor,
+  an AI tool) before it is shown: a widget the library does not have is an error (`widget-unknown`, with a "did you
+  mean" warning for a near spelling), and a top-level key no widget reads, an option the widget does not have and an
+  option value of the wrong type are warnings naming what that place takes. Every example the catalog gives passes it
+  with no warning.
+
+### Changed
+
+- `UWidgetLocaleStrings` has `specErrorWidgetUnknown` (English and `./locales/ko` carry it) — a host that registers
+  a full locale adds it.
+- `validate` moved from the core entry into a chunk shared with `./tools` (the core entry is 1.3 KB smaller, the
+  shared chunk 1.8 KB).
+
 ## [0.33.2] - 2026-10-15
 
 ### Fixed

@@ -57,6 +57,8 @@ export interface UWidgetLocaleStrings {
   /** {max} — the nesting limit. */
   specErrorTooDeep: string;
   specErrorWidgetRequired: string;
+  /** {widget} — a widget the library does not have (reported by `checkSpec`). */
+  specErrorWidgetUnknown: string;
   specErrorTypeInvalid: string;
   specErrorFieldsFormdownExclusive: string;
   /** {widget}, {got} — the JavaScript type it got. */
@@ -118,6 +120,7 @@ const EN: UWidgetLocaleStrings = {
   specErrorNotObject: 'Spec must be a non-null object',
   specErrorTooDeep: 'compose children exceed maximum nesting depth ({max})',
   specErrorWidgetRequired: 'Required field "widget" must be a non-empty string',
+  specErrorWidgetUnknown: 'There is no widget "{widget}" — help() lists the widgets',
   specErrorTypeInvalid: '"type" must be "u-widget" if specified',
   specErrorFieldsFormdownExclusive: '"fields" and "formdown" are mutually exclusive',
   specErrorDataNotArray: '"{widget}" expects "data" to be an array, got {got}',
