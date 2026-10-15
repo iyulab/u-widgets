@@ -380,6 +380,13 @@ describe('toEChartsOption', () => {
       expect((result.yAxis as Obj).data).toEqual(['A', 'B']);
       expect((result.xAxis as Obj).type).toBe('value');
     });
+
+    it("lists a horizontal chart's categories top to bottom in the data's order", () => {
+      const horizontal = toEChartsOption(spec({ widget: 'chart.bar', data: [{ cat: 'A', val: 10 }], options: { horizontal: true } }));
+      expect((horizontal.yAxis as Obj).inverse).toBe(true);
+      const vertical = toEChartsOption(spec({ widget: 'chart.bar', data: [{ cat: 'A', val: 10 }] }));
+      expect((vertical.xAxis as Obj).inverse).toBeUndefined();
+    });
   });
 
   describe('options: smooth', () => {

@@ -490,7 +490,9 @@ function buildCartesian(
     return s;
   });
 
-  const catAxis: Record<string, unknown> = { type: 'category', data: categories };
+  // A horizontal chart lists its categories top to bottom in the data's order, as text reads — ECharts would start
+  // the category axis at the bottom, putting a ranking's first entry last.
+  const catAxis: Record<string, unknown> = { type: 'category', data: categories, ...(horizontal && { inverse: true }) };
   const valAxis: Record<string, unknown> = { type: 'value' };
 
   // Histogram mode: remove gaps between bars

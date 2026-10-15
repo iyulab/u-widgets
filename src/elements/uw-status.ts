@@ -44,9 +44,11 @@ export class UwStatus extends LitElement {
 
     /* ⚠flex-wrap 은 «가로» 축 설계라 그대로 둔다 — 여기서 여는 것은 «세로» 축뿐이다.
        항목이 여러 행으로 감기면서 길어진 높이가 호스트 제약을 넘던 자리다. */
+    /* 호스트가 더 높으면 줄들은 위에 모인다 — 기본값(stretch)은 남는 높이를 줄 사이에 나눠 항목을 흩어 놓는다. */
     .status-list {
       display: flex;
       flex-wrap: wrap;
+      align-content: flex-start;
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;

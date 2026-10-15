@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A **horizontal** bar, line or scatter chart lists its categories top to bottom in the data's order — a ranking's
+  first entry on top, where it was drawn last. The category axis of a vertical chart is unchanged.
+- **`status`** keeps its rows together at the top of a host taller than its items, where the rows were spread over
+  the extra height.
+
 ## [0.33.0] - 2026-10-15
 
 ### Added

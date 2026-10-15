@@ -381,3 +381,24 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
     expect(axes.y, '세로가 hidden 이면 wrap 된 행에 도달할 수 없다').toBe('auto');
   });
 });
+
+test('status — 호스트가 내용보다 높아도 항목 줄은 위에 모여 있고 줄 사이가 벌어지지 않는다', async ({ page }) => {
+  await ready(page);
+  const tops = await page.evaluate(async () => {
+    const stage = document.createElement('div');
+    stage.setAttribute('style', 'position:absolute;top:0;left:0;width:260px');
+    const host = document.createElement('u-widget') as HTMLElement & { spec?: unknown };
+    host.setAttribute('style', 'height:400px');
+    host.spec = { widget: 'status', data: ['Press', 'Robot', 'Fastener', 'Vision', 'Packer'].map((label) => ({ label, value: 'running', level: 'success' })) };
+    stage.appendChild(host);
+    document.body.appendChild(stage);
+    await new Promise((r) => setTimeout(r, 700));
+    const items = Array.from(host.shadowRoot!.querySelector('uw-status')!.shadowRoot!.querySelectorAll('.status-item'));
+    const hostTop = host.getBoundingClientRect().top;
+    return [...new Set(items.map((el) => Math.round(el.getBoundingClientRect().top - hostTop)))].sort((a, b) => a - b);
+  });
+  expect(tops.length, `줄이 하나뿐이면 이 판정은 공허하다 ${JSON.stringify(tops)}`).toBeGreaterThan(1);
+  // 줄 간격은 항목 높이 + gap(12px) 정도 — 남는 높이(400px)를 나눠 가지면 100px 넘게 벌어진다.
+  for (let i = 1; i < tops.length; i++) expect(tops[i] - tops[i - 1], JSON.stringify(tops)).toBeLessThan(48);
+  expect(tops[0]).toBeLessThan(24);
+});

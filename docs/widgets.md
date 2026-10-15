@@ -189,7 +189,7 @@ rebuilds the option when the layout changes. Anything set in `options.echarts` s
 | Option | Type | Applies To | Description |
 |---|---|---|---|
 | `stacked` | `boolean` | bar, line, area | Stack series |
-| `horizontal` | `boolean` | bar, line, scatter | Swap axes |
+| `horizontal` | `boolean` | bar, line, scatter | Swap axes — the categories then run top to bottom in the data's order |
 | `valueAxisZero` | `boolean` | bar, line, area | `false` spans the value axis over the data instead of always reaching zero — for values that move far from zero, such as a control chart around its centre line or a process temperature. Default `true`. Follows the value axis when `horizontal`; reaches every value axis of a chart with two |
 | `smooth` | `boolean` | line, area | Smooth curves |
 | `series` | `object[]` | bar, line, area | Per-series settings, in `mapping.y` order: `label` (the name in the legend and tooltip — the field name otherwise, which is often a source's code such as `PM`), `color`, `lineStyle` (`'solid'`, `'dashed'` or `'dotted'` as in `referenceLines`, or an ECharts `lineStyle` object such as `{ "type": "dashed", "width": 2 }`), `symbol`, `type`, `yAxisIndex` |
