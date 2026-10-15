@@ -13,8 +13,12 @@ function errorResult(err: unknown): ToolResult {
   return { content: [{ type: 'text', text: `Internal error: ${msg}` }], isError: true };
 }
 
-/** A record of arbitrary values keyed by string — Zod 4 requires the key schema explicitly. */
-const record = () => z.record(z.string(), z.unknown());
+/**
+ * An object of any fields. Written as `additionalProperties: true`, not the empty schema `{}` zod gives an open object
+ * by default: a widely used open-model tool-call parser rewrites the values under an empty schema (arrays come back as
+ * objects), and the model is then told its own output is wrong.
+ */
+const record = () => z.looseObject({}).meta({ additionalProperties: true });
 
 /**
  * Create and configure the u-widgets MCP server.
@@ -81,7 +85,7 @@ export function createServer(): McpServer {
     {
       description: 'Validate a u-widget spec against its structure and the catalog: a widget that does not exist is an error; a key no widget reads, an option the widget does not have or of the wrong type are warnings naming what that place takes. Returns errors (fatal) and warnings (non-fatal). Use this to check a spec before rendering.',
       inputSchema: z.strictObject({
-        spec: record().describe('The u-widget spec object to validate. Must be a plain object with a "widget" field.'),
+        spec: z.looseObject({ widget: z.string() }).meta({ additionalProperties: true }).describe('The u-widget spec object to validate, with its "widget" field.'),
       }),
     },
     async ({ spec }) => {

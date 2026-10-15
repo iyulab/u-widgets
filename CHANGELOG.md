@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- MCP server: the tools' open-object inputs (`spec`, `data`) are written `additionalProperties: true` instead of the
+  empty schema `{}` — a widely used open-model tool-call parser rewrote the values under the empty schema, so arrays
+  reached the server as objects. A test keeps `{}` out of every tool input.
+
 ## [0.34.0] - 2026-10-16
 
 ### Added
