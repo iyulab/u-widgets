@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-15
+
 ### Added
 
 - **`valueAxisZero`** for bar, line and area charts. `false` spans the value axis over the data instead of always
