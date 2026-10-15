@@ -334,7 +334,7 @@ function warnMisplacedAxisOptions(options: Record<string, unknown>): void {
     if (options[axis] == null || warnedMisplacedAxis.has(axis)) continue;
     warnedMisplacedAxis.add(axis);
     console.warn(
-      `[u-widgets] options.${axis} is ignored — axis config must go under ` +
+      `[@iyulab/u-widgets] options.${axis} is ignored — axis config must go under ` +
       `options.echarts.${axis} (deep-merged onto the generated axis), e.g. ` +
       `options: { echarts: { ${axis}: { axisLabel: { interval: 0, rotate: 30 } } } }.`,
     );
@@ -346,7 +346,7 @@ function warnUnregisteredComponentKeys(passthrough: Record<string, unknown>): vo
     if (!UNREGISTERED_COMPONENT_KEYS.has(key) || warnedKeys.has(key)) continue;
     warnedKeys.add(key);
     console.warn(
-      `[u-widgets] options.echarts.${key} requires an ECharts component that ` +
+      `[@iyulab/u-widgets] options.echarts.${key} requires an ECharts component that ` +
       `u-widgets does not register (tree-shakeable build). The option is merged ` +
       `but will not work at runtime. For heavy interactions (zoom/pan/toolbox), ` +
       `use @iyulab/flex-chart instead.`,
@@ -378,7 +378,7 @@ function warnUnregisteredSeriesTypes(series: unknown): void {
     if (typeof type !== 'string' || REGISTERED_SERIES_TYPES.has(type) || warnedSeriesTypes.has(type)) continue;
     warnedSeriesTypes.add(type);
     console.warn(
-      `[u-widgets] series type "${type}" requires an ECharts chart module that ` +
+      `[@iyulab/u-widgets] series type "${type}" requires an ECharts chart module that ` +
       `u-widgets does not register (tree-shakeable build). The series is merged ` +
       `but will not render at runtime. For advanced chart types, ` +
       `use @iyulab/flex-chart instead.`,

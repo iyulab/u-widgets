@@ -21,7 +21,7 @@ function normalizeColumnVariant(variant: unknown): UWidgetColumnDefinition['vari
   if (!warnedColumnVariants.has(key)) {
     warnedColumnVariants.add(key);
     console.warn(
-      `[uw-table] Unknown column variant "${key}" — expected one of ${[...VALID_COLUMN_VARIANTS].join(', ')}. ` +
+      `[@iyulab/u-widgets] uw-table: unknown column variant "${key}" — expected one of ${[...VALID_COLUMN_VARIANTS].join(', ')}. ` +
       `Falling back to default styling.`,
     );
   }

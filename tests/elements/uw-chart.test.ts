@@ -311,7 +311,7 @@ describe('uw-chart', () => {
     await new Promise((r) => setTimeout(r, 50));
 
     expect(warnSpy).toHaveBeenCalledWith(
-      '[uw-chart] Failed to initialize ECharts:',
+      '[@iyulab/u-widgets] uw-chart: failed to initialize ECharts:',
       'Canvas not supported',
     );
     warnSpy.mockRestore();

@@ -251,8 +251,8 @@ describe('u-widget', () => {
       expect(lines()).toEqual([]);
       vi.advanceTimersByTime(5000);
       expect(lines()).toEqual([
-        `[u-widget] "chart.funnel" needs import '@iyulab/u-widgets/charts'`,
-        `[u-widget] "chart.treemap" needs import '@iyulab/u-widgets/charts'`,
+        `[@iyulab/u-widgets] u-widget: "chart.funnel" needs import '@iyulab/u-widgets/charts'`,
+        `[@iyulab/u-widgets] u-widget: "chart.treemap" needs import '@iyulab/u-widgets/charts'`,
       ]);
     } finally {
       vi.useRealTimers();

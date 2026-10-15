@@ -42,7 +42,7 @@ export function normalize(spec: UWidgetSpec): UWidgetSpec {
         result.actions = parsed.actions;
       }
     } catch (e) {
-      console.warn('[u-widget:normalize] Failed to parse formdown:', (e as Error).message);
+      console.warn('[@iyulab/u-widgets] normalize: failed to parse formdown:', (e as Error).message);
     }
   }
 

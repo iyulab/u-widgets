@@ -28,7 +28,7 @@ function normalizeVariant(variant: unknown): MetricData['variant'] {
   if (!warnedVariants.has(key)) {
     warnedVariants.add(key);
     console.warn(
-      `[uw-metric] Unknown variant "${key}" — expected one of ${[...VALID_VARIANTS].join(', ')}. ` +
+      `[@iyulab/u-widgets] uw-metric: unknown variant "${key}" — expected one of ${[...VALID_VARIANTS].join(', ')}. ` +
       `Falling back to default styling.`,
     );
   }

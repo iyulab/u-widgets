@@ -125,7 +125,7 @@ export class UwChart extends LitElement {
       });
       this._updateChart();
     } catch (e) {
-      console.warn('[uw-chart] Failed to initialize ECharts:', (e as Error).message);
+      console.warn('[@iyulab/u-widgets] uw-chart: failed to initialize ECharts:', (e as Error).message);
     }
   }
 

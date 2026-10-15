@@ -266,7 +266,7 @@ export class UWidget extends LitElement {
         try {
           return JSON.parse(value);
         } catch (e) {
-          console.warn('[u-widget] Invalid JSON in spec attribute:', (e as Error).message);
+          console.warn('[@iyulab/u-widgets] u-widget: invalid JSON in the spec attribute:', (e as Error).message);
           return null;
         }
       },
@@ -550,7 +550,7 @@ export class UWidget extends LitElement {
       checkedMissingEntries.add(spec.widget);
       const widget = spec.widget;
       setTimeout(() => {
-        if (!customElements.get(needed.element)) console.warn(`[u-widget] "${widget}" needs import '${needed.entry}'`);
+        if (!customElements.get(needed.element)) console.warn(`[@iyulab/u-widgets] u-widget: "${widget}" needs import '${needed.entry}'`);
       }, MISSING_ENTRY_GRACE_MS);
     }
     if (!this._awaitedElements.has(needed.element)) {

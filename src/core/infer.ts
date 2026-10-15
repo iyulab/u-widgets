@@ -65,7 +65,7 @@ export function infer(
 // Debug logging helper — only logs in development builds
 function debugInfer(widget: string, message: string): void {
   if (typeof console !== 'undefined' && console.debug) {
-    console.debug(`[u-widget:infer] ${widget}: ${message}`);
+    console.debug(`[@iyulab/u-widgets] infer: ${widget}: ${message}`);
   }
 }
 

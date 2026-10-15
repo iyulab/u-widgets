@@ -102,7 +102,7 @@ describe('normalize', () => {
     // Should not crash, fields remain undefined
     expect(result.fields).toBeUndefined();
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[u-widget:normalize]'),
+      expect.stringContaining('[@iyulab/u-widgets] normalize:'),
       expect.any(String),
     );
     warnSpy.mockRestore();

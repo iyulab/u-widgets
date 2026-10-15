@@ -11,6 +11,7 @@
 
 ### Changed
 
+- Console diagnostics begin with `[@iyulab/u-widgets]`, so a message in a console shared by several packages says which one wrote it (several also say what to do next).
 - The published declarations keep each element's own `HTMLElementTagNameMap` merge instead of one block written by hand
   in the build config, through the shared `@iyulab/components` declaration step. The types a consumer sees are the same
   (`u-widget`, `uw-chart` and `uw-math` keep their classes, composed-only elements stay `HTMLElement`), and a merge added

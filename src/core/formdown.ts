@@ -97,7 +97,7 @@ export function parseFormdown(input: string, _data?: Record<string, unknown>): F
     // Try field line
     const fieldMatch = FIELD_RE.exec(line);
     if (!fieldMatch) {
-      console.debug(`[u-widget:formdown] Skipping unrecognized line: "${line}"`);
+      console.debug(`[@iyulab/u-widgets] formdown: skipping unrecognized line: "${line}"`);
       continue;
     }
 
@@ -173,7 +173,7 @@ function parseInlineAttrs(attrs: string, field: UWidgetFieldDefinition): void {
         field.placeholder = val;
         break;
       default:
-        console.debug(`[u-widget:formdown] Unknown inline attribute "${key}" on field "${field.field}"`);
+        console.debug(`[@iyulab/u-widgets] formdown: unknown inline attribute "${key}" on field "${field.field}"`);
         break;
     }
   }
