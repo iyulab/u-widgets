@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.33.1] - 2026-10-15
+
 ### Fixed
 
 - A **horizontal** bar, line or scatter chart lists its categories top to bottom in the data's order — a ranking's
