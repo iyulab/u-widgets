@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.35.2] - 2026-10-17
+
 ### Fixed
 
 - `help()` / `./tools`: a mapping key's description names every widget that reads it — a Gantt's `color` (bars of a
