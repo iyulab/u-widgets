@@ -134,6 +134,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   xFormat: 'X-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
   yFormat: 'Y-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
   valueAxisZero: 'Value axis reaches zero (default); false spans the data — for values far from zero (bar/line/area)',
+  xAxisType: "'value' — points at their numeric x (uneven times or distances), not evenly spaced categories (line/area)",
   // table / list
   pageSize: 'Rows per page',
   compact: 'Compact display mode',
@@ -213,6 +214,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   xFormat: { type: 'object' },
   yFormat: { type: 'object' },
   valueAxisZero: { type: 'boolean', default: true },
+  xAxisType: { type: '"category" | "value"', default: 'category' },
   pageSize: { type: 'number' },
   compact: { type: 'boolean', default: false },
   searchable: { type: 'boolean', default: false },
@@ -314,8 +316,8 @@ function withNamesAndEnums(fields: Record<string, readonly Omit<DataFieldInfo, '
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel'],
   'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel'],

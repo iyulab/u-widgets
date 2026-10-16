@@ -35,7 +35,9 @@ function matchConditionalStyle(
  *
  * Supports `options.echarts` passthrough: any key-value pairs in
  * `options.echarts` are recursively deep-merged into the generated
- * ECharts option (nested objects merge; arrays replace), allowing full
+ * ECharts option (nested objects merge; `series`, `xAxis` and `yAxis` arrays merge element by element —
+ * `series: [{ type: 'line' }]` changes the first generated series rather than replacing it; other arrays
+ * replace), allowing full
  * customization — including axis control such as
  * `options.echarts.xAxis.axisLabel` on top of the builder's category data.
  *
@@ -164,7 +166,7 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   const passthrough = options.echarts as Record<string, unknown> | undefined;
   if (passthrough && typeof passthrough === 'object') {
     warnUnregisteredComponentKeys(passthrough);
-    result = deepMerge(result, passthrough);
+    result = deepMerge(result, passthrough, ELEMENTWISE_KEYS);
   }
 
   // Guard series-type false affordance: catches both options.series[i].type
@@ -418,7 +420,11 @@ function reachReferenceLines(result: Record<string, unknown>, options: Record<st
   const series = (result.series as Record<string, unknown>[] | undefined) ?? [];
   if (!lines.length || series.some((s) => s.stack)) return;
   const data = series
-    .flatMap((s) => (Array.isArray(s.data) ? s.data : []).map((p) => (p && typeof p === 'object' ? (p as { value?: unknown }).value : p)))
+    .flatMap((s) => (Array.isArray(s.data) ? s.data : []).map((p) => {
+      const v = (p as { value?: unknown } | null)?.value ?? p;
+      // An `[x, y]` point (a numeric x axis) — the value is y.
+      return Array.isArray(v) ? v[1] : v;
+    }))
     .filter((v): v is number => typeof v === 'number');
   const axis = [result[key]].flat()[0] as Record<string, unknown> | undefined;
   if (!data.length || !axis) return;
@@ -481,6 +487,12 @@ function buildCartesian(
 
   const categories = data.map((row) => String(row[xField] ?? ''));
   const horizontal = !!options.horizontal;
+  // A numeric x axis — points at their x values, not evenly spaced categories: a profile over uneven times.
+  const valueX = !horizontal && options.xAxisType === 'value';
+  const point = (row: Record<string, unknown>, val: unknown) => {
+    const x = row[xField];
+    return valueX ? [x == null || x === '' ? null : Number(x), val] : val;
+  };
 
   const seriesOverrides = Array.isArray(options.series) ? options.series as ChartSeriesOption[] : [];
   const condStyles = options.conditionalStyles as ConditionalStyleRule[] | undefined;
@@ -494,13 +506,13 @@ function buildCartesian(
         if (condStyles?.length) {
           const match = matchConditionalStyle(row, condStyles);
           if (match) {
-            const item: Record<string, unknown> = { value: val, itemStyle: { color: match.color } };
+            const item: Record<string, unknown> = { value: point(row, val), itemStyle: { color: match.color } };
             if (match.symbol) item.symbol = match.symbol;
             if (match.symbolSize) item.symbolSize = match.symbolSize;
             return item;
           }
         }
-        return val;
+        return point(row, val);
       }),
     };
     if (options._area) s.areaStyle = {};
@@ -526,7 +538,10 @@ function buildCartesian(
 
   // A horizontal chart lists its categories top to bottom in the data's order, as text reads — ECharts would start
   // the category axis at the bottom, putting a ranking's first entry last.
-  const catAxis: Record<string, unknown> = { type: 'category', data: categories, ...(horizontal && { inverse: true }) };
+  const catAxis: Record<string, unknown> = valueX
+    // `scale`: an x value axis starts at the data, not at zero (years, timestamps).
+    ? { type: 'value', scale: true }
+    : { type: 'category', data: categories, ...(horizontal && { inverse: true }) };
   const valAxis: Record<string, unknown> = { type: 'value' };
 
   // Histogram mode: remove gaps between bars
@@ -1388,6 +1403,7 @@ function getNumberFields(data: Record<string, unknown>[]): string[] {
 function deepMerge(
   base: Record<string, unknown>,
   overrides: Record<string, unknown>,
+  elementwise: ReadonlySet<string> = new Set(),
 ): Record<string, unknown> {
   const result = { ...base };
   for (const key of Object.keys(overrides)) {
@@ -1395,11 +1411,28 @@ function deepMerge(
     const ov = overrides[key];
     if (isPlainObject(bv) && isPlainObject(ov)) {
       result[key] = deepMerge(bv as Record<string, unknown>, ov as Record<string, unknown>);
+    } else if (elementwise.has(key) && Array.isArray(ov) && bv != null) {
+      result[key] = mergeElementwise(bv, ov);
     } else {
       result[key] = ov;
     }
   }
   return result;
+}
+
+/**
+ * Passthrough keys whose arrays line up with the generated ones — `series[i]`, `xAxis[i]`, `yAxis[i]`. Replacing them
+ * whole dropped the builder's data and the reference-line markLine (`series: [{ type: 'line' }]` drew an empty chart).
+ */
+const ELEMENTWISE_KEYS: ReadonlySet<string> = new Set(['series', 'xAxis', 'yAxis']);
+
+/** `override[i]` merged onto `base[i]`; extra override entries are appended. A generated single axis object stays one. */
+function mergeElementwise(base: unknown, override: unknown[]): unknown {
+  const items = [base].flat();
+  const merged = override
+    .map((o, i) => (isPlainObject(items[i]) && isPlainObject(o) ? deepMerge(items[i], o) : o))
+    .concat(items.slice(override.length));
+  return Array.isArray(base) || merged.length > 1 ? merged : merged[0];
 }
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {

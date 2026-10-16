@@ -74,6 +74,7 @@ export const toolLabelsKo: ToolLabels = {
     xFormat: 'X축 서식',
     yFormat: 'Y축 서식',
     valueAxisZero: '값 축을 0부터',
+    xAxisType: 'X축 종류',
     pageSize: '페이지당 행 수',
     compact: '간결하게',
     searchable: '검색 상자',

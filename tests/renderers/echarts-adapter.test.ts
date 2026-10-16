@@ -1851,3 +1851,52 @@ describe('toEChartsOption', () => {
     });
   });
 });
+
+describe('a profile over uneven x — chart.line xAxisType: value (#1380)', () => {
+  const profile = [{ t: 0, v: 25 }, { t: 62.5, v: 150 }, { t: 300, v: 25 }];
+
+  it('🔴puts each point at its x on a value axis', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.line', data: profile, mapping: { x: 't', y: 'v' }, options: { xAxisType: 'value' } }));
+    expect((o.xAxis as Obj).type).toBe('value');
+    expect(((o.series as ObjArray)[0]).data).toEqual([[0, 25], [62.5, 150], [300, 25]]);
+  });
+
+  it('🔴a y reference line still widens the value axis', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.line', data: profile, mapping: { x: 't', y: 'v' },
+      options: { xAxisType: 'value', referenceLines: [{ axis: 'y', value: 217 }] } }));
+    expect(((o.series as ObjArray)[0]).markLine).toBeTruthy();
+  });
+
+  it('NEGATIVE — without it the x axis is categories, evenly spaced', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.line', data: profile, mapping: { x: 't', y: 'v' } }));
+    expect((o.xAxis as Obj).type).toBe('category');
+    expect(((o.series as ObjArray)[0]).data).toEqual([25, 150, 25]);
+  });
+});
+
+describe('options.echarts series · axes merge element by element (#1380)', () => {
+  it('🔴series: [{ type: \'line\' }] changes the generated series — data and the reference line stay', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.scatter', data: [{ t: 0, v: 25 }, { t: 62.5, v: 150 }, { t: 300, v: 25 }],
+      mapping: { x: 't', y: 'v' },
+      options: { referenceLines: [{ axis: 'y', value: 100 }], echarts: { series: [{ type: 'line' }] } } }));
+    const s = (o.series as ObjArray)[0];
+    expect(s.type).toBe('line');
+    expect((s.data as unknown[]).length).toBe(3);
+    expect(s.markLine).toBeTruthy();
+  });
+
+  it('🔴yAxis: [{ name }] merges onto the generated axis', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.line', data: [{ x: 'a', y: 1 }], mapping: { x: 'x', y: 'y' },
+      options: { echarts: { yAxis: [{ name: '°C' }] } } }));
+    const y = o.yAxis as Obj;
+    expect(y.type).toBe('value');
+    expect(y.name).toBe('°C');
+  });
+
+  it('extra passthrough series are appended', () => {
+    const o = toEChartsOption(spec({ widget: 'chart.line', data: [{ x: 'a', y: 1 }], mapping: { x: 'x', y: 'y' },
+      options: { echarts: { series: [{}, { type: 'line', data: [2] }] } } }));
+    expect((o.series as ObjArray).length).toBe(2);
+    expect(((o.series as ObjArray)[0]).data).toEqual([1]);
+  });
+});

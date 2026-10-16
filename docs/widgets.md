@@ -194,11 +194,12 @@ rebuilds the option when the layout changes. Anything set in `options.echarts` s
 | `horizontal` | `boolean` | bar, line, scatter | Swap axes — the categories then run top to bottom in the data's order |
 | `valueAxisZero` | `boolean` | bar, line, area | `false` spans the value axis over the data instead of always reaching zero — for values that move far from zero, such as a control chart around its centre line or a process temperature. Default `true`. Follows the value axis when `horizontal`; reaches every value axis of a chart with two |
 | `smooth` | `boolean` | line, area | Smooth curves |
+| `xAxisType` | `'category' \| 'value'` | line, area | `'value'` puts each point at its numeric `x` — a profile over uneven times or distances — instead of evenly spaced categories. The x axis then starts at the data, not at zero. Default `'category'` |
 | `series` | `object[]` | bar, line, area | Per-series settings, in `mapping.y` order: `label` (the name in the legend and tooltip — the field name otherwise, which is often a source's code such as `PM`), `color`, `lineStyle` (`'solid'`, `'dashed'` or `'dotted'` as in `referenceLines`, or an ECharts `lineStyle` object such as `{ "type": "dashed", "width": 2 }`), `symbol`, `type`, `yAxisIndex` |
 | `donut` | `boolean` | pie | Donut chart |
 | `showLabel` | `boolean` | pie, gantt | Show data labels (gantt: in-bar segment labels, default on) |
 | `categories` | `string[]` | gantt | Row order top to bottom; listed rows stay on the axis without intervals |
-| `echarts` | `object` | all charts | Raw ECharts option passthrough (recursively deep-merged; see below) |
+| `echarts` | `object` | all charts | Raw ECharts option passthrough (recursively deep-merged; `series`, `xAxis` and `yAxis` arrays merge element by element; see below) |
 | `colorRange` | `[string, string]` | heatmap | 색상 범위 `["#e0f2fe","#0c4a6e"]` |
 
 ### Waterfall totals
@@ -271,7 +272,9 @@ When `mapping` is omitted: first string → `y`, first two number or date-like f
 ### Axis label control (interval / rotate / name)
 
 Axis config must go under **`options.echarts`** — it is deep-merged onto the generated
-axis, so the builder's category data is preserved. Placing `xAxis`/`yAxis` at the
+axis, so the builder's category data is preserved. `series`, `xAxis` and `yAxis` given as arrays merge by index onto
+the generated ones (`series: [{ type: 'line' }]` changes the first series and keeps its data and reference lines;
+entries past the generated ones are added); every other array replaces. Placing `xAxis`/`yAxis` at the
 `options` top level is ignored (a dev warning points to the fix). Use this when long or
 numerous category labels are auto-hidden by ECharts:
 
