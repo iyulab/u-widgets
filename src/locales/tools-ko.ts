@@ -65,6 +65,7 @@ export const toolLabelsKo: ToolLabels = {
     series: '계열',
     conditionalStyles: '조건부 스타일',
     subtitle: '부제',
+    format: '값 서식',
     step: '계단선',
     legend: '범례',
     grid: '격자선',

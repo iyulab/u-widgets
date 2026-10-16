@@ -85,6 +85,7 @@ const EN: ToolLabels = {
     series: 'Series',
     conditionalStyles: 'Conditional styles',
     subtitle: 'Subtitle',
+    format: 'Value format',
     step: 'Step line',
     legend: 'Legend',
     grid: 'Grid lines',

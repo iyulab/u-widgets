@@ -41,7 +41,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
-| `gauge` | Gauge with thresholds | — (uses `data.value`) |
+| `gauge` | Gauge with thresholds | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
 | `progress` | Progress bar | — (uses `data.value`) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
 | `list` | Structured list | `primary`, `secondary`, `avatar`, `trailing` |
@@ -109,11 +109,13 @@ commonly answers in, so `data` can be passed as it came:
 | Format | Output |
 |---|---|
 | `number` | `1,234` |
+| `number:2` | `1,234.50` — fixed decimals (0–20) |
 | `currency` | `$1,234.00` (기본: USD) |
 | `currency:KRW` | `₩1,234` |
 | `currency:EUR` | `€1,234.00` |
 | `currency:JPY` | `¥1,234` |
 | `percent` | `73%` |
+| `percent:1` | `73.5%` |
 | `date` | `2025-01-15` |
 | `datetime` | `2025-01-15 14:30` |
 | `time` | `14:30` |

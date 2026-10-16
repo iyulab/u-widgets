@@ -354,3 +354,32 @@ describe('uw-gauge', () => {
     });
   });
 });
+
+describe('uw-gauge — value in the widget locale (#1426 class)', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+  const valueText = (shadow: ShadowRoot) => shadow.querySelector('.gauge-value')!.textContent;
+
+  it('🔴shows the value in options.locale — a German page reads 79,17', async () => {
+    const el = createElement({ widget: 'gauge', data: { value: 79.17 }, options: { locale: 'de' } });
+    const shadow = await render(el);
+    expect(valueText(shadow)).toBe('79,17');
+    expect(shadow.querySelector('[role="meter"]')!.getAttribute('aria-valuetext')).toBe('79,17');
+    expect(shadow.querySelector('[role="meter"]')!.getAttribute('aria-valuenow')).toBe('79.17');
+  });
+
+  it('🔴takes a format with fixed decimals', async () => {
+    const el = createElement({ widget: 'gauge', data: { value: 1.3 }, options: { locale: 'de', format: 'number:2', max: 2 } });
+    expect(valueText(await render(el))).toBe('1,30');
+  });
+
+  it('🔴a progress label {value} is formatted the same way', async () => {
+    const el = createElement({ widget: 'progress', data: { value: 0.5 }, options: { locale: 'de', label: '{value} / 1', max: 1 } });
+    const shadow = await render(el);
+    expect(shadow.querySelector('.progress-info span')!.textContent).toBe('0,5 / 1');
+  });
+
+  it('NEGATIVE — an English page keeps the dot', async () => {
+    const el = createElement({ widget: 'gauge', data: { value: 79.17 }, options: { locale: 'en' } });
+    expect(valueText(await render(el))).toBe('79.17');
+  });
+});

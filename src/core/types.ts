@@ -73,8 +73,8 @@ export interface UWidgetColumnDefinition {
   field: string;
   /** Display header label. Defaults to the field name. */
   label?: string;
-  /** Value formatting hint (e.g., `"currency"`, `"currency:EUR"`, `"percent"`). */
-  format?: 'number' | 'currency' | `currency:${string}` | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
+  /** Value formatting hint (e.g., `"number:2"`, `"currency"`, `"currency:EUR"`, `"percent"`). */
+  format?: 'number' | `number:${number}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes';
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
   /**

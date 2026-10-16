@@ -40,7 +40,7 @@ describe('checkSpec', () => {
       'options.dense is not an option of list — it takes compact',
     ]);
     expect(checkSpec({ widget: 'gauge', data: { value: 3 }, options: { max: '100' } }).warnings).toEqual(['options.max should be a number, not "100"']);
-    expect(checkSpec({ widget: 'metric', data: { value: 3 }, options: { unit: 'kW' } }).warnings).toEqual(['options.unit is not an option of metric — it takes none']);
+    expect(checkSpec({ widget: 'metric', data: { value: 3 }, options: { unit: 'kW' } }).warnings).toEqual(['options.unit is not an option of metric — it takes format']);
   });
 
   it('answers as validate does when the structure itself is wrong', () => {

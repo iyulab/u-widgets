@@ -245,3 +245,21 @@ describe('formatValue', () => {
     });
   });
 });
+
+describe('formatValue — fixed fraction digits (number:N · percent:N)', () => {
+  it('🔴number:4 shows exactly four places in the locale', () => {
+    expect(formatValue(0.97444, 'number:4', 'en')).toBe('0.9744');
+    expect(formatValue(0.97444, 'number:4', 'de')).toBe('0,9744');
+    expect(formatValue(55.03, 'number:2', 'de')).toBe('55,03');
+    expect(formatValue(2, 'number:2', 'en')).toBe('2.00');
+  });
+
+  it('🔴percent:1 fixes the places', () => {
+    expect(formatValue(73.456, 'percent:1', 'en')).toBe('73.5%');
+  });
+
+  it('NEGATIVE — a parameter that is not a count is ignored (Intl default)', () => {
+    expect(formatValue(1.23456, 'number:x', 'en')).toBe(formatValue(1.23456, 'number', 'en'));
+    expect(formatValue(1.23456, 'number:99', 'en')).toBe(formatValue(1.23456, 'number', 'en'));
+  });
+});

@@ -11,7 +11,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
 /**
  * Format a value according to a format hint string.
  *
- * Supported formats: `"number"`, `"currency"`, `"currency:EUR"`, `"percent"`,
+ * Supported formats: `"number"`, `"number:2"` (fixed fraction digits), `"currency"`, `"currency:EUR"`, `"percent"`, `"percent:1"`,
  * `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for unknown formats.
  *
  * @param value - The value to format (coerced to number where needed).
@@ -23,6 +23,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * @example
  * ```ts
  * formatValue(1234.5, 'number')       // "1,234.5"
+ * formatValue(0.97444, 'number:4')    // "0.9744"
  * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
  * formatValue(73, 'percent')          // "73%"
  * formatValue(1536000, 'bytes')       // "1.5 MB"
@@ -37,11 +38,11 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
 
   switch (type as FormatType) {
     case 'number':
-      return formatNumber(value, locale);
+      return formatNumber(value, locale, digits(param));
     case 'currency':
       return formatCurrency(value, param, locale);
     case 'percent':
-      return formatPercent(value, locale);
+      return formatPercent(value, locale, digits(param));
     case 'date':
       return formatDate(value, locale);
     case 'datetime':
@@ -55,10 +56,22 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
   }
 }
 
-function formatNumber(value: unknown, locale?: string): string {
+/** `number:2` · `percent:1` — the fraction digits after the colon (0–20), or `undefined` when absent or not a count. */
+function digits(param: string | undefined): number | undefined {
+  if (param === undefined || !/^\d{1,2}$/.test(param)) return undefined;
+  const n = Number(param);
+  return n <= 20 ? n : undefined;
+}
+
+function formatNumber(value: unknown, locale?: string, fractionDigits?: number): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  return new Intl.NumberFormat(locale).format(num);
+  const fixed = fractionDigits === undefined ? {} : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits };
+  try {
+    return new Intl.NumberFormat(locale, fixed).format(num);
+  } catch {
+    return new Intl.NumberFormat(undefined, fixed).format(num);
+  }
 }
 
 function formatCurrency(value: unknown, currencyCode?: string, locale?: string): string {
@@ -86,20 +99,22 @@ function formatCurrency(value: unknown, currencyCode?: string, locale?: string):
   }
 }
 
-function formatPercent(value: unknown, locale?: string): string {
+function formatPercent(value: unknown, locale?: string, fractionDigits?: number): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
   if (locale) {
     try {
       return new Intl.NumberFormat(locale, {
         style: 'percent',
-        maximumFractionDigits: 2,
+        ...(fractionDigits === undefined
+          ? { maximumFractionDigits: 2 }
+          : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }),
       }).format(num / 100);
     } catch {
       // Invalid locale fallback
     }
   }
-  return num + '%';
+  return (fractionDigits === undefined ? String(num) : num.toFixed(fractionDigits)) + '%';
 }
 
 /** A date (and time) as a string writes it: ISO 8601 (`2025-01-15T14:30:00Z`) and the variations APIs use —

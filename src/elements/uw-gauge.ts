@@ -2,6 +2,7 @@ import { LitElement, html, svg, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { formatValue } from '../core/format.js';
 
 interface GaugeThreshold {
   to: number;
@@ -15,6 +16,9 @@ interface GaugeOptions {
   unit: string;
   subtitle: string;
   thresholds: GaugeThreshold[];
+  /** Format hint for the shown value (`formatValue`) — default `number`, in the widget's locale. */
+  format?: string;
+  locale?: string;
 }
 
 const DEFAULT_GAUGE_OPTIONS: GaugeOptions = {
@@ -217,10 +221,11 @@ export class UwGauge extends LitElement {
     const fillPath = pct > 0 ? describeArc(cx, cy, r, startAngle, endAngle) : null;
 
     const label = typeof this.spec!.title === 'string' ? this.spec!.title : 'Gauge';
-    const valueText = activeLabel ? `${value}${opts.unit} ${activeLabel}` : `${value}${opts.unit}`;
+    const shown = this.formatShown(value, opts);
+    const valueText = activeLabel ? `${shown}${opts.unit} ${activeLabel}` : `${shown}${opts.unit}`;
 
     const lines: { kind: 'value' | 'unit' | 'subtitle'; text: string; height: number }[] = [
-      { kind: 'value', text: String(value), height: VALUE_LINE },
+      { kind: 'value', text: shown, height: VALUE_LINE },
     ];
     if (opts.unit) lines.push({ kind: 'unit', text: opts.unit, height: UNIT_LINE });
     if (activeLabel) lines.push({ kind: 'subtitle', text: activeLabel, height: SUBTITLE_LINE });
@@ -334,14 +339,21 @@ export class UwGauge extends LitElement {
     `;
   }
 
+  /** The value as shown — in the widget's locale (`79,17` on a German page), through `options.format` (default `number`). */
+  private formatShown(value: number, opts: GaugeOptions): string {
+    return formatValue(value, opts.format ?? 'number', typeof opts.locale === 'string' ? opts.locale : undefined);
+  }
+
   private formatLabel(value: number, pct: number): string {
-    const opts = this.spec!.options as Record<string, unknown> | undefined;
-    if (opts?.label) {
-      return String(opts.label)
-        .replace('{value}', String(value))
+    const opts = this.getOptions();
+    const shown = this.formatShown(value, opts);
+    const template = (this.spec!.options as Record<string, unknown> | undefined)?.label;
+    if (template) {
+      return String(template)
+        .replace('{value}', shown)
         .replace('{percent}', String(Math.round(pct)));
     }
-    return String(value);
+    return shown;
   }
 
   private getThresholdColor(value: number, opts: GaugeOptions): string {

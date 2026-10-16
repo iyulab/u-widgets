@@ -2,12 +2,22 @@
 
 ## [Unreleased]
 
+### Added
+
+- Format hints `number:N` and `percent:N` — a fixed number of decimals (0–20), in the widget's locale: `number:4` shows
+  `0.9744` (`0,9744` on a German page). Table columns, metric and stat-group values take them; a table still sorts on the
+  raw value.
+- `gauge` · `progress` `options.format` — the shown value goes through the same format hints.
+
 ### Changed
 
 - `checkSpec`: an option of the widget written at the top level of a spec (`{ widget: "list", compact: true }`) is
   named as such — move it into `options` — instead of only as a key no widget reads.
 
 ### Fixed
+
+- `gauge` · `progress` show their value in the widget's locale — a German page read `79.17` where every other widget
+  wrote `79,17`. The value is the default `number` format; `aria-valuetext` and a progress label's `{value}` follow it.
 
 - Docs: Theming said the `--u-widget-*` tokens could be set on any ancestor element — an inherited value never beats the
   defaults a widget declares on its own host, so such a setting did nothing. It now says to set them on the widget element
