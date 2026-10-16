@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- Docs: Theming said the `--u-widget-*` tokens could be set on any ancestor element — an inherited value never beats the
+  defaults a widget declares on its own host, so such a setting did nothing. It now says to set them on the widget element
+  (`u-widget { … }`, or its `style`), with the dark-mode example to match, and which tokens an accent colour runs through.
+
 - MCP server 0.6.1: the tools' open-object inputs (`spec`, `data`) are written `additionalProperties: true` instead of the
   empty schema `{}` — a widely used open-model tool-call parser rewrote the values under the empty schema, so arrays
   reached the server as objects. A test keeps `{}` out of every tool input.

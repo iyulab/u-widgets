@@ -459,7 +459,23 @@ code can listen with `onLocaleChange(listener)`, which returns the unsubscribe f
 
 ## Theming
 
-CSS custom properties on any ancestor element:
+CSS custom properties **on the widget element itself** — a rule that selects it (`u-widget { … }`, `.board u-widget { … }`)
+or its `style` attribute. Each widget declares its defaults on its own host (`:host { --u-widget-*: … }`), and a value
+inherited from an ancestor (`:root`, a wrapper `div`) never beats a declaration on the element itself — set there, the
+defaults stay. A rule in the page that selects the element does win: the page's styles come before the shadow tree's.
+
+```css
+/* a brand accent for every widget on the page */
+u-widget { --u-widget-primary: #0f766e; }
+```
+
+```html
+<!-- or one widget: an inline style on the element -->
+<u-widget style="--u-widget-primary: #e11d48; --u-widget-on-primary: #fff"></u-widget>
+```
+
+Setting `--u-widget-primary` alone leaves the first chart series (`--u-widget-chart-color-1`) and the ink on a primary
+fill (`--u-widget-on-primary`) at their defaults — set them with it when the accent should run through a chart too.
 
 | Token | Default | Description |
 |---|---|---|
@@ -475,7 +491,7 @@ CSS custom properties on any ancestor element:
 ### Dark mode
 
 ```css
-.dark {
+.dark u-widget {
   --u-widget-text: #e2e8f0;
   --u-widget-text-secondary: #94a3b8;
   --u-widget-primary: #818cf8;
