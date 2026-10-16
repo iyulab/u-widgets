@@ -1,5 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { themeStyles } from '../../src/styles/tokens.js';
+
+// uw-chart's static styles are read below, never a chart drawn: echarts stands in as stubs, as in uw-chart.test.ts.
+// Loading the real one made this file's first uw-chart import run past its timeout under a full suite's load.
+vi.mock('echarts/core', () => ({ default: { use: vi.fn(), init: vi.fn() }, use: vi.fn(), init: vi.fn() }));
+vi.mock('echarts/charts', () => ({
+  BarChart: {}, LineChart: {}, PieChart: {}, ScatterChart: {}, RadarChart: {},
+  HeatmapChart: {}, BoxplotChart: {}, FunnelChart: {}, TreemapChart: {}, CustomChart: {},
+}));
+vi.mock('echarts/components', () => ({
+  GridComponent: {}, TooltipComponent: {}, LegendComponent: {}, RadarComponent: {}, MarkLineComponent: {}, VisualMapComponent: {},
+}));
+vi.mock('echarts/renderers', () => ({ CanvasRenderer: {} }));
 
 // WCAG 2.1 relative luminance
 function relativeLuminance(hex: string): number {
@@ -115,7 +127,7 @@ describe('themeStyles', () => {
     ];
 
     for (const name of elementNames) {
-      it(`${name} includes themeStyles in static styles`, { timeout: 15000 }, async () => {
+      it(`${name} includes themeStyles in static styles`, async () => {
         // Import elements to register them (u-chart is a separate entry point)
         await import('../../src/elements/u-widget.js');
         if (name === 'uw-chart') {

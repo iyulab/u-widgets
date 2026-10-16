@@ -80,7 +80,8 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "test:mcp": "cd mcp && npm install --no-save --no-package-lock && npm test"
+    "test:mcp": "cd mcp && npm install --no-save --no-package-lock && npm test",
+    "check": "npm run lint && npm run build && npm test && npm run test:e2e"
   },
   "keywords": [
     "widgets",
