@@ -1,9 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.35.0] - 2026-10-16
+
+MCP server 0.6.2 follows `^0.35.0` — its option lists gain `format` (gauge · progress · metric · stat-group) and `xAxisType` (line · area).
 
 ### Added
 
+- `chart.line` · `chart.area` `options.xAxisType: 'value'` — each point at its numeric `x` on a value axis: a profile over
+  uneven times or distances, which a category axis spaced evenly. Reference lines work as before.
 - Format hints `number:N` and `percent:N` — a fixed number of decimals (0–20), in the widget's locale: `number:4` shows
   `0.9744` (`0,9744` on a German page). Table columns, metric and stat-group values take them; a table still sorts on the
   raw value.
@@ -11,6 +15,9 @@
 
 ### Changed
 
+- `options.echarts` passthrough merges `series`, `xAxis` and `yAxis` arrays element by element onto the generated ones
+  (they replaced them whole). `series: [{ type: 'line' }]` on a scatter chart drew an empty chart — the generated data
+  and the reference-line markLine were gone. A full series given there still sets its own `data`.
 - `checkSpec`: an option of the widget written at the top level of a spec (`{ widget: "list", compact: true }`) is
   named as such — move it into `options` — instead of only as a key no widget reads.
 
