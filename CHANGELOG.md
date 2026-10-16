@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.1] - 2026-10-16
+
+### Changed
+
+- `@formdown/core` 0.16 – 0.19 is accepted (optional peer `>=0.15.0 <0.20.0`, was `<0.17.0`) — an app on 0.17 or later no
+  longer gets a peer conflict. 0.17 – 0.19 only add to the parser's public types; the forms entry behaves the same.
+
 ## [0.35.0] - 2026-10-16
 
 MCP server 0.6.2 follows `^0.35.0` — its option lists gain `format` (gauge · progress · metric · stat-group) and `xAxisType` (line · area).
