@@ -13,9 +13,9 @@ import { dataFieldLabel, optionLabel } from './tool-labels.js';
 export const MAPPING_DOCS: Readonly<Record<string, string>> = {
   x: 'X-axis / category field',
   y: 'Y-axis value field(s)',
-  label: 'Label field (pie/funnel)',
-  value: 'Value field (pie/funnel/heatmap)',
-  color: 'Color grouping field (scatter)',
+  label: 'Label field (pie/funnel/gantt)',
+  value: 'Value field (pie/funnel/heatmap/histogram)',
+  color: 'Color grouping field (scatter/gantt)',
   size: 'Size encoding field (scatter bubble)',
   opacity: 'Opacity encoding field (scatter bubble)',
   axis: 'Axis field (radar indicators)',

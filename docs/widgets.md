@@ -31,14 +31,14 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.area` | Area chart | `x`, `y` |
 | `chart.pie` | Pie / donut chart | `label`, `value` |
 | `chart.scatter` | Scatter plot | `x`, `y` |
-| `chart.radar` | Radar chart | `axis`, `value` |
+| `chart.radar` | Radar chart | `axis`, `y` (one polygon per field) |
 | `chart.heatmap` | 히트맵 | `x`, `y`, `value` |
-| `chart.box` | 박스플롯 | `x`, `low`, `q1`, `median`, `q3`, `high` |
+| `chart.box` | 박스플롯 | `x`, `y` (five fields: min, q1, median, q3, max) |
 | `chart.funnel` | 깔때기 차트 | `label`, `value` |
 | `chart.waterfall` | 폭포 차트 | `x`, `y`, `total?` |
-| `chart.treemap` | 트리맵 | `label`, `value` |
+| `chart.treemap` | 트리맵 | — (uses `name`, `value`, `children` in the data) |
 | `chart.histogram` | Histogram (auto-binning) | `value` (or a flat `number[]`) |
-| `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` |
+| `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` (bars of a group share a colour) |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
 | `gauge` | Gauge with thresholds | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |

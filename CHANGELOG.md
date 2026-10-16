@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- `help()` / `./tools`: a mapping key's description names every widget that reads it — a Gantt's `color` (bars of a
+  group share a colour) and `label`, and a histogram's `value`, were described as the scatter's and the pie's only, and
+  read as not available to them.
+- `chart.radar` lists its mapping keys as `axis` and `y`, the ones it reads — it listed `value`, which it ignores.
+- `docs/widgets.md`: the mapping column for `chart.radar`, `chart.box` and `chart.treemap` matches what they read.
+
 ## [0.35.1] - 2026-10-16
 
 ### Changed

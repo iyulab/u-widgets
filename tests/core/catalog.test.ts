@@ -149,6 +149,22 @@ describe('help → WidgetDetail', () => {
     }
   });
 
+  it('describes every mapping key a widget lists as that widget reads it', () => {
+    // A description names the widgets it applies to, "(pie/funnel)" — a widget listing the key but missing from that
+    // list reads the key as not its own (a Gantt's `color`, described as the scatter's, looked unavailable).
+    for (const { widget } of help()) {
+      const detail = help(widget) as WidgetDetail;
+      for (const key of detail.mappingKeys) {
+        const doc = detail.mappingDocs[key];
+        expect(doc, `${widget} ${key}`).toBeDefined();
+        const named = /\s\(([^)]*)\)\s*$/.exec(doc)?.[1];
+        if (named) expect(named.split(/[\/, ]+/).some((name) => widget.endsWith(name)), `${widget} ${key}: "${doc}"`).toBe(true);
+      }
+    }
+    expect((help('chart.gantt') as WidgetDetail).mappingDocs.color).toContain('gantt');
+    expect((help('chart.radar') as WidgetDetail).mappingKeys).toEqual(['axis', 'y']);
+  });
+
   it('mappingDocs matches mappingKeys', () => {
     const detail = help('chart.scatter') as WidgetDetail;
     // scatter has x, y, color, size

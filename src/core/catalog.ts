@@ -63,7 +63,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'chart.area', category: 'chart', description: 'Area chart (filled line chart)', mappingKeys: ['x', 'y'], dataShape: 'array' },
   { widget: 'chart.pie', category: 'chart', description: 'Pie or donut chart for proportions', mappingKeys: ['label', 'value'], dataShape: 'array' },
   { widget: 'chart.scatter', category: 'chart', description: 'Scatter plot for two numeric dimensions', mappingKeys: ['x', 'y', 'color', 'size'], dataShape: 'array' },
-  { widget: 'chart.radar', category: 'chart', description: 'Radar chart for multi-axis comparison', mappingKeys: ['axis', 'value'], dataShape: 'array' },
+  { widget: 'chart.radar', category: 'chart', description: 'Radar chart for multi-axis comparison', mappingKeys: ['axis', 'y'], dataShape: 'array' },
   { widget: 'chart.heatmap', category: 'chart', description: 'Heatmap for matrix data visualization', mappingKeys: ['x', 'y', 'value'], dataShape: 'array' },
   { widget: 'chart.box', category: 'chart', description: 'Box plot for statistical distribution', mappingKeys: ['x', 'y'], dataShape: 'array' },
   { widget: 'chart.funnel', category: 'chart', description: 'Funnel chart for sequential stages', mappingKeys: ['label', 'value'], dataShape: 'array' },
