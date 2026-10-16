@@ -14,7 +14,8 @@ const SPEC_KEYS = new Set([
  *
  * - a `widget` the library does not have is an error (it would draw nothing useful);
  * - a top-level key no widget reads, an option the widget does not have, and an option value of the wrong type
- *   are warnings, each naming what that place takes.
+ *   are warnings, each naming what that place takes — and an option of the widget written at the top level says to
+ *   move it into `options`.
  *
  * `validate` stays the lighter check a renderer runs; this one needs the catalog, so it lives in `./tools`.
  */
@@ -33,10 +34,12 @@ export function checkSpec(spec: unknown): ValidationResult {
     return result([issue], warnings);
   }
 
+  const optionKeys = new Set(widget in WIDGET_OPTIONS ? getWidgetOptions(widget).map((info) => info.key) : []);
   for (const key of Object.keys(obj)) {
-    if (key !== 'widget' && !SPEC_KEYS.has(key)) {
-      warnings.push(`"${key}" is not read by any widget — a spec takes ${[...SPEC_KEYS].join(', ')}`);
-    }
+    if (key === 'widget' || SPEC_KEYS.has(key)) continue;
+    warnings.push(optionKeys.has(key)
+      ? `"${key}" is an option of ${widget} — put it in options: { "${key}": … }`
+      : `"${key}" is not read by any widget — a spec takes ${[...SPEC_KEYS].join(', ')}`);
   }
 
   const options = obj.options;

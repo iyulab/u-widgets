@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `checkSpec`: an option of the widget written at the top level of a spec (`{ widget: "list", compact: true }`) is
+  named as such — move it into `options` — instead of only as a key no widget reads.
+
 ### Fixed
 
 - Docs: Theming said the `--u-widget-*` tokens could be set on any ancestor element — an inherited value never beats the

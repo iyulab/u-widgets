@@ -29,6 +29,11 @@ describe('checkSpec', () => {
     expect(warnings).toEqual([expect.stringMatching(/^"rows" is not read by any widget — a spec takes id, title, .*data, mapping/)]);
   });
 
+  it('says to move an option of the widget written at the top level into options', () => {
+    const { warnings } = checkSpec({ widget: 'list', data: [{ a: 1 }], compact: true });
+    expect(warnings).toEqual(['"compact" is an option of list — put it in options: { "compact": … }']);
+  });
+
   it('warns of an option the widget does not have, and of an option value of the wrong type', () => {
     expect(checkSpec({ widget: 'list', data: [], options: { compact: 'yes', dense: true } }).warnings).toEqual([
       'options.compact should be a boolean, not "yes"',
