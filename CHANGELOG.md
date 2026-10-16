@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Development: `npm run check` runs lint, build (with typecheck), unit and browser tests in CI's order — one command to
+  chain a push on (`npm run check && git push`), with no pipe between a step and its exit code.
+
 ## [0.35.2] - 2026-10-17
 
 ### Fixed
