@@ -146,6 +146,10 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
     applyAxisFormat(result, catKey, options.categoryAxisFormat as AxisFormatOption | undefined, locale);
   }
 
+  // A value axis no format option reached reads its numbers in the widget locale — ECharts writes
+  // English grouping and a dot decimal («50,000» reads as fifty on a German page).
+  applyLocaleNumberDefaults(result, locale);
+
   // valueAxisZero: false — the value axis spans the data instead of always reaching zero, for a series that
   // moves far from zero (a control chart around its centre line, a process temperature). ECharts calls it `scale`.
   if (isCartesian && options.valueAxisZero === false) {
@@ -871,7 +875,9 @@ function buildHeatmap(
       formatter: (params: Record<string, unknown>) => {
         const d = params.data as number[];
         if (!d) return '';
-        return `${xCats[d[0]]} × ${yCats[d[1]]}: ${d[2] != null ? d[2] : '-'}`;
+        // The tooltip is HTML: category names come from the data, so they are escaped.
+        const value = localeFormatters(options.locale as string | undefined).valueFormatter(d[2]);
+        return `${escapeHtml(String(xCats[d[0]]))} × ${escapeHtml(String(yCats[d[1]]))}: ${value}`;
       },
     },
     grid: { bottom: 60 },
@@ -1510,6 +1516,80 @@ function buildAxisFormatter(fmt: AxisFormatOption, locale?: string, timestamps =
     if (fmt.suffix) result = result + fmt.suffix;
     return result;
   };
+}
+
+/**
+ * A number in the locale, with as many fraction digits as the value itself carries — an axis tick
+ * of 0.25 stays 0.25 (`0,25`), never rounded to the Intl default of three.
+ */
+function localeNumberFormatter(locale?: string): (value: number) => string {
+  const cache = new Map<number, Intl.NumberFormat>();
+  return (value: number) => {
+    const text = String(value);
+    if (/e/i.test(text)) return text;
+    const digits = Math.min(text.split('.')[1]?.length ?? 0, 20);
+    let nf = cache.get(digits);
+    if (!nf) {
+      nf = new Intl.NumberFormat(locale, { maximumFractionDigits: digits });
+      cache.set(digits, nf);
+    }
+    return nf.format(value);
+  };
+}
+
+/**
+ * Locale defaults for numbers ECharts would otherwise write itself:
+ * - a `value` / `log` axis without a label formatter (xFormat · yFormat · valueAxisFormat set one);
+ * - a tooltip without `formatter` / `valueFormatter`, unless a time axis is present (its values are
+ *   timestamps that ECharts formats as dates).
+ * Runs before the `options.echarts` passthrough, so a formatter the spec sets there still wins.
+ */
+function applyLocaleNumberDefaults(result: Record<string, unknown>, locale?: string): void {
+  const { axisFormatter, valueFormatter } = localeFormatters(locale);
+  let hasTimeAxis = false;
+
+  for (const key of ['xAxis', 'yAxis'] as const) {
+    const axis = result[key];
+    const withDefault = (a: unknown): unknown => {
+      if (!isPlainObject(a)) return a;
+      if (a.type === 'time') hasTimeAxis = true;
+      if (a.type !== 'value' && a.type !== 'log') return a;
+      const label = isPlainObject(a.axisLabel) ? a.axisLabel : {};
+      if (label.formatter !== undefined) return a;
+      return { ...a, axisLabel: { ...label, formatter: axisFormatter } };
+    };
+    if (Array.isArray(axis)) result[key] = axis.map(withDefault);
+    else if (axis) result[key] = withDefault(axis);
+  }
+
+  const tooltip = result.tooltip;
+  if (!isPlainObject(tooltip) || hasTimeAxis) return;
+  if (tooltip.formatter !== undefined || tooltip.valueFormatter !== undefined) return;
+  result.tooltip = { ...tooltip, valueFormatter };
+}
+
+interface LocaleFormatters {
+  axisFormatter: (value: number | string) => string;
+  valueFormatter: (value: unknown) => string | string[];
+}
+
+/** One pair per locale — the same spec yields the same option, functions included. */
+const LOCALE_FORMATTERS = new Map<string, LocaleFormatters>();
+
+function localeFormatters(locale?: string): LocaleFormatters {
+  const key = locale ?? '';
+  let pair = LOCALE_FORMATTERS.get(key);
+  if (!pair) {
+    const format = localeNumberFormatter(locale);
+    const readable = (v: unknown): string =>
+      typeof v === 'number' ? (Number.isFinite(v) ? format(v) : '-') : v == null || v === '' ? '-' : String(v);
+    pair = {
+      axisFormatter: (value) => (typeof value === 'number' ? format(value) : String(value)),
+      valueFormatter: (value) => (Array.isArray(value) ? value.map(readable) : readable(value)),
+    };
+    LOCALE_FORMATTERS.set(key, pair);
+  }
+  return pair;
 }
 
 /**

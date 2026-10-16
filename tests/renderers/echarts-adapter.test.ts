@@ -1824,13 +1824,15 @@ describe('toEChartsOption', () => {
       expect(formatter(50)).toBe('50 kg');
     });
 
-    it('does not add formatter when format options are absent', () => {
+    it('without format options a value axis gets the locale number default', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.bar',
         data: [{ cat: 'A', val: 10 }],
+        options: { locale: 'de' },
       }));
       const yAxis = result.yAxis as Record<string, unknown>;
-      expect(yAxis.axisLabel).toBeUndefined();
+      const formatter = (yAxis.axisLabel as Record<string, unknown>).formatter as (v: number) => string;
+      expect(formatter(1234.5)).toBe('1.234,5');
     });
 
     it('applies yFormat to dual y-axis (both value axes)', () => {

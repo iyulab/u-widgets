@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Security
+
+- `markdown`: a quote in a link URL can no longer close the `href` attribute and add an event handler attribute —
+  `[x](https://a/" onmouseover="…)` rendered an `<a>` with an `onmouseover`. Markdown text is now escaped for attribute
+  context too (`"` and `'`). Specs are often written by a language model; treat this as a fix to take.
+- `chart.heatmap`: the tooltip escapes the row and column names — they went into ECharts' HTML tooltip as markup
+  (`chart.gantt` already escaped its names). The cell value is written in the widget locale.
+
+### Fixed
+
+- `markdown`: emphasis marks inside a link URL or inline code stay literal — `[a](https://x/*y*)` put an `<em>` inside
+  the `href`, and a link inside inline code became a link. Link text keeps its emphasis.
+- Charts: a value axis with no `xFormat` / `yFormat` (or `valueAxisFormat`) writes its numbers in the widget locale, and
+  so does the tooltip — a German page read `50,000` (fifty) on the axis where the table below wrote `50.000`. English
+  pages look as before. Category and time axes are unchanged; a formatter from `options.echarts` still wins.
+
 ### Changed
 
 - Development: `npm run check` runs lint, build (with typecheck), unit and browser tests in CI's order — one command to

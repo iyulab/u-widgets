@@ -255,7 +255,7 @@ export class UwContent extends LitElement {
 
     if (!content) return nothing;
 
-    // html-sink: parseMarkdown escapes the whole text first, then adds its own formatting markup
+    // html-sink: parseMarkdown escapes the whole text first (quotes too — a link's href is an attribute), then adds its own markup
     return html`<div class="markdown" part="markdown"
       .innerHTML=${this.parseMarkdown(content)}
     ></div>`;
@@ -300,7 +300,11 @@ export class UwContent extends LitElement {
    * Intentionally lightweight; does NOT pull in a full markdown library.
    */
   private parseMarkdown(text: string): string {
-    let result = this.escapeHtml(text);
+    // Code and links are cut out into placeholders before inline formatting runs, so `*` inside
+    // them stays literal and a link's href is never rewritten by a later rule.
+    const held: string[] = [];
+    const hold = (markup: string) => `${held.push(markup) - 1}`;
+    let result = this.escapeHtml(text.replace(/[]/g, ''));
 
     // Headers (must be at start of line)
     result = result.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
@@ -314,7 +318,7 @@ export class UwContent extends LitElement {
     // Code blocks (``` ... ```)
     result = result.replace(/```[\s\S]*?```/g, (match) => {
       const inner = match.slice(3, -3).replace(/^\w*\n/, ''); // Remove language hint
-      return `<pre><code>${inner}</code></pre>`;
+      return hold(`<pre><code>${inner}</code></pre>`);
     });
 
     // Tables (must be before inline formatting)
@@ -342,22 +346,26 @@ export class UwContent extends LitElement {
     );
 
     // Inline code
-    result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
+    result = result.replace(/`([^`]+)`/g, (_m, code: string) => hold(`<code>${code}</code>`));
 
-    // Bold and italic
-    result = result.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    result = result.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-    // Links (sanitize href to block javascript:/data:/vbscript: XSS)
+    // Links (sanitize href to block javascript:/data:/vbscript: XSS). The text was escaped above,
+    // quotes included, so the href cannot close its attribute.
     result = result.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
       (_match, text: string, href: string) => {
         const safe = this.sanitizeUrl(href);
         const hint = this.escapeHtml(this._locale.opensInNewTab);
-        return `<a href="${safe}" target="_blank" rel="noopener">${text}<span class="new-tab-hint">${hint}</span></a>`;
+        return hold(`<a href="${safe}" target="_blank" rel="noopener">${this.inlineFormat(text)}<span class="new-tab-hint">${hint}</span></a>`);
       },
     );
+
+    // Bold and italic
+    result = this.inlineFormat(result);
+
+    // Placeholders back — a held link's text may itself hold inline code.
+    while (/\d+/.test(result)) {
+      result = result.replace(/(\d+)/g, (_m, i: string) => held[Number(i)]);
+    }
 
     // Blockquotes
     result = result.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
@@ -386,6 +394,13 @@ export class UwContent extends LitElement {
     return result;
   }
 
+  private inlineFormat(text: string): string {
+    return text
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+  }
+
   private sanitizeUrl(url: string): string {
     // Strip all whitespace + zero-width/invisible Unicode characters
     const stripped = url.replace(/[\s\u200B\u200C\u200D\uFEFF\u00AD\u200E\u200F]/g, '');
@@ -398,11 +413,14 @@ export class UwContent extends LitElement {
     return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
+  /** Safe in text and in a quoted attribute — the markdown output puts escaped text in both. */
   private escapeHtml(text: string): string {
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 }
 

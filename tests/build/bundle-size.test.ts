@@ -69,7 +69,9 @@ describe('bundle size budget', () => {
     // before) — most of it the console warning that names a lineStyle the chart ignores.
     // Re-baselined from 9.75 KB for reference lines past the data: measured 9.78 KB with them (9.53 KB at the
     // previous re-baseline, then the horizontal category order) — the axis reaching a line the data does not.
-    expect(size).toBeLessThan(10 * 1024);
+    // Re-baselined from 10 KB for numbers in the widget locale on value axes and tooltips: measured 10.32 KB
+    // with them (9.98 KB before) — the formatter pair, its per-locale cache and the time-axis exception.
+    expect(size).toBeLessThan(10.5 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 17 KB gzip', () => {

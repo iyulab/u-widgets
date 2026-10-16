@@ -207,6 +207,9 @@ The `type` override (and `options.echarts.series[].type` passthrough) may only r
 
 `xFormat` / `yFormat` accept: `type` (`number`, `currency`, `percent`, `date`, `bytes`), `prefix`, `suffix`, `currency`, `decimals`.
 
+Without them, a value axis and the tooltip write numbers in the widget locale (`de`: `50.000` · `2,5`). A formatter set
+through `options.echarts` (`yAxis.axisLabel.formatter`, `tooltip.valueFormatter`) still wins.
+
 ## Events
 
 ```js
