@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Optional peer `@formdown/core` accepts `>=0.15.0 <0.22.0` (was `<0.20.0`). 0.20 and 0.21 only add to the public types
+  (`compute` fields, `parseComputation`); the form widget's tests run green on 0.21.
+
 ## [0.35.3] - 2026-10-17
 
 ### Security
