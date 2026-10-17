@@ -1,4 +1,5 @@
 import { LitElement, html, css, nothing } from 'lit';
+import { escapeHtml } from '../core/escape.js';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
@@ -304,7 +305,7 @@ export class UwContent extends LitElement {
     // them stays literal and a link's href is never rewritten by a later rule.
     const held: string[] = [];
     const hold = (markup: string) => `${held.push(markup) - 1}`;
-    let result = this.escapeHtml(text.replace(/[]/g, ''));
+    let result = escapeHtml(text.replace(/[]/g, ''));
 
     // Headers (must be at start of line)
     result = result.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
@@ -356,7 +357,7 @@ export class UwContent extends LitElement {
       /\[([^\]]+)\]\(([^)]+)\)/g,
       (_match, text: string, href: string) => {
         const safe = this.sanitizeUrl(href);
-        const hint = this.escapeHtml(this._locale.opensInNewTab);
+        const hint = escapeHtml(this._locale.opensInNewTab);
         // html-sink: attr url — the href text was escaped above (quotes included) and the protocol is checked by sanitizeUrl
         return hold(`<a href="${safe}" target="_blank" rel="noopener">${this.inlineFormat(text)}<span class="new-tab-hint">${hint}</span></a>`);
       },
@@ -416,15 +417,6 @@ export class UwContent extends LitElement {
     return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
-  /** Safe in text and in a quoted attribute — the markdown output puts escaped text in both. */
-  private escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 }
 
 declare global {

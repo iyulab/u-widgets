@@ -1,4 +1,5 @@
 import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption, ChartSeriesOption, LineStyleKeyword } from '../core/types.js';
+import { escapeHtml } from '../core/escape.js';
 import { formatValue, parseDateText } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
 import { isDateLikeString } from '../core/utils.js';
@@ -1222,15 +1223,6 @@ interface GanttItem {
   label?: string;
   rawStart: unknown;
   rawEnd: unknown;
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 /**

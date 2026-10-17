@@ -1,4 +1,5 @@
 import { LitElement, html, css, nothing } from 'lit';
+import { escapeHtml } from '../core/escape.js';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
@@ -57,13 +58,10 @@ function kwSet(lang: string): Set<string> {
 }
 
 /** Escape HTML special characters. */
-function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 
 /** Wrap token text in a span, handling newlines by closing/reopening the span. */
 function wrap(text: string, cls: string): string {
-  const escaped = esc(text);
+  const escaped = escapeHtml(text);
   // html-sink: class — `cls` is one of the fixed token class names the highlighter passes; the text is escaped
   if (!escaped.includes('\n')) return `<span class="hl-${cls}">${escaped}</span>`;
   return escaped.split('\n').map(line => `<span class="hl-${cls}">${line}</span>`).join('\n');
@@ -86,7 +84,7 @@ function strEnd(code: string, start: number, quote: string): number {
  * Token classes: hl-k (keyword), hl-s (string), hl-c (comment), hl-n (number).
  */
 function highlight(code: string, lang: string): string {
-  if (!lang) return esc(code);
+  if (!lang) return escapeHtml(code);
   const resolved = AL[lang] || lang;
 
   // JSON has special handling
@@ -144,7 +142,7 @@ function highlight(code: string, lang: string): string {
       let j = i + 1;
       while (j < len && /[a-zA-Z0-9_$]/.test(code[j])) j++;
       const word = code.slice(i, j);
-      result += kw.has(word) ? `<span class="hl-k">${esc(word)}</span>` : esc(word);
+      result += kw.has(word) ? `<span class="hl-k">${escapeHtml(word)}</span>` : escapeHtml(word);
       i = j;
       continue;
     }
@@ -153,7 +151,7 @@ function highlight(code: string, lang: string): string {
     if (resolved === 'html' && ch === '<' && i + 1 < len && /[a-zA-Z/!]/.test(code[i + 1])) {
       const end = code.indexOf('>', i);
       if (end !== -1) {
-        result += `<span class="hl-k">${esc(code.slice(i, end + 1))}</span>`;
+        result += `<span class="hl-k">${escapeHtml(code.slice(i, end + 1))}</span>`;
         i = end + 1;
         continue;
       }
@@ -167,16 +165,16 @@ function highlight(code: string, lang: string): string {
       // If followed by ':', it's a property name
       const afterWord = code.slice(j).trimStart();
       if (afterWord[0] === ':') {
-        result += `<span class="hl-k">${esc(word)}</span>`;
+        result += `<span class="hl-k">${escapeHtml(word)}</span>`;
       } else {
-        result += esc(word);
+        result += escapeHtml(word);
       }
       i = j;
       continue;
     }
 
     // Default: output character
-    result += esc(ch);
+    result += escapeHtml(ch);
     i++;
   }
 
@@ -221,7 +219,7 @@ function highlightJSON(code: string): string {
     }
     if (matched) continue;
 
-    result += esc(ch);
+    result += escapeHtml(ch);
     i++;
   }
 
@@ -410,7 +408,7 @@ export class UwCode extends LitElement {
           >${this._copied ? localeStringsOf(this.spec).copied : localeStringsOf(this.spec).copy}</button>
         </div>
         <div class="code-body" part="code-body" style=${bodyStyle}>
-          <!-- html-sink: highlighter output — every token passes esc() before its span is added -->
+          <!-- html-sink: highlighter output — every token passes escapeHtml() before its span is added -->
           <pre data-wrap=${String(wrapText)}><code .innerHTML=${linesHtml}></code></pre>
         </div>
       </div>
