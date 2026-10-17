@@ -335,8 +335,10 @@ export class UwContent extends LitElement {
         });
         const rows = bodyBlock.trim().split('\n').map(parseCells);
 
+        // html-sink: style attr — the alignment is one of three fixed literals; header and cell text was escaped above
         const ths = headers.map((h, i) =>
           `<th scope="col" style="text-align:${aligns[i] ?? 'left'}">${h}</th>`).join('');
+        // html-sink: style attr — same fixed alignment literals as the header cells
         const trs = rows.map(row =>
           '<tr>' + row.map((c, i) =>
             `<td style="text-align:${aligns[i] ?? 'left'}">${c}</td>`).join('') + '</tr>').join('');
@@ -355,6 +357,7 @@ export class UwContent extends LitElement {
       (_match, text: string, href: string) => {
         const safe = this.sanitizeUrl(href);
         const hint = this.escapeHtml(this._locale.opensInNewTab);
+        // html-sink: attr url — the href text was escaped above (quotes included) and the protocol is checked by sanitizeUrl
         return hold(`<a href="${safe}" target="_blank" rel="noopener">${this.inlineFormat(text)}<span class="new-tab-hint">${hint}</span></a>`);
       },
     );

@@ -64,6 +64,7 @@ function esc(s: string): string {
 /** Wrap token text in a span, handling newlines by closing/reopening the span. */
 function wrap(text: string, cls: string): string {
   const escaped = esc(text);
+  // html-sink: class — `cls` is one of the fixed token class names the highlighter passes; the text is escaped
   if (!escaped.includes('\n')) return `<span class="hl-${cls}">${escaped}</span>`;
   return escaped.split('\n').map(line => `<span class="hl-${cls}">${line}</span>`).join('\n');
 }
@@ -391,6 +392,7 @@ export class UwCode extends LitElement {
       const num = i + 1;
       const hl = highlightLines.has(num) ? ' line-hl' : '';
       const numHtml = lineNumbers ? `<span class="line-no">${num}</span>` : '';
+      // html-sink: class — `hl` is a fixed class literal; the line text is already escaped
       return `<span class="line${hl}">${numHtml}${line || ' '}</span>`;
     }).join('');
 
