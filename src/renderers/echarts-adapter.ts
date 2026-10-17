@@ -873,10 +873,10 @@ function buildHeatmap(
     },
     tooltip: {
       trigger: 'item',
+      // html-sink: text — ECharts draws what this returns as HTML; both category names are escapeHtml()ed and the value is a formatted number
       formatter: (params: Record<string, unknown>) => {
         const d = params.data as number[];
         if (!d) return '';
-        // The tooltip is HTML: category names come from the data, so they are escaped.
         const value = localeFormatters(options.locale as string | undefined).valueFormatter(d[2]);
         return `${escapeHtml(String(xCats[d[0]]))} × ${escapeHtml(String(yCats[d[1]]))}: ${value}`;
       },
@@ -1373,6 +1373,7 @@ function buildGantt(
     series,
     tooltip: {
       trigger: 'item',
+      // html-sink: text — ECharts draws what this returns as HTML; row, label and both endpoints are escapeHtml()ed, the arrow is a literal
       formatter: (p: { seriesIndex: number; dataIndex: number }) => {
         const item = seriesItems[p.seriesIndex]?.[p.dataIndex];
         if (!item) return '';
