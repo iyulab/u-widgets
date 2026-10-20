@@ -584,6 +584,13 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
         data: { value: 4250, label: 'Revenue', prefix: '$', suffix: '/mo', change: 8.3, trend: 'up' },
       },
     },
+    {
+      label: 'With a sparkline (the recent values, oldest first)',
+      spec: {
+        widget: 'metric',
+        data: { value: 18.4, label: 'Traffic', unit: 'Tbps', sparkline: [14.2, 15.8, 17.1, 16.4, 18.4] },
+      },
+    },
   ],
   'stat-group': [
     {
