@@ -78,6 +78,17 @@ describe('toEChartsOption — compact layout', () => {
     expect(s.center).toEqual(['50%', '50%']);
   });
 
+  it('puts the legend where the passthrough places it — its bottom replaces the compact layout’s top', () => {
+    const spec = { ...pie, options: { legend: true, echarts: { legend: { orient: 'horizontal', bottom: 4, left: 'center' } } } } as UWidgetSpec;
+    const legend = toEChartsOption(spec, { width: 900, height: 240 }).legend as Obj;
+    expect(legend).toMatchObject({ orient: 'horizontal', bottom: 4, left: 'center' });
+    expect(legend).not.toHaveProperty('top');
+    expect(legend).not.toHaveProperty('right');
+    // Both sides given, both kept — the author asked for them.
+    const both = { ...pie, options: { legend: true, echarts: { legend: { top: 10, bottom: 4 } } } } as UWidgetSpec;
+    expect(toEChartsOption(both, { width: 900, height: 240 }).legend).toMatchObject({ top: 10, bottom: 4 });
+  });
+
   it('keeps a side legend on a wide, short pie and shifts the pie to make room', () => {
     const o = toEChartsOption(pie, { width: 300, height: 180 });
     expect(o.legend).toMatchObject({ orient: 'vertical', left: 4, top: 'middle' });

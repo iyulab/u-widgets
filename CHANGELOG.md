@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A box the `echarts` passthrough places by one side now sits there: its `bottom` replaces a generated `top`, its
+  `right` a generated `left` (and the other way round) — a pie legend given `bottom` was drawn across the pie, at the
+  `top: 'middle'` a small chart's layout gives it. Both sides given, both are kept.
+- A metric with a sparkline in a host shorter than it would grow keeps inside the host: the sparkline gives up its
+  room first, instead of the card running past its box onto what is below it.
+
 ## [0.38.0] - 2026-10-20
 
 MCP server 0.7.2 follows `^0.38.0`.

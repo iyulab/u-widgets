@@ -1397,9 +1397,17 @@ function getNumberFields(data: Record<string, unknown>[]): string[] {
 }
 
 /**
+ * A box's place in ECharts, one axis at a time: `top` or `bottom`, `left` or `right`. Given both, ECharts follows `top`
+ * and `left` — so a place the author gives on one side replaces the generated one on the other (`bottom: 4` over the
+ * compact layout's `top: 'middle'` drew the legend across the pie, not under it).
+ */
+const OPPOSITE_SIDES: Readonly<Record<string, string>> = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
+
+/**
  * Deep-merge `overrides` into `base` recursively.
  * If both base[key] and overrides[key] are plain objects, merge recursively.
- * Arrays and other values: overrides[key] wins.
+ * Arrays and other values: overrides[key] wins. A side an override places a box by drops the base's opposite side
+ * (`OPPOSITE_SIDES`), unless the override gives both.
  */
 function deepMerge(
   base: Record<string, unknown>,
@@ -1407,6 +1415,9 @@ function deepMerge(
   elementwise: ReadonlySet<string> = new Set(),
 ): Record<string, unknown> {
   const result = { ...base };
+  for (const [side, opposite] of Object.entries(OPPOSITE_SIDES)) {
+    if (side in overrides && !(opposite in overrides)) delete result[opposite];
+  }
   for (const key of Object.keys(overrides)) {
     const bv = base[key];
     const ov = overrides[key];

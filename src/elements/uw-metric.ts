@@ -100,6 +100,9 @@ export class UwMetric extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 4px;
+      /* A flex item of the host, so a height the host is given reaches it — and the sparkline below gives up its room
+         first, rather than the card running past its box onto the next one. */
+      min-height: 0;
     }
 
     .metric-value {
@@ -168,6 +171,8 @@ export class UwMetric extends LitElement {
       display: block;
       width: 100%;
       height: 28px;
+      flex: 0 1 28px;
+      min-height: 0;
       margin-top: 4px;
       color: var(--u-widget-primary, #4f46e5);
       overflow: visible;
