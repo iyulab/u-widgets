@@ -13,8 +13,8 @@ const SPEC_KEYS = new Set([
  * something) wrote by hand, before it is shown:
  *
  * - a `widget` the library does not have is an error (it would draw nothing useful);
- * - a top-level key no widget reads, an option the widget does not have, and an option value of the wrong type
- *   are warnings, each naming what that place takes — and an option of the widget written at the top level says to
+ * - a top-level key no widget reads, an option the widget does not have, an option value of the wrong type, and a
+ *   field a reference line or a series does not have (or of the wrong kind) are warnings, each naming what that place takes — and an option of the widget written at the top level says to
  *   move it into `options`.
  *
  * `validate` stays the lighter check a renderer runs; this one needs the catalog, so it lives in `./tools`.
@@ -57,10 +57,61 @@ export function checkSpec(spec: unknown): ValidationResult {
       }
       const problem = typeProblem(value, info.type, info.enum);
       if (problem) warnings.push(`options.${key} ${problem}`);
+      else if (key in ITEM_FIELDS && Array.isArray(value)) warnings.push(...itemProblems(key, value));
     }
   }
 
   return result(base.issues, warnings);
+}
+
+type FieldCheck = (value: unknown) => string | undefined;
+
+const ofType = (type: 'string' | 'number'): FieldCheck => (value) => (typeof value === type ? undefined : `should be a ${type}, not ${JSON.stringify(value)}`);
+const oneOf = (values: readonly string[]): FieldCheck => (value) =>
+  values.includes(value as string) ? undefined : `should be one of ${values.map((v) => `"${v}"`).join(', ')}, not ${JSON.stringify(value)}`;
+const LINE_STYLES = ['solid', 'dashed', 'dotted'] as const;
+
+/**
+ * The fields of each item of the options that are lists of settings — a misspelt field there (`lineStyle` on a
+ * reference line, which takes `style`) is dropped by the chart without a sign, so it is named here.
+ */
+const ITEM_FIELDS: Record<string, { name: string; fields: Record<string, FieldCheck> }> = {
+  referenceLines: {
+    name: 'a reference line',
+    fields: {
+      axis: oneOf(['x', 'y']),
+      value: (v) => (typeof v === 'number' || typeof v === 'string' ? undefined : `should be a number or a string, not ${JSON.stringify(v)}`),
+      label: ofType('string'),
+      color: ofType('string'),
+      style: oneOf(LINE_STYLES),
+    },
+  },
+  series: {
+    name: 'a series',
+    fields: {
+      label: ofType('string'),
+      color: ofType('string'),
+      lineStyle: (v) => (v !== null && typeof v === 'object' && !Array.isArray(v) ? undefined : oneOf(LINE_STYLES)(v)),
+      symbol: ofType('string'),
+      type: ofType('string'),
+      yAxisIndex: ofType('number'),
+    },
+  },
+};
+
+/** What is wrong with the items of the list option `key` — fields it does not have, values of the wrong kind. */
+function itemProblems(key: string, items: unknown[]): string[] {
+  const { name, fields } = ITEM_FIELDS[key];
+  return items.flatMap((item, i) => {
+    const at = `options.${key}[${i}]`;
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) return [`${at} should be an object`];
+    return Object.entries(item as Record<string, unknown>).flatMap(([field, value]) => {
+      const check = fields[field];
+      if (!check) return [`${at}.${field} is not a field of ${name} — it takes ${Object.keys(fields).join(', ')}`];
+      const problem = check(value);
+      return problem ? [`${at}.${field} ${problem}`] : [];
+    });
+  });
 }
 
 /** Whether `typed` is `target` with one letter added, dropped or changed. */

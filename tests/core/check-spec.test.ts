@@ -49,6 +49,22 @@ describe('checkSpec', () => {
       expect(checkSpec({ widget, data: [{ x: 'a', y: 1 }], options: { referenceLines } }).warnings, widget).toEqual([]);
   });
 
+  it('names a field a reference line or a series does not have, and a value of the wrong kind', () => {
+    const warnings = checkSpec({
+      widget: 'chart.bar',
+      data: [{ x: 'a', y: 1 }],
+      options: {
+        referenceLines: [{ value: 30, label: 'Target', lineStyle: 'dashed' }, { axis: 'z', value: 1, style: 'dashed' }],
+        series: [{ label: 'mph', lineStyle: 'dash' }, { lineStyle: { type: 'dashed' } }],
+      },
+    }).warnings;
+    expect(warnings).toEqual([
+      'options.referenceLines[0].lineStyle is not a field of a reference line — it takes axis, value, label, color, style',
+      'options.referenceLines[1].axis should be one of "x", "y", not "z"',
+      'options.series[0].lineStyle should be one of "solid", "dashed", "dotted", not "dash"',
+    ]);
+  });
+
   it('answers as validate does when the structure itself is wrong', () => {
     expect(checkSpec({ widget: 'gauge', data: [1] }).issues[0].code).toBe('data-not-object');
   });

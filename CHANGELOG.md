@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `checkSpec` names a field a reference line or a series does not have, and one of the wrong kind — `lineStyle` on a reference line (it takes `style`), `axis: 'z'`. The chart dropped them without a sign.
+- A reference line's `axis` may be left out: it means `'y'`, as the chart already drew it — and a line past the data now widens the value axis to reach it without `axis` too.
+
 ### Fixed
 
 - `chart.area` lists `referenceLines` among its options — an area chart draws them as a line chart does, but `checkSpec` and `./tools` said it did not take them. The chart options table documents `referenceLines`.

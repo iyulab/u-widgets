@@ -400,6 +400,15 @@ describe('toEChartsOption', () => {
       expect((result.yAxis as Obj).min).toBeUndefined();
     });
 
+    it('reads a line without an axis as on the value axis — drawn and reached there', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' },
+        options: { valueAxisZero: false, referenceLines: [{ value: 1500 }] },
+      }));
+      expect((result.yAxis as Obj).max).toBe(1600);
+      expect((((result.series as ObjArray)[0].markLine as Obj).data as ObjArray)[0].yAxis).toBe(1500);
+    });
+
     it('leaves the axis to the data when every line is within it, and reaches a low line on a data-spanned axis', () => {
       const within = toEChartsOption(spec({ widget: 'chart.line', data: demand, mapping: { x: 't', y: 'kw' }, options: { referenceLines: [{ axis: 'y', value: 1100 }] } }));
       expect((within.yAxis as Obj).max).toBeUndefined();

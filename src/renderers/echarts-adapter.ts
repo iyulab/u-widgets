@@ -420,7 +420,7 @@ function seriesLineStyle(value: unknown, index: number): Record<string, unknown>
 function reachReferenceLines(result: Record<string, unknown>, options: Record<string, unknown>): void {
   const key = options.horizontal ? 'xAxis' : 'yAxis';
   const lines = ((options.referenceLines as ReferenceLineOption[] | undefined) ?? [])
-    .filter((rl) => rl.axis === key[0] && typeof rl.value === 'number')
+    .filter((rl) => (rl.axis ?? 'y') === key[0] && typeof rl.value === 'number')
     .map((rl) => rl.value as number);
   const series = (result.series as Record<string, unknown>[] | undefined) ?? [];
   if (!lines.length || series.some((s) => s.stack)) return;

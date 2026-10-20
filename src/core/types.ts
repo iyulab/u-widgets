@@ -318,8 +318,9 @@ export interface UWidgetEvent {
  * Used in `options.referenceLines` for bar, line, area, scatter, histogram and gantt charts.
  */
 export interface ReferenceLineOption {
-  /** Which axis the line is drawn on. */
-  axis: 'x' | 'y';
+  /** Which axis the line is drawn on — `'y'` the value axis of an upright chart, `'x'` the category or time axis (the
+   *  value axis of a `horizontal` bar chart). Default: `'y'`. */
+  axis?: 'x' | 'y';
   /** Position value on the axis. */
   value: number | string;
   /** Label text — for a `y` line inside the plot above its right end, for an `x` line at its end. */
