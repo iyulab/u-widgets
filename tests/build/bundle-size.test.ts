@@ -74,7 +74,7 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(10.5 * 1024);
   });
 
-  it('tools bundle (with its names chunk) is under 17.5 KB gzip', () => {
+  it('tools bundle (with its names chunk) is under 18 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js')) + gzipSize(resolve(DIST, toolLabelsChunk()));
     // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE, OPTION_TYPES.
     // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
@@ -87,7 +87,9 @@ describe('bundle size budget', () => {
     // measured 16.75 KB together.
     // Re-baselined from 17 KB for the form's `fieldStates` in the catalog (the spec key and the widget note an author
     // reads in `help('form')`): measured 17.03 KB.
-    expect(size).toBeLessThan(17.5 * 1024);
+    // Re-baselined from 17.5 KB for `checkSpec` holding reference lines and series to their fields, `echarts` among
+    // every chart's options, and the metric's `sparkline` field with its example: measured 17.6 KB.
+    expect(size).toBeLessThan(18 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {
