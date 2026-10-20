@@ -211,7 +211,7 @@ describe('uw-chart', () => {
     } as unknown as UWidgetSpecType;
     document.body.appendChild(el);
     await new Promise((r) => setTimeout(r, 50));
-    const option = mockSetOption.mock.calls.at(-1)![0] as { series: Array<{ markLine: { label: { color: string }; data: Array<{ label: Record<string, unknown> }> } }> };
+    const option = mockSetOption.mock.calls[mockSetOption.mock.calls.length - 1][0] as { series: Array<{ markLine: { label: { color: string }; data: Array<{ label: Record<string, unknown> }> } }> };
     const markLine = option.series[0].markLine;
     expect(markLine.label.color).toBe('#9ca3af');
     expect(markLine.data[1].label.color).toBe('#f59e0b');
