@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 /**
  * CDN build: IIFE bundle for <script> tag usage.
- * Bundles lit + all widgets. Only echarts remains external.
+ * Bundles lit, `@formdown/core` and all widgets. Only echarts remains external.
  *
  * Usage: npm run build:cdn
  */
@@ -18,7 +18,7 @@ export default defineConfig({
       fileName: () => 'u-widgets.global.js',
     },
     rollupOptions: {
-      external: ['echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//],
+      external: ['echarts', /^echarts\//],
       output: {
         globals: {
           'echarts': 'echarts',

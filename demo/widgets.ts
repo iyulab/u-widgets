@@ -1065,11 +1065,11 @@ const catalog: Record<string, WidgetDoc> = {
         formdown: [
           '@name*(Name): []',
           '@email*(Email): @[]',
-          '@volume(Volume): R[min=0,max=100,step=5]',
-          '@notify(Notifications): ^[]',
-          '@tags{JS,TS,Rust,Go}(Skills): ms[]',
+          '@volume(Volume): R[min=0 max=100 step=5]',
+          '@notify(Notifications): c[]',
+          '@tags{JS,TS,Rust,Go}(Skills): s[multiple]',
           '@[submit "Save"]',
-          '@[cancel "Reset"]',
+          '@[reset "Reset"]',
         ].join('\n'),
       },
       'Validation + pattern': {

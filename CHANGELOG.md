@@ -8,8 +8,24 @@
 
 ### Changed
 
-- Optional peer `@formdown/core` accepts `>=0.15.0 <0.22.0` (was `<0.20.0`). 0.20 and 0.21 only add to the public types
-  (`compute` fields, `parseComputation`); the form widget's tests run green on 0.21.
+- **Breaking — `formdown` is read by `@formdown/core`, now a dependency (`^0.21.0`).** The built-in subset parser is
+  gone, so a form's `formdown` text means what it means to formdown itself. Moving an existing form:
+  - Attributes are separated by spaces, not commas: `R[min=0,max=100]` → `R[min=0 max=100]`.
+  - `ms[]` (multiselect) → `s[multiple]`.
+  - `@[cancel "Reset"]` → `@[reset "Reset"]` (still the `cancel` action); any other action is a named button —
+    `@[delete "Delete" danger]` → `@delete: [button label="Delete" style="danger"]`.
+  - `^[]` (toggle) has no formdown syntax yet; write that form as a `fields` array.
+  - A field written without a label now shows formdown's label made from its name (`@first_name` → «First Name»).
+- **Breaking — the `@iyulab/u-widgets/forms` entry is removed**, with `registerFormdownParser`, `getFormdownParser`
+  and the `FormdownParser` type: there is one parser, so there is nothing to swap. Drop the
+  `import '@iyulab/u-widgets/forms'` line. `parseFormdown(text)` takes no data argument and also returns
+  `diagnostics`.
+- Bundle size: an app's bundle now carries formdown's parser — about 43 KB gzip, most of it `yaml` (front matter). Only
+  the parser is imported (`@formdown/core/parser`, not `FormManager`).
+- `validate()` reports each formdown line the parser cannot read — a line that looks like a field but is not one, an
+  unclosed `[` — as a warning with its line number. It reported nothing for such a line before, and the line was dropped
+  without a word.
+- The CDN bundle (`u-widgets.global.js`) carries `@formdown/core`, so a `formdown` form reads the same there.
 
 ## [0.35.3] - 2026-10-17
 

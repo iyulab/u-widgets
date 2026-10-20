@@ -389,7 +389,8 @@ Layout modes: `stack` (vertical, default), `row` (horizontal), `grid` (with `spa
 
 ## Form (formdown)
 
-Forms can use [formdown](https://github.com/iyulab/formdown) syntax for compact definitions:
+Forms can be written in [formdown](https://github.com/iyulab/formdown) instead of a `fields` array — the text is read
+by `@formdown/core` (a dependency of this package), so any form formdown reads is read the same way here:
 
 ```json
 {
@@ -404,11 +405,21 @@ Forms can use [formdown](https://github.com/iyulab/formdown) syntax for compact 
 | `@[]` | email |
 | `#[]` | number |
 | `?[]` | password |
-| `T4[]` | textarea |
-| `d[]` | date |
+| `%[]` | tel |
+| `&[]` | url |
+| `T4[]` | textarea (4 rows) |
+| `d[]` · `dt[]` · `t[]` | date · datetime · time |
+| `R[]` | range |
 | `s[]` | select |
+| `s[multiple]` | multiselect |
 | `r[]` | radio |
 | `c[]` | checkbox |
+
+Attributes go inside the brackets, separated by spaces: `R[min=0 max=100 step=5]`,
+`[minlength=2 maxlength=10 pattern="^\w+$" placeholder="Code"]`. Buttons: `@[submit "Save"]` and `@[reset "Clear"]`
+become the `submit` and `cancel` actions; any other action is a named button — `@remove: [button label="Delete" style="danger"]`
+is the action `remove`. A `toggle` field has no formdown syntax yet — use a `fields` array for it. `validate()` reports a
+line formdown cannot read (it is left out of the form) as a warning with its line number.
 
 Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An option written
 `value=Label` submits `value` and shows `Label` — `@kind{hw=Hardware,sw=Software}(Kind): s[]`

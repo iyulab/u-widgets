@@ -1,7 +1,6 @@
 // @vitest-environment node
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { normalize, normalizeMapping } from '../../src/core/normalize.js';
-import { registerFormdownParser, getFormdownParser } from '../../src/core/formdown.js';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
 describe('normalize', () => {
@@ -88,27 +87,9 @@ describe('normalize', () => {
     expect(result.actions).toEqual([{ label: 'Custom', action: 'custom' }]);
   });
 
-  it('handles formdown parser error gracefully', () => {
-    // Register a parser that throws
-    const original = getFormdownParser();
-    registerFormdownParser(() => { throw new Error('Parser crash'); });
-
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const spec: UWidgetSpec = {
-      widget: 'form',
-      formdown: '@name: []',
-    };
-    const result = normalize(spec);
-    // Should not crash, fields remain undefined
-    expect(result.fields).toBeUndefined();
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[@iyulab/u-widgets] normalize:'),
-      expect.any(String),
-    );
-    warnSpy.mockRestore();
-
-    // Restore original parser
-    registerFormdownParser(original);
+  it('leaves out a formdown line the parser cannot read, keeping the rest', () => {
+    const result = normalize({ widget: 'form', formdown: '@name: []\n@notify: ^[]' });
+    expect(result.fields).toEqual([{ field: 'name', label: 'Name', type: 'text' }]);
   });
 });
 

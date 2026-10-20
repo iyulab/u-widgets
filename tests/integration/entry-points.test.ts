@@ -30,8 +30,6 @@ describe('entry point: u-widgets (index)', () => {
 
     // Formdown
     expect(typeof mod.parseFormdown).toBe('function');
-    expect(typeof mod.registerFormdownParser).toBe('function');
-    expect(typeof mod.getFormdownParser).toBe('function');
 
     // Formatting
     expect(typeof mod.formatValue).toBe('function');

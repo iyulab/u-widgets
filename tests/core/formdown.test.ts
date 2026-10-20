@@ -1,232 +1,132 @@
 // @vitest-environment node
+/**
+ * `parseFormdown` reads formdown with `@formdown/core` itself — these tests run the real parser, so
+ * each one pins how a written form becomes the form widget's fields and actions.
+ */
 import { describe, it, expect } from 'vitest';
-import { parseOptionList as coreParseOptionList } from '@formdown/core';
 import { parseFormdown } from '../../src/core/formdown.js';
-import { parseOptionList } from '../../src/core/field-option.js';
 
-describe('parseFormdown', () => {
-  it('parses basic text field', () => {
-    const result = parseFormdown('@name: []');
-    expect(result.fields).toEqual([
-      { field: 'name', type: 'text' },
-    ]);
+const field = (written: string) => parseFormdown(written).fields[0];
+
+describe('parseFormdown — fields', () => {
+  it('reads a text field', () => {
+    expect(parseFormdown('@name: []').fields).toEqual([{ field: 'name', type: 'text', label: 'Name' }]);
   });
 
-  it('parses required field', () => {
-    const result = parseFormdown('@name*: []');
-    expect(result.fields[0].required).toBe(true);
+  it('reads required and label', () => {
+    expect(field('@name*(Full Name): []')).toEqual({ field: 'name', type: 'text', label: 'Full Name', required: true });
   });
 
-  it('parses label', () => {
-    const result = parseFormdown('@name(Full Name): []');
-    expect(result.fields[0].label).toBe('Full Name');
+  it.each([
+    ['@a: @[]', 'email'],
+    ['@a: #[]', 'number'],
+    ['@a: ?[]', 'password'],
+    ['@a: %[]', 'tel'],
+    ['@a: &[]', 'url'],
+    ['@a: d[]', 'date'],
+    ['@a: dt[]', 'datetime'],
+    ['@a: t[]', 'time'],
+    ['@a: R[]', 'range'],
+    ['@a{x,y}: s[]', 'select'],
+    ['@a{x,y}: r[]', 'radio'],
+    ['@a{x,y}: c[]', 'checkbox'],
+  ])('reads %s as %s', (written, type) => {
+    expect(field(written).type).toBe(type);
   });
 
-  it('parses options', () => {
-    const result = parseFormdown('@size{S,M,L}: r[]');
-    expect(result.fields[0].options).toEqual(['S', 'M', 'L']);
-    expect(result.fields[0].type).toBe('radio');
+  it('reads a textarea with its rows (T4[])', () => {
+    expect(field('@note: T4[]')).toMatchObject({ type: 'textarea', rows: 4 });
   });
 
-  it('parses value=Label options — the value is submitted, the label shown', () => {
-    const result = parseFormdown('@kind{hw=Hardware,sw=Software,other}(Kind): s[]');
-    expect(result.fields[0].options).toEqual([
+  it('reads a select of several values (s[multiple]) as multiselect', () => {
+    expect(field('@tags{JS,TS,Rust}: s[multiple]')).toMatchObject({ type: 'multiselect', options: ['JS', 'TS', 'Rust'] });
+  });
+
+  it('keeps an option value apart from its label (value=Label)', () => {
+    expect(field('@kind{hw=Hardware,sw=Software,other}: s[]').options).toEqual([
       { value: 'hw', label: 'Hardware' },
       { value: 'sw', label: 'Software' },
       'other',
     ]);
   });
 
-  it('reads option lists exactly as @formdown/core does', () => {
-    const cases = [
-      'a,b,c',
-      'hw=Hardware,sw=Software,other',
-      'a\\,b,c',          // escaped comma stays in the option
-      'eq\\=sign,x=Y\\=Z', // escaped `=` in the value and in the label
-      ' p = Pea , q= ,=r', // spaces trimmed; an empty side means "shown as written"
-      'same=same',
-    ];
-    for (const written of cases) {
-      const ours = parseOptionList(written).map((o) => (typeof o === 'string' ? { value: o } : o));
-      expect(ours, written).toEqual(coreParseOptionList(written).options);
-    }
+  it('reads min, max and step', () => {
+    expect(field('@volume: R[min=0 max=100 step=5]')).toMatchObject({ min: 0, max: 100, step: 5 });
   });
 
-  it('parses email field (@[])', () => {
-    const result = parseFormdown('@email: @[]');
-    expect(result.fields[0].type).toBe('email');
+  it('keeps a date bound as text', () => {
+    expect(field('@from: d[min="2026-01-01"]').min).toBe('2026-01-01');
   });
 
-  it('parses number field (#[])', () => {
-    const result = parseFormdown('@age: #[]');
-    expect(result.fields[0].type).toBe('number');
+  it('reads length limits, pattern and placeholder', () => {
+    expect(field('@code: [minlength=2 maxlength=10 pattern="^\\w+$" placeholder="Code"]')).toMatchObject({
+      minLength: 2,
+      maxLength: 10,
+      pattern: '^\\w+$',
+      placeholder: 'Code',
+    });
   });
 
-  it('parses number field with min/max', () => {
-    const result = parseFormdown('@age: #[min=18,max=120]');
-    expect(result.fields[0].type).toBe('number');
-    expect(result.fields[0].min).toBe(18);
-    expect(result.fields[0].max).toBe(120);
+  it('reads every field line, skipping blank ones', () => {
+    expect(parseFormdown('\n  @name: []  \n\n  @age: #[]\n').fields.map((f) => f.field)).toEqual(['name', 'age']);
   });
 
-  it('parses password field (?[])', () => {
-    const result = parseFormdown('@pwd: ?[]');
-    expect(result.fields[0].type).toBe('password');
+  it('returns nothing for empty input', () => {
+    expect(parseFormdown('')).toEqual({ fields: [], actions: [], diagnostics: [] });
   });
+});
 
-  it('parses tel field (%[])', () => {
-    const result = parseFormdown('@phone: %[]');
-    expect(result.fields[0].type).toBe('tel');
-  });
-
-  it('parses url field (&[])', () => {
-    const result = parseFormdown('@website: &[]');
-    expect(result.fields[0].type).toBe('url');
-  });
-
-  it('parses textarea with rows (T4[])', () => {
-    const result = parseFormdown('@message: T4[]');
-    expect(result.fields[0].type).toBe('textarea');
-    expect(result.fields[0].rows).toBe(4);
-  });
-
-  it('parses date field (d[])', () => {
-    const result = parseFormdown('@birth: d[]');
-    expect(result.fields[0].type).toBe('date');
-  });
-
-  it('parses datetime field (dt[])', () => {
-    const result = parseFormdown('@created: dt[]');
-    expect(result.fields[0].type).toBe('datetime');
-  });
-
-  it('parses time field (t[])', () => {
-    const result = parseFormdown('@alarm: t[]');
-    expect(result.fields[0].type).toBe('time');
-  });
-
-  it('parses select field (s[])', () => {
-    const result = parseFormdown('@priority{low,medium,high}: s[]');
-    expect(result.fields[0].type).toBe('select');
-    expect(result.fields[0].options).toEqual(['low', 'medium', 'high']);
-  });
-
-  it('parses checkbox field (c[])', () => {
-    const result = parseFormdown('@skills{JS,TS,Rust}: c[]');
-    expect(result.fields[0].type).toBe('checkbox');
-    expect(result.fields[0].options).toEqual(['JS', 'TS', 'Rust']);
-  });
-
-  it('parses action buttons', () => {
-    const result = parseFormdown('@[submit "Save"]');
-    expect(result.actions).toEqual([
+describe('parseFormdown — actions', () => {
+  it('maps the shorthand submit and reset by their kind, though formdown names them at random', () => {
+    expect(parseFormdown('@[submit "Save"]\n@[reset "Clear"]').actions).toEqual([
       { action: 'submit', label: 'Save', style: 'primary' },
+      { action: 'cancel', label: 'Clear', style: 'default' },
     ]);
   });
 
-  it('parses cancel action', () => {
-    const result = parseFormdown('@[cancel "Dismiss"]');
-    expect(result.actions).toEqual([
-      { action: 'cancel', label: 'Dismiss', style: 'default' },
+  it('maps the long form by its type, keeping the name for a plain button', () => {
+    expect(parseFormdown('@save: [submit label="Save"]\n@preview: [button label="Preview"]').actions).toEqual([
+      { action: 'submit', label: 'Save', style: 'primary' },
+      { action: 'preview', label: 'Preview' },
     ]);
   });
 
-  it('parses action with explicit style', () => {
-    const result = parseFormdown('@[submit "Delete" danger]');
-    expect(result.actions[0].style).toBe('danger');
+  it('takes a style the widget knows', () => {
+    expect(parseFormdown('@remove: [button label="Delete" style="danger"]').actions).toEqual([
+      { action: 'remove', label: 'Delete', style: 'danger' },
+    ]);
   });
 
-  it('parses full form', () => {
-    const input = [
-      '@name*(Name): []',
-      '@email*(Email): @[]',
-      '@priority{low,medium,high}(Priority): s[]',
-      '@message(Message): T4[]',
-      '@[submit "Submit"]',
-      '@[cancel "Cancel"]',
-    ].join('\n');
+  it('reads a full form', () => {
+    const result = parseFormdown(
+      [
+        '@name*(Name): []',
+        '@email*(Email): @[]',
+        '@priority{low,medium,high}(Priority): s[]',
+        '@message(Message): T4[]',
+        '@[submit "Submit"]',
+        '@[reset "Cancel"]',
+      ].join('\n'),
+    );
+    expect(result.fields).toEqual([
+      { field: 'name', label: 'Name', type: 'text', required: true },
+      { field: 'email', label: 'Email', type: 'email', required: true },
+      { field: 'priority', label: 'Priority', type: 'select', options: ['low', 'medium', 'high'] },
+      { field: 'message', label: 'Message', type: 'textarea', rows: 4 },
+    ]);
+    expect(result.actions.map((a) => a.action)).toEqual(['submit', 'cancel']);
+    expect(result.diagnostics).toEqual([]);
+  });
+});
 
-    const result = parseFormdown(input);
-    expect(result.fields.length).toBe(4);
-    expect(result.fields[0]).toEqual({
-      field: 'name', label: 'Name', type: 'text', required: true,
-    });
-    expect(result.fields[1]).toEqual({
-      field: 'email', label: 'Email', type: 'email', required: true,
-    });
-    expect(result.fields[2]).toEqual({
-      field: 'priority', label: 'Priority', type: 'select',
-      options: ['low', 'medium', 'high'],
-    });
-    expect(result.fields[3]).toEqual({
-      field: 'message', label: 'Message', type: 'textarea', rows: 4,
-    });
-    expect(result.actions.length).toBe(2);
-    expect(result.actions[0].action).toBe('submit');
-    expect(result.actions[1].action).toBe('cancel');
+describe('parseFormdown — diagnostics', () => {
+  it('reports a line that looks like a field but is not one, with its line', () => {
+    const { fields, diagnostics } = parseFormdown('@name: []\n@notify: ^[]');
+    expect(fields.map((f) => f.field)).toEqual(['name']);
+    expect(diagnostics).toEqual([expect.objectContaining({ severity: 'warning', line: 2 })]);
   });
 
-  it('ignores empty lines and whitespace', () => {
-    const input = '\n  @name: []  \n\n  @age: #[]\n';
-    const result = parseFormdown(input);
-    expect(result.fields.length).toBe(2);
-  });
-
-  it('returns empty result for empty input', () => {
-    const result = parseFormdown('');
-    expect(result.fields).toEqual([]);
-    expect(result.actions).toEqual([]);
-  });
-
-  // Toggle, Range, Multiselect markers
-  it('parses toggle field (^[])', () => {
-    const result = parseFormdown('@notify: ^[]');
-    expect(result.fields[0].type).toBe('toggle');
-  });
-
-  it('parses range field (R[])', () => {
-    const result = parseFormdown('@volume: R[min=0,max=100]');
-    expect(result.fields[0].type).toBe('range');
-    expect(result.fields[0].min).toBe(0);
-    expect(result.fields[0].max).toBe(100);
-  });
-
-  it('parses range field with step', () => {
-    const result = parseFormdown('@brightness: R[min=0,max=100,step=5]');
-    expect(result.fields[0].type).toBe('range');
-    expect(result.fields[0].step).toBe(5);
-  });
-
-  it('parses multiselect field (ms[])', () => {
-    const result = parseFormdown('@tags{JS,TS,Rust,Go}: ms[]');
-    expect(result.fields[0].type).toBe('multiselect');
-    expect(result.fields[0].options).toEqual(['JS', 'TS', 'Rust', 'Go']);
-  });
-
-  it('accepts optional _data parameter without error', () => {
-    const result = parseFormdown('@name: []', { name: 'test' });
-    expect(result.fields[0].field).toBe('name');
-  });
-
-  it('parses inline minlength attribute', () => {
-    const result = parseFormdown('@code: [minlength=3]');
-    expect(result.fields[0].minLength).toBe(3);
-  });
-
-  it('parses inline pattern attribute', () => {
-    const result = parseFormdown('@zip: [pattern=^\\d{5}$]');
-    expect(result.fields[0].pattern).toBe('^\\d{5}$');
-  });
-
-  it('parses inline placeholder attribute', () => {
-    const result = parseFormdown('@name: [placeholder=Enter name]');
-    expect(result.fields[0].placeholder).toBe('Enter name');
-  });
-
-  it('parses multiple inline attributes together', () => {
-    const result = parseFormdown('@code: [minlength=2,maxlength=10,pattern=^\\w+$]');
-    expect(result.fields[0].minLength).toBe(2);
-    expect(result.fields[0].maxLength).toBe(10);
-    expect(result.fields[0].pattern).toBe('^\\w+$');
+  it('reports an unclosed attribute list as an error', () => {
+    expect(parseFormdown('@name: [text').diagnostics).toEqual([expect.objectContaining({ severity: 'error', line: 1 })]);
   });
 });

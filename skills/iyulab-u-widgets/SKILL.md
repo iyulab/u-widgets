@@ -43,7 +43,6 @@ auto-inferred from the data shape when omitted — see
 | `u-widgets` | Everything below except `chart.*` and `math` | — |
 | `u-widgets/charts` | `chart.*` types (`uw-chart`) | `echarts` |
 | `u-widgets/math` | `math` type (`uw-math`) | `katex` |
-| `u-widgets/forms` | Swaps the built-in formdown parser for the full `@formdown/core` one | `@formdown/core` |
 | `u-widgets/components` | `uw-form` draws `date` / `datetime` fields with `<u-date-picker>` (typed entry, calendar, app locale); submitted values keep the native shape. u-widgets' default locale follows the components `Locale` (one `Locale.set()` switches both) | `@iyulab/components` ≥ 2.8 |
 | `u-widgets/cdn` | Single `<script>` bundle (core + charts), for non-bundler usage | — |
 

@@ -22,7 +22,6 @@ import { fixPublishedDtsGlobals } from '@iyulab/components/plugins/dts-globals.j
 const ENTRY = {
   'u-widgets': resolve(__dirname, 'src/index.ts'),
   'u-widgets-charts': resolve(__dirname, 'src/charts.ts'),
-  'u-widgets-forms': resolve(__dirname, 'src/forms.ts'),
   'u-widgets-tools': resolve(__dirname, 'src/tools.ts'),
   'u-widgets-math': resolve(__dirname, 'src/math.ts'),
   'u-widgets-react': resolve(__dirname, 'src/react.ts'),

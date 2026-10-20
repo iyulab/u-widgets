@@ -106,11 +106,6 @@ describe('bundle size budget', () => {
     expect(readFileSync(file, 'utf-8')).not.toContain('Bar chart');
   });
 
-  it('forms bundle is under 2 KB gzip', () => {
-    const size = gzipSize(resolve(DIST, 'u-widgets-forms.js'));
-    expect(size).toBeLessThan(2 * 1024);
-  });
-
   it('core raw size check', () => {
     const size = rawSize(resolve(DIST, 'u-widgets.js'));
     console.log(`  core raw: ${(size / 1024).toFixed(2)} KB`);

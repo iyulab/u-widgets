@@ -6,7 +6,6 @@
  * **Entry points:**
  * - `u-widgets` — Core element `<u-widget>` + utility functions (this module)
  * - `u-widgets/charts` — Chart support (requires `echarts` peer dependency)
- * - `u-widgets/forms` — Rich formdown parsing (requires `@formdown/core` peer dependency)
  *
  * @example
  * ```ts
@@ -37,8 +36,8 @@ export { validate, isWidgetSpec, specErrorMessage } from './core/schema.js';
 export type { ValidationResult, ValidationIssue, SpecErrorCode } from './core/schema.js';
 export { infer } from './core/infer.js';
 export { normalize } from './core/normalize.js';
-export { parseFormdown, registerFormdownParser, getFormdownParser } from './core/formdown.js';
-export type { FormdownResult, FormdownParser } from './core/formdown.js';
+export { parseFormdown } from './core/formdown.js';
+export type { FormdownResult, FormdownDiagnostic } from './core/formdown.js';
 export { formatValue } from './core/format.js';
 export { suggestWidget } from './core/suggest.js';
 export { widgetEntry } from './core/entries.js';

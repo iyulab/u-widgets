@@ -1,5 +1,5 @@
 import type { UWidgetSpec, FieldType } from './types.js';
-import { getFormdownParser } from './formdown.js';
+import { parseFormdown } from './formdown.js';
 import { formatTemplate, getDefaultLocale, type UWidgetLocaleStrings } from './locale.js';
 import { ARRAY_DATA, isColumnar, toRows } from './tabular.js';
 
@@ -176,12 +176,10 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     }
   }
 
-  // Validate formdown string is parseable
+  // What the formdown parser could not read as written
   if (typeof obj.formdown === 'string' && obj.formdown.length > 0 && !obj.fields) {
-    try {
-      getFormdownParser()(obj.formdown);
-    } catch {
-      warnings.push('formdown string could not be parsed — check syntax');
+    for (const d of parseFormdown(obj.formdown).diagnostics) {
+      warnings.push(d.line != null ? `formdown line ${d.line}: ${d.message}` : `formdown: ${d.message}`);
     }
   }
 

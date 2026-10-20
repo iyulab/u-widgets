@@ -31,6 +31,8 @@ export default defineConfig({
       },
       {
         resolve: { alias: { '@iyulab/u-widgets': resolve(__dirname, 'src/index.ts') } },
+        // Optimized before the first test — found mid-run, Vite reloads the page and a test iframe never becomes ready.
+        optimizeDeps: { include: ['@formdown/core/parser'] },
         test: {
           name: 'browser',
           // 직렬 — 파일마다 브라우저 페이지가 함께 뜨면 여유 메모리가 바닥나 시험이 «timed out waiting for click»·
