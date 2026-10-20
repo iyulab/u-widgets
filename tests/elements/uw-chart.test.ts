@@ -199,6 +199,24 @@ describe('uw-chart', () => {
     expect(option).toBeDefined();
   });
 
+  it('labels reference lines in the theme’s secondary text colour unless a line gives its own', async () => {
+    const el = document.createElement('uw-chart') as UwChartType;
+    el.style.setProperty('--u-widget-text', '#e5e7eb');
+    el.style.setProperty('--u-widget-text-secondary', '#9ca3af');
+    el.spec = {
+      widget: 'chart.line',
+      data: [{ t: 'a', v: 1 }, { t: 'b', v: 3 }],
+      mapping: { x: 't', y: 'v' },
+      options: { referenceLines: [{ value: 2, label: 'target' }, { value: 3, label: 'peak', color: '#f59e0b' }] },
+    } as unknown as UWidgetSpecType;
+    document.body.appendChild(el);
+    await new Promise((r) => setTimeout(r, 50));
+    const option = mockSetOption.mock.calls.at(-1)![0] as { series: Array<{ markLine: { label: { color: string }; data: Array<{ label: Record<string, unknown> }> } }> };
+    const markLine = option.series[0].markLine;
+    expect(markLine.label.color).toBe('#9ca3af');
+    expect(markLine.data[1].label.color).toBe('#f59e0b');
+  });
+
   it('calls setOption again when spec changes', async () => {
     const el = createElement({
       widget: 'chart.bar',

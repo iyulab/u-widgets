@@ -876,6 +876,8 @@ describe('toEChartsOption', () => {
       expect(mlData[0].name).toBe('Threshold');
       // Inside the plot, above the line's right end — outside the plot's edge it was cut off.
       expect((mlData[0].label as Obj).position).toBe('insideEndTop');
+      // In the line's colour and with no outline — the outline ECharts gives an inside label drew it doubled on a dark board.
+      expect(mlData[0].label).toMatchObject({ color: 'red', textBorderWidth: 0 });
       expect((mlData[0].lineStyle as Obj).color).toBe('red');
       expect((mlData[0].lineStyle as Obj).type).toBe('dashed');
     });

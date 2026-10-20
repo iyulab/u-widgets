@@ -466,7 +466,9 @@ function buildMarkLine(
         item.name = rl.label;
         // A y line's label goes inside the plot, above the line's right end: at 'end' it sits outside the plot's
         // right edge, which the grid leaves no room for, and a label longer than the margin was cut off.
-        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'insideEndTop' };
+        // No outline: ECharts strokes a label set inside the plot with a contrasting border, which on a dark board drew
+        // the words doubled. In the line's colour when it has one; otherwise the theme's (uw-chart sets it).
+        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'insideEndTop', textBorderWidth: 0, ...(rl.color && { color: rl.color }) };
       }
       const lineStyle: Record<string, unknown> = {};
       if (rl.color) lineStyle.color = rl.color;

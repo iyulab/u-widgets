@@ -225,6 +225,14 @@ export class UwChart extends LitElement {
     if (option.xAxis) option.xAxis = mergeAxisTheme(option.xAxis);
     if (option.yAxis) option.yAxis = mergeAxisTheme(option.yAxis);
 
+    // Reference lines' labels — in the secondary text colour unless a line gives its own (a data item's label wins).
+    const series = Array.isArray(option.series) ? (option.series as Record<string, unknown>[]) : [];
+    for (const s of series) {
+      const markLine = s.markLine as Record<string, unknown> | undefined;
+      if (!markLine) continue;
+      s.markLine = { ...markLine, label: { color: secondaryColor || textColor, ...(markLine.label as Record<string, unknown> ?? {}) } };
+    }
+
     // Legend — merge textStyle preserving existing properties
     if (option.legend && typeof option.legend === 'object') {
       const leg = option.legend as Record<string, unknown>;

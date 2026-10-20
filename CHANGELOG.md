@@ -7,6 +7,8 @@
 - A box the `echarts` passthrough places by one side now sits there: its `bottom` replaces a generated `top`, its
   `right` a generated `left` (and the other way round) — a pie legend given `bottom` was drawn across the pie, at the
   `top: 'middle'` a small chart's layout gives it. Both sides given, both are kept.
+- A reference line's label no longer reads doubled on a dark board: it is drawn without the outline ECharts gives a label
+  inside the plot, in the line's colour when the line has one and in the theme's secondary text colour otherwise.
 - A metric with a sparkline in a host shorter than it would grow keeps inside the host: the sparkline gives up its
   room first, instead of the card running past its box onto what is below it.
 
