@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Every chart lists `echarts` among its options (an object, described in the editor metadata) — `checkSpec` warned that the documented raw ECharts passthrough was not an option.
 - `checkSpec` names a field a reference line or a series does not have, and one of the wrong kind — `lineStyle` on a reference line (it takes `style`), `axis: 'z'`. The chart dropped them without a sign.
 - A reference line's `axis` may be left out: it means `'y'`, as the chart already drew it — and a line past the data now widens the value axis to reach it without `axis` too.
 
