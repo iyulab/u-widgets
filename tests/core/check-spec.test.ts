@@ -49,6 +49,11 @@ describe('checkSpec', () => {
       expect(checkSpec({ widget, data: [{ x: 'a', y: 1 }], options: { referenceLines } }).warnings, widget).toEqual([]);
   });
 
+  it('takes the raw ECharts option on every chart, as documented', () => {
+    for (const widget of ['chart.bar', 'chart.funnel', 'chart.gantt'])
+      expect(checkSpec({ widget, data: [], options: { echarts: { xAxis: { axisLabel: { interval: 0 } } } } }).warnings, widget).toEqual([]);
+  });
+
   it('names a field a reference line or a series does not have, and a value of the wrong kind', () => {
     const warnings = checkSpec({
       widget: 'chart.bar',

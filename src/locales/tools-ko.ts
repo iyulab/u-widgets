@@ -58,6 +58,7 @@ export const toolLabelsKo: ToolLabels = {
     donut: '도넛',
     colors: '색상',
     colorRange: '색 범위',
+    echarts: 'ECharts 옵션',
     histogram: '히스토그램',
     bins: '구간 수',
     referenceLines: '기준선',

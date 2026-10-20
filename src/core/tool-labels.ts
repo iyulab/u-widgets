@@ -78,6 +78,7 @@ const EN: ToolLabels = {
     donut: 'Donut',
     colors: 'Colors',
     colorRange: 'Color range',
+    echarts: 'ECharts option',
     histogram: 'Histogram',
     bins: 'Bins',
     referenceLines: 'Reference lines',
