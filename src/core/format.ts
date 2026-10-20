@@ -119,7 +119,7 @@ function formatPercent(value: unknown, locale?: string, fractionDigits?: number)
 
 /** A date (and time) as a string writes it: ISO 8601 (`2025-01-15T14:30:00Z`) and the variations APIs use —
  *  a space or dots between the parts (`2025-01-15 14:30`, `2025.01.15`) — or compact digits (`20250115`,
- *  `202501151430`, `20250115 1430`). `offset` is the string's own (`Z`, `+09:00`), when it gives one. */
+ *  `202501151430`, `20250115 1430`). `offset` is the string's own (`Z`, `+09:00`, `+0900`, `+09`), when it gives one. */
 interface DateParts {
   year: number;
   month: number;
@@ -131,7 +131,7 @@ interface DateParts {
   offset?: string;
 }
 
-const DELIMITED_DATE = /^(\d{4})[-./](\d{2})[-./](\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(\.\d+)?)?)?\s*(Z|[+-]\d{2}:?\d{2})?$/i;
+const DELIMITED_DATE = /^(\d{4})[-./](\d{2})[-./](\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(\.\d+)?)?)?\s*(Z|[+-]\d{2}(?::?\d{2})?)?$/i;
 const COMPACT_DATE = /^(\d{4})(\d{2})(\d{2})(?:[T ]?(\d{2})(\d{2})(\d{2})?)?$/;
 
 function dateParts(value: string): DateParts | null {
@@ -167,7 +167,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
  *  on its own day west of UTC. */
 function instantOf(p: DateParts): Date {
   if (p.offset) {
-    const offset = /^z$/i.test(p.offset) ? 'Z' : p.offset.replace(/^([+-]\d{2}):?(\d{2})$/, '$1:$2');
+    // `+09`, `+0900` and `+09:00` are one offset; the Date parser takes only the last.
+    const offset = /^z$/i.test(p.offset) ? 'Z' : p.offset.replace(/^([+-]\d{2}):?(\d{2})?$/, (_, hours: string, minutes?: string) => `${hours}:${minutes ?? '00'}`);
     return new Date(`${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour ?? 0)}:${pad(p.minute ?? 0)}:${pad(p.second ?? 0)}${p.rest}${offset}`);
   }
   return new Date(p.year, p.month - 1, p.day, p.hour ?? 0, p.minute ?? 0, p.second ?? 0);

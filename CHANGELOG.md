@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Date text with a short offset (`2026-10-09T19:00:00+09`, ISO 8601's `±hh`) reads as that moment; it read as no date.
+
 ### Changed
 
 - Optional peer `@formdown/core` accepts `>=0.15.0 <0.22.0` (was `<0.20.0`). 0.20 and 0.21 only add to the public types
