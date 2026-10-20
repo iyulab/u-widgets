@@ -38,6 +38,12 @@ describe('parseFormdown — fields', () => {
     expect(field('@note: T4[]')).toMatchObject({ type: 'textarea', rows: 4 });
   });
 
+  it('reads a single checkbox shown as a switch (c[switch]) as a toggle — a checkbox with choices stays one', () => {
+    expect(field('@notify(Notify me): c[switch]')).toEqual({ field: 'notify', type: 'toggle', label: 'Notify me' });
+    expect(field('@notify: [checkbox switch]').type).toBe('toggle');
+    expect(field('@days{mon,tue}: c[switch]').type).toBe('checkbox');
+  });
+
   it('reads a select of several values (s[multiple]) as multiselect', () => {
     expect(field('@tags{JS,TS,Rust}: s[multiple]')).toMatchObject({ type: 'multiselect', options: ['JS', 'TS', 'Rust'] });
   });
@@ -124,6 +130,12 @@ describe('parseFormdown — diagnostics', () => {
     const { fields, diagnostics } = parseFormdown('@name: []\n@notify: ^[]');
     expect(fields.map((f) => f.field)).toEqual(['name']);
     expect(diagnostics).toEqual([expect.objectContaining({ severity: 'warning', line: 2 })]);
+  });
+
+  it('says front matter is not read — the widget takes no values from it', () => {
+    const { fields, diagnostics } = parseFormdown('---\ntitle: Contact\n---\n@name: []');
+    expect(fields.map((f) => f.field)).toEqual(['name']);
+    expect(diagnostics).toEqual([expect.objectContaining({ severity: 'warning' })]);
   });
 
   it('reports an unclosed attribute list as an error', () => {

@@ -414,12 +414,13 @@ by `@formdown/core` (a dependency of this package), so any form formdown reads i
 | `s[multiple]` | multiselect |
 | `r[]` | radio |
 | `c[]` | checkbox |
+| `c[switch]` | toggle (a single checkbox shown as a switch) |
 
 Attributes go inside the brackets, separated by spaces: `R[min=0 max=100 step=5]`,
 `[minlength=2 maxlength=10 pattern="^\w+$" placeholder="Code"]`. Buttons: `@[submit "Save"]` and `@[reset "Clear"]`
 become the `submit` and `cancel` actions; any other action is a named button — `@remove: [button label="Delete" style="danger"]`
-is the action `remove`. A `toggle` field has no formdown syntax yet — use a `fields` array for it. `validate()` reports a
-line formdown cannot read (it is left out of the form) as a warning with its line number.
+is the action `remove`. `validate()` reports a line formdown cannot read (it is left out of the form) as a warning with
+its line number — and front matter (`---` … `---`), which the form takes no values from.
 
 Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An option written
 `value=Label` submits `value` and shows `Label` — `@kind{hw=Hardware,sw=Software}(Kind): s[]`

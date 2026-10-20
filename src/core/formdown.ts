@@ -56,8 +56,14 @@ function numberOrText(value: unknown): number | string {
 
 function mapField(f: FormdownField): UWidgetFieldDefinition {
   const a = f.attributes ?? {};
-  // formdown writes a select of several values as `s[multiple]`.
-  const type = f.type === 'select' && a.multiple === true ? 'multiselect' : (FIELD_TYPE_MAP[f.type] ?? 'text');
+  // formdown writes a select of several values as `s[multiple]`, and a switch as a single checkbox `c[switch]`.
+  const single = !f.options || f.options.length === 0;
+  const type =
+    f.type === 'select' && a.multiple === true
+      ? 'multiselect'
+      : f.type === 'checkbox' && a.switch === true && single
+        ? 'toggle'
+        : (FIELD_TYPE_MAP[f.type] ?? 'text');
   const def: UWidgetFieldDefinition = { field: f.name, type };
   if (f.label) def.label = f.label;
   if (f.required) def.required = true;

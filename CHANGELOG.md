@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `form`: a toggle has formdown syntax — `@notify: c[switch]` (formdown 0.22, a single checkbox shown as a switch).
+
+### Changed
+
+- Needs `@formdown/core` `^0.22.0`. Its parser no longer brings a YAML reader, so a bundle with the form is about
+  30 KB (gzip) lighter. Front matter in formdown text is reported as unread (a warning); the form never took values
+  from it.
+
 ## [0.36.0] - 2026-10-20
 
 MCP server 0.7.0 follows `^0.36.0` — `help('form')` and `validate` know `fieldStates`.
