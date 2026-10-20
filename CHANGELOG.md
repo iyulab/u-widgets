@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `chart.area` lists `referenceLines` among its options — an area chart draws them as a line chart does, but `checkSpec` and `./tools` said it did not take them. The chart options table documents `referenceLines`.
+- `chart.bar` with `horizontal`: a reference line's label is drawn at the line's top — it sat at the bottom, over the value axis labels, since the categories run top to bottom.
+
 ## [0.37.0] - 2026-10-20
 
 MCP server 0.7.1 follows `^0.37.0`.

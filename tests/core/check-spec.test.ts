@@ -43,6 +43,12 @@ describe('checkSpec', () => {
     expect(checkSpec({ widget: 'metric', data: { value: 3 }, options: { unit: 'kW' } }).warnings).toEqual(['options.unit is not an option of metric — it takes format']);
   });
 
+  it('takes the options each chart draws — an area chart its reference lines, as a line chart does', () => {
+    const referenceLines = [{ axis: 'y', value: 5 }];
+    for (const widget of ['chart.line', 'chart.area', 'chart.bar'])
+      expect(checkSpec({ widget, data: [{ x: 'a', y: 1 }], options: { referenceLines } }).warnings, widget).toEqual([]);
+  });
+
   it('answers as validate does when the structure itself is wrong', () => {
     expect(checkSpec({ widget: 'gauge', data: [1] }).issues[0].code).toBe('data-not-object');
   });

@@ -315,7 +315,7 @@ export interface UWidgetEvent {
 
 /**
  * Reference line drawn on a chart axis.
- * Used in `options.referenceLines` for bar, line, area, and scatter charts.
+ * Used in `options.referenceLines` for bar, line, area, scatter, histogram and gantt charts.
  */
 export interface ReferenceLineOption {
   /** Which axis the line is drawn on. */

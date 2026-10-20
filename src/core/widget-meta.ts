@@ -317,7 +317,7 @@ function withNamesAndEnums(fields: Record<string, readonly Omit<DataFieldInfo, '
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel'],
-  'chart.area': ['smooth', 'stack', 'colors', 'series', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel'],
   'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel'],

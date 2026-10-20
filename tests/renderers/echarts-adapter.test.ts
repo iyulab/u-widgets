@@ -871,6 +871,37 @@ describe('toEChartsOption', () => {
       expect((mlData[0].lineStyle as Obj).type).toBe('dashed');
     });
 
+    it('labels a value line of a horizontal bar chart at its top, clear of the value axis labels', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [
+          { type: 'O', days: 3.4 },
+          { type: 'A', days: 5.1 },
+        ],
+        mapping: { x: 'type', y: 'days' },
+        options: { horizontal: true, referenceLines: [{ axis: 'x', value: 5, label: 'Enough' }] },
+      }));
+      const line = ((result.series as ObjArray)[0].markLine as Obj).data as ObjArray;
+      expect(line[0].xAxis).toBe(5);
+      expect((line[0].label as Obj).position).toBe('start');
+      expect((result.yAxis as Obj).inverse).toBe(true);
+    });
+
+    it('draws them on an area chart as on a line chart', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.area',
+        data: [
+          { day: '1', stock: 5.4 },
+          { day: '2', stock: 4.6 },
+        ],
+        mapping: { x: 'day', y: 'stock' },
+        options: { referenceLines: [{ axis: 'y', value: 5, style: 'dashed' }] },
+      }));
+      const series = result.series as ObjArray;
+      expect(series[0].areaStyle).toBeDefined();
+      expect(((series[0].markLine as Obj).data as ObjArray)[0].yAxis).toBe(5);
+    });
+
     it('supports x-axis reference lines', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.bar',

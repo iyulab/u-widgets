@@ -588,7 +588,9 @@ function buildCartesian(
   // Reference lines → ECharts markLine on first series
   const refLines = options.referenceLines as ReferenceLineOption[] | undefined;
   if (Array.isArray(refLines) && refLines.length > 0 && seriesItems.length > 0) {
-    seriesItems[0].markLine = buildMarkLine(refLines);
+    // A horizontal chart's category axis is inverted (first category on top), as a gantt's rows are — 'start' is
+    // the top of a vertical line there, while 'end' would sit on the value axis's tick labels.
+    seriesItems[0].markLine = buildMarkLine(refLines, undefined, options.horizontal ? 'start' : 'end');
   }
 
   return result;
