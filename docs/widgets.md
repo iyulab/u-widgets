@@ -160,6 +160,17 @@ runs on scrolls, so none of it becomes unreachable, and media scales down with i
 argument and returns the compact layout for a small one; `<uw-chart>` passes its own size and
 rebuilds the option when the layout changes. Anything set in `options.echarts` still wins.
 
+## Metric Data
+
+`metric` (and each item of `stat-group`) reads `value` and, optionally, `label`, `unit`, `prefix`, `suffix`, `change`
+(a percentage, with `trend`: `up` · `down` · `flat`), `icon`, `description`, `variant` (the value's colour) and
+`sparkline` — the recent values, oldest first, drawn as a small line under the value. The line is scaled to its own
+range (it shows the shape, not the size), takes the variant's colour or the primary one, and needs two numbers or more.
+
+```json
+{ "widget": "metric", "data": { "value": 18.4, "unit": "Tbps", "label": "Traffic", "sparkline": [14.2, 15.8, 17.1, 16.4, 18.4] } }
+```
+
 ## Table Options
 
 | Option | Type | Description |

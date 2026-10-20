@@ -128,6 +128,7 @@ const EN: ToolLabels = {
     trend: 'Trend',
     icon: 'Icon',
     description: 'Description',
+    sparkline: 'Recent values',
     max: 'Maximum',
     content: 'Content',
     src: 'Source URL',

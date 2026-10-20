@@ -16,7 +16,28 @@ interface MetricData {
   description?: string;
   format?: string;
   variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  sparkline?: number[];
 }
+
+/**
+ * The recent values under a figure as a small line, oldest first, scaled to their own range — the shape of the
+ * last hours, not their size. Two values or more draw it; anything that is not a number is left out.
+ */
+function sparklinePaths(values: number[]): { line: string; area: string } | undefined {
+  if (values.length < 2) return undefined;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const points = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * 100;
+    // A flat run sits in the middle; otherwise the lowest value at the bottom and the highest at the top, inside
+    // a margin so the stroke is not cut.
+    const y = max === min ? 12 : 22 - ((v - min) / (max - min)) * 20;
+    return `${round(x)},${round(y)}`;
+  });
+  return { line: `M${points.join('L')}`, area: `M0,24L${points.join('L')}L100,24Z` };
+}
+
+const round = (n: number) => Math.round(n * 100) / 100;
 
 const VALID_VARIANTS = new Set(['success', 'warning', 'danger', 'info', 'neutral']);
 const warnedVariants = new Set<string>();
@@ -56,6 +77,9 @@ function toMetricData(
     description: data.description as string | undefined,
     format: data.format as string | undefined,
     variant: normalizeVariant(data.variant),
+    sparkline: Array.isArray(data.sparkline)
+      ? (data.sparkline as unknown[]).filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
+      : undefined,
   };
 }
 
@@ -140,6 +164,21 @@ export class UwMetric extends LitElement {
     }
 
     .metric-icon { font-size: 1.25rem; line-height: 1; margin-bottom: 2px; }
+    .metric-sparkline {
+      display: block;
+      width: 100%;
+      height: 28px;
+      margin-top: 4px;
+      color: var(--u-widget-primary, #4f46e5);
+      overflow: visible;
+    }
+    .metric-sparkline .line { fill: none; stroke: currentColor; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+    .metric-sparkline .area { fill: currentColor; opacity: 0.14; }
+    .metric[data-variant="success"] .metric-sparkline { color: var(--u-widget-positive, #15803d); }
+    .metric[data-variant="danger"] .metric-sparkline { color: var(--u-widget-negative, #dc2626); }
+    .metric[data-variant="warning"] .metric-sparkline { color: var(--u-widget-warning, #d97706); }
+    .metric[data-variant="neutral"] .metric-sparkline { color: var(--u-widget-text-secondary, #5b6777); }
+
     .metric-description { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
 
     /* ── variant colors ── */
@@ -237,6 +276,14 @@ export class UwMetric extends LitElement {
     `;
   }
 
+  private renderSparkline(values: number[] | undefined) {
+    const paths = values && sparklinePaths(values);
+    if (!paths) return nothing;
+    return html`<svg class="metric-sparkline" part="sparkline" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+      <path class="area" d=${paths.area}></path><path class="line" d=${paths.line}></path>
+    </svg>`;
+  }
+
   private renderMetric(m: MetricData) {
     const trendArrow =
       m.trend === 'up' ? '\u2191' : m.trend === 'down' ? '\u2193' : m.trend === 'flat' ? '\u2192' : '';
@@ -258,6 +305,7 @@ export class UwMetric extends LitElement {
             >`
           : nothing}
         ${m.description ? html`<div class="metric-description" part="description">${m.description}</div>` : nothing}
+        ${this.renderSparkline(m.sparkline)}
       </div>
     `;
   }

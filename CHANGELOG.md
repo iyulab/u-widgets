@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `metric` and `stat-group` draw `data.sparkline` — the recent values, oldest first — as a small line under the value, scaled to its own range, in the variant's colour.
+
 ### Changed
 
 - `checkSpec` names a field a reference line or a series does not have, and one of the wrong kind — `lineStyle` on a reference line (it takes `style`), `axis: 'z'`. The chart dropped them without a sign.

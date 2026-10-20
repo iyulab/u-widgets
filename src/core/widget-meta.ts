@@ -370,6 +370,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'trend', type: '"up" | "down" | "flat"', desc: 'Trend direction' },
     { key: 'icon', type: 'string', desc: 'Emoji or short text icon' },
     { key: 'description', type: 'string', desc: 'Sub-label below value' },
+    { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
   ],
   'stat-group': [
     { key: 'label', type: 'string', desc: 'Display label', required: true },
@@ -381,6 +382,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'trend', type: '"up" | "down" | "flat"', desc: 'Trend direction' },
     { key: 'icon', type: 'string', desc: 'Emoji or short text icon' },
     { key: 'description', type: 'string', desc: 'Sub-label below value' },
+    { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
   ],
   'gauge': [
     { key: 'value', type: 'number', desc: 'Current value on the arc', required: true },
@@ -469,7 +471,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'chart.treemap': 'No mapping. data is [{name, value, children?}].',
   'chart.histogram': 'Flat number[] or objects with single numeric field → frequency distribution',
   'chart.gantt': 'mapping omittable. First string → y (row), first two number/date-like fields → start, end, next string → label. color groups intervals.',
-  'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?}.',
+  'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?, sparkline?}.',
   'stat-group': 'No mapping needed. data is [{label, value, ...}]. Optional: icon (emoji), description (sub-label).',
   'gauge': 'No mapping needed. data is {value}. Set min/max/unit in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',

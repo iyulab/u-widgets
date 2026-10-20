@@ -127,6 +127,22 @@ describe('uw-metric', () => {
       expect(shadow.querySelector('.metric-label')).toBeNull();
     });
 
+    it('draws the recent values as a line under the value, scaled to their own range', async () => {
+      const el = createElement({ widget: 'metric', data: { value: 18.4, sparkline: [10, 20, 'x', 15], variant: 'danger' } });
+      const shadow = await render(el);
+      const line = shadow.querySelector('.metric-sparkline .line');
+      // Three numbers across the width: the lowest at the bottom margin, the highest at the top one.
+      expect(line?.getAttribute('d')).toBe('M0,22L50,2L100,12');
+      expect(shadow.querySelector('.metric-sparkline')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('draws a flat run in the middle, and no line for fewer than two values', async () => {
+      const flat = await render(createElement({ widget: 'metric', data: { value: 1, sparkline: [3, 3] } }));
+      expect(flat.querySelector('.metric-sparkline .line')?.getAttribute('d')).toBe('M0,12L100,12');
+      const one = await render(createElement({ widget: 'metric', data: { value: 1, sparkline: [3] } }));
+      expect(one.querySelector('.metric-sparkline')).toBeNull();
+    });
+
     it('renders nothing when no data', async () => {
       const el = createElement({ widget: 'metric' });
       const shadow = await render(el);

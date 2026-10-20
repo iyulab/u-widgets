@@ -108,6 +108,7 @@ export const toolLabelsKo: ToolLabels = {
     trend: '추세',
     icon: '아이콘',
     description: '설명',
+    sparkline: '최근 값',
     max: '최댓값',
     content: '내용',
     src: '원본 주소',
