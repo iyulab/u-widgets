@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-20
+
+MCP server 0.7.1 follows `^0.37.0`.
+
 ### Added
 
 - `form`: a toggle has formdown syntax — `@notify: c[switch]` (formdown 0.22, a single checkbox shown as a switch).
