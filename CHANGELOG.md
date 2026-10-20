@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-20
+
+MCP server 0.7.0 follows `^0.36.0` — `help('form')` and `validate` know `fieldStates`.
+
 ### Added
 
 - `form`: `fieldStates` — what the host suggests for each field, by field name: `{ suggestions?, note?, decline? }`,
