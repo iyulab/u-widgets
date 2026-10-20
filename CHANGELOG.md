@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-20
+
+MCP server 0.7.2 follows `^0.38.0`.
+
 ### Added
 
 - `metric` and `stat-group` draw `data.sparkline` — the recent values, oldest first — as a small line under the value, scaled to its own range, in the variant's colour.
