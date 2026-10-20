@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.38.1] - 2026-10-21
+
+MCP server 0.7.2 follows `^0.38.0` and takes this release as it is.
+
 ### Fixed
 
 - A box the `echarts` passthrough places by one side now sits there: its `bottom` replaces a generated `top`, its
