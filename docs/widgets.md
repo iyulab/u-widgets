@@ -426,6 +426,30 @@ Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An opti
 (`\,` and `\=` keep a comma or `=` inside an option). In a `fields` array the same option is
 `{ "value": "hw", "label": "Hardware" }`; a plain string is a value shown as itself.
 
+### Suggested values (`fieldStates`)
+
+A host that can guess what goes in a field — from earlier records, another system, a model — says so per field name
+in `fieldStates`. It is the same shape `@formdown/ui`'s `<formdown-ui>` takes, so one suggestion source serves both:
+
+```json
+{
+  "widget": "form",
+  "formdown": "@vendor*(Vendor): []\n@qty(Quantity): #[]",
+  "fieldStates": {
+    "vendor": { "suggestions": ["Acme Supply", "Globex"], "note": "Used on the last 3 orders", "decline": "Neither" },
+    "qty": { "suggestions": ["12"] }
+  }
+}
+```
+
+- The first suggestion shows in the empty field in place of its placeholder; every suggestion is a button under the
+  field, beside the `note`.
+- Picking one puts it in the field — a number field reads it as a number, a multiselect adds it — and the widget sends
+  `suggestion-pick` (`data: { field, value }`), then the usual `change`.
+- `decline` adds a button with that label; it sends `suggestion-decline` (`data: { field }`) and changes nothing.
+- A new `fieldStates` keeps what the user has typed — only new `data` or `fields` start the form over.
+- Parts: `suggestions`, `suggestion`, `note`, `decline`.
+
 ### Date fields and locale in an `@iyulab/components` app
 
 `date` and `datetime` fields use the browser's native inputs, whose display follows the browser's

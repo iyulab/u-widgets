@@ -184,6 +184,44 @@ export class UwForm extends LitElement {
       margin-top: 2px;
     }
 
+    /* fieldStates — what the host offers for the field: value buttons, the note on why, a decline button. */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .suggestions button {
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
+      font-weight: 500;
+    }
+
+    .suggestion {
+      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 8%, var(--u-widget-bg, #fff));
+      border: 1px solid color-mix(in srgb, var(--u-widget-primary, #4f46e5) 30%, transparent);
+      color: var(--u-widget-text, #1a1a2e);
+    }
+
+    .suggestion[aria-pressed='true'] {
+      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 18%, var(--u-widget-bg, #fff));
+      border-color: var(--u-widget-primary, #4f46e5);
+    }
+
+    .decline {
+      background: transparent;
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      color: var(--u-widget-text-secondary, #64748b);
+    }
+
+    .field-note {
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
+      color: var(--u-widget-text-secondary, #64748b);
+    }
+
     input.invalid,
     textarea.invalid,
     select.invalid {
@@ -315,6 +353,7 @@ export class UwForm extends LitElement {
             >`
           : nothing}
         ${this.renderInput(field, type, value, error ? errorId : undefined)}
+        ${this.renderSuggestions(field, value)}
         ${error ? html`<div class="field-error" id=${errorId} role="alert" part="field-error">${error}</div>` : nothing}
       </div>
     `;
@@ -347,7 +386,7 @@ export class UwForm extends LitElement {
           id=${`input-${field.field}`}
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
-          placeholder=${field.placeholder ?? ''}
+          placeholder=${this._placeholder(field, value)}
           rows=${field.rows ?? 3}
           ?required=${field.required}
           minlength=${field.minLength ?? ''}
@@ -475,7 +514,7 @@ export class UwForm extends LitElement {
           id=${`input-${field.field}`}
           class=${hasError ? 'invalid' : ''}
           .value=${String(value ?? '')}
-          placeholder=${field.placeholder ?? ''}
+          placeholder=${this._placeholder(field, value)}
           ?required=${field.required}
           aria-invalid=${hasError ? 'true' : 'false'}
           aria-describedby=${errorId ?? nothing}
@@ -495,6 +534,84 @@ export class UwForm extends LitElement {
           part="input"
         />`;}
     }
+  }
+
+  /** The first suggestion stands in for the placeholder while the field is empty. */
+  private _placeholder(field: UWidgetFieldDefinition, value: unknown): string {
+    const first = this.spec?.fieldStates?.[field.field]?.suggestions?.[0];
+    const empty = value == null || value === '' || (Array.isArray(value) && value.length === 0);
+    return empty && first ? first : (field.placeholder ?? '');
+  }
+
+  private renderSuggestions(field: UWidgetFieldDefinition, value: unknown) {
+    const state = this.spec?.fieldStates?.[field.field];
+    if (!state) return nothing;
+    const suggestions = state.suggestions ?? [];
+    if (suggestions.length === 0 && !state.note && !state.decline) return nothing;
+    const label = formatTemplate(this._locale.suggestionsFor, { label: field.label ?? field.field });
+    return html`<div class="suggestions" part="suggestions" role="group" aria-label=${label}>
+      ${suggestions.map(
+        (s) => html`<button
+          type="button"
+          class="suggestion"
+          part="suggestion"
+          aria-pressed=${this._holds(field, value, s) ? 'true' : 'false'}
+          @click=${() => this._onPick(field, s)}
+        >${this._suggestionText(field, s)}</button>`,
+      )}
+      ${state.note ? html`<span class="field-note" part="note">${state.note}</span>` : nothing}
+      ${state.decline
+        ? html`<button type="button" class="decline" part="decline" @click=${() => this._onDecline(field)}>${state.decline}</button>`
+        : nothing}
+    </div>`;
+  }
+
+  /** A suggested choice shows as the option it names — its label, not its value. */
+  private _suggestionText(field: UWidgetFieldDefinition, s: string): string {
+    const option = field.options?.find((o) => optionValue(o) === s);
+    return option !== undefined ? optionLabel(option) : s;
+  }
+
+  /** A suggestion read as the field's value: a number for number and range, one more choice for a group of several. */
+  private _suggestedValue(field: UWidgetFieldDefinition, s: string, current: unknown): unknown {
+    const type = field.type ?? 'text';
+    if (type === 'number' || type === 'range') {
+      const n = Number(s);
+      return s.trim() !== '' && !Number.isNaN(n) ? n : s;
+    }
+    if (type === 'toggle') return s === 'true';
+    if (type === 'multiselect' || (type === 'checkbox' && (field.options?.length ?? 0) > 0)) {
+      const held = Array.isArray(current) ? current : [];
+      return held.includes(s) ? held : [...held, s];
+    }
+    return s;
+  }
+
+  private _holds(field: UWidgetFieldDefinition, value: unknown, s: string): boolean {
+    const picked = this._suggestedValue(field, s, undefined);
+    if (Array.isArray(picked)) return Array.isArray(value) && value.includes(s);
+    return value === picked;
+  }
+
+  private _onPick(field: UWidgetFieldDefinition, s: string) {
+    const value = this._suggestedValue(field, s, this._formData[field.field]);
+    this._emitEvent({
+      type: 'suggestion-pick',
+      widget: this.spec!.widget,
+      id: this.spec!.id,
+      // The value picked — for a group of several, the one choice added, not the whole selection.
+      data: { field: field.field, value: Array.isArray(value) ? s : value },
+    });
+    this._onChange(field.field, value);
+  }
+
+  private _onDecline(field: UWidgetFieldDefinition) {
+    this._emitEvent({
+      type: 'suggestion-decline',
+      widget: this.spec!.widget,
+      id: this.spec!.id,
+      data: { field: field.field },
+    });
   }
 
   private renderActions(actions: UWidgetAction[]) {

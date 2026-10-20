@@ -1072,6 +1072,20 @@ const catalog: Record<string, WidgetDoc> = {
           '@[reset "Reset"]',
         ].join('\n'),
       },
+      'Suggested values (fieldStates)': {
+        widget: 'form',
+        formdown: [
+          '@vendor*(Vendor): []',
+          '@qty(Quantity): #[min=1]',
+          '@site{plant-a=Plant A,plant-b=Plant B}(Site): s[]',
+          '@[submit "Order"]',
+        ].join('\n'),
+        fieldStates: {
+          vendor: { suggestions: ['Acme Supply', 'Globex'], note: 'Used on the last 3 orders', decline: 'Neither' },
+          qty: { suggestions: ['12'], note: 'The usual batch' },
+          site: { suggestions: ['plant-b'] },
+        },
+      },
       'Validation + pattern': {
         widget: 'form',
         fields: [

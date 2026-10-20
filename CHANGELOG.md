@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `form`: `fieldStates` — what the host suggests for each field, by field name: `{ suggestions?, note?, decline? }`,
+  the shape `@formdown/ui`'s `<formdown-ui>` takes. The first suggestion shows in the empty field as its placeholder;
+  each suggestion is a button under the field beside the note, and picking one puts it in the field
+  (`suggestion-pick`, then `change`). `decline` adds a button that sends `suggestion-decline` and changes nothing. A
+  new `fieldStates` keeps what the user typed. Parts `suggestions`, `suggestion`, `note`, `decline`.
+
 ### Fixed
 
 - Date text with a short offset (`2026-10-09T19:00:00+09`, ISO 8601's `±hh`) reads as that moment; it read as no date.

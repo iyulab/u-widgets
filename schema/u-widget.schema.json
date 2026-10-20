@@ -67,6 +67,11 @@
           "type": "string",
           "description": "Form/confirm field definitions in formdown syntax. Mutually exclusive with fields."
         },
+        "fieldStates": {
+          "type": "object",
+          "description": "Form: what the host says about each field, by field name — suggested values, a note, a decline label",
+          "additionalProperties": { "$ref": "#/$defs/fieldState" }
+        },
         "options": {
           "type": "object",
           "description": "Widget-specific rendering options"
@@ -172,6 +177,11 @@
         "formdown": {
           "type": "string",
           "description": "Form/confirm field definitions in formdown syntax"
+        },
+        "fieldStates": {
+          "type": "object",
+          "description": "Form: what the host says about each field, by field name — suggested values, a note, a decline label",
+          "additionalProperties": { "$ref": "#/$defs/fieldState" }
         },
         "options": {
           "type": "object"
@@ -295,6 +305,16 @@
         }
       },
       "required": ["field"],
+      "additionalProperties": false
+    },
+    "fieldState": {
+      "type": "object",
+      "description": "What the host says about one form field",
+      "properties": {
+        "suggestions": { "type": "array", "items": { "type": "string" }, "description": "Values offered for the field; the first shows in the empty field in place of its placeholder" },
+        "note": { "type": "string", "description": "Why — shown beside the suggestions" },
+        "decline": { "type": "string", "description": "Label of a button that declines the suggestions" }
+      },
       "additionalProperties": false
     },
     "fieldDefinition": {

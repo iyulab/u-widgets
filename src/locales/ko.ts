@@ -29,6 +29,7 @@ export const ko: UWidgetLocaleStrings = {
   invalidEmail: '{label}에 올바른 이메일 주소를 입력하세요',
   invalidUrl: '{label}에 올바른 URL을 입력하세요',
   invalidPattern: '{label} 형식이 올바르지 않습니다',
+  suggestionsFor: '{label} 제안',
 
   // Accessible names of widget regions
   actions: '동작',

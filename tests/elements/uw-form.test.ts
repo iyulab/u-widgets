@@ -1350,4 +1350,130 @@ describe('uw-form', () => {
       expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
   });
+
+  describe('fieldStates — suggestions', () => {
+    const events = (el: UwForm) => {
+      const seen: { type: string; data?: Record<string, unknown> }[] = [];
+      el.addEventListener('u-widget-internal', (e) => seen.push((e as CustomEvent).detail));
+      return seen;
+    };
+
+    it('lists the suggestions, the note and the decline button under the field', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [{ field: 'vendor', label: 'Vendor', type: 'text' }],
+        fieldStates: { vendor: { suggestions: ['Acme', 'Globex'], note: 'Used on the last 3 orders', decline: 'None of these' } },
+      });
+      const shadow = await render(el);
+      const group = shadow.querySelector('.suggestions')!;
+      expect(group.getAttribute('role')).toBe('group');
+      expect(group.getAttribute('aria-label')).toBe('Suggestions for Vendor');
+      expect([...group.querySelectorAll('.suggestion')].map((b) => b.textContent)).toEqual(['Acme', 'Globex']);
+      expect(group.querySelector('.field-note')?.textContent).toBe('Used on the last 3 orders');
+      expect(group.querySelector('.decline')?.textContent).toBe('None of these');
+      for (const b of group.querySelectorAll('button')) expect(b.getAttribute('type')).toBe('button');
+    });
+
+    it('shows the first suggestion in the empty field in place of its placeholder', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [{ field: 'vendor', type: 'text', placeholder: 'Type a vendor' }],
+        fieldStates: { vendor: { suggestions: ['Acme'] } },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('input')!.getAttribute('placeholder')).toBe('Acme');
+    });
+
+    it('keeps the placeholder once the field holds a value', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { vendor: 'Initech' },
+        fields: [{ field: 'vendor', type: 'text', placeholder: 'Type a vendor' }],
+        fieldStates: { vendor: { suggestions: ['Acme'] } },
+      });
+      const shadow = await render(el);
+      expect(shadow.querySelector('input')!.getAttribute('placeholder')).toBe('Type a vendor');
+    });
+
+    it('picking a suggestion puts it in the field, then reports the pick and the change', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [{ field: 'qty', type: 'number' }],
+        fieldStates: { qty: { suggestions: ['12'] } },
+      });
+      const seen = events(el);
+      const shadow = await render(el);
+      (shadow.querySelector('.suggestion') as HTMLButtonElement).click();
+      await el.updateComplete;
+      expect(seen.map((e) => [e.type, e.data])).toEqual([
+        ['suggestion-pick', { field: 'qty', value: 12 }],
+        ['change', { field: 'qty', value: 12 }],
+      ]);
+      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('12');
+      expect(shadow.querySelector('.suggestion')!.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('a pick adds one choice to a multiselect', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { tags: ['a'] },
+        fields: [{ field: 'tags', type: 'multiselect', options: ['a', 'b'] }],
+        fieldStates: { tags: { suggestions: ['b'] } },
+      });
+      const seen = events(el);
+      const shadow = await render(el);
+      (shadow.querySelector('.suggestion') as HTMLButtonElement).click();
+      await el.updateComplete;
+      expect(seen[0]).toMatchObject({ type: 'suggestion-pick', data: { field: 'tags', value: 'b' } });
+      expect(seen[1]).toMatchObject({ type: 'change', data: { field: 'tags', value: ['a', 'b'] } });
+    });
+
+    it('declining reports it and changes nothing', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { vendor: '' },
+        fields: [{ field: 'vendor', type: 'text' }],
+        fieldStates: { vendor: { suggestions: ['Acme'], decline: 'No' } },
+      });
+      const seen = events(el);
+      const shadow = await render(el);
+      (shadow.querySelector('.decline') as HTMLButtonElement).click();
+      await el.updateComplete;
+      expect(seen).toEqual([expect.objectContaining({ type: 'suggestion-decline', data: { field: 'vendor' } })]);
+      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('');
+    });
+
+    it('a new fieldStates keeps what the user typed', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'vendor', type: 'text' }] });
+      const shadow = await render(el);
+      const input = shadow.querySelector('input') as HTMLInputElement;
+      input.value = 'Init';
+      input.dispatchEvent(new Event('input'));
+      await el.updateComplete;
+      el.spec = { ...el.spec!, fieldStates: { vendor: { suggestions: ['Initech'] } } };
+      await el.updateComplete;
+      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('Init');
+      expect(shadow.querySelector('.suggestion')?.textContent).toBe('Initech');
+    });
+
+    it('a suggested choice shows as its option label', async () => {
+      const el = createElement({
+        widget: 'form',
+        fields: [{ field: 'site', type: 'select', options: [{ value: 'plant-b', label: 'Plant B' }] }],
+        fieldStates: { site: { suggestions: ['plant-b'] } },
+      });
+      const seen = events(el);
+      const shadow = await render(el);
+      const button = shadow.querySelector('.suggestion') as HTMLButtonElement;
+      expect(button.textContent).toBe('Plant B');
+      button.click();
+      expect(seen[0]).toMatchObject({ type: 'suggestion-pick', data: { field: 'site', value: 'plant-b' } });
+    });
+
+    it('draws nothing for a field with no state', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'a', type: 'text' }], fieldStates: { b: { suggestions: ['x'] } } });
+      const shadow = await render(el);
+      expect(shadow.querySelector('.suggestions')).toBeNull();
+    });
+  });
 });

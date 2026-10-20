@@ -33,6 +33,8 @@ export interface UWidgetLocaleStrings {
   invalidEmail: string;
   invalidUrl: string;
   invalidPattern: string;
+  /** Accessible name of a form field's list of suggested values (`fieldStates`) — template with {label}. */
+  suggestionsFor: string;
   // Accessible names of widget regions (used when the spec has no title)
   actions: string;
   citations: string;
@@ -99,6 +101,7 @@ const EN: UWidgetLocaleStrings = {
   invalidEmail: '{label} must be a valid email address',
   invalidUrl: '{label} must be a valid URL',
   invalidPattern: '{label} format is invalid',
+  suggestionsFor: 'Suggestions for {label}',
   // Region names
   actions: 'Actions',
   citations: 'Citations',

@@ -4,7 +4,7 @@ import { WIDGET_OPTIONS, getWidgetOptions } from './widget-meta.js';
 
 /** The top-level keys a spec may carry, besides `widget` — anything else is not read by any widget. */
 const SPEC_KEYS = new Set([
-  'id', 'title', 'description', 'data', 'mapping', 'fields', 'formdown', 'options', 'actions',
+  'id', 'title', 'description', 'data', 'mapping', 'fields', 'formdown', 'fieldStates', 'options', 'actions',
   'type', 'version', 'layout', 'columns', 'children', 'span', 'collapsed',
 ]);
 

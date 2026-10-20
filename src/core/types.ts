@@ -233,6 +233,22 @@ export interface UWidgetFieldDefinition {
   message?: string;
 }
 
+/**
+ * What the host says about one form field (`spec.fieldStates[field]`).
+ *
+ * The first suggestion shows in the empty field in place of its placeholder; every suggestion is listed under the
+ * field as a button, beside the note. Picking one puts it in the field (a `suggestion-pick` event, then `change`);
+ * with `decline`, a button with that label follows (a `suggestion-decline` event — nothing in the form changes).
+ */
+export interface UWidgetFieldState {
+  /** Values offered for the field, as text — a number field reads them as numbers. */
+  suggestions?: string[];
+  /** Why — shown beside the suggestions (the evidence behind them). */
+  note?: string;
+  /** Label of a button that declines the suggestions. */
+  decline?: string;
+}
+
 // ── Actions ──
 
 /**
@@ -275,7 +291,7 @@ export interface UWidgetAction {
  */
 export interface UWidgetEvent {
   /** Event category. */
-  type: 'submit' | 'action' | 'change' | 'select';
+  type: 'submit' | 'action' | 'change' | 'select' | 'suggestion-pick' | 'suggestion-decline';
   /** The widget type that emitted this event. */
   widget: string;
   /** Widget instance `id` (if set in the spec). */
@@ -284,6 +300,8 @@ export interface UWidgetEvent {
   action?: string;
   /**
    * Event payload data.
+   *
+   * `suggestion-pick` on `form`: `field` and the `value` picked (already in the field). `suggestion-decline`: `field`.
    *
    * `select` on `table`/`list`: the row's fields plus `_index`, its index in `spec.data`. On a
    * chart: `name`, `seriesName`, `value` and `dataIndex` (the mark's index within its series), plus
@@ -400,6 +418,11 @@ export interface UWidgetSpec {
   fields?: UWidgetFieldDefinition[];
   /** Formdown shorthand syntax for form fields (mutually exclusive with `fields`). */
   formdown?: string;
+  /**
+   * What the host says about each form field, by field name — values it suggests, a note on why, and a way to decline
+   * them. Same shape as `fieldStates` of `@formdown/ui`'s `<formdown-ui>`, so one suggestion source serves both.
+   */
+  fieldStates?: Record<string, UWidgetFieldState>;
   /**
    * Widget-specific rendering options.
    *

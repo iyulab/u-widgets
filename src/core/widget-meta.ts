@@ -475,7 +475,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'table': 'mapping.columns omittable — auto-inferred from data keys.',
   'list': 'mapping omittable if data has primary/secondary keys. Otherwise set mapping.',
-  'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults.',
+  'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults. fieldStates (by field name: suggestions, note, decline) offers values to pick.',
   'confirm': 'Uses title, description, actions. data is optional.',
   'markdown': 'No mapping. data is {content: "markdown string"}.',
   'image': 'No mapping. data is {src, alt?, caption?}.',
