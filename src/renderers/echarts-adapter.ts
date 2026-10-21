@@ -456,6 +456,7 @@ function buildMarkLine(
   refLines: ReferenceLineOption[],
   toX: (value: number | string) => unknown = (v) => v,
   xLabelPosition = 'end',
+  yLabelPosition: (value: number | string) => string = () => 'insideEndTop',
 ): Record<string, unknown> {
   return {
     silent: true,
@@ -468,7 +469,7 @@ function buildMarkLine(
         // right edge, which the grid leaves no room for, and a label longer than the margin was cut off.
         // No outline: ECharts strokes a label set inside the plot with a contrasting border, which on a dark board drew
         // the words doubled. In the line's colour when it has one; otherwise the theme's (uw-chart sets it).
-        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : 'insideEndTop', textBorderWidth: 0, ...(rl.color && { color: rl.color }) };
+        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : yLabelPosition(rl.value), textBorderWidth: 0, ...(rl.color && { color: rl.color }) };
       }
       const lineStyle: Record<string, unknown> = {};
       if (rl.color) lineStyle.color = rl.color;
@@ -592,7 +593,13 @@ function buildCartesian(
   if (Array.isArray(refLines) && refLines.length > 0 && seriesItems.length > 0) {
     // A horizontal chart's category axis is inverted (first category on top), as a gantt's rows are — 'start' is
     // the top of a vertical line there, while 'end' would sit on the value axis's tick labels.
-    seriesItems[0].markLine = buildMarkLine(refLines, undefined, options.horizontal ? 'start' : 'end');
+    seriesItems[0].markLine = buildMarkLine(refLines, undefined, options.horizontal ? 'start' : 'end', (value) => {
+      // A y line's label sits above one of its ends, over the first or the last category: at the right end unless the
+      // data there reaches the line and the data at the left end does not — then it would be drawn over the last bar.
+      const reach = (row: unknown) => Math.max(...yFields.map((f) => Number((row as Record<string, unknown>)[f]) || 0));
+      const line = Number(value);
+      return data.length > 1 && reach(data[data.length - 1]) >= line && reach(data[0]) < line ? 'insideStartTop' : 'insideEndTop';
+    });
   }
 
   return result;

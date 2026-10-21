@@ -874,12 +874,29 @@ describe('toEChartsOption', () => {
       expect(mlData.length).toBe(1);
       expect(mlData[0].yAxis).toBe(10);
       expect(mlData[0].name).toBe('Threshold');
-      // Inside the plot, above the line's right end — outside the plot's edge it was cut off.
-      expect((mlData[0].label as Obj).position).toBe('insideEndTop');
+      // Inside the plot, above the line's left end: the last bar (15) rises through the right end, the first (5) does not.
+      expect((mlData[0].label as Obj).position).toBe('insideStartTop');
       // In the line's colour and with no outline — the outline ECharts gives an inside label drew it doubled on a dark board.
       expect(mlData[0].label).toMatchObject({ color: 'red', textBorderWidth: 0 });
       expect((mlData[0].lineStyle as Obj).color).toBe('red');
       expect((mlData[0].lineStyle as Obj).type).toBe('dashed');
+    });
+
+    it('labels a y line above its right end, unless the data reaches the line there and not at the left end', () => {
+      const position = (values: number[]) => {
+        const result = toEChartsOption(spec({
+          widget: 'chart.bar',
+          data: values.map((v, i) => ({ name: `c${i}`, v })),
+          mapping: { x: 'name', y: 'v' },
+          options: { referenceLines: [{ value: 30, label: 'Target' }] },
+        }));
+        return ((((result.series as ObjArray)[0].markLine as Obj).data as ObjArray)[0].label as Obj).position;
+      };
+      // Outside the plot's right edge it was cut off, so it stays inside — at the right end while the last bar is under it.
+      expect(position([40, 20, 25])).toBe('insideEndTop');
+      expect(position([20, 25, 34])).toBe('insideStartTop');
+      // Both ends reach the line: no end is clear; the right end, as before.
+      expect(position([35, 20, 34])).toBe('insideEndTop');
     });
 
     it('labels a value line of a horizontal bar chart at its top, clear of the value axis labels', () => {
