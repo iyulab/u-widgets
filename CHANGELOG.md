@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.38.2] - 2026-10-21
+
+MCP server 0.7.2 follows `^0.38.0` and takes this release as it is.
+
 ### Fixed
 
 - A funnel stage far narrower than the widest (under 30 % of it) is named beside it, on the right with a leader line,
@@ -10,7 +14,6 @@
 - A y reference line's label is drawn where no bar reaches it: above the line's right end as before, its left end when
   the data at the right end reaches the line, and past the plot's right end — with room made for it on a small
   chart — when the data reaches it at both ends. It was drawn over the last bar.
-
 
 ## [0.38.1] - 2026-10-21
 
