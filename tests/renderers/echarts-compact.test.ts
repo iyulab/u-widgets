@@ -54,6 +54,17 @@ describe('toEChartsOption — compact layout', () => {
     expect(o.legend).toMatchObject({ top: 0, itemWidth: 12 });
   });
 
+  it('leaves room past the right end for a reference line label the bars reach at both ends', () => {
+    const bars = (values: number[]) => ({
+      widget: 'chart.bar',
+      data: values.map((v, i) => ({ c: `c${i}`, v })),
+      mapping: { x: 'c', y: 'v' },
+      options: { referenceLines: [{ value: 30, label: '목표' }] },
+    }) as UWidgetSpec;
+    expect((toEChartsOption(bars([34, 20, 32]), { width: 340, height: 220 }).grid as Obj).right).toBe(12 + 2 * 12 + 8);
+    expect((toEChartsOption(bars([34, 20, 12]), { width: 340, height: 220 }).grid as Obj).right).toBe(12);
+  });
+
   it('drops the legend when the canvas is too short for it', () => {
     const o = toEChartsOption(twoSeries, { width: 300, height: 120 });
     expect((o.legend as Obj).show).toBe(false);

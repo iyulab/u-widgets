@@ -7,8 +7,9 @@
 - A funnel stage far narrower than the widest (under 30 % of it) is named beside it, on the right with a leader line,
   instead of inside — the name ran past the stage's edges when a funnel narrowed sharply (visits 61,700 → orders
   2,184).
-- A y reference line's label moves to the line's left end when the data at the right end reaches the line and the
-  data at the left end does not — it was drawn over the last bar. Otherwise it stays above the right end.
+- A y reference line's label is drawn where no bar reaches it: above the line's right end as before, its left end when
+  the data at the right end reaches the line, and past the plot's right end — with room made for it on a small
+  chart — when the data reaches it at both ends. It was drawn over the last bar.
 
 
 ## [0.38.1] - 2026-10-21

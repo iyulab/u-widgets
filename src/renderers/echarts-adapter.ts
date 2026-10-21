@@ -255,13 +255,18 @@ function applyCompactLayout(
     const keepLegend = legendVisible && showLegend;
     if (legend) result.legend = keepLegend ? { ...legend, top: 0, ...COMPACT_LEGEND } : { ...legend, show: false };
     if (result.visualMap) result.visualMap = { ...(result.visualMap as Record<string, unknown>), show: false };
-    // A mark line's label (a reference line, gantt's makespan) sits above the plot's top edge.
-    const markLineLabel = (result.series as Record<string, unknown>[] | undefined)?.some((s) => s.markLine) ? 14 : 0;
+    // A mark line's label (a reference line, gantt's makespan) sits above the plot's top edge — or, for a y line whose
+    // label goes past the plot's right end, beside it: room for its words there.
+    const markLines = ((result.series as Record<string, unknown>[] | undefined) ?? []).flatMap((s) => ((s.markLine as { data?: Record<string, unknown>[] } | undefined)?.data ?? []));
+    const markLineLabel = markLines.length > 0 ? 14 : 0;
+    const besideRight = Math.max(0, ...markLines
+      .filter((m) => m.yAxis !== undefined && (m.label as { position?: string } | undefined)?.position === 'end')
+      .map((m) => String((m.label as { formatter?: unknown }).formatter ?? '').length * 12 + 8));
     // 'same' + 'all': the rect below is the outer bound, and the axis labels and names are fitted inside it.
     result.grid = {
       ...(result.grid as Record<string, unknown> | undefined),
       top: (keepLegend ? 28 : 12) + markLineLabel,
-      right: 12,
+      right: 12 + besideRight,
       bottom: 8,
       left: 8,
       outerBoundsMode: 'same',
@@ -594,11 +599,13 @@ function buildCartesian(
     // A horizontal chart's category axis is inverted (first category on top), as a gantt's rows are — 'start' is
     // the top of a vertical line there, while 'end' would sit on the value axis's tick labels.
     seriesItems[0].markLine = buildMarkLine(refLines, undefined, options.horizontal ? 'start' : 'end', (value) => {
-      // A y line's label sits above one of its ends, over the first or the last category: at the right end unless the
-      // data there reaches the line and the data at the left end does not — then it would be drawn over the last bar.
+      // A y line's label sits above one of its ends, inside the plot, where the data there stays under the line — the
+      // right end first; with the data reaching the line at both ends, past the plot's right edge (the layout leaves
+      // room for it there) rather than over a bar.
       const reach = (row: unknown) => Math.max(...yFields.map((f) => Number((row as Record<string, unknown>)[f]) || 0));
       const line = Number(value);
-      return data.length > 1 && reach(data[data.length - 1]) >= line && reach(data[0]) < line ? 'insideStartTop' : 'insideEndTop';
+      if (data.length === 0 || reach(data[data.length - 1]) < line) return 'insideEndTop';
+      return reach(data[0]) < line ? 'insideStartTop' : 'end';
     });
   }
 

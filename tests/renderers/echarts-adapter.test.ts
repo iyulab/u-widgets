@@ -895,8 +895,8 @@ describe('toEChartsOption', () => {
       // Outside the plot's right edge it was cut off, so it stays inside — at the right end while the last bar is under it.
       expect(position([40, 20, 25])).toBe('insideEndTop');
       expect(position([20, 25, 34])).toBe('insideStartTop');
-      // Both ends reach the line: no end is clear; the right end, as before.
-      expect(position([35, 20, 34])).toBe('insideEndTop');
+      // Both ends reach the line: inside, it would sit over a bar either way — past the plot's right end instead.
+      expect(position([35, 20, 34])).toBe('end');
     });
 
     it('labels a value line of a horizontal bar chart at its top, clear of the value axis labels', () => {
