@@ -961,6 +961,9 @@ function guessNumberField(data: Record<string, unknown>[]): string | undefined {
   return Object.keys(first).find((k) => typeof first[k] === 'number');
 }
 
+/** Below this share of the widest stage, a funnel stage's name goes outside it. */
+const FUNNEL_LABEL_INSIDE_MIN = 0.3;
+
 function buildFunnel(
   data: unknown,
   mapping: NormalizedMapping | undefined,
@@ -973,10 +976,15 @@ function buildFunnel(
 
   if (!labelField || !valueField) return {};
 
-  const seriesData = (data as Record<string, unknown>[]).map((row) => ({
+  const rows = (data as Record<string, unknown>[]).map((row) => ({
     name: String(row[labelField] ?? ''),
     value: Number(row[valueField] ?? 0),
   }));
+  // A stage far narrower than the widest has no room for its name inside: it is named beside it, on the right, with a
+  // leader line — where a narrow stage leaves the funnel's box empty.
+  const widest = Math.max(0, ...rows.map((r) => r.value));
+  const narrow = (value: number) => widest > 0 && value / widest < FUNNEL_LABEL_INSIDE_MIN;
+  const seriesData = rows.map((r) => (narrow(r.value) ? { ...r, label: { position: 'right' }, labelLine: { show: true } } : r));
 
   return {
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },

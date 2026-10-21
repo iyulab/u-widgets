@@ -1195,6 +1195,33 @@ describe('toEChartsOption', () => {
       expect((series[0].data as ObjArray).length).toBe(2);
     });
 
+    it('names a stage far narrower than the widest beside it, on the right, with a leader line', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.funnel',
+        data: [
+          { stage: 'Visit', count: 61700 },
+          { stage: 'View', count: 32400 },
+          { stage: 'Cart', count: 8900 },
+          { stage: 'Order', count: 2184 },
+        ],
+        mapping: { label: 'stage', value: 'count' },
+      }));
+      const series = (result.series as ObjArray)[0];
+      const data = series.data as ObjArray;
+      expect(data.map((d) => (d.label as { position?: string } | undefined)?.position)).toEqual([undefined, undefined, 'right', 'right']);
+      expect(data[3].labelLine).toEqual({ show: true });
+    });
+
+    it('keeps every name inside when no stage is that narrow', () => {
+      const result = toEChartsOption(spec({
+        widget: 'chart.funnel',
+        data: [{ stage: 'A', count: 100 }, { stage: 'B', count: 60 }, { stage: 'C', count: 35 }],
+        mapping: { label: 'stage', value: 'count' },
+      }));
+      const series = (result.series as ObjArray)[0];
+      expect((series.data as ObjArray).every((d) => d.label === undefined)).toBe(true);
+    });
+
     it('has legend', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.funnel',

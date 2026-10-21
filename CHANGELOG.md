@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A funnel stage far narrower than the widest (under 30 % of it) is named beside it, on the right with a leader line,
+  instead of inside — the name ran past the stage's edges when a funnel narrowed sharply (visits 61,700 → orders
+  2,184).
+
+
 ## [0.38.1] - 2026-10-21
 
 MCP server 0.7.2 follows `^0.38.0` and takes this release as it is.
