@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-10-21
+
+MCP server 0.7.3 follows `^0.39.0`.
+
 ### Changed
 
 - A chart with axes (bar, line, area, scatter, box, histogram, waterfall, gantt, heatmap) lays itself out to its canvas
