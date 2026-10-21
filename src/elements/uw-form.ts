@@ -1,14 +1,47 @@
 import { LitElement, html, css, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent, FieldType } from '../core/types.js';
-import { getLocaleStrings, formatTemplate } from '../core/locale.js';
+import { customElement, property, query } from 'lit/decorators.js';
+import '@formdown/ui';
+import type { FormdownUI } from '@formdown/ui';
+import { typedData, type ValidationMessages } from '@formdown/core';
+import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
+import { getLocaleStrings, type UWidgetLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { optionValue, optionLabel } from '../core/field-option.js';
-import { getFieldControl } from '../core/field-controls.js';
+import { toFormdown } from '../core/formdown.js';
 
+/** The parts of the drawn fields, passed through `<formdown-ui>` so a page styles them as `uw-form::part(…)`. */
+const FIELD_PARTS = [
+  'field', 'label', 'input', 'field-error', 'radio-group', 'checkbox-group', 'description',
+  'option-label', 'suggestion', 'decline', 'field-note',
+].join(', ');
+
+/** The widget's locale sentences, by formdown's rule names. */
+function messagesOf(locale: UWidgetLocaleStrings): Partial<ValidationMessages> {
+  return {
+    required: locale.required,
+    minLength: locale.minLength,
+    maxLength: locale.maxLength,
+    min: locale.minValue,
+    max: locale.maxValue,
+    number: locale.invalidNumber,
+    email: locale.invalidEmail,
+    url: locale.invalidUrl,
+    tel: locale.invalidTel,
+    date: locale.invalidDate,
+    dateMin: locale.dateMin,
+    dateMax: locale.dateMax,
+    pattern: locale.invalidPattern,
+  };
+}
+
+/**
+ * The form and confirm widgets. A form's fields are drawn, checked and offered suggestions by `<formdown-ui>`
+ * (`@formdown/ui`) from the spec's `fields`, written as formdown; the widget draws the actions and says what
+ * happened in its own events.
+ */
 @customElement('uw-form')
 export class UwForm extends LitElement {
   static styles = [themeStyles, css`
+
     /* 세로 flex 인 이유: 아래 form-container 가 flex item 이어야 호스트 제약이 그것에 닿는다. */
     :host {
       display: flex;
@@ -17,126 +50,45 @@ export class UwForm extends LitElement {
       container: uw-form / inline-size;
     }
 
-    /* ⚠.multiselect-group 의 max-height 180px 와 다른 «층» 이다 — 그것은 한 필드 «안» 의
-       상한이고 이것은 폼 전체가 호스트 제약을 받는 축이다. 둘은 충돌하지 않는다. */
     .form-container {
       display: flex;
       flex-direction: column;
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
-      gap: 16px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .field-label {
-      font-size: var(--u-widget-font-size-label, 0.8125rem);
-      font-weight: 600;
-      color: var(--u-widget-text, #1a1a2e);
-    }
-
-    .field-label .required {
-      color: var(--u-widget-negative, #dc2626);
-      margin-left: 2px;
-    }
-
-    input,
-    textarea,
-    select {
-      padding: 8px 12px;
-      border: 1px solid var(--u-widget-border, #e2e8f0);
-      border-radius: 6px;
-      font-size: var(--u-widget-font-size, 0.875rem);
-      font-family: inherit;
-      color: var(--u-widget-text, #1a1a2e);
-      background: var(--u-widget-bg, #fff);
-      outline: none;
-      transition: border-color var(--u-widget-duration-fast, 150ms);
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: var(--u-widget-primary, #4f46e5);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--u-widget-primary, #4f46e5) 10%, transparent);
-    }
-
-    textarea {
-      resize: vertical;
-    }
-
-    .toggle-wrapper {
-      display: flex;
-      align-items: center;
       gap: 8px;
     }
 
-    .toggle-track {
-      width: 44px;
-      height: 24px;
-      border-radius: 12px;
-      background: var(--u-widget-border, #e2e8f0);
-      cursor: pointer;
-      position: relative;
-      transition: background var(--u-widget-duration-normal, 200ms);
-    }
-
-    .toggle-track[data-on='true'] {
-      background: var(--u-widget-primary, #4f46e5);
-    }
-
-    .toggle-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: transform var(--u-widget-duration-normal, 200ms);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    .toggle-track[data-on='true'] .toggle-thumb {
-      transform: translateX(20px);
-    }
-
-    .checkbox-group,
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .multiselect-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      border: 1px solid var(--u-widget-border, #e2e8f0);
-      border-radius: 6px;
-      padding: 8px;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-
-    /* 🔴포인터 타깃은 13x13 네이티브 입력이 아니라 «이 라벨»이다 — 라벨을 누르면 토글되므로
-       WCAG 2.2 SC 2.5.8 이 재는 「포인터 동작을 받는 영역」이 여기다. 실측 343x19 로 높이가
-       5px 모자랐다. 입력 자체에 치수를 주면 브라우저가 체크 글리프를 박스에 맞춰 키워
-       시각이 바뀌지만, 라벨 행의 하한은 글리프를 건드리지 않는다. */
-    .checkbox-group label,
-    .radio-group label,
-    .multiselect-group label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-block-size: 24px;
-      font-size: var(--u-widget-font-size, 0.875rem);
-      cursor: pointer;
+    /* 필드는 <formdown-ui> 가 그린다. 그 모양은 그것의 사용자 정의 속성으로 — 위젯 토큰에서 — 정해, 테마가 다른 위젯에
+       닿듯 필드에도 닿는다. 스크롤은 위의 form-container 한 곳이다. */
+    formdown-ui {
+      flex: 0 0 auto;
+      overflow: visible;
+      background: transparent;
+      --formdown-font-family: inherit;
+      --formdown-text-primary: var(--u-widget-text, #1a1a2e);
+      --formdown-text-secondary: var(--u-widget-text-secondary, #64748b);
+      --formdown-note-color: var(--u-widget-text-secondary, #64748b);
+      --formdown-ghost-color: var(--u-widget-text-secondary, #64748b);
+      --formdown-border-color: var(--u-widget-border, #e2e8f0);
+      --formdown-bg-primary: var(--u-widget-bg, #fff);
+      --formdown-bg-secondary: var(--u-widget-surface, #f1f5f9);
+      --formdown-accent-color: var(--u-widget-primary, #4f46e5);
+      --formdown-switch-on-color: var(--u-widget-primary, #4f46e5);
+      --formdown-switch-off-color: var(--u-widget-border, #e2e8f0);
+      --formdown-input-focus-ring-color: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 10%, transparent);
+      --formdown-error-color: var(--u-widget-negative, #dc2626);
+      --formdown-suggestion-bg: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 8%, var(--u-widget-bg, #fff));
+      --formdown-suggestion-border-color: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 30%, transparent);
+      --formdown-font-size-base: var(--u-widget-font-size, 0.875rem);
+      --formdown-font-size-sm: var(--u-widget-font-size-label, 0.8125rem);
+      --formdown-font-weight-medium: 600;
+      --formdown-input-padding-y: 8px;
+      --formdown-input-padding-x: 12px;
+      --formdown-input-border-radius: 6px;
+      --formdown-label-margin: 4px;
+      --formdown-field-gap: 16px;
+      --formdown-spacing-md: 16px;
     }
 
     .actions {
@@ -178,62 +130,6 @@ export class UwForm extends LitElement {
       border-color: transparent;
     }
 
-    .field-error {
-      font-size: var(--u-widget-font-size-caption, 0.75rem);
-      color: var(--u-widget-negative, #dc2626);
-      margin-top: 2px;
-    }
-
-    /* fieldStates — what the host offers for the field: value buttons, the note on why, a decline button. */
-    .suggestions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .suggestions button {
-      padding: 2px 10px;
-      border-radius: 999px;
-      font-size: var(--u-widget-font-size-caption, 0.75rem);
-      font-weight: 500;
-    }
-
-    .suggestion {
-      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 8%, var(--u-widget-bg, #fff));
-      border: 1px solid color-mix(in srgb, var(--u-widget-primary, #4f46e5) 30%, transparent);
-      color: var(--u-widget-text, #1a1a2e);
-    }
-
-    .suggestion[aria-pressed='true'] {
-      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 18%, var(--u-widget-bg, #fff));
-      border-color: var(--u-widget-primary, #4f46e5);
-    }
-
-    .decline {
-      background: transparent;
-      border: 1px solid var(--u-widget-border, #e2e8f0);
-      color: var(--u-widget-text-secondary, #64748b);
-    }
-
-    .field-note {
-      font-size: var(--u-widget-font-size-caption, 0.75rem);
-      color: var(--u-widget-text-secondary, #64748b);
-    }
-
-    input.invalid,
-    textarea.invalid,
-    select.invalid {
-      border-color: var(--u-widget-negative, #dc2626);
-    }
-
-    input.invalid:focus,
-    textarea.invalid:focus,
-    select.invalid:focus {
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--u-widget-negative, #dc2626) 10%, transparent);
-    }
-
     /* ── confirm ── */
     .confirm-container {
       display: flex;
@@ -248,17 +144,13 @@ export class UwForm extends LitElement {
     }
 
     @container uw-form (max-width: 20rem) {
-      .form-container {
-        gap: 12px;
-      }
-
-      .field-label {
-        font-size: var(--u-widget-font-size-caption, 0.75rem);
-      }
-
-      input, textarea, select {
-        font-size: var(--u-widget-font-size-label, 0.8125rem);
-        padding: 6px 8px;
+      formdown-ui {
+        --formdown-field-gap: 12px;
+        --formdown-spacing-md: 12px;
+        --formdown-font-size-sm: var(--u-widget-font-size-caption, 0.75rem);
+        --formdown-font-size-base: var(--u-widget-font-size-label, 0.8125rem);
+        --formdown-input-padding-y: 6px;
+        --formdown-input-padding-x: 8px;
       }
 
       .actions {
@@ -283,11 +175,14 @@ export class UwForm extends LitElement {
   @property({ type: String, reflect: true })
   theme: string | null = null;
 
-  @state()
-  private _formData: Record<string, unknown> = {};
+  @query('formdown-ui')
+  private _fields!: FormdownUI | null;
 
-  @state()
-  private _errors: Record<string, string> = {};
+  /** The formdown text the fields are drawn from — written again only when the spec's `fields` change. */
+  private _content = '';
+
+  /** Values to put in the fields at the next render — the spec's `data` when it is new. */
+  private _pendingData: Record<string, unknown> | null = null;
 
   willUpdate(changed: Map<string, unknown>) {
     if (changed.has('spec') && this.spec) {
@@ -295,13 +190,20 @@ export class UwForm extends LitElement {
       // `u-widget` builds a new spec object on every render (locale propagation, inferred mapping) — only new
       // `data` or `fields` from the caller is a new form. Resetting on any new object threw away what the user had
       // typed whenever the host re-rendered (a theme or locale switch).
-      if (!prev || prev.data !== this.spec.data || prev.fields !== this.spec.fields) {
-        this._formData = { ...(this.spec.data as Record<string, unknown> ?? {}) };
-        this._errors = {};
-      } else if (prev.options?.locale !== this.spec.options?.locale && Object.keys(this._errors).length) {
-        // The messages on screen were written in the old locale — rewrite the ones still showing.
-        this._rewriteErrors();
+      if (!prev || prev.fields !== this.spec.fields) {
+        this._content = toFormdown(this.spec.fields ?? []);
       }
+      if (!prev || prev.data !== this.spec.data || prev.fields !== this.spec.fields) {
+        this._pendingData = { ...((this.spec.data as Record<string, unknown>) ?? {}) };
+      }
+    }
+  }
+
+  updated() {
+    // After the content: `<formdown-ui>` draws the new fields, then fills them from `data`.
+    if (this._pendingData && this._fields) {
+      this._fields.data = this._pendingData;
+      this._pendingData = null;
     }
   }
 
@@ -316,14 +218,25 @@ export class UwForm extends LitElement {
   }
 
   private renderForm() {
-    const fields = this.spec!.fields ?? [];
     const actions = this.spec!.actions ?? [];
 
     return html`
-      <form class="form-container" part="form" @submit=${this._onFormSubmit}>
-        ${fields.map((f) => this.renderField(f))}
+      <div class="form-container" part="form">
+        <formdown-ui
+          exportparts=${FIELD_PARTS}
+          body-html="escape"
+          .content=${this._content}
+          .fieldStates=${this.spec!.fieldStates ?? {}}
+          .messages=${messagesOf(this._locale)}
+          @formdown-change=${this._onFieldChange}
+          @formdown-data-update=${this._stop}
+          @form-submit=${this._stop}
+          @validation-error=${this._stop}
+          @formdown-suggestion-pick=${this._onPick}
+          @formdown-suggestion-decline=${this._onDecline}
+        ></formdown-ui>
         ${actions.length > 0 ? this.renderActions(actions) : nothing}
-      </form>
+      </div>
     `;
   }
 
@@ -339,294 +252,16 @@ export class UwForm extends LitElement {
     `;
   }
 
-  private renderField(field: UWidgetFieldDefinition) {
-    const value = this._formData[field.field];
-    const type = field.type ?? 'text';
-    const error = this._errors[field.field];
-    const errorId = `err-${field.field}`;
-
-    return html`
-      <div class="field" part="field">
-        ${field.label
-          ? html`<label class="field-label" for=${`input-${field.field}`} part="label"
-              >${field.label}${field.required ? html`<span class="required">*</span>` : nothing}</label
-            >`
-          : nothing}
-        ${this.renderInput(field, type, value, error ? errorId : undefined)}
-        ${this.renderSuggestions(field, value)}
-        ${error ? html`<div class="field-error" id=${errorId} role="alert" part="field-error">${error}</div>` : nothing}
-      </div>
-    `;
-  }
-
-  private renderInput(
-    field: UWidgetFieldDefinition,
-    type: string,
-    value: unknown,
-    errorId?: string,
-  ) {
-    const hasError = !!this._errors[field.field];
-
-    // An optional entry point (`u-widgets/components`) may have replaced this type's control.
-    const control = getFieldControl(type as FieldType);
-    if (control) {
-      return control({
-        field,
-        value,
-        id: `input-${field.field}`,
-        hasError,
-        errorId,
-        onChange: (next) => this._onChange(field.field, next),
-      });
-    }
-
-    switch (type) {
-      case 'textarea':
-        return html`<textarea
-          id=${`input-${field.field}`}
-          class=${hasError ? 'invalid' : ''}
-          .value=${String(value ?? '')}
-          placeholder=${this._placeholder(field, value)}
-          rows=${field.rows ?? 3}
-          ?required=${field.required}
-          minlength=${field.minLength ?? ''}
-          maxlength=${field.maxLength ?? ''}
-          aria-invalid=${hasError ? 'true' : 'false'}
-          aria-describedby=${errorId ?? nothing}
-          ?aria-required=${field.required}
-          @input=${(e: Event) => this._onChange(field.field, (e.target as HTMLTextAreaElement).value)}
-          part="input"
-        ></textarea>`;
-
-      case 'select':
-        return html`<select
-          id=${`input-${field.field}`}
-          class=${hasError ? 'invalid' : ''}
-          .value=${String(value ?? '')}
-          ?required=${field.required}
-          aria-invalid=${hasError ? 'true' : 'false'}
-          aria-describedby=${errorId ?? nothing}
-          @change=${(e: Event) => this._onChange(field.field, (e.target as HTMLSelectElement).value)}
-          part="input"
-        >
-          <option value="">--</option>
-          ${(field.options ?? []).map(
-            // `selected` per option, not only `.value` on the select: Lit commits the select's own
-            // bindings before its children, so on first render `.value` names an option that does
-            // not exist yet and a pre-filled value showed as "--".
-            (o) => html`<option value=${optionValue(o)} ?selected=${optionValue(o) === String(value ?? '')}>${optionLabel(o)}</option>`,
-          )}
-        </select>`;
-
-      case 'multiselect':
-        return html`<div class="multiselect-group" part="multiselect-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
-          ${(field.options ?? []).map(
-            (o) => { const opt = optionValue(o); return html`
-              <label>
-                <input
-                  type="checkbox"
-                  value=${opt}
-                  ?checked=${Array.isArray(value) && value.includes(opt)}
-                  @change=${(e: Event) => {
-                    const checked = (e.target as HTMLInputElement).checked;
-                    const current = Array.isArray(value) ? [...value] : [];
-                    this._onChange(
-                      field.field,
-                      checked ? [...current, opt] : current.filter((v) => v !== opt),
-                    );
-                  }}
-                />
-                ${optionLabel(o)}
-              </label>
-            `; },
-          )}
-        </div>`;
-
-      case 'toggle':
-        return html`<div class="toggle-wrapper">
-          <div
-            class="toggle-track"
-            data-on=${!!value}
-            role="switch"
-            aria-checked=${!!value}
-            aria-label=${field.label ?? field.field}
-            tabindex="0"
-            @click=${() => this._onChange(field.field, !value)}
-            @keydown=${(e: KeyboardEvent) => {
-              if (e.key === ' ' || e.key === 'Enter') {
-                e.preventDefault();
-                this._onChange(field.field, !value);
-              }
-            }}
-            part="toggle"
-          >
-            <div class="toggle-thumb"></div>
-          </div>
-        </div>`;
-
-      case 'radio':
-        return html`<div class="radio-group" part="radio-group" role="radiogroup" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
-          ${(field.options ?? []).map(
-            (o) => { const opt = optionValue(o); return html`
-              <label>
-                <input
-                  type="radio"
-                  name=${field.field}
-                  value=${opt}
-                  ?checked=${value === opt}
-                  @change=${() => this._onChange(field.field, opt)}
-                />
-                ${optionLabel(o)}
-              </label>
-            `; },
-          )}
-        </div>`;
-
-      case 'checkbox':
-        return html`<div class="checkbox-group" part="checkbox-group" role="group" aria-label=${field.label ?? field.field} aria-invalid=${hasError ? 'true' : 'false'} aria-describedby=${errorId ?? nothing}>
-          ${(field.options ?? []).map(
-            (o) => { const opt = optionValue(o); return html`
-              <label>
-                <input
-                  type="checkbox"
-                  value=${opt}
-                  ?checked=${Array.isArray(value) && value.includes(opt)}
-                  @change=${(e: Event) => {
-                    const checked = (e.target as HTMLInputElement).checked;
-                    const current = Array.isArray(value) ? [...value] : [];
-                    this._onChange(
-                      field.field,
-                      checked ? [...current, opt] : current.filter((v) => v !== opt),
-                    );
-                  }}
-                />
-                ${optionLabel(o)}
-              </label>
-            `; },
-          )}
-        </div>`;
-
-      default: {
-        // Map deprecated 'datetime' to the valid HTML input type
-        const htmlType = type === 'datetime' ? 'datetime-local' : type;
-        return html`<input
-          type=${htmlType}
-          id=${`input-${field.field}`}
-          class=${hasError ? 'invalid' : ''}
-          .value=${String(value ?? '')}
-          placeholder=${this._placeholder(field, value)}
-          ?required=${field.required}
-          aria-invalid=${hasError ? 'true' : 'false'}
-          aria-describedby=${errorId ?? nothing}
-          ?aria-required=${field.required}
-          min=${field.min ?? ''}
-          max=${field.max ?? ''}
-          step=${field.step ?? ''}
-          minlength=${field.minLength ?? ''}
-          maxlength=${field.maxLength ?? ''}
-          pattern=${field.pattern ?? ''}
-          @input=${(e: Event) => {
-            const raw = (e.target as HTMLInputElement).value;
-            const coerced = (type === 'number' || type === 'range') && raw !== ''
-              ? Number(raw) : raw;
-            this._onChange(field.field, coerced);
-          }}
-          part="input"
-        />`;}
-    }
-  }
-
-  /** The first suggestion stands in for the placeholder while the field is empty. */
-  private _placeholder(field: UWidgetFieldDefinition, value: unknown): string {
-    const first = this.spec?.fieldStates?.[field.field]?.suggestions?.[0];
-    const empty = value == null || value === '' || (Array.isArray(value) && value.length === 0);
-    return empty && first ? first : (field.placeholder ?? '');
-  }
-
-  private renderSuggestions(field: UWidgetFieldDefinition, value: unknown) {
-    const state = this.spec?.fieldStates?.[field.field];
-    if (!state) return nothing;
-    const suggestions = state.suggestions ?? [];
-    if (suggestions.length === 0 && !state.note && !state.decline) return nothing;
-    const label = formatTemplate(this._locale.suggestionsFor, { label: field.label ?? field.field });
-    return html`<div class="suggestions" part="suggestions" role="group" aria-label=${label}>
-      ${suggestions.map(
-        (s) => html`<button
-          type="button"
-          class="suggestion"
-          part="suggestion"
-          aria-pressed=${this._holds(field, value, s) ? 'true' : 'false'}
-          @click=${() => this._onPick(field, s)}
-        >${this._suggestionText(field, s)}</button>`,
-      )}
-      ${state.note ? html`<span class="field-note" part="note">${state.note}</span>` : nothing}
-      ${state.decline
-        ? html`<button type="button" class="decline" part="decline" @click=${() => this._onDecline(field)}>${state.decline}</button>`
-        : nothing}
-    </div>`;
-  }
-
-  /** A suggested choice shows as the option it names — its label, not its value. */
-  private _suggestionText(field: UWidgetFieldDefinition, s: string): string {
-    const option = field.options?.find((o) => optionValue(o) === s);
-    return option !== undefined ? optionLabel(option) : s;
-  }
-
-  /** A suggestion read as the field's value: a number for number and range, one more choice for a group of several. */
-  private _suggestedValue(field: UWidgetFieldDefinition, s: string, current: unknown): unknown {
-    const type = field.type ?? 'text';
-    if (type === 'number' || type === 'range') {
-      const n = Number(s);
-      return s.trim() !== '' && !Number.isNaN(n) ? n : s;
-    }
-    if (type === 'toggle') return s === 'true';
-    if (type === 'multiselect' || (type === 'checkbox' && (field.options?.length ?? 0) > 0)) {
-      const held = Array.isArray(current) ? current : [];
-      return held.includes(s) ? held : [...held, s];
-    }
-    return s;
-  }
-
-  private _holds(field: UWidgetFieldDefinition, value: unknown, s: string): boolean {
-    const picked = this._suggestedValue(field, s, undefined);
-    if (Array.isArray(picked)) return Array.isArray(value) && value.includes(s);
-    return value === picked;
-  }
-
-  private _onPick(field: UWidgetFieldDefinition, s: string) {
-    const value = this._suggestedValue(field, s, this._formData[field.field]);
-    this._emitEvent({
-      type: 'suggestion-pick',
-      widget: this.spec!.widget,
-      id: this.spec!.id,
-      // The value picked — for a group of several, the one choice added, not the whole selection.
-      data: { field: field.field, value: Array.isArray(value) ? s : value },
-    });
-    this._onChange(field.field, value);
-  }
-
-  private _onDecline(field: UWidgetFieldDefinition) {
-    this._emitEvent({
-      type: 'suggestion-decline',
-      widget: this.spec!.widget,
-      id: this.spec!.id,
-      data: { field: field.field },
-    });
-  }
-
   private renderActions(actions: UWidgetAction[]) {
     return html`
       <div class="actions" part="actions">
         ${actions.map(
           (a) => html`
             <button
-              type=${a.action === 'submit' ? 'submit' : 'button'}
+              type="button"
               data-style=${a.style ?? 'default'}
               ?disabled=${a.disabled}
-              @click=${(e: Event) => {
-                if (a.action === 'submit') e.preventDefault();
-                this._onAction(a);
-              }}
+              @click=${() => this._onAction(a)}
               part="action-btn"
             >
               ${a.label}
@@ -637,19 +272,79 @@ export class UwForm extends LitElement {
     `;
   }
 
-  private _onFormSubmit = (e: Event) => {
-    e.preventDefault();
-    const submitAction = (this.spec?.actions ?? []).find((a) => a.action === 'submit');
-    if (submitAction) {
-      this._onAction(submitAction);
-    } else if (this._validate()) {
-      this._emitEvent({
-        type: 'submit',
-        widget: this.spec!.widget,
-        id: this.spec!.id,
-        data: { ...this._formData },
-      });
+  /** `<formdown-ui>`'s own events stay inside the widget — the widget says what happened in its own events. */
+  private _stop = (e: Event) => e.stopPropagation();
+
+  private _field(name: string): UWidgetFieldDefinition | undefined {
+    return this.spec?.fields?.find((f) => f.field === name);
+  }
+
+  /** The form's values as the widget sends them: the spec's `data`, then the fields — numbers as numbers. */
+  private _values(): Record<string, unknown> {
+    const fields = this._fields;
+    const schema = fields?.getSchema();
+    const typed = fields && schema ? typedData(fields.getFormData(), schema) : {};
+    for (const [name, value] of Object.entries(typed)) typed[name] = this._native(name, value);
+    return { ...((this.spec?.data as Record<string, unknown>) ?? {}), ...typed };
+  }
+
+  /** One field's value as the widget sends it — the same reading as `_values`. */
+  private _typed(name: string, value: unknown): unknown {
+    const schema = this._fields?.getSchema();
+    return this._native(name, schema ? typedData({ [name]: value }, schema)[name] : value);
+  }
+
+  /** A datetime in the native `datetime-local` shape, `YYYY-MM-DDTHH:mm` in local time, whichever control gave it — a
+   *  picker of its own (`u-widgets/components`) reports the time with seconds and its offset. */
+  private _native(name: string, value: unknown): unknown {
+    if (this._field(name)?.type !== 'datetime' || typeof value !== 'string') return value;
+    return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value) ? value.slice(0, 16) : value;
+  }
+
+  private _onFieldChange = (e: CustomEvent<{ fieldName: string; value: unknown }>) => {
+    e.stopPropagation();
+    const { fieldName, value } = e.detail;
+    this._emitChange(fieldName, this._typed(fieldName, value));
+  };
+
+  /** A suggestion read as the field's value: one more choice for a group of several, a boolean for a switch. */
+  private _suggestedValue(field: UWidgetFieldDefinition | undefined, s: string, current: unknown): unknown {
+    const type = field?.type ?? 'text';
+    if (type === 'toggle') return s === 'true';
+    if (type === 'multiselect' || (type === 'checkbox' && (field?.options?.length ?? 0) > 0)) {
+      const held = Array.isArray(current) ? current : [];
+      return held.includes(s) ? held : [...held, s];
     }
+    return s;
+  }
+
+  private _onPick = (e: CustomEvent<{ field: string; value: string }>) => {
+    e.stopPropagation();
+    const fields = this._fields;
+    if (!fields) return;
+    const { field: name, value: s } = e.detail;
+    // `<formdown-ui>` leaves the field as it was — taking the value is the host's call, and the widget takes it.
+    const value = this._suggestedValue(this._field(name), s, fields.getFormData()[name]);
+    fields.updateField(name, value);
+    const typed = this._typed(name, value);
+    this._emitEvent({
+      type: 'suggestion-pick',
+      widget: this.spec!.widget,
+      id: this.spec!.id,
+      // The value picked — for a group of several, the one choice added, not the whole selection.
+      data: { field: name, value: Array.isArray(value) ? s : typed },
+    });
+    this._emitChange(name, typed);
+  };
+
+  private _onDecline = (e: CustomEvent<{ field: string }>) => {
+    e.stopPropagation();
+    this._emitEvent({
+      type: 'suggestion-decline',
+      widget: this.spec!.widget,
+      id: this.spec!.id,
+      data: { field: e.detail.field },
+    });
   };
 
   private _onConfirmKeydown = (e: KeyboardEvent) => {
@@ -661,14 +356,7 @@ export class UwForm extends LitElement {
     }
   };
 
-  private _onChange(field: string, value: unknown) {
-    this._formData = { ...this._formData, [field]: value };
-    // Clear error for this field on change
-    if (this._errors[field]) {
-      const updated = { ...this._errors };
-      delete updated[field];
-      this._errors = updated;
-    }
+  private _emitChange(field: string, value: unknown) {
     this._emitEvent({
       type: 'change',
       widget: this.spec!.widget,
@@ -682,82 +370,13 @@ export class UwForm extends LitElement {
     return getLocaleStrings(typeof locale === 'string' ? locale : undefined);
   }
 
+  /** Checks the fields; on a failure the fields say why, and the first field that failed takes focus. */
   private _validate(): boolean {
-    const fields = this.spec?.fields ?? [];
-    const errors: Record<string, string> = {};
-    const locale = this._locale;
-
-    for (const field of fields) {
-      const value = this._formData[field.field];
-      const label = field.label ?? field.field;
-
-      // Required check
-      if (field.required) {
-        if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
-          errors[field.field] = field.message ?? formatTemplate(locale.required, { label });
-          continue; // Skip further checks if empty
-        }
-      }
-
-      // Skip further checks if value is empty and not required
-      if (value == null || value === '') continue;
-
-      // maxLength check (text, textarea)
-      if (field.maxLength != null && typeof value === 'string' && value.length > field.maxLength) {
-        errors[field.field] = field.message ?? formatTemplate(locale.maxLength, { label, max: field.maxLength });
-      }
-
-      // min/max check (number, range)
-      if (field.min != null && typeof value === 'number' && value < Number(field.min)) {
-        errors[field.field] = field.message ?? formatTemplate(locale.minValue, { label, min: field.min });
-      }
-      if (field.max != null && typeof value === 'number' && value > Number(field.max)) {
-        errors[field.field] = field.message ?? formatTemplate(locale.maxValue, { label, max: field.max });
-      }
-
-      // minLength check (text, textarea)
-      if (field.minLength != null && typeof value === 'string' && value.length < field.minLength) {
-        errors[field.field] = field.message ?? formatTemplate(locale.minLength, { label, min: field.minLength });
-        continue;
-      }
-
-      // Email pattern check
-      if (field.type === 'email' && typeof value === 'string') {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          errors[field.field] = field.message ?? formatTemplate(locale.invalidEmail, { label });
-          continue;
-        }
-      }
-
-      // URL pattern check
-      if (field.type === 'url' && typeof value === 'string') {
-        if (!/^https?:\/\/.+/.test(value)) {
-          errors[field.field] = field.message ?? formatTemplate(locale.invalidUrl, { label });
-          continue;
-        }
-      }
-
-      // Custom pattern check
-      if (field.pattern && typeof value === 'string') {
-        try {
-          if (!new RegExp(field.pattern).test(value)) {
-            errors[field.field] = field.message ?? formatTemplate(locale.invalidPattern, { label });
-          }
-        } catch {
-          // Invalid regex pattern — skip validation
-        }
-      }
-    }
-
-    this._errors = errors;
-    return Object.keys(errors).length === 0;
-  }
-
-  /** Re-runs validation for the fields whose error is showing — same verdicts, current locale's words. */
-  private _rewriteErrors(): void {
-    const showing = Object.keys(this._errors);
-    this._validate();
-    this._errors = Object.fromEntries(Object.entries(this._errors).filter(([field]) => showing.includes(field)));
+    const fields = this._fields;
+    if (!fields) return true;
+    const { isValid, errors } = fields.validate();
+    if (!isValid && errors[0]) fields.focusField(errors[0].field);
+    return isValid;
   }
 
   private _onAction(action: UWidgetAction) {
@@ -767,7 +386,7 @@ export class UwForm extends LitElement {
         type: 'submit',
         widget: this.spec!.widget,
         id: this.spec!.id,
-        data: { ...this._formData },
+        data: this._values(),
       });
     } else if (action.action === 'cancel') {
       this._emitEvent({
@@ -782,7 +401,7 @@ export class UwForm extends LitElement {
         widget: this.spec!.widget,
         id: this.spec!.id,
         action: action.action,
-        data: { ...this._formData },
+        data: this._values(),
       });
     }
   }

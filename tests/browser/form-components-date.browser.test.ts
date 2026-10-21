@@ -20,23 +20,29 @@ async function mount(data: Record<string, unknown>) {
   } as UwForm['spec'];
   document.body.appendChild(el);
   await el.updateComplete;
+  // The fields are `<formdown-ui>`'s; it binds a picker by name once the picker is defined.
+  const fields = el.shadowRoot!.querySelector('formdown-ui') as HTMLElement & { updateComplete: Promise<unknown> };
+  await fields.updateComplete;
+  await new Promise((r) => setTimeout(r, 20));
+  const root = fields.shadowRoot!;
   const changes: unknown[] = [];
   el.addEventListener('u-widget-internal', (e) => changes.push((e as CustomEvent).detail.data));
-  const [due, at] = el.shadowRoot!.querySelectorAll('u-date-picker') as NodeListOf<Picker>;
+  const [due, at] = root.querySelectorAll('u-date-picker') as NodeListOf<Picker>;
   await (due as unknown as { updateComplete: Promise<unknown> }).updateComplete;
-  return { el, due, at, changes };
+  return { el, root, due, at, changes };
 }
 
 describe('uw-form with u-widgets/components', () => {
   afterEach(() => { document.body.innerHTML = ''; });
 
   it('draws date and datetime fields with u-date-picker, pre-filled, labelled by the field label', async () => {
-    const { el, due, at } = await mount({ due: '2026-10-06', at: '2026-10-06T14:30' });
-    expect(el.shadowRoot!.querySelector('input[type="date"], input[type="datetime-local"]')).toBeNull();
+    const { root, due, at } = await mount({ due: '2026-10-06', at: '2026-10-06T14:30' });
+    expect(root.querySelector('input[type="date"], input[type="datetime-local"]')).toBeNull();
     expect([due.mode, due.value]).toEqual(['date', '2026-10-06']);
     expect([at.mode, at.value]).toEqual(['datetime', '2026-10-06T14:30']);
     expect((due as unknown as { min?: string }).min).toBe('2026-01-01');
-    const label = el.shadowRoot!.querySelector('label[for="input-due"]') as HTMLLabelElement;
+    const label = root.querySelector(`label[for="${due.id}"]`) as HTMLLabelElement;
+    expect(label.textContent).toContain('Due');
     expect(label.control).toBe(due);
   });
 

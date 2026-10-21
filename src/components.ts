@@ -11,7 +11,8 @@
  * every `Locale.set()`, so one call switches the whole app. A widget's own `locale` still wins.
  *
  * Submitted values keep the native shape: `YYYY-MM-DD` for `date`, `YYYY-MM-DDTHH:mm` (local time)
- * for `datetime` — turning this on changes how a field looks, not what the form sends.
+ * for `datetime` — turning this on changes how a field looks, not what the form sends. The picker is a
+ * formdown field type (`date`, `datetime-local`), so every `<formdown-ui>` on the page draws it, not only `uw-form`.
  *
  * @example
  * ```ts
@@ -20,40 +21,38 @@
  * ```
  */
 
-import { html, nothing } from 'lit';
 import '@iyulab/components/dist/components/date-picker/UDatePicker.js';
 import { Locale } from '@iyulab/components/dist/utilities/Locale.js';
-import { registerFieldControl, type FieldControlContext } from './core/field-controls.js';
+import { getDefaultExtensionManager, type Field } from '@formdown/core';
 import { setDefaultLocale } from './core/locale.js';
 
+const escapeAttr = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 /** `min`/`max` the picker reads: an ISO day (it bounds days, also in datetime mode). */
-function dayBound(bound: number | string | undefined): string | undefined {
+function dayBound(bound: unknown): string | undefined {
   return typeof bound === 'string' && /^\d{4}-\d{2}-\d{2}/.test(bound) ? bound.slice(0, 10) : undefined;
 }
 
+/** The control `<formdown-ui>` puts under the field's label: a form-associated `<u-date-picker>`, which it binds
+ *  by its `name` — the value it reports is read in, `data` is written to it. The id and label are formdown's. */
 function datePicker(mode: 'date' | 'datetime') {
-  return ({ field, value, id, hasError, errorId, onChange }: FieldControlContext) => html`<u-date-picker
-    id=${id}
-    mode=${mode}
-    .value=${typeof value === 'string' ? value : ''}
-    .min=${dayBound(field.min)}
-    .max=${dayBound(field.max)}
-    placeholder=${field.placeholder ?? nothing}
-    ?required=${field.required}
-    aria-invalid=${hasError ? 'true' : 'false'}
-    aria-describedby=${errorId ?? nothing}
-    @change=${(e: Event) => {
-      const picked = (e.target as HTMLElement & { value: string }).value ?? '';
-      // The picker emits a full DateTimeOffset in datetime mode; its local wall time is what a
-      // native `datetime-local` would have sent.
-      onChange(mode === 'datetime' ? picked.slice(0, 16) : picked);
-    }}
-    part="input"
-  ></u-date-picker>`;
+  return (field: Field): string => {
+    const attributes = (field.attributes ?? {}) as Record<string, unknown>;
+    const min = dayBound(attributes.min);
+    const max = dayBound(attributes.max);
+    const placeholder = field.placeholder ?? (typeof attributes.placeholder === 'string' ? attributes.placeholder : undefined);
+    return `<u-date-picker id="${escapeAttr(field.name)}" name="${escapeAttr(field.name)}" mode="${mode}"${min ? ` min="${min}"` : ''}${
+      max ? ` max="${max}"` : ''
+    }${placeholder ? ` placeholder="${escapeAttr(placeholder)}"` : ''}${field.required ? ' required' : ''} part="input"></u-date-picker>`;
+  };
 }
 
-registerFieldControl('date', datePicker('date'));
-registerFieldControl('datetime', datePicker('datetime'));
+// Registered on formdown's field type registry at once (`registerPlugin` registers after an await, so a form drawn
+// right after this import could miss it). Once per page — a second copy of this module leaves the first in place.
+const fieldTypes = getDefaultExtensionManager().getFieldTypeRegistry();
+if (!fieldTypes.has('date')) fieldTypes.register({ type: 'date', generator: datePicker('date') });
+if (!fieldTypes.has('datetime-local')) fieldTypes.register({ type: 'datetime-local', generator: datePicker('datetime') });
 
 // One language for the app: u-widgets' default locale is the components locale, now and after every switch.
 setDefaultLocale(Locale.get());

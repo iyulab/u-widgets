@@ -37,7 +37,7 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, 'katex', 'react', /^react\//, '@lit/react', /^@lit\/react\//, '@iyulab/u-widgets', '@iyulab/components', /^@iyulab\/components\//],
+      external: ['lit', /^lit\//, 'echarts', /^echarts\//, '@formdown/core', /^@formdown\/core\//, '@formdown/ui', 'katex', 'react', /^react\//, '@lit/react', /^@lit\/react\//, '@iyulab/u-widgets', '@iyulab/components', /^@iyulab\/components\//],
       output: {
         globals: {
           lit: 'Lit',

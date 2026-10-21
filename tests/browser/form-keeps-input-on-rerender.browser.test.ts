@@ -7,9 +7,14 @@ import { describe, it, expect, afterEach } from 'vitest';
 import '../../src/elements/u-widget.js';
 import '../../src/elements/uw-form.js';
 
-const formIn = (w: Element) => w.shadowRoot!.querySelector('uw-form') as HTMLElement & { updateComplete: Promise<unknown> };
-const settle = async (w: HTMLElement & { updateComplete: Promise<unknown> }) => {
-  await w.updateComplete; await formIn(w)?.updateComplete; await new Promise((r) => setTimeout(r, 20));
+type Updating = HTMLElement & { updateComplete: Promise<unknown> };
+const formIn = (w: Element) => w.shadowRoot!.querySelector('uw-form') as Updating;
+// The fields are drawn by `<formdown-ui>` inside the form.
+const fieldsIn = (w: Element) => formIn(w).shadowRoot!.querySelector('formdown-ui') as Updating;
+const inputIn = (w: Element) => fieldsIn(w).shadowRoot!.querySelector('input')!;
+const settle = async (w: Updating) => {
+  await w.updateComplete; await formIn(w)?.updateComplete; await fieldsIn(w)?.updateComplete;
+  await new Promise((r) => setTimeout(r, 20));
 };
 
 describe('uw-form inside u-widget keeps input across re-renders', () => {
@@ -21,13 +26,13 @@ describe('uw-form inside u-widget keeps input across re-renders', () => {
     w.spec = { widget: 'form', data: { name: '' }, fields: [{ field: 'name', type: 'text', label: 'Name' }] };
     document.body.appendChild(w);
     await settle(w);
-    const input = formIn(w).shadowRoot!.querySelector('input')!;
+    const input = inputIn(w);
     input.value = 'Ann';
     input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     await settle(w);
     w.theme = 'dark';
     await settle(w);
-    expect(formIn(w).shadowRoot!.querySelector('input')!.value).toBe('Ann');
+    expect(inputIn(w).value).toBe('Ann');
   });
 
   it('NEGATIVE — a new spec from the caller is a new form', async () => {
@@ -35,11 +40,11 @@ describe('uw-form inside u-widget keeps input across re-renders', () => {
     w.spec = { widget: 'form', data: { name: '' }, fields: [{ field: 'name', type: 'text', label: 'Name' }] };
     document.body.appendChild(w);
     await settle(w);
-    const input = formIn(w).shadowRoot!.querySelector('input')!;
+    const input = inputIn(w);
     input.value = 'Ann';
     input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     w.spec = { widget: 'form', data: { name: 'Bo' }, fields: [{ field: 'name', type: 'text', label: 'Name' }] };
     await settle(w);
-    expect(formIn(w).shadowRoot!.querySelector('input')!.value).toBe('Bo');
+    expect(inputIn(w).value).toBe('Bo');
   });
 });

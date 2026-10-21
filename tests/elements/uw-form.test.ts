@@ -2,6 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import '../../src/elements/uw-form.js';
 import type { UwForm } from '../../src/elements/uw-form.js';
 import { registerLocale } from '../../src/core/locale.js';
+import { toFormdown } from '../../src/core/formdown.js';
+
+// The fields are drawn by `<formdown-ui>`, which has a shadow root of its own — `fields(el)` is where they are.
+// What `<formdown-ui>` itself does with a field (how each type draws, which rule says what) is formdown's to test;
+// these tests hold what the widget adds: the fields it writes, its events, its actions, its locale and its look.
 
 function createElement(spec: Record<string, unknown>): UwForm {
   const el = document.createElement('uw-form') as UwForm;
@@ -10,10 +15,78 @@ function createElement(spec: Record<string, unknown>): UwForm {
   return el;
 }
 
-async function render(el: UwForm) {
+type FieldsElement = HTMLElement & {
+  updateComplete: Promise<unknown>;
+  data: Record<string, unknown>;
+  messages: Record<string, string>;
+  fieldStates: Record<string, unknown>;
+  content: string;
+};
+
+/** Waits for the widget and the fields it draws. */
+async function render(el: UwForm): Promise<ShadowRoot> {
   await el.updateComplete;
+  const fd = el.shadowRoot!.querySelector('formdown-ui') as FieldsElement | null;
+  if (fd) {
+    await fd.updateComplete;
+    await new Promise((r) => setTimeout(r, 0));
+  }
   return el.shadowRoot!;
 }
+
+function fieldsOf(el: UwForm): FieldsElement {
+  return el.shadowRoot!.querySelector('formdown-ui') as FieldsElement;
+}
+
+function fields(el: UwForm): ShadowRoot {
+  return fieldsOf(el).shadowRoot!;
+}
+
+function type(input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, value: string) {
+  input.value = value;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function events(el: UwForm) {
+  const listener = vi.fn();
+  el.addEventListener('u-widget-internal', listener);
+  return {
+    listener,
+    of: (t: string) => listener.mock.calls.map((c) => c[0].detail).filter((d) => d.type === t),
+  };
+}
+
+function submitButton(el: UwForm): HTMLButtonElement {
+  return el.shadowRoot!.querySelector('.actions button') as HTMLButtonElement;
+}
+
+describe('toFormdown', () => {
+  it('writes each field type as formdown reads it back', () => {
+    const text = toFormdown([
+      { field: 'title', label: 'Heading', type: 'text', required: true, placeholder: 'Short', pattern: '\\d{3}', minLength: 2, maxLength: 9 },
+      { field: 'n', type: 'number', min: 1, max: 10, step: 2 },
+      { field: 'body', type: 'textarea', rows: 5 },
+      { field: 'tags', type: 'multiselect', options: ['a', { value: 'b', label: 'Bee' }] },
+      { field: 'on', type: 'toggle', label: 'Power' },
+      { field: 'at', type: 'datetime' },
+      { field: 'kind', type: 'radio', options: ['x', 'y'] },
+    ]);
+    expect(text).toContain('@title(Heading): [text required');
+    expect(text).toMatch(/minlength=2/);
+    expect(text).toMatch(/maxlength=9/);
+    expect(text).toContain('@n: [number');
+    expect(text).toMatch(/min=1 max=10 step=2/);
+    expect(text).toMatch(/@body: \[textarea rows=5\]/);
+    expect(text).toMatch(/@tags: \[select options="a,b=Bee" multiple\]/);
+    expect(text).toContain('@on(Power): [checkbox switch]');
+    expect(text).toContain('@at: [datetime-local]');
+    expect(text).toContain('@kind: [radio options="x,y"]');
+  });
+
+  it('writes a field’s own message as its error sentence', () => {
+    expect(toFormdown([{ field: 'a', type: 'text', required: true, message: 'Fill it' }])).toContain('error-message="Fill it"');
+  });
+});
 
 describe('uw-form', () => {
   beforeEach(() => {
@@ -21,665 +94,364 @@ describe('uw-form', () => {
   });
 
   describe('form widget', () => {
-    it('renders form container', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', label: 'Name', type: 'text' }],
-      });
-      const shadow = await render(el);
-      expect(shadow.querySelector('.form-container')).not.toBeNull();
-    });
-
-    it('renders text input field with label', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', label: 'Name', type: 'text' }],
-      });
-      const shadow = await render(el);
-      expect(shadow.querySelector('.field-label')?.textContent).toContain('Name');
-      expect(shadow.querySelector('input[type="text"]')).not.toBeNull();
-    });
-
-    it('shows required indicator', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', label: 'Name', type: 'text', required: true }],
-      });
-      const shadow = await render(el);
-      expect(shadow.querySelector('.required')).not.toBeNull();
-    });
-
-    it('renders textarea', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'desc', type: 'textarea', rows: 5 }],
-      });
-      const shadow = await render(el);
-      const textarea = shadow.querySelector('textarea');
-      expect(textarea).not.toBeNull();
-      expect(textarea?.getAttribute('rows')).toBe('5');
-    });
-
-    it('renders select with options', async () => {
+    it('draws the fields with <formdown-ui> from the spec’s fields', async () => {
       const el = createElement({
         widget: 'form',
         fields: [
-          { field: 'priority', type: 'select', options: ['low', 'medium', 'high'] },
+          { field: 'name', label: 'Name', type: 'text', required: true },
+          { field: 'desc', type: 'textarea', rows: 5 },
+          { field: 'priority', type: 'select', options: ['low', 'high'] },
         ],
       });
-      const shadow = await render(el);
-      const select = shadow.querySelector('select');
-      expect(select).not.toBeNull();
-      const options = select!.querySelectorAll('option');
-      // +1 for the "--" placeholder
-      expect(options.length).toBe(4);
+      await render(el);
+      const root = fields(el);
+      expect(root.querySelector('label')?.textContent).toContain('Name');
+      expect(root.querySelector('input[name="name"]')?.hasAttribute('required')).toBe(true);
+      expect(root.querySelector('textarea[name="desc"]')?.getAttribute('rows')).toBe('5');
+      expect(root.querySelectorAll('select[name="priority"] option[value="low"], select[name="priority"] option[value="high"]').length).toBe(2);
     });
 
-    it('renders toggle with role="switch" and aria-checked', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { active: true },
-        fields: [{ field: 'active', label: 'Active', type: 'toggle' }],
-      });
-      const shadow = await render(el);
-      const toggle = shadow.querySelector('.toggle-track');
-      expect(toggle).not.toBeNull();
-      expect(toggle?.getAttribute('role')).toBe('switch');
-      expect(toggle?.getAttribute('aria-checked')).toBe('true');
-      expect(toggle?.getAttribute('aria-label')).toBe('Active');
-      expect(toggle?.getAttribute('tabindex')).toBe('0');
+    it('draws HTML in a label as text', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'a', label: '<img src=x onerror=alert(1)>' }] });
+      await render(el);
+      expect(fields(el).querySelector('img')).toBeNull();
     });
 
-    it('renders radio buttons', async () => {
+    it('fills the fields from data', async () => {
       const el = createElement({
         widget: 'form',
+        data: { name: 'Ada', on: true, tags: ['b'] },
         fields: [
-          { field: 'size', type: 'radio', options: ['S', 'M', 'L'] },
+          { field: 'name', type: 'text' },
+          { field: 'on', type: 'toggle' },
+          { field: 'tags', type: 'multiselect', options: ['a', 'b'] },
         ],
       });
-      const shadow = await render(el);
-      const radios = shadow.querySelectorAll('input[type="radio"]');
-      expect(radios.length).toBe(3);
+      await render(el);
+      const root = fields(el);
+      expect((root.querySelector('input[name="name"]') as HTMLInputElement).value).toBe('Ada');
+      expect((root.querySelector('input[name="on"]') as HTMLInputElement).checked).toBe(true);
+      const options = Array.from((root.querySelector('select[name="tags"]') as HTMLSelectElement).options);
+      expect(options.filter((o) => o.selected).map((o) => o.value)).toEqual(['b']);
     });
 
-    it('renders checkbox group', async () => {
+    it('reports a change with the field and its value — a number field’s value as a number', async () => {
       const el = createElement({
         widget: 'form',
-        fields: [
-          { field: 'skills', type: 'checkbox', options: ['JS', 'TS', 'Rust'] },
-        ],
+        fields: [{ field: 'name', type: 'text' }, { field: 'n', type: 'number' }, { field: 'r', type: 'range', min: 0, max: 10 }],
       });
-      const shadow = await render(el);
-      const checkboxes = shadow.querySelectorAll('input[type="checkbox"]');
-      expect(checkboxes.length).toBe(3);
-    });
-
-    it('renders multiselect as checkbox list', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust', 'Go'] },
-        ],
-      });
-      const shadow = await render(el);
-      const container = shadow.querySelector('.multiselect-group');
-      expect(container).not.toBeNull();
-      const checkboxes = container!.querySelectorAll('input[type="checkbox"]');
-      expect(checkboxes.length).toBe(4);
-    });
-
-    it('multiselect pre-checks selected values', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { langs: ['TS', 'Rust'] },
-        fields: [
-          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust', 'Go'] },
-        ],
-      });
-      const shadow = await render(el);
-      const checkboxes = shadow.querySelectorAll('.multiselect-group input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
-      expect(checkboxes[0].checked).toBe(false); // JS
-      expect(checkboxes[1].checked).toBe(true);  // TS
-      expect(checkboxes[2].checked).toBe(true);  // Rust
-      expect(checkboxes[3].checked).toBe(false); // Go
-    });
-
-    it('multiselect toggles values via checkbox change', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { langs: ['TS'] },
-        fields: [
-          { field: 'langs', type: 'multiselect', options: ['JS', 'TS', 'Rust'] },
-        ],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const checkboxes = shadow.querySelectorAll('.multiselect-group input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
-      // Check JS (index 0) to add it
-      checkboxes[0].checked = true;
-      checkboxes[0].dispatchEvent(new Event('change', { bubbles: true }));
-      await el.updateComplete;
-
-      expect(listener).toHaveBeenCalledOnce();
-      const detail = listener.mock.calls[0][0].detail;
-      expect(detail.type).toBe('change');
-      expect(detail.data.field).toBe('langs');
-      expect(detail.data.value).toEqual(['TS', 'JS']);
-    });
-
-    it('{ value, label } options show the label and submit the value — all four choice types', async () => {
-      const kinds = [{ value: 'hw', label: 'Hardware' }, 'other'];
-      const el = createElement({
-        widget: 'form',
-        data: { sel: 'hw', rad: 'hw', chk: ['hw'], multi: ['hw'] },
-        fields: [
-          { field: 'sel', type: 'select', options: kinds },
-          { field: 'rad', type: 'radio', options: kinds },
-          { field: 'chk', type: 'checkbox', options: kinds },
-          { field: 'multi', type: 'multiselect', options: kinds },
-        ],
-      });
-      const shadow = await render(el);
-
-      const select = shadow.querySelector('select') as HTMLSelectElement;
-      const opts = [...select.options].slice(1); // after the empty "--"
-      expect(opts.map((o) => [o.value, o.textContent?.trim()])).toEqual([['hw', 'Hardware'], ['other', 'other']]);
-      // the pre-filled select value is measured in the browser project (happy-dom differs)
-
-      for (const group of ['.radio-group', '.checkbox-group', '.multiselect-group']) {
-        const labels = [...shadow.querySelectorAll(`${group} label`)];
-        expect(labels.map((l) => l.textContent?.trim()), group).toEqual(['Hardware', 'other']);
-        const inputs = [...shadow.querySelectorAll(`${group} input`)] as HTMLInputElement[];
-        expect(inputs.map((i) => i.value), group).toEqual(['hw', 'other']);
-        expect(inputs[0].checked, group).toBe(true);
-      }
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-      const radios = shadow.querySelectorAll('.radio-group input') as NodeListOf<HTMLInputElement>;
-      radios[1].checked = true;
-      radios[1].dispatchEvent(new Event('change', { bubbles: true }));
-      const multi = shadow.querySelectorAll('.multiselect-group input') as NodeListOf<HTMLInputElement>;
-      multi[1].checked = true;
-      multi[1].dispatchEvent(new Event('change', { bubbles: true }));
-      await el.updateComplete;
-      expect(listener.mock.calls.map((c) => c[0].detail.data)).toEqual([
-        { field: 'rad', value: 'other' },
-        { field: 'multi', value: ['hw', 'other'] },
+      await render(el);
+      const { of } = events(el);
+      type(fields(el).querySelector('input[name="name"]') as HTMLInputElement, 'Ada');
+      type(fields(el).querySelector('input[name="n"]') as HTMLInputElement, '42');
+      type(fields(el).querySelector('input[name="r"]') as HTMLInputElement, '3');
+      expect(of('change').map((d) => d.data)).toEqual([
+        { field: 'name', value: 'Ada' },
+        { field: 'n', value: 42 },
+        { field: 'r', value: 3 },
       ]);
     });
 
-    it('pre-fills from data defaults', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { name: 'Alice' },
-        fields: [{ field: 'name', type: 'text' }],
-      });
-      const shadow = await render(el);
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      expect(input.value).toBe('Alice');
+    it('keeps <formdown-ui>’s own events inside the widget', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'name', type: 'text' }] });
+      await render(el);
+      const outside = vi.fn();
+      document.body.addEventListener('formdown-change', outside);
+      document.body.addEventListener('formdown-data-update', outside);
+      type(fields(el).querySelector('input[name="name"]') as HTMLInputElement, 'Ada');
+      document.body.removeEventListener('formdown-change', outside);
+      document.body.removeEventListener('formdown-data-update', outside);
+      expect(outside).not.toHaveBeenCalled();
     });
 
-    it('renders action buttons', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', type: 'text' }],
-        actions: [
-          { label: 'Submit', action: 'submit', style: 'primary' },
-          { label: 'Cancel', action: 'cancel' },
-        ],
-      });
-      const shadow = await render(el);
-      const buttons = shadow.querySelectorAll('button');
-      expect(buttons.length).toBe(2);
-      expect(buttons[0].textContent).toContain('Submit');
-      expect(buttons[0].getAttribute('data-style')).toBe('primary');
+    it('a new spec object with the same fields and data keeps what the user typed', async () => {
+      const spec = { widget: 'form', data: {}, fields: [{ field: 'name', type: 'text' }] };
+      const el = createElement(spec);
+      await render(el);
+      type(fields(el).querySelector('input[name="name"]') as HTMLInputElement, 'typed');
+      el.spec = { ...spec, options: { locale: 'ko' } } as unknown as UwForm['spec'];
+      await render(el);
+      expect((fields(el).querySelector('input[name="name"]') as HTMLInputElement).value).toBe('typed');
     });
 
-    it('dispatches change event on input', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', type: 'text' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      input.value = 'Bob';
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-
-      expect(listener).toHaveBeenCalledOnce();
-      const detail = listener.mock.calls[0][0].detail;
-      expect(detail.type).toBe('change');
-      expect(detail.data.field).toBe('name');
-      expect(detail.data.value).toBe('Bob');
+    it('new data fills the form again', async () => {
+      const spec = { widget: 'form', data: { name: 'one' }, fields: [{ field: 'name', type: 'text' }] };
+      const el = createElement(spec);
+      await render(el);
+      el.spec = { ...spec, data: { name: 'two' } } as unknown as UwForm['spec'];
+      await render(el);
+      expect((fields(el).querySelector('input[name="name"]') as HTMLInputElement).value).toBe('two');
     });
 
-    it('dispatches submit event with form data', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { name: 'Alice' },
-        fields: [{ field: 'name', type: 'text' }],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-
-      expect(listener).toHaveBeenCalledOnce();
-      const detail = listener.mock.calls[0][0].detail;
-      expect(detail.type).toBe('submit');
-      expect(detail.data.name).toBe('Alice');
+    it('new fields draw the new form, filled from data', async () => {
+      const spec = { widget: 'form', data: { b: 'kept' }, fields: [{ field: 'a', type: 'text' }] };
+      const el = createElement(spec);
+      await render(el);
+      el.spec = { ...spec, fields: [{ field: 'b', type: 'text' }] } as unknown as UwForm['spec'];
+      await render(el);
+      expect(fields(el).querySelector('input[name="a"]')).toBeNull();
+      expect((fields(el).querySelector('input[name="b"]') as HTMLInputElement).value).toBe('kept');
     });
   });
 
-  describe('validation', () => {
-    it('prevents submit when required field is empty', async () => {
+  describe('actions', () => {
+    it('submits the values — the spec’s data with the fields, numbers as numbers', async () => {
+      const el = createElement({
+        widget: 'form',
+        data: { id: 7, name: 'Ada' },
+        fields: [{ field: 'name', type: 'text' }, { field: 'n', type: 'number' }],
+        actions: [{ label: 'Save', action: 'submit', style: 'primary' }],
+      });
+      await render(el);
+      const { of } = events(el);
+      type(fields(el).querySelector('input[name="n"]') as HTMLInputElement, '5');
+      submitButton(el).click();
+      expect(of('submit')).toHaveLength(1);
+      expect(of('submit')[0].data).toEqual({ id: 7, name: 'Ada', n: 5 });
+    });
+
+    it('does not submit while a field breaks a rule; the field says why and takes focus', async () => {
       const el = createElement({
         widget: 'form',
         fields: [
+          { field: 'ok', type: 'text' },
           { field: 'name', label: 'Name', type: 'text', required: true },
         ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        actions: [{ label: 'Save', action: 'submit' }],
       });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      // submit event should NOT fire
-      expect(listener).not.toHaveBeenCalled();
-      // error message should be visible
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Name is required');
+      await render(el);
+      const { of } = events(el);
+      submitButton(el).click();
+      await render(el);
+      expect(of('submit')).toHaveLength(0);
+      const input = fields(el).querySelector('input[name="name"]') as HTMLInputElement;
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      expect(fields(el).querySelector('[part~="field-error"]')?.textContent).toBe('Name is required');
+      expect(fields(el).activeElement).toBe(input);
     });
 
-    it('shows invalid class on required empty field after submit attempt', async () => {
+    it('checks every rule the field declares — length, range, format, pattern', async () => {
       const el = createElement({
         widget: 'form',
+        data: { t: 'too long text', n: 50, e: 'nope', p: '1234' },
         fields: [
-          { field: 'email', label: 'Email', type: 'email', required: true },
+          { field: 't', label: 'T', type: 'text', maxLength: 5 },
+          { field: 'n', label: 'N', type: 'number', max: 10 },
+          { field: 'e', label: 'E', type: 'email' },
+          { field: 'p', label: 'P', type: 'text', pattern: '\\d{3}' },
         ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        actions: [{ label: 'Save', action: 'submit' }],
       });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const input = shadow.querySelector('input');
-      expect(input?.classList.contains('invalid')).toBe(true);
+      await render(el);
+      const { of } = events(el);
+      submitButton(el).click();
+      await render(el);
+      expect(of('submit')).toHaveLength(0);
+      const errors = Array.from(fields(el).querySelectorAll('[part~="field-error"]')).map((e) => e.textContent);
+      expect(errors).toEqual([
+        'T must be at most 5 characters',
+        'N must be at most 10',
+        'E must be a valid email address',
+        'P format is invalid',
+      ]);
     });
 
-    it('allows submit when required field is filled', async () => {
+    it('submits once the field is fixed', async () => {
       const el = createElement({
         widget: 'form',
-        data: { name: 'Alice' },
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        fields: [{ field: 'name', type: 'text', required: true }],
+        actions: [{ label: 'Save', action: 'submit' }],
       });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-
-      expect(listener).toHaveBeenCalledOnce();
-      expect(listener.mock.calls[0][0].detail.type).toBe('submit');
+      await render(el);
+      const { of } = events(el);
+      submitButton(el).click();
+      type(fields(el).querySelector('input[name="name"]') as HTMLInputElement, 'Ada');
+      submitButton(el).click();
+      expect(of('submit').map((d) => d.data)).toEqual([{ name: 'Ada' }]);
     });
 
-    it('clears error when user types into required field', async () => {
+    it('a field’s own message says why it is required', async () => {
       const el = createElement({
         widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        fields: [{ field: 'name', type: 'text', required: true, message: 'Tell us your name' }],
+        actions: [{ label: 'Save', action: 'submit' }],
       });
-      const shadow = await render(el);
-
-      // trigger validation error
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-      expect(shadow.querySelector('.field-error')).not.toBeNull();
-
-      // type into field
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      input.value = 'Bob';
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      await el.updateComplete;
-
-      // error should be cleared
-      expect(shadow.querySelector('.field-error')).toBeNull();
+      await render(el);
+      submitButton(el).click();
+      await render(el);
+      expect(fields(el).querySelector('[part~="field-error"]')?.textContent).toBe('Tell us your name');
     });
 
-    it('validates required checkbox (must have selections)', async () => {
+    it('a custom action reports the values; cancel reports only itself', async () => {
       const el = createElement({
         widget: 'form',
-        fields: [
-          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'], required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        data: { name: 'Ada' },
+        fields: [{ field: 'name', type: 'text', required: true }],
+        actions: [{ label: 'Draft', action: 'draft' }, { label: 'Cancel', action: 'cancel' }],
       });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(listener).not.toHaveBeenCalled();
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Skills is required');
+      await render(el);
+      const { of } = events(el);
+      const [draft, cancel] = Array.from(el.shadowRoot!.querySelectorAll('.actions button')) as HTMLButtonElement[];
+      draft.click();
+      cancel.click();
+      expect(of('action')).toEqual([
+        expect.objectContaining({ action: 'draft', data: { name: 'Ada' } }),
+        expect.objectContaining({ action: 'cancel' }),
+      ]);
+      expect(of('action')[1].data).toBeUndefined();
     });
 
-    it('validates maxLength on text field', async () => {
+    it('draws the actions with their style and disabled state', async () => {
       const el = createElement({
         widget: 'form',
-        data: { name: 'VeryLongName' },
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', maxLength: 5 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        fields: [{ field: 'a' }],
+        actions: [{ label: 'Delete', action: 'remove', style: 'danger', disabled: true }],
       });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(listener).not.toHaveBeenCalled();
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Name must be at most 5 characters');
-    });
-
-    it('validates min on number field', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { age: 5 },
-        fields: [
-          { field: 'age', label: 'Age', type: 'number', min: 18 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(listener).not.toHaveBeenCalled();
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Age must be at least 18');
-    });
-
-    it('validates max on number field', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { quantity: 150 },
-        fields: [
-          { field: 'quantity', label: 'Quantity', type: 'number', max: 100 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(listener).not.toHaveBeenCalled();
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Quantity must be at most 100');
-    });
-
-    it('validates email format', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { email: 'not-an-email' },
-        fields: [
-          { field: 'email', label: 'Email', type: 'email' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(listener).not.toHaveBeenCalled();
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Email must be a valid email address');
-    });
-
-    it('passes validation with valid email', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { email: 'alice@example.com' },
-        fields: [
-          { field: 'email', label: 'Email', type: 'email' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-
-      expect(listener).toHaveBeenCalledOnce();
-    });
-
-    it('sets aria-invalid on input after validation failure', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const input = shadow.querySelector('input');
-      expect(input?.getAttribute('aria-invalid')).toBe('true');
-    });
-
-    it('sets aria-required on required fields', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-      });
-      const shadow = await render(el);
-      const input = shadow.querySelector('input');
-      expect(input?.hasAttribute('aria-required')).toBe(true);
-    });
-
-    it('error message has role="alert"', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const error = shadow.querySelector('.field-error');
-      expect(error?.getAttribute('role')).toBe('alert');
-    });
-
-    it('skips min/max/maxLength when field is empty and not required', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'age', label: 'Age', type: 'number', min: 18 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-
-      // Empty optional field should pass
-      expect(listener).toHaveBeenCalledOnce();
+      await render(el);
+      const btn = submitButton(el);
+      expect(btn.dataset.style).toBe('danger');
+      expect(btn.disabled).toBe(true);
+      expect(btn.getAttribute('part')).toBe('action-btn');
     });
   });
 
-    it('coerces number input value from string to number', async () => {
+  describe('locale', () => {
+    it('says the rules in the widget’s locale', async () => {
+      registerLocale('xx', { required: '{label} — needed', maxLength: '{label}: {max} at most' });
       const el = createElement({
         widget: 'form',
-        fields: [
-          { field: 'age', label: 'Age', type: 'number', min: 18 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
+        data: { b: 'abcdef' },
+        options: { locale: 'xx' },
+        fields: [{ field: 'a', label: 'A', required: true }, { field: 'b', label: 'B', maxLength: 3 }],
+        actions: [{ label: 'Save', action: 'submit' }],
       });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      // Simulate user typing "5" into the number input
-      const input = shadow.querySelector('input[type="number"]') as HTMLInputElement;
-      input.value = '5';
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-
-      // The change event should emit a number, not a string
-      const changeEvent = listener.mock.calls[0][0].detail;
-      expect(changeEvent.data.value).toBe(5);
-      expect(typeof changeEvent.data.value).toBe('number');
+      await render(el);
+      submitButton(el).click();
+      await render(el);
+      const errors = Array.from(fields(el).querySelectorAll('[part~="field-error"]')).map((e) => e.textContent);
+      expect(errors).toEqual(['A — needed', 'B: 3 at most']);
     });
 
-    it('validates min after user types into number input', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'age', label: 'Age', type: 'number', min: 18 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      // Simulate user typing "5" via the input handler
-      const input = shadow.querySelector('input[type="number"]') as HTMLInputElement;
-      input.value = '5';
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      await el.updateComplete;
-
-      const submitListener = vi.fn();
-      el.addEventListener('u-widget-internal', submitListener);
-
-      // Now try to submit — min validation should catch the value
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      // Should not have submitted
-      const submitEvents = submitListener.mock.calls.filter((c) => c[0].detail.type === 'submit');
-      expect(submitEvents.length).toBe(0);
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Age must be at least 18');
+    it('gives <formdown-ui> a sentence for every rule it checks', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'a' }] });
+      await render(el);
+      expect(Object.keys(fieldsOf(el).messages).sort()).toEqual(
+        ['date', 'dateMax', 'dateMin', 'email', 'max', 'maxLength', 'min', 'minLength', 'number', 'pattern', 'required', 'tel', 'url'],
+      );
+      expect(Object.values(fieldsOf(el).messages).every((m) => typeof m === 'string' && m.length > 0)).toBe(true);
     });
 
-    it('links label to input via for/id', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text' },
-        ],
-      });
-      const shadow = await render(el);
+    it('rewrites the sentences on screen when the locale changes', async () => {
+      registerLocale('yy', { required: '{label} (yy)' });
+      const spec = { widget: 'form', data: {}, fields: [{ field: 'a', label: 'A', required: true }], actions: [{ label: 'Save', action: 'submit' }] };
+      const el = createElement(spec);
+      await render(el);
+      submitButton(el).click();
+      await render(el);
+      el.spec = { ...spec, options: { locale: 'yy' } } as unknown as UwForm['spec'];
+      await render(el);
+      expect(fields(el).querySelector('[part~="field-error"]')?.textContent).toBe('A (yy)');
+    });
+  });
 
-      const label = shadow.querySelector('label.field-label') as HTMLLabelElement;
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      expect(label.getAttribute('for')).toBe('input-name');
-      expect(input.id).toBe('input-name');
+  describe('fieldStates — suggestions', () => {
+    const spec = (extra: Record<string, unknown> = {}) => ({
+      widget: 'form',
+      data: {},
+      fields: [
+        { field: 'title', label: 'Title', type: 'text' },
+        { field: 'n', type: 'number' },
+        { field: 'tags', type: 'multiselect', options: ['a', 'b', 'c'] },
+      ],
+      fieldStates: {
+        title: { suggestions: ['Pump 3', 'Pump 4'], note: 'From the last report', decline: 'None of these' },
+        n: { suggestions: ['12'] },
+        tags: { suggestions: ['b'] },
+      },
+      ...extra,
     });
 
-    it('links label to textarea via for/id', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'desc', label: 'Description', type: 'textarea' },
-        ],
-      });
-      const shadow = await render(el);
-
-      const label = shadow.querySelector('label.field-label') as HTMLLabelElement;
-      const textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
-      expect(label.getAttribute('for')).toBe('input-desc');
-      expect(textarea.id).toBe('input-desc');
+    it('passes the field states to <formdown-ui>, which lists them under the field', async () => {
+      const el = createElement(spec());
+      await render(el);
+      const root = fields(el);
+      expect(Array.from(root.querySelectorAll('[part~="suggestion"]')).map((b) => b.textContent)).toContain('Pump 3');
+      expect(root.querySelector('[part~="field-note"]')?.textContent).toContain('From the last report');
+      expect(root.querySelector('[part~="decline"]')?.textContent).toBe('None of these');
     });
 
-    it('renders datetime field as datetime-local input type', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'start', label: 'Start', type: 'datetime' }],
-      });
-      const shadow = await render(el);
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      expect(input.type).toBe('datetime-local');
+    it('picking a suggestion puts it in the field, then reports the pick and the change', async () => {
+      const el = createElement(spec());
+      await render(el);
+      const { of, listener } = events(el);
+      (fields(el).querySelector('[part~="suggestion"]') as HTMLButtonElement).click();
+      await render(el);
+      expect((fields(el).querySelector('input[name="title"]') as HTMLInputElement).value).toBe('Pump 3');
+      expect(listener.mock.calls.map((c) => c[0].detail.type)).toEqual(['suggestion-pick', 'change']);
+      expect(of('suggestion-pick')[0].data).toEqual({ field: 'title', value: 'Pump 3' });
     });
 
-    it('links label to select via for/id', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'color', label: 'Color', type: 'select', options: ['red', 'blue'] },
-        ],
-      });
-      const shadow = await render(el);
-
-      const label = shadow.querySelector('label.field-label') as HTMLLabelElement;
-      const select = shadow.querySelector('select') as HTMLSelectElement;
-      expect(label.getAttribute('for')).toBe('input-color');
-      expect(select.id).toBe('input-color');
+    it('a number field’s suggestion is picked as a number', async () => {
+      const el = createElement(spec());
+      await render(el);
+      const { of } = events(el);
+      const n = Array.from(fields(el).querySelectorAll('[part~="suggestion"]')).find((b) => b.textContent === '12') as HTMLButtonElement;
+      n.click();
+      expect(of('suggestion-pick')[0].data).toEqual({ field: 'n', value: 12 });
+      expect(of('change')[0].data).toEqual({ field: 'n', value: 12 });
     });
+
+    it('a pick adds one choice to a multiselect', async () => {
+      const el = createElement(spec({ data: { tags: ['a'] } }));
+      await render(el);
+      const { of } = events(el);
+      const b = Array.from(fields(el).querySelectorAll('[part~="suggestion"]')).find((x) => x.textContent === 'b') as HTMLButtonElement;
+      b.click();
+      expect(of('suggestion-pick')[0].data).toEqual({ field: 'tags', value: 'b' });
+      expect(of('change')[0].data).toEqual({ field: 'tags', value: ['a', 'b'] });
+    });
+
+    it('declining reports it and changes nothing', async () => {
+      const el = createElement(spec());
+      await render(el);
+      const { of } = events(el);
+      (fields(el).querySelector('[part~="decline"]') as HTMLButtonElement).click();
+      expect(of('suggestion-decline')).toEqual([expect.objectContaining({ data: { field: 'title' } })]);
+      expect(of('change')).toHaveLength(0);
+    });
+
+    it('a new fieldStates keeps what the user typed', async () => {
+      const s = spec();
+      const el = createElement(s);
+      await render(el);
+      type(fields(el).querySelector('input[name="title"]') as HTMLInputElement, 'typed');
+      el.spec = { ...s, fieldStates: { title: { suggestions: ['Other'] } } } as unknown as UwForm['spec'];
+      await render(el);
+      expect((fields(el).querySelector('input[name="title"]') as HTMLInputElement).value).toBe('typed');
+    });
+  });
+
+  describe('look', () => {
+    it('passes the fields’ parts through, so a page styles them on the widget', async () => {
+      const el = createElement({ widget: 'form', fields: [{ field: 'a' }] });
+      await render(el);
+      const parts = fieldsOf(el).getAttribute('exportparts') ?? '';
+      for (const part of ['field', 'label', 'input', 'field-error', 'suggestion', 'decline', 'field-note']) {
+        expect(parts.split(',').map((p) => p.trim())).toContain(part);
+      }
+    });
+
+    it('sets the fields’ look from the widget’s tokens, and narrows it in a narrow container', () => {
+      const styles = (customElements.get('uw-form') as unknown as { styles: { cssText: string }[] }).styles;
+      const css = styles.map((s) => s.cssText).join(' ');
+      expect(css).toContain('--formdown-accent-color: var(--u-widget-primary');
+      expect(css).toContain('--formdown-error-color: var(--u-widget-negative');
+      expect(css).toMatch(/@container uw-form \(max-width: 20rem\)/);
+    });
+  });
 
   describe('confirm widget', () => {
-    it('renders confirm container', async () => {
+    it('renders the description and the actions', async () => {
       const el = createElement({
         widget: 'confirm',
         description: 'Delete this item?',
@@ -689,791 +461,24 @@ describe('uw-form', () => {
         ],
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.confirm-container')).not.toBeNull();
+      expect(shadow.querySelector('.confirm-description')?.textContent).toBe('Delete this item?');
+      expect(shadow.querySelector('button')?.getAttribute('data-style')).toBe('danger');
+      expect(shadow.querySelector('formdown-ui')).toBeNull();
     });
 
-    it('renders description', async () => {
+    it('submits with no fields to check, and cancels on its button or Escape', async () => {
       const el = createElement({
         widget: 'confirm',
-        description: 'Are you sure?',
-        actions: [],
+        actions: [{ label: 'OK', action: 'submit' }, { label: 'Cancel', action: 'cancel' }],
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.confirm-description')?.textContent).toBe('Are you sure?');
-    });
-
-    it('renders danger-styled action', async () => {
-      const el = createElement({
-        widget: 'confirm',
-        description: 'Delete?',
-        actions: [{ label: 'Delete', action: 'submit', style: 'danger' }],
-      });
-      const shadow = await render(el);
-      const btn = shadow.querySelector('button');
-      expect(btn?.getAttribute('data-style')).toBe('danger');
-    });
-
-    it('dispatches cancel event', async () => {
-      const el = createElement({
-        widget: 'confirm',
-        actions: [{ label: 'Cancel', action: 'cancel' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-
-      expect(listener).toHaveBeenCalledOnce();
-      expect(listener.mock.calls[0][0].detail.action).toBe('cancel');
-    });
-  });
-
-  describe('keyboard & accessibility', () => {
-    it('renders form element (not div) for keyboard submit', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', type: 'text' }],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-      const form = shadow.querySelector('form.form-container');
-      expect(form).not.toBeNull();
-    });
-
-    it('submit button has type="submit"', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'name', type: 'text' }],
-        actions: [
-          { label: 'Submit', action: 'submit' },
-          { label: 'Cancel', action: 'cancel' },
-        ],
-      });
-      const shadow = await render(el);
-      const buttons = shadow.querySelectorAll('button');
-      expect(buttons[0].getAttribute('type')).toBe('submit');
-      expect(buttons[1].getAttribute('type')).toBe('button');
-    });
-
-    it('form submit event triggers validation and submit action', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { name: 'Alice' },
-        fields: [{ field: 'name', type: 'text', required: true }],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const form = shadow.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-
-      // Filter for submit events only (not change events)
-      const submitEvents = listener.mock.calls.filter((c) => c[0].detail.type === 'submit');
-      expect(submitEvents.length).toBe(1);
-      expect(submitEvents[0][0].detail.data.name).toBe('Alice');
-    });
-
-    it('aria-describedby links input to error message', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      // Trigger validation
-      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const input = shadow.querySelector('input');
-      const errorId = input?.getAttribute('aria-describedby');
-      expect(errorId).toBe('err-name');
-      const errorEl = shadow.getElementById(errorId!);
-      expect(errorEl?.textContent).toBe('Name is required');
-    });
-
-    it('aria-describedby not present when no error', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { name: 'Alice' },
-        fields: [{ field: 'name', label: 'Name', type: 'text' }],
-      });
-      const shadow = await render(el);
-      const input = shadow.querySelector('input');
-      expect(input?.hasAttribute('aria-describedby')).toBe(false);
-    });
-
-    it('Enter key submits form even without explicit submit action', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { name: 'Alice' },
-        fields: [{ field: 'name', type: 'text' }],
-        // No actions defined
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const form = shadow.querySelector('form') as HTMLFormElement;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-
-      const submitEvents = listener.mock.calls.filter((c) => c[0].detail.type === 'submit');
-      expect(submitEvents.length).toBe(1);
-      expect(submitEvents[0][0].detail.data.name).toBe('Alice');
-    });
-
-    it('Escape key in confirm triggers cancel action', async () => {
-      const el = createElement({
-        widget: 'confirm',
-        description: 'Delete this?',
-        actions: [
-          { label: 'Delete', action: 'submit', style: 'danger' },
-          { label: 'Cancel', action: 'cancel' },
-        ],
-      });
-      const shadow = await render(el);
-
-      const listener = vi.fn();
-      el.addEventListener('u-widget-internal', listener);
-
-      const container = shadow.querySelector('.confirm-container') as HTMLElement;
-      container.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-
-      expect(listener).toHaveBeenCalledOnce();
-      expect(listener.mock.calls[0][0].detail.action).toBe('cancel');
-    });
-  });
-
-  describe('locale integration', () => {
-    it('uses registered locale for validation messages', async () => {
-      registerLocale('ko', { required: '{label}은(는) 필수입니다' });
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: '이름', type: 'text', required: true },
-        ],
-        actions: [{ label: '제출', action: 'submit' }],
-        options: { locale: 'ko' },
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('이름은(는) 필수입니다');
-    });
-
-    it('uses field.message override over locale', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'pw', label: 'Password', type: 'text', required: true, message: '비밀번호를 입력하세요' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('비밀번호를 입력하세요');
-    });
-
-    it('field.message applies to all validation rules for that field', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { age: 5 },
-        fields: [
-          { field: 'age', label: 'Age', type: 'number', min: 18, message: '18세 이상이어야 합니다' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('18세 이상이어야 합니다');
-    });
-
-    it('validates minLength for text fields', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { code: 'AB' },
-        fields: [
-          { field: 'code', label: 'Code', type: 'text', minLength: 3 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Code must be at least 3 characters');
-    });
-
-    it('passes minLength when value is long enough', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { code: 'ABCD' },
-        fields: [
-          { field: 'code', label: 'Code', type: 'text', minLength: 3 },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')).toBeNull();
-    });
-
-    it('validates URL field rejects non-http URLs', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { site: 'not-a-url' },
-        fields: [
-          { field: 'site', label: 'Website', type: 'url' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Website must be a valid URL');
-    });
-
-    it('validates URL field accepts valid URLs', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { site: 'https://example.com' },
-        fields: [
-          { field: 'site', label: 'Website', type: 'url' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')).toBeNull();
-    });
-
-    it('validates custom pattern rejects non-matching value', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { zip: 'abc' },
-        fields: [
-          { field: 'zip', label: 'ZIP', type: 'text', pattern: '^\\d{5}$' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('ZIP format is invalid');
-    });
-
-    it('validates custom pattern accepts matching value', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { zip: '12345' },
-        fields: [
-          { field: 'zip', label: 'ZIP', type: 'text', pattern: '^\\d{5}$' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')).toBeNull();
-    });
-
-    it('skips pattern validation for invalid regex', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { code: 'test' },
-        fields: [
-          { field: 'code', label: 'Code', type: 'text', pattern: '[invalid(' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      // Invalid regex should be silently skipped, no error
-      expect(shadow.querySelector('.field-error')).toBeNull();
-    });
-
-    it('field.message overrides URL validation message', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { site: 'bad' },
-        fields: [
-          { field: 'site', label: 'Site', type: 'url', message: '올바른 URL을 입력하세요' },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('올바른 URL을 입력하세요');
-    });
-
-    it('falls back to English when locale not registered', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'name', label: 'Name', type: 'text', required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-        options: { locale: 'xx-XX' },
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      expect(shadow.querySelector('.field-error')?.textContent).toBe('Name is required');
-    });
-  });
-
-  describe('textarea attributes', () => {
-    it('renders textarea with maxlength attribute', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'bio', type: 'textarea', label: 'Bio', maxLength: 200 },
-        ],
-      });
-      const shadow = await render(el);
-      const textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
-      expect(textarea).not.toBeNull();
-      expect(textarea.getAttribute('maxlength')).toBe('200');
-    });
-
-    it('renders textarea with minlength attribute', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'comment', type: 'textarea', label: 'Comment', minLength: 10 },
-        ],
-      });
-      const shadow = await render(el);
-      const textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
-      expect(textarea.getAttribute('minlength')).toBe('10');
-    });
-
-    it('validates textarea maxLength on submit', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'bio', type: 'textarea', label: 'Bio', maxLength: 5 },
-        ],
-        data: { bio: 'too long text' },
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const error = shadow.querySelector('.field-error');
-      expect(error).not.toBeNull();
-      expect(error?.textContent).toContain('5');
-    });
-
-    it('validates textarea minLength on submit', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'bio', type: 'textarea', label: 'Bio', minLength: 50 },
-        ],
-        data: { bio: 'short' },
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-
-      const btn = shadow.querySelector('button') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const error = shadow.querySelector('.field-error');
-      expect(error).not.toBeNull();
-      expect(error?.textContent).toContain('50');
-    });
-  });
-
-  describe('ARIA group roles', () => {
-    it('radio group has role="radiogroup" and aria-label', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'size', label: 'Size', type: 'radio', options: ['S', 'M', 'L'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.radio-group');
-      expect(group?.getAttribute('role')).toBe('radiogroup');
-      expect(group?.getAttribute('aria-label')).toBe('Size');
-    });
-
-    it('checkbox group has role="group" and aria-label', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.checkbox-group');
-      expect(group?.getAttribute('role')).toBe('group');
-      expect(group?.getAttribute('aria-label')).toBe('Skills');
-    });
-
-    it('multiselect group has role="group" and aria-label', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'langs', label: 'Languages', type: 'multiselect', options: ['JS', 'TS'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.multiselect-group');
-      expect(group?.getAttribute('role')).toBe('group');
-      expect(group?.getAttribute('aria-label')).toBe('Languages');
-    });
-
-    it('falls back to field name when label is missing', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'priority', type: 'radio', options: ['Low', 'High'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.radio-group');
-      expect(group?.getAttribute('aria-label')).toBe('priority');
-    });
-  });
-
-  describe('aria-invalid on all field types', () => {
-    it('select has aria-invalid="false" by default', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'color', label: 'Color', type: 'select', options: ['red', 'blue'] },
-        ],
-      });
-      const shadow = await render(el);
-      const select = shadow.querySelector('select');
-      expect(select?.getAttribute('aria-invalid')).toBe('false');
-    });
-
-    it('radio group has aria-invalid="false" by default', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'size', label: 'Size', type: 'radio', options: ['S', 'M'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.radio-group');
-      expect(group?.getAttribute('aria-invalid')).toBe('false');
-    });
-
-    it('checkbox group has aria-invalid="false" by default', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.checkbox-group');
-      expect(group?.getAttribute('aria-invalid')).toBe('false');
-    });
-
-    it('multiselect group has aria-invalid="false" by default', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'langs', label: 'Langs', type: 'multiselect', options: ['JS', 'TS'] },
-        ],
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.multiselect-group');
-      expect(group?.getAttribute('aria-invalid')).toBe('false');
-    });
-
-    it('radio group has aria-describedby linking to error', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'color', label: 'Color', type: 'radio', options: ['Red', 'Blue'], required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const group = shadow.querySelector('.radio-group');
-      const errorId = group?.getAttribute('aria-describedby');
-      expect(errorId).toBe('err-color');
-      expect(shadow.getElementById(errorId!)?.textContent).toBe('Color is required');
-    });
-
-    it('checkbox group has aria-describedby linking to error', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'skills', label: 'Skills', type: 'checkbox', options: ['JS', 'TS'], required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const group = shadow.querySelector('.checkbox-group');
-      const errorId = group?.getAttribute('aria-describedby');
-      expect(errorId).toBe('err-skills');
-      expect(shadow.getElementById(errorId!)?.textContent).toBe('Skills is required');
-    });
-
-    it('multiselect group has aria-describedby linking to error', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [
-          { field: 'langs', label: 'Langs', type: 'multiselect', options: ['JS', 'TS'], required: true },
-        ],
-        actions: [{ label: 'Submit', action: 'submit' }],
-      });
-      const shadow = await render(el);
-      const btn = shadow.querySelector('button[type="submit"]') as HTMLButtonElement;
-      btn.click();
-      await el.updateComplete;
-
-      const group = shadow.querySelector('.multiselect-group');
-      const errorId = group?.getAttribute('aria-describedby');
-      expect(errorId).toBe('err-langs');
-      expect(shadow.getElementById(errorId!)?.textContent).toBe('Langs is required');
-    });
-  });
-
-  describe('container query', () => {
-    it('has container-type declared in styles', () => {
-      const styles = (customElements.get('uw-form') as any).styles;
-      const allCss = Array.isArray(styles)
-        ? styles.map((s: any) => s.cssText ?? '').join(' ')
-        : styles?.cssText ?? '';
-      expect(allCss).toContain('container');
-      expect(allCss).toContain('uw-form');
-    });
-
-    it('has responsive rules for narrow containers', () => {
-      const styles = (customElements.get('uw-form') as any).styles;
-      const allCss = Array.isArray(styles)
-        ? styles.map((s: any) => s.cssText ?? '').join(' ')
-        : styles?.cssText ?? '';
-      expect(allCss).toContain('@container');
-    });
-  });
-
-  describe('keyboard navigation', () => {
-    it('toggle switch responds to Enter key', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { active: false },
-        fields: [{ field: 'active', label: 'Active', type: 'toggle' }],
-      });
-      const shadow = await render(el);
-      const toggle = shadow.querySelector('.toggle-track') as HTMLElement;
-
-      toggle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      await el.updateComplete;
-
-      expect(toggle.getAttribute('aria-checked')).toBe('true');
-    });
-
-    it('toggle switch responds to Space key', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { active: false },
-        fields: [{ field: 'active', label: 'Active', type: 'toggle' }],
-      });
-      const shadow = await render(el);
-      const toggle = shadow.querySelector('.toggle-track') as HTMLElement;
-
-      toggle.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
-      await el.updateComplete;
-
-      expect(toggle.getAttribute('aria-checked')).toBe('true');
-    });
-  });
-
-  describe('fieldStates — suggestions', () => {
-    const events = (el: UwForm) => {
-      const seen: { type: string; data?: Record<string, unknown> }[] = [];
-      el.addEventListener('u-widget-internal', (e) => seen.push((e as CustomEvent).detail));
-      return seen;
-    };
-
-    it('lists the suggestions, the note and the decline button under the field', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'vendor', label: 'Vendor', type: 'text' }],
-        fieldStates: { vendor: { suggestions: ['Acme', 'Globex'], note: 'Used on the last 3 orders', decline: 'None of these' } },
-      });
-      const shadow = await render(el);
-      const group = shadow.querySelector('.suggestions')!;
-      expect(group.getAttribute('role')).toBe('group');
-      expect(group.getAttribute('aria-label')).toBe('Suggestions for Vendor');
-      expect([...group.querySelectorAll('.suggestion')].map((b) => b.textContent)).toEqual(['Acme', 'Globex']);
-      expect(group.querySelector('.field-note')?.textContent).toBe('Used on the last 3 orders');
-      expect(group.querySelector('.decline')?.textContent).toBe('None of these');
-      for (const b of group.querySelectorAll('button')) expect(b.getAttribute('type')).toBe('button');
-    });
-
-    it('shows the first suggestion in the empty field in place of its placeholder', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'vendor', type: 'text', placeholder: 'Type a vendor' }],
-        fieldStates: { vendor: { suggestions: ['Acme'] } },
-      });
-      const shadow = await render(el);
-      expect(shadow.querySelector('input')!.getAttribute('placeholder')).toBe('Acme');
-    });
-
-    it('keeps the placeholder once the field holds a value', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { vendor: 'Initech' },
-        fields: [{ field: 'vendor', type: 'text', placeholder: 'Type a vendor' }],
-        fieldStates: { vendor: { suggestions: ['Acme'] } },
-      });
-      const shadow = await render(el);
-      expect(shadow.querySelector('input')!.getAttribute('placeholder')).toBe('Type a vendor');
-    });
-
-    it('picking a suggestion puts it in the field, then reports the pick and the change', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'qty', type: 'number' }],
-        fieldStates: { qty: { suggestions: ['12'] } },
-      });
-      const seen = events(el);
-      const shadow = await render(el);
-      (shadow.querySelector('.suggestion') as HTMLButtonElement).click();
-      await el.updateComplete;
-      expect(seen.map((e) => [e.type, e.data])).toEqual([
-        ['suggestion-pick', { field: 'qty', value: 12 }],
-        ['change', { field: 'qty', value: 12 }],
-      ]);
-      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('12');
-      expect(shadow.querySelector('.suggestion')!.getAttribute('aria-pressed')).toBe('true');
-    });
-
-    it('a pick adds one choice to a multiselect', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { tags: ['a'] },
-        fields: [{ field: 'tags', type: 'multiselect', options: ['a', 'b'] }],
-        fieldStates: { tags: { suggestions: ['b'] } },
-      });
-      const seen = events(el);
-      const shadow = await render(el);
-      (shadow.querySelector('.suggestion') as HTMLButtonElement).click();
-      await el.updateComplete;
-      expect(seen[0]).toMatchObject({ type: 'suggestion-pick', data: { field: 'tags', value: 'b' } });
-      expect(seen[1]).toMatchObject({ type: 'change', data: { field: 'tags', value: ['a', 'b'] } });
-    });
-
-    it('declining reports it and changes nothing', async () => {
-      const el = createElement({
-        widget: 'form',
-        data: { vendor: '' },
-        fields: [{ field: 'vendor', type: 'text' }],
-        fieldStates: { vendor: { suggestions: ['Acme'], decline: 'No' } },
-      });
-      const seen = events(el);
-      const shadow = await render(el);
-      (shadow.querySelector('.decline') as HTMLButtonElement).click();
-      await el.updateComplete;
-      expect(seen).toEqual([expect.objectContaining({ type: 'suggestion-decline', data: { field: 'vendor' } })]);
-      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('');
-    });
-
-    it('a new fieldStates keeps what the user typed', async () => {
-      const el = createElement({ widget: 'form', fields: [{ field: 'vendor', type: 'text' }] });
-      const shadow = await render(el);
-      const input = shadow.querySelector('input') as HTMLInputElement;
-      input.value = 'Init';
-      input.dispatchEvent(new Event('input'));
-      await el.updateComplete;
-      el.spec = { ...el.spec!, fieldStates: { vendor: { suggestions: ['Initech'] } } };
-      await el.updateComplete;
-      expect((shadow.querySelector('input') as HTMLInputElement).value).toBe('Init');
-      expect(shadow.querySelector('.suggestion')?.textContent).toBe('Initech');
-    });
-
-    it('a suggested choice shows as its option label', async () => {
-      const el = createElement({
-        widget: 'form',
-        fields: [{ field: 'site', type: 'select', options: [{ value: 'plant-b', label: 'Plant B' }] }],
-        fieldStates: { site: { suggestions: ['plant-b'] } },
-      });
-      const seen = events(el);
-      const shadow = await render(el);
-      const button = shadow.querySelector('.suggestion') as HTMLButtonElement;
-      expect(button.textContent).toBe('Plant B');
-      button.click();
-      expect(seen[0]).toMatchObject({ type: 'suggestion-pick', data: { field: 'site', value: 'plant-b' } });
-    });
-
-    it('draws nothing for a field with no state', async () => {
-      const el = createElement({ widget: 'form', fields: [{ field: 'a', type: 'text' }], fieldStates: { b: { suggestions: ['x'] } } });
-      const shadow = await render(el);
-      expect(shadow.querySelector('.suggestions')).toBeNull();
+      const { of } = events(el);
+      const [ok, cancel] = Array.from(shadow.querySelectorAll('button')) as HTMLButtonElement[];
+      ok.click();
+      cancel.click();
+      shadow.querySelector('.confirm-container')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(of('submit')).toHaveLength(1);
+      expect(of('action').map((d) => d.action)).toEqual(['cancel', 'cancel']);
     });
   });
 });

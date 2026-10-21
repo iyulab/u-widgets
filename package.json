@@ -98,7 +98,8 @@
     "url": "git+https://github.com/iyulab/u-widgets.git"
   },
   "dependencies": {
-    "@formdown/core": "^0.22.0",
+    "@formdown/core": "0.24.0",
+    "@formdown/ui": "0.24.0",
     "lit": "^3.3.3"
   },
   "peerDependencies": {

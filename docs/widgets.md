@@ -439,6 +439,22 @@ Modifiers: `*` = required, `(Label)` = display label, `{a,b}` = options. An opti
 (`\,` and `\=` keep a comma or `=` inside an option). In a `fields` array the same option is
 `{ "value": "hw", "label": "Hardware" }`; a plain string is a value shown as itself.
 
+### How the fields behave
+
+The fields are drawn, checked and offered suggestions by `<formdown-ui>` (`@formdown/ui`). A `fields` array is written
+as formdown for it, so a form reads the same whichever way it is given.
+
+- On submit every rule a field declares is checked — required, length, range, number, email, URL, phone, date and
+  `pattern` (which matches the whole value). Each failing field shows why under it and is marked `aria-invalid`; the
+  first one takes focus. The sentences are the widget locale's.
+- A field's `message` replaces that sentence for whichever rule its value breaks first — one sentence a field, as
+  `setCustomValidity` gives a control. In formdown text: `@name*(Name): [minlength=2 error-message="Tell us your name"]`.
+- Enter in a field moves to the next one; the form is submitted through its `submit` action, never by Enter.
+- A `multiselect` is a `<select multiple>`; a `toggle` is a checkbox drawn as a switch.
+- Values are sent typed: a number or range field's as a number, a datetime's as `YYYY-MM-DDTHH:mm` in local time.
+- Parts, for `uw-form::part(…)`: `field`, `label`, `input`, `field-error`, `description`, `radio-group`,
+  `checkbox-group`, `option-label`, `suggestion`, `decline`, `field-note`.
+
 ### Suggested values (`fieldStates`)
 
 A host that can guess what goes in a field — from earlier records, another system, a model — says so per field name
@@ -457,8 +473,10 @@ in `fieldStates`. It is the same shape `@formdown/ui`'s `<formdown-ui>` takes, s
 
 - The first suggestion shows in the empty field in place of its placeholder; every suggestion is a button under the
   field, beside the `note`.
+- A button shows the suggestion as the field shows it — an option's label, not its value — and says with
+  `aria-pressed` whether it is the field's value now; a field's buttons are a group named for the field.
 - Picking one puts it in the field — a number field reads it as a number, a multiselect adds it — and the widget sends
-  `suggestion-pick` (`data: { field, value }`), then the usual `change`.
+  `suggestion-pick` (`data: { field, value }`, the value — not the label), then the usual `change`.
 - `decline` adds a button with that label; it sends `suggestion-decline` (`data: { field }`) and changes nothing.
 - A new `fieldStates` keeps what the user has typed — only new `data` or `fields` start the form over.
 - Parts: `suggestions`, `suggestion`, `note`, `decline`.
@@ -474,7 +492,8 @@ import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 2.8
 ```
 
 The fields then render `<u-date-picker>` (typed entry, calendar, the app's locale). What the form
-submits does not change: `YYYY-MM-DD` for `date`, `YYYY-MM-DDTHH:mm` (local time) for `datetime`.
+submits does not change: `YYYY-MM-DD` for `date`, `YYYY-MM-DDTHH:mm` (local time) for `datetime`. The picker is
+registered as formdown's `date` and `datetime-local` field types, so any `<formdown-ui>` on the page draws it too.
 
 The same import makes u-widgets follow the components locale: its default locale is `Locale.get()`
 and moves with every `Locale.set()`, so one call switches the whole app. A widget's own `locale`

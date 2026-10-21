@@ -1,10 +1,12 @@
 import { FormdownParser } from '@formdown/core/parser';
+import { formatFormdown } from '@formdown/core/format';
 import type { UWidgetFieldDefinition, UWidgetAction, FieldType } from './types.js';
 
 /**
  * Reads a form written in formdown (`@name*(Label): []`, `@[submit "Save"]`) with `@formdown/core` and
  * turns it into the form widget's `fields` and `actions`. The syntax is formdown's own — this module only
- * maps what the parser reads onto the widget's field and action shapes.
+ * maps what the parser reads onto the widget's field and action shapes, and back (`toFormdown`) for the
+ * `<formdown-ui>` element that draws the form's fields.
  */
 export interface FormdownResult {
   fields: UWidgetFieldDefinition[];
@@ -28,6 +30,8 @@ interface FormdownField {
   required?: boolean;
   placeholder?: string;
   pattern?: string;
+  /** The field's own sentence for the rule its value breaks first (`error-message="…"` in the text). */
+  errorMessage?: string;
   options?: { value: string; label?: string }[];
   attributes?: Record<string, unknown>;
 }
@@ -70,6 +74,7 @@ function mapField(f: FormdownField): UWidgetFieldDefinition {
   const placeholder = f.placeholder ?? a.placeholder;
   if (placeholder != null) def.placeholder = String(placeholder);
   if (f.pattern) def.pattern = f.pattern;
+  if (f.errorMessage) def.message = f.errorMessage;
   if (f.options && f.options.length > 0) {
     def.options = f.options.map((o) =>
       o.label !== undefined && o.label !== o.value ? { value: o.value, label: o.label } : o.value,
@@ -131,4 +136,47 @@ export function parseFormdown(input: string): FormdownResult {
       ...(d.span?.line != null ? { line: d.span.line } : {}),
     })),
   };
+}
+
+/** The widget's field types that formdown writes another way — the inverse of `FIELD_TYPE_MAP` plus the two attribute forms. */
+const FORMDOWN_TYPE: Partial<Record<FieldType, string>> = {
+  datetime: 'datetime-local',
+  multiselect: 'select',
+  toggle: 'checkbox',
+};
+
+/** One field in the shape `formatFormdown` writes. */
+function unmapField(def: UWidgetFieldDefinition): FormdownField {
+  const type = def.type ?? 'text';
+  const attributes: Record<string, unknown> = {};
+  if (type === 'multiselect') attributes.multiple = true;
+  if (type === 'toggle') attributes.switch = true;
+  if (def.min != null) attributes.min = def.min;
+  if (def.max != null) attributes.max = def.max;
+  if (def.step != null) attributes.step = def.step;
+  if (def.minLength != null) attributes.minlength = def.minLength;
+  if (def.maxLength != null) attributes.maxlength = def.maxLength;
+  if (def.rows != null) attributes.rows = def.rows;
+  const field: FormdownField = { name: def.field, type: FORMDOWN_TYPE[type] ?? type, attributes };
+  if (def.label) field.label = def.label;
+  if (def.required) field.required = true;
+  if (def.placeholder) field.placeholder = def.placeholder;
+  if (def.pattern) field.pattern = def.pattern;
+  // The field's own sentence for whichever rule its value breaks first, as `setCustomValidity` gives one.
+  if (def.message) field.errorMessage = def.message;
+  if (def.options && def.options.length > 0) {
+    field.options = def.options.map((o) => (typeof o === 'string' ? { value: o } : o));
+  }
+  return field;
+}
+
+/**
+ * Writes the form widget's fields as formdown text — what `<formdown-ui>` reads. Buttons are not written: the
+ * widget draws its own actions.
+ *
+ * @param fields - The widget's field definitions.
+ * @returns formdown text with one line per field.
+ */
+export function toFormdown(fields: UWidgetFieldDefinition[]): string {
+  return formatFormdown(fields.map(unmapField) as Parameters<typeof formatFormdown>[0]);
 }

@@ -31,20 +31,18 @@ async function deepShadowText(page: Page, id: string): Promise<string> {
 
 /**
  * Check if a selector exists in the nested shadow DOM.
- * Searches in: u-widget#shadow → inner-element#shadow → selector
+ * Searches every shadow root below the widget.
  */
 async function deepShadowHas(page: Page, id: string, selector: string): Promise<boolean> {
   return page.evaluate(
     ([hostId, sel]) => {
       const host = document.getElementById(hostId);
       if (!host?.shadowRoot) return false;
-      // Direct check in u-widget shadow
-      if (host.shadowRoot.querySelector(sel)) return true;
-      // Check all child elements' shadow roots
-      for (const child of host.shadowRoot.querySelectorAll('*')) {
-        if (child.shadowRoot?.querySelector(sel)) return true;
-      }
-      return false;
+      // Every shadow root below the widget — a widget may draw through an element of its own (the form's fields).
+      const has = (root: ShadowRoot): boolean =>
+        !!root.querySelector(sel) ||
+        Array.from(root.querySelectorAll('*')).some((child) => !!child.shadowRoot && has(child.shadowRoot));
+      return has(host.shadowRoot);
     },
     [id, selector] as const,
   );

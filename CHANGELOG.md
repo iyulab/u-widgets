@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** the `form` widget's fields are drawn, checked and offered suggestions by `<formdown-ui>`
+  (`@formdown/ui`, now a dependency, with `@formdown/core` pinned to the same version). The spec does not change —
+  `fields` (or `formdown`), `data`, `fieldStates`, `actions` and the events are as before — but what the fields are
+  made of is formdown's:
+  - The fields sit in `<formdown-ui>`'s shadow root. A page styles them as before through the parts the widget passes
+    on (`uw-form::part(field|label|input|field-error|suggestion|decline|field-note|radio-group|checkbox-group|description)`);
+    a `multiselect` is a `<select multiple>`, a `toggle` a switch checkbox.
+  - Every rule a field declares is checked on submit — required, length, range, number, email, URL, phone, date and
+    `pattern`, which now has to match the whole value. Each failing field shows why under it, is marked
+    `aria-invalid`, and the first one takes focus. The sentences are the widget locale's (new keys `invalidNumber`,
+    `invalidTel`, `invalidDate`, `dateMin`, `dateMax`).
+  - Enter in a field moves to the next field; a form is submitted through its `submit` action. A form with no actions
+    is no longer submitted by Enter.
+  - A `submit` or action event carries the spec's `data` with the fields' values over it, a number or range field's
+    value as a number; a `change` event's value is typed the same way.
+  - A field's `message` is its own sentence for whichever rule its value breaks first — not only `required` — as
+    `setCustomValidity` gives one sentence a control. In formdown text it is `error-message="…"`, and a form read from
+    formdown keeps it as `message`.
+  - A suggestion button of a field with options shows the option's label, says with `aria-pressed` whether it is the
+    field's value now, and the buttons of a field are a group named for it.
+  - A checkbox, radio or switch label is at least 24px tall (WCAG 2.2 target size); an option's label is the part
+    `option-label`.
+  - `u-widgets/components` draws date and datetime fields with `<u-date-picker>` as a formdown field type, so every
+    `<formdown-ui>` on the page draws it, not only the form widget's. A datetime is still sent as
+    `YYYY-MM-DDTHH:mm` in local time.
+  - The package can be imported in Node again — `@formdown/ui` 0.24 no longer bundles a second copy of Lit's base
+    class (an MCP server that reads specs in Node failed to start).
+
 ## [0.39.0] - 2026-10-21
 
 MCP server 0.7.3 follows `^0.39.0`.

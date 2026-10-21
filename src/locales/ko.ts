@@ -29,6 +29,11 @@ export const ko: UWidgetLocaleStrings = {
   invalidEmail: '{label}에 올바른 이메일 주소를 입력하세요',
   invalidUrl: '{label}에 올바른 URL을 입력하세요',
   invalidPattern: '{label} 형식이 올바르지 않습니다',
+  invalidNumber: '{label}에 숫자를 입력하세요',
+  invalidTel: '{label}에 올바른 전화번호를 입력하세요',
+  invalidDate: '{label}에 올바른 날짜를 입력하세요',
+  dateMin: '{label}은(는) {min} 이후 날짜여야 합니다',
+  dateMax: '{label}은(는) {max} 이전 날짜여야 합니다',
   suggestionsFor: '{label} 제안',
 
   // Accessible names of widget regions

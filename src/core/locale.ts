@@ -33,6 +33,13 @@ export interface UWidgetLocaleStrings {
   invalidEmail: string;
   invalidUrl: string;
   invalidPattern: string;
+  invalidNumber: string;
+  invalidTel: string;
+  invalidDate: string;
+  /** A date before the field's `min` — template with {label}, {min}. */
+  dateMin: string;
+  /** A date after the field's `max` — template with {label}, {max}. */
+  dateMax: string;
   /** Accessible name of a form field's list of suggested values (`fieldStates`) — template with {label}. */
   suggestionsFor: string;
   // Accessible names of widget regions (used when the spec has no title)
@@ -101,6 +108,11 @@ const EN: UWidgetLocaleStrings = {
   invalidEmail: '{label} must be a valid email address',
   invalidUrl: '{label} must be a valid URL',
   invalidPattern: '{label} format is invalid',
+  invalidNumber: '{label} must be a number',
+  invalidTel: '{label} must be a valid phone number',
+  invalidDate: '{label} must be a valid date',
+  dateMin: '{label} must be on or after {min}',
+  dateMax: '{label} must be on or before {max}',
   suggestionsFor: 'Suggestions for {label}',
   // Region names
   actions: 'Actions',
