@@ -343,8 +343,10 @@ test.describe('크기 계약 — 호스트 제약이 내부에 닿는다', () =>
       return out;
     });
     expect(plots['160x140'], `실측 ${JSON.stringify(plots)} — 종전에는 약 0px`).toBeGreaterThan(60);
-    // 큰 캔버스는 ECharts 기본 배치 그대로다(위 여백 65px) — 조밀 배치가 기본 모습을 바꾸지 않았다는 증거.
-    expect(plots['600x300:top'], `실측 ${JSON.stringify(plots)}`).toBe(65);
+    // 큰 캔버스도 캔버스에 맞춘 배치다 — 종전 ECharts 기본 여백(위 65 · 아래 60px)에서는 플롯이 캔버스의 절반쯤이었다
+    // (위 여백은 범례 자리 40 + 축 위 끝 라벨의 반).
+    expect(plots['600x300:top'], `실측 ${JSON.stringify(plots)}`).toBeLessThanOrEqual(50);
+    expect(plots['600x300'], `실측 ${JSON.stringify(plots)}`).toBeGreaterThan(200);
   });
 
   test('stat-group — 세로만 열고 가로 `hidden` 은 의도대로 남는다', async ({ page }) => {

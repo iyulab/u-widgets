@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+
+- A chart with axes (bar, line, area, scatter, box, histogram, waterfall, gantt, heatmap) lays itself out to its canvas
+  at every size, not only a small one: the axis labels and names are kept inside the canvas, with room above the plot
+  only for a legend (now placed on top) or a reference line's label. ECharts' own margins — 60px above and below and
+  a tenth of the width each side — drew the plot in about half of a chart a few hundred pixels tall. A spec that puts
+  the legend at the foot through `options.echarts.legend.bottom` gets its room there instead; a spec's own
+  `options.echarts.grid` still lays the chart out as before.
+
 ## [0.38.2] - 2026-10-21
 
 MCP server 0.7.2 follows `^0.38.0` and takes this release as it is.

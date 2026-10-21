@@ -41,6 +41,40 @@ describe('chartLayoutKey', () => {
   });
 });
 
+describe('toEChartsOption — a chart with axes fitted to its canvas', () => {
+  it('keeps the axis labels inside the canvas and leaves room above only for the legend', () => {
+    const o = toEChartsOption(twoSeries);
+    expect(o.grid).toEqual({ top: 40, right: 20, bottom: 12, left: 12, outerBoundsMode: 'same', outerBoundsContain: 'all' });
+    expect(o.legend).toMatchObject({ top: 0 });
+    const single = toEChartsOption({ ...twoSeries, mapping: { x: 'day', y: 'cpu' }, options: { legend: false } } as UWidgetSpec);
+    expect(single.grid).toMatchObject({ top: 20 });
+  });
+
+  it('moves the legend’s room to the foot when the spec puts the legend there', () => {
+    const o = toEChartsOption({ ...twoSeries, options: { echarts: { legend: { bottom: 0 } } } } as UWidgetSpec);
+    expect(o.legend).toMatchObject({ bottom: 0 });
+    expect(o.legend).not.toHaveProperty('top');
+    expect(o.grid).toMatchObject({ top: 20, bottom: 40 });
+    // A grid of the spec's own is the spec's to lay out — its bottom replaces the fitted top, as any side it gives does.
+    const own = toEChartsOption({ ...twoSeries, options: { echarts: { legend: { bottom: 0 }, grid: { bottom: 50 } } } } as UWidgetSpec);
+    expect(own.grid).toMatchObject({ bottom: 50, outerBoundsMode: 'same' });
+    expect(own.grid).not.toHaveProperty('top');
+  });
+
+  it('keeps the room a builder set for something of its own — a heatmap’s colour scale', () => {
+    const o = toEChartsOption({
+      widget: 'chart.heatmap',
+      data: [{ x: 'a', y: 'b', v: 1 }],
+      mapping: { x: 'x', y: 'y', value: 'v' },
+    } as UWidgetSpec);
+    expect(o.grid).toMatchObject({ bottom: 60, outerBoundsMode: 'same' });
+  });
+
+  it('leaves the pie alone — it has no axes', () => {
+    expect(toEChartsOption(pie).grid).toBeUndefined();
+  });
+});
+
 describe('toEChartsOption — compact layout', () => {
   it('leaves a roomy canvas exactly as without a size', () => {
     expect(toEChartsOption(twoSeries, { width: 600, height: 300 })).toEqual(toEChartsOption(twoSeries));

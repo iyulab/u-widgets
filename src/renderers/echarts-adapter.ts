@@ -165,6 +165,7 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   // Axis config placed at options top-level (instead of options.echarts) is dropped — warn.
   warnMisplacedAxisOptions(options);
 
+  if (result.xAxis && result.yAxis) fitCartesianGrid(result);
   if (chartLayoutKey(size)) applyCompactLayout(result, widget, options, size!);
 
   // Apply echarts passthrough: recursive deep-merge onto the generated option.
@@ -172,6 +173,7 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   if (passthrough && typeof passthrough === 'object') {
     warnUnregisteredComponentKeys(passthrough);
     result = deepMerge(result, passthrough, ELEMENTWISE_KEYS);
+    followLegendToFoot(result, passthrough);
   }
 
   // Guard series-type false affordance: catches both options.series[i].type
@@ -179,6 +181,53 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   warnUnregisteredSeriesTypes(result.series);
 
   return result;
+}
+
+/**
+ * The room a chart's mark lines need outside the plot: a label (a reference line, gantt's makespan) sits above the plot's
+ * top edge — or, for a y line whose label goes past the plot's right end, beside it, as wide as its words.
+ */
+function markLineRoom(result: Record<string, unknown>): { markLineLabel: number; besideRight: number } {
+  const markLines = ((result.series as Record<string, unknown>[] | undefined) ?? []).flatMap((s) => ((s.markLine as { data?: Record<string, unknown>[] } | undefined)?.data ?? []));
+  const besideRight = Math.max(0, ...markLines
+    .filter((m) => m.yAxis !== undefined && (m.label as { position?: string } | undefined)?.position === 'end')
+    .map((m) => String((m.label as { formatter?: unknown }).formatter ?? '').length * 12 + 8));
+  return { markLineLabel: markLines.length > 0 ? 14 : 0, besideRight };
+}
+
+/**
+ * Lay a chart with axes out to its canvas: the axis labels and names inside the canvas, with margins that leave room only
+ * for what sits outside the plot — a legend on top, a reference line's label. ECharts' own grid reserves 60px above,
+ * 60px below and a tenth of the width each side whatever the chart holds, so a chart a few hundred pixels tall drew its
+ * plot in about half its canvas. A grid the builder set (a heatmap's room for its colour scale) is kept over this.
+ */
+function fitCartesianGrid(result: Record<string, unknown>): void {
+  const legend = result.legend as Record<string, unknown> | undefined;
+  const legendVisible = !!legend && legend.show !== false;
+  // On top, where the room is left for it — ECharts 6 puts a legend at the foot by default, over the axis labels.
+  if (legendVisible && legend.top === undefined && legend.bottom === undefined) result.legend = { ...legend, top: 0 };
+  const { markLineLabel, besideRight } = markLineRoom(result);
+  result.grid = {
+    top: (legendVisible ? 40 : 20) + markLineLabel,
+    right: 20 + besideRight,
+    bottom: 12,
+    left: 12,
+    outerBoundsMode: 'same',
+    outerBoundsContain: 'all',
+    ...(result.grid as Record<string, unknown> | undefined),
+  };
+}
+
+/**
+ * A spec that moves a fitted chart's legend to the foot (`options.echarts.legend.bottom`) and lays out no grid of its
+ * own gets the legend's room moved with it — below the axis labels instead of above the plot.
+ */
+function followLegendToFoot(result: Record<string, unknown>, passthrough: Record<string, unknown>): void {
+  const legend = passthrough.legend as Record<string, unknown> | undefined;
+  const grid = result.grid as Record<string, unknown> | undefined;
+  if (!legend || legend.bottom === undefined || legend.top !== undefined) return;
+  if (!grid || grid.outerBoundsMode !== 'same' || passthrough.grid !== undefined) return;
+  result.grid = { ...grid, top: (grid.top as number) - 20, bottom: (grid.bottom as number) + 28 };
 }
 
 /** The pixel size of the canvas a chart is drawn into. */
@@ -255,13 +304,7 @@ function applyCompactLayout(
     const keepLegend = legendVisible && showLegend;
     if (legend) result.legend = keepLegend ? { ...legend, top: 0, ...COMPACT_LEGEND } : { ...legend, show: false };
     if (result.visualMap) result.visualMap = { ...(result.visualMap as Record<string, unknown>), show: false };
-    // A mark line's label (a reference line, gantt's makespan) sits above the plot's top edge — or, for a y line whose
-    // label goes past the plot's right end, beside it: room for its words there.
-    const markLines = ((result.series as Record<string, unknown>[] | undefined) ?? []).flatMap((s) => ((s.markLine as { data?: Record<string, unknown>[] } | undefined)?.data ?? []));
-    const markLineLabel = markLines.length > 0 ? 14 : 0;
-    const besideRight = Math.max(0, ...markLines
-      .filter((m) => m.yAxis !== undefined && (m.label as { position?: string } | undefined)?.position === 'end')
-      .map((m) => String((m.label as { formatter?: unknown }).formatter ?? '').length * 12 + 8));
+    const { markLineLabel, besideRight } = markLineRoom(result);
     // 'same' + 'all': the rect below is the outer bound, and the axis labels and names are fitted inside it.
     result.grid = {
       ...(result.grid as Record<string, unknown> | undefined),
