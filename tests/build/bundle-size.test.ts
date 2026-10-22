@@ -53,7 +53,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 11 KB gzip', () => {
+  it('charts bundle is under 11.5 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
@@ -75,7 +75,9 @@ describe('bundle size budget', () => {
     // narrow funnel stage named beside it, a reference line's label at the end the bars do not reach.
     // Re-baselined from 10.75 KB for charts with axes fitted to their canvas at every size: measured 10.86 KB with it
     // (10.64 KB before) — the fitted grid, the legend placed on top and its room following a legend moved to the foot.
-    expect(size).toBeLessThan(11 * 1024);
+    // Re-baselined from 11 KB for a page's skin and readable times: measured 11.16 KB (10.86 KB before) — the body face
+    // read from the tokens, ISO times on the category axis labelled in the locale, the value format in the tooltip.
+    expect(size).toBeLessThan(11.5 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 18 KB gzip', () => {

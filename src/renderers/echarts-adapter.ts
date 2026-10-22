@@ -151,6 +151,10 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   // English grouping and a dot decimal («50,000» reads as fifty on a German page).
   applyLocaleNumberDefaults(result, locale);
 
+  // A value format the spec gives its value axis is also how the tooltip writes the values.
+  const valueFormat = (options.valueAxisFormat ?? (options.horizontal ? options.xFormat : options.yFormat)) as AxisFormatOption | undefined;
+  if (isCartesian && valueFormat) applyTooltipValueFormat(result, valueFormat, locale);
+
   // valueAxisZero: false — the value axis spans the data instead of always reaching zero, for a series that
   // moves far from zero (a control chart around its centre line, a process temperature). ECharts calls it `scale`.
   if (isCartesian && options.valueAxisZero === false) {
@@ -541,8 +545,8 @@ function buildCartesian(
 
   if (!xField || yFields.length === 0) return {};
 
-  const categories = data.map((row) => String(row[xField] ?? ''));
   const horizontal = !!options.horizontal;
+  const categories = timeCategories(data.map((row) => row[xField]), options) ?? data.map((row) => String(row[xField] ?? ''));
   // A numeric x axis — points at their x values, not evenly spaced categories: a profile over uneven times.
   const valueX = !horizontal && options.xAxisType === 'value';
   const point = (row: Record<string, unknown>, val: unknown) => {
@@ -1516,6 +1520,34 @@ function mergeElementwise(base: unknown, override: unknown[]): unknown {
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v != null && typeof v === 'object' && !Array.isArray(v);
+}
+
+/**
+ * Category labels for x values that are all times written as ISO strings (`2026-10-23T09:00:00+09:00`), when the spec
+ * gives the category axis no format of its own: each in the widget locale, as short as the span allows — the time of
+ * day when every value is on one day, the date when every value is a midnight, both otherwise. The raw strings are
+ * what a source sends; as labels they are unreadable. `undefined` when the values are not all such times.
+ */
+function timeCategories(values: unknown[], options: Record<string, unknown>): string[] | undefined {
+  if (options.xFormat || options.categoryAxisFormat || options.horizontal || options.xAxisType) return undefined;
+  if (values.length === 0 || !values.every((v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v))) return undefined;
+  // Read as the date formats read them: a date alone is local midnight, not UTC.
+  const times = values.map((v) => parseDateText(v as string));
+  if (times.some((t) => t === null)) return undefined;
+  const day = (t: Date) => `${t.getFullYear()}-${t.getMonth()}-${t.getDate()}`;
+  const oneDay = times.every((t) => day(t!) === day(times[0]!));
+  const midnights = times.every((t) => t!.getHours() === 0 && t!.getMinutes() === 0 && t!.getSeconds() === 0);
+  const format = oneDay && !midnights ? 'time' : midnights ? 'date' : 'datetime';
+  const locale = options.locale as string | undefined;
+  return values.map((v) => formatValue(v, format, locale));
+}
+
+/** The tooltip writes values with the value axis's format, unless the spec gives the tooltip its own. */
+function applyTooltipValueFormat(result: Record<string, unknown>, fmt: AxisFormatOption, locale?: string): void {
+  const tooltip = isPlainObject(result.tooltip) ? result.tooltip : undefined;
+  if (!tooltip || tooltip.formatter !== undefined) return;
+  const format = buildAxisFormatter(fmt, locale);
+  result.tooltip = { ...tooltip, valueFormatter: (value: unknown) => (typeof value === 'number' ? format(value) : String(value ?? '')) };
 }
 
 /** A timestamp as a local wall-clock ISO string (`YYYY-MM-DDTHH:mm:ss.sss`) — no UTC shift. */

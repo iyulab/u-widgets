@@ -20,6 +20,11 @@
 - Typeface tokens: `--u-widget-font-display` (titles, the `header` widget, a stamp) and `--u-widget-font-numeric` (a
   metric's value, a gauge's reading, a right-aligned table column — with digits of one width); both are the body face
   unless set. Charts now draw their text in `--u-widget-font-family`, so a page's face reaches them too.
+- A bar, line or area chart whose x values are all dates or times as ISO text labels them in the widget's locale — the
+  time of day when they are on one day, the date when they are all midnights, both otherwise — instead of the raw text,
+  on the axis and in the tooltip. An x format, `categoryAxisFormat` or `xAxisType` in the spec takes over.
+- The tooltip writes values with the value axis format (`yFormat`, or `valueAxisFormat`) when the spec gives one —
+  `3.00 kg` in the tooltip as on the axis.
 
 ### Changed
 

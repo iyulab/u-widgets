@@ -311,6 +311,14 @@ When `mapping` is omitted: first string → `y`, first two number or date-like f
 }
 ```
 
+### Times on the category axis
+
+A bar, line or area chart whose x values are all dates or times as a source sends them (`2026-10-23`,
+`2026-10-23T09:00:00+09:00`) labels them in the widget's locale, as short as the span allows: the time of day when every
+value is on one day, the date when every value is a midnight, both otherwise — the tooltip shows the same label.
+`xFormat`, `categoryAxisFormat` or `xAxisType` set by the spec take over. The value axis format (`yFormat`, or
+`valueAxisFormat`) is also how the tooltip writes the values, unless the spec gives the tooltip a formatter of its own.
+
 ### Axis label control (interval / rotate / name)
 
 Axis config must go under **`options.echarts`** — it is deep-merged onto the generated
