@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-10-23
+
+MCP server 0.7.4 follows `^0.40.0`.
+
 ### Changed
 
 - **Breaking:** the `form` widget's fields are drawn, checked and offered suggestions by `<formdown-ui>`
