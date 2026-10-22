@@ -55,6 +55,7 @@ const EN: ToolLabels = {
     'code': 'Code block',
     'citation': 'Citation',
     'status': 'Status',
+    'status-card': 'Status card',
     'steps': 'Steps',
     'rating': 'Rating',
     'video': 'Video',
@@ -118,6 +119,7 @@ const EN: ToolLabels = {
     widths: 'Column widths',
     spacing: 'Spacing',
     frame: 'Frame',
+    overflow: 'Overflow',
   },
   dataFields: {
     value: 'Value',
@@ -150,6 +152,11 @@ const EN: ToolLabels = {
     url: 'Link',
     snippet: 'Snippet',
     source: 'Source',
+    subtitle: 'Subtitle',
+    readings: 'Readings',
+    meter: 'Meter',
+    image: 'Picture',
+    note: 'Note',
   },
   widgetOptions: {
     rating: { max: 'Icons' },
@@ -157,6 +164,7 @@ const EN: ToolLabels = {
   },
   widgetDataFields: {
     header: { level: 'Heading level' },
+    'status-card': { status: 'Badge text' },
   },
 };
 

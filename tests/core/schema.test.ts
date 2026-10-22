@@ -391,8 +391,10 @@ describe('isWidgetSpec', () => {
 
 describe('validate — status data', () => {
   it('warns when a status item has no value, which it would not draw', () => {
-    expect(validate({ widget: 'status', data: { label: 'Pump' } }).warnings).toContain('data has no "value" — the status widget draws nothing');
-    expect(validate({ widget: 'status', data: [{ value: 'Up' }, { label: 'DB' }] }).warnings).toContain('data[1] has no "value" — the status item is not drawn');
+    expect(validate({ widget: 'status', data: { label: 'Pump' } }).warnings).toContain('data has no "value" or "tone" — the status widget draws nothing');
+    expect(validate({ widget: 'status', data: [{ value: 'Up' }, { label: 'DB' }] }).warnings).toContain('data[1] has no "value" or "tone" — the status item is not drawn');
+    expect(validate({ widget: 'status', data: [{ label: 'DB', tone: 'alarm' }] }).warnings).toEqual([]);
+    expect(validate({ widget: 'status-card', data: { tone: 'ok' } }).warnings).toContain('data has no "title" — the status card draws nothing');
   });
 
   it('accepts an item with a value and no label', () => {

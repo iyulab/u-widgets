@@ -20,6 +20,7 @@ import './uw-kv.js';
 import './uw-code.js';
 import './uw-citation.js';
 import './uw-status.js';
+import './uw-status-card.js';
 import './uw-steps.js';
 import './uw-rating.js';
 import './uw-video.js';
@@ -395,6 +396,9 @@ export class UWidget extends LitElement {
         break;
       case 'status':
         widgetHtml = html`<uw-status .spec=${resolved} theme=${t ?? nothing} nested></uw-status>`;
+        break;
+      case 'status-card':
+        widgetHtml = html`<uw-status-card .spec=${resolved} theme=${t ?? nothing} nested></uw-status-card>`;
         break;
       case 'steps':
         widgetHtml = html`<uw-steps .spec=${resolved} theme=${t ?? nothing} nested></uw-steps>`;

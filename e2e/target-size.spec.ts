@@ -311,7 +311,7 @@ test.describe('WCAG 2.2 SC 2.5.8 — 타깃 크기(최소)', () => {
     expect(`측정 ${measured.size}(${[...measured].sort().join(' ')}) · 미측정 ${unmeasured.length}(${unmeasured.join(' ')})`)
       .toBe(
         '측정 8(u-widget uw-citation uw-code uw-compose uw-content uw-form uw-rating uw-table) · ' +
-        '미측정 9(uw-chart uw-gallery uw-gauge uw-kv uw-math uw-metric uw-status uw-steps uw-video)',
+        '미측정 10(uw-chart uw-gallery uw-gauge uw-kv uw-math uw-metric uw-status uw-status-card uw-steps uw-video)',
       );
   });
 });

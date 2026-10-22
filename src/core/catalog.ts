@@ -88,7 +88,8 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   // Chat / Interaction
   { widget: 'code', category: 'content', description: 'Syntax-highlighted code block with line numbers and copy button', mappingKeys: [], dataShape: 'object' },
   { widget: 'citation', category: 'content', description: 'Source/reference cards with title, URL, snippet, and source', mappingKeys: [], dataShape: 'array' },
-  { widget: 'status', category: 'content', description: 'Status indicators with label, value, and level-based coloring', mappingKeys: [], dataShape: 'array' },
+  { widget: 'status', category: 'content', description: 'Status indicators with label, value, and a tone (colour and mark)', mappingKeys: [], dataShape: 'array' },
+  { widget: 'status-card', category: 'content', description: 'One asset or place: its name, its state as a tone, a few readings, a meter and a picture', mappingKeys: [], dataShape: 'object' },
   { widget: 'steps', category: 'content', description: 'Multi-step progress indicator (done/active/pending/error)', mappingKeys: [], dataShape: 'array' },
   { widget: 'rating', category: 'content', description: 'Star/heart/thumb rating display or input', mappingKeys: [], dataShape: 'object' },
   { widget: 'video', category: 'content', description: 'Video player with controls, poster, and caption', mappingKeys: [], dataShape: 'object' },
@@ -284,6 +285,14 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
     data: [
       { title: 'u-widgets Documentation', url: 'https://github.com/iyulab/u-widgets', source: 'GitHub' },
     ],
+  },
+  'status-card': {
+    widget: 'status-card',
+    data: {
+      title: 'Pump P-3',
+      tone: 'ok',
+      readings: [{ label: 'Flow', value: 412.5, format: 'number:1', unit: 'm³/h' }],
+    },
   },
   'status': {
     widget: 'status',
@@ -787,6 +796,26 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
           { label: 'Auth Service', value: 'Down', tone: 'alarm' },
           { label: 'Backup', value: 'Scheduled', tone: 'info' },
         ],
+      },
+    },
+  ],
+  'status-card': [
+    {
+      label: 'A pump with its readings',
+      spec: {
+        widget: 'status-card',
+        data: {
+          title: 'Pump P-3',
+          subtitle: 'Intake, east bank',
+          tone: 'warn',
+          status: 'Vibration high',
+          readings: [
+            { label: 'Flow', value: 412.5, format: 'number:1', unit: 'm³/h' },
+            { label: 'Vibration', value: 7.2, format: 'number:1', unit: 'mm/s', tone: 'warn' },
+          ],
+          meter: { value: 68, min: 0, max: 100, unit: '%' },
+          note: 'Bearing check booked for 14:00',
+        },
       },
     },
   ],

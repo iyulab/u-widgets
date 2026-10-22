@@ -35,6 +35,7 @@ export const toolLabelsKo: ToolLabels = {
     'code': '코드 블록',
     'citation': '인용',
     'status': '상태',
+    'status-card': '상태 카드',
     'steps': '단계',
     'rating': '평점',
     'video': '동영상',
@@ -98,6 +99,7 @@ export const toolLabelsKo: ToolLabels = {
     widths: '열 너비',
     spacing: '간격',
     frame: '틀',
+    overflow: '넘칠 때',
   },
   dataFields: {
     value: '값',
@@ -130,6 +132,11 @@ export const toolLabelsKo: ToolLabels = {
     url: '링크',
     snippet: '발췌',
     source: '출처',
+    subtitle: '부제',
+    readings: '읽은 값',
+    meter: '미터',
+    image: '그림',
+    note: '메모',
   },
   widgetOptions: {
     rating: { max: '아이콘 수' },
@@ -137,6 +144,7 @@ export const toolLabelsKo: ToolLabels = {
   },
   widgetDataFields: {
     header: { level: '제목 수준' },
+    'status-card': { status: '배지 글' },
   },
 };
 

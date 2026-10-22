@@ -48,6 +48,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
 | `citation` | Source/reference cards | — (uses data array) |
 | `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.tone` — [Tones](#tones)) |
+| `status-card` | One asset or place: name, state, readings | — (uses `data.title`, `data.tone`, `data.readings` — [Status card](#status-card)) |
 | `steps` | Multi-step progress | — (uses data array) |
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
 | `video` | HTML5 video player | — (uses `data.src`; subtitle / caption tracks in `data.tracks`: `[{ src, srclang?, label?, kind?, default? }]`, WebVTT) |
@@ -189,6 +190,28 @@ The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (ligh
 `alarm` and `accent` follow `--u-widget-positive`, `--u-widget-warning`, `--u-widget-negative` and
 `--u-widget-primary`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
 legend.
+
+## Status card
+
+`status-card` is one asset or place — a pump, a rack, a stall, a ticket — with its state and a few readings. It reads
+`title` and, optionally, `subtitle`, `tone` (the stripe and the badge's colour and mark), `status` (the badge's words —
+the tone's name in the widget's locale when left out), `emphasis` (`stamp` puts the words on the card as a stamp),
+`readings` (`[{ label, value, unit?, format?, tone? }]` — each value formatted as `format` says, a reading's own tone
+colouring its value), `meter` (`{ value, min?, max?, unit?, format?, tone? }`, a bar from `min` 0 to `max` 100 unless
+given), `image` (a URL or an inline `data:image/…` — the card's picture) or `icon` (a short text or emoji instead), and
+`note` (a line at the foot).
+
+```json
+{ "widget": "status-card", "data": {
+  "title": "Pump P-3", "subtitle": "Intake, east bank", "tone": "warn", "status": "Vibration high",
+  "readings": [{ "label": "Flow", "value": 412.5, "format": "number:1", "unit": "m³/h" },
+               { "label": "Vibration", "value": 7.2, "unit": "mm/s", "tone": "warn" }],
+  "meter": { "value": 68, "unit": "%" }, "note": "Bearing check booked for 14:00" } }
+```
+
+It fits small boxes, from about 130px wide: under 180px the badge moves below the name, the picture shrinks and the
+readings stack one per line. What still does not fit is clipped — or, with `options.overflow`, faded out (`fade`) or
+scrolled (`scroll`).
 
 ## Metric Data
 

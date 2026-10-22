@@ -4,6 +4,13 @@
 
 ### Added
 
+- `status-card` widget: one asset or place — `title`, `subtitle`, its state as a `tone` (a stripe and a badge with the
+  tone's mark and the `status` words, or the tone's name in the widget's locale), `emphasis` (`stamp`: the words as a
+  stamp), `readings` (label · value pairs, each formatted with `format` and `unit` and optionally toned), a `meter`
+  against its range, a picture (`image` — a URL or an inline `data:image/…` — or an `icon`) and a `note`. It fits boxes
+  from about 130px wide (narrow, the badge goes under the name and the readings stack), and `options.overflow` clips
+  (default), fades or scrolls what does not fit.
+
 - Tones: one vocabulary of eleven for every widget that colours a value by its state — `ok` · `info` · `watch` · `warn`
   · `alarm` · `off` · `idle` · `accent` · `past` · `now` · `next` (`watch` is the early sign before a warning, `off` is
   switched off and `idle` waiting for work, `past` · `now` · `next` are places in a sequence). Each has a mark (✓ ● ◆ ▲ ✕

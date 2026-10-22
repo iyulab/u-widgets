@@ -166,6 +166,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   columns: 'Number of grid columns',
   widths: 'Column width ratios (number[], "auto", "stretch")',
   spacing: 'Spacing size (small, default, large)',
+  overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
 };
 
@@ -240,6 +241,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   widths: { type: '(number | "auto" | "stretch")[]' },
   spacing: choice(['small', 'default', 'large'], 'default'),
   frame: choice(FRAMES),
+  overflow: choice(['clip', 'fade', 'scroll'], 'clip'),
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
@@ -348,6 +350,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'code': ['lineNumbers', 'highlight', 'maxHeight', 'wrap'],
   'citation': ['compact', 'numbered'],
   'status': [],
+  'status-card': ['overflow'],
   'steps': ['layout', 'compact'],
   'rating': ['max', 'interactive', 'icon', 'label'],
   'video': ['autoplay', 'controls', 'loop', 'muted'],
@@ -451,6 +454,18 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'snippet', type: 'string', desc: 'Excerpt text' },
     { key: 'source', type: 'string', desc: 'Source name' },
   ],
+  'status-card': [
+    { key: 'title', type: 'string', desc: 'The asset or place', required: true },
+    { key: 'subtitle', type: 'string', desc: 'A second line under the name' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state: stripe, badge colour and mark' },
+    { key: 'status', type: 'string', desc: 'The badge\'s words (default: the tone\'s name)' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour (stamp: the badge as a stamp)' },
+    { key: 'readings', type: 'Array<{ label, value, unit?, format?, tone? }>', desc: 'A few label · value pairs' },
+    { key: 'meter', type: '{ value, min?, max?, unit?, format?, tone? }', desc: 'A value against its range, as a bar (min 0, max 100 unless given)' },
+    { key: 'image', type: 'string', desc: 'The card\'s picture: a URL or an inline image (data:image/…)' },
+    { key: 'icon', type: 'string', desc: 'A short text or emoji as the picture, when there is no image' },
+    { key: 'note', type: 'string', desc: 'A line at the foot' },
+  ],
   'status': [
     { key: 'label', type: 'string', desc: 'Status label' },
     { key: 'value', type: 'string', desc: 'Status value', required: true },
@@ -494,6 +509,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'kv': 'No mapping. data is {key: val, ...} or [{key, value}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
+  'status-card': 'No mapping. data is {title, subtitle?, tone?, status?, emphasis?, readings?: [{label, value, unit?, format?, tone?}], meter?: {value, min?, max?, unit?}, image?, icon?, note?}.',
   'status': 'No mapping. data is {label?, value?, tone?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
   'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',
   'gallery': 'No mapping. data is [{src, alt?, caption?}]. columns/aspectRatio in options.',

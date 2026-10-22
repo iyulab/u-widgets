@@ -51,6 +51,7 @@ export type WidgetType =
   | 'code'
   | 'citation'
   | 'status'
+  | 'status-card'
   | 'steps'
   | 'rating'
   | 'video'

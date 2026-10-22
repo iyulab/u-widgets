@@ -193,14 +193,19 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     }
   }
 
-  // A status item without a `value` draws nothing; with none at all the widget is empty.
+  // A status item with neither a `value` nor a `tone` draws nothing; with none at all the widget is empty.
   if (widget === 'status' && obj.data && typeof obj.data === 'object') {
     const items = (Array.isArray(obj.data) ? obj.data : [obj.data]) as unknown[];
     items.forEach((item, i) => {
-      if (item == null || typeof item !== 'object' || !('value' in item)) {
-        warnings.push(Array.isArray(obj.data) ? `data[${i}] has no "value" — the status item is not drawn` : 'data has no "value" — the status widget draws nothing');
+      if (item == null || typeof item !== 'object' || !('value' in item || 'tone' in item)) {
+        warnings.push(Array.isArray(obj.data) ? `data[${i}] has no "value" or "tone" — the status item is not drawn` : 'data has no "value" or "tone" — the status widget draws nothing');
       }
     });
+  }
+
+  // A status card is named by its `title`; without one it draws nothing.
+  if (widget === 'status-card' && obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data) && !('title' in obj.data)) {
+    warnings.push('data has no "title" — the status card draws nothing');
   }
 
   // Validate mapping fields against data
