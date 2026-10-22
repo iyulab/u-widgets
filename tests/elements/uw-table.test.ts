@@ -1150,3 +1150,44 @@ describe('uw-table', () => {
     });
   });
 });
+
+describe('uw-table list — rows as a board shows them', () => {
+  const rows = [
+    { at: '2026-10-23T08:00:00', what: 'Boarding', gate: 'A4', pax: 182, state: 'past' },
+    { at: '2026-10-23T08:30:00', what: 'Pushback', gate: 'A4', pax: 182, state: 'now' },
+    { at: '2026-10-23T09:10:00', what: 'Arrival', gate: 'B2', pax: 96.5, state: 'next' },
+    { at: '2026-10-23T09:40:00', what: 'Cleaning', gate: 'B2', pax: 0, state: 'alarm' },
+  ];
+  const spec = (options: Record<string, unknown> = {}) => ({
+    widget: 'list', data: rows,
+    mapping: { primary: 'what', time: 'at', tone: 'state', columns: [{ field: 'gate', label: 'Gate', align: 'left' }, { field: 'pax', label: 'Pax', format: 'number:1' }] },
+    options: { locale: 'en-US', ...options },
+  });
+
+  it('marks each row with its tone, dims what is done and picks out what is now', async () => {
+    const shadow = await render(createElement(spec()));
+    const items = [...shadow.querySelectorAll('.list-item')];
+    expect(items.map(i => i.getAttribute('data-tone'))).toEqual(['past', 'now', 'next', 'alarm']);
+    expect(items[3].querySelector('[part="mark"]')?.textContent).toBe('✕');
+  });
+
+  it('shows a date-time as its time of day first, and the columns formatted after the text under their captions', async () => {
+    const shadow = await render(createElement(spec()));
+    const first = shadow.querySelectorAll('.list-item')[2];
+    expect(first.querySelector('[part="time"]')?.textContent).toMatch(/9:10/);
+    expect([...first.querySelectorAll('[part="cell"]')].map(c => c.textContent)).toEqual(['B2', '96.5']);
+    expect([...shadow.querySelectorAll('.list-head .list-cell')].map(c => c.textContent)).toEqual(['Gate', 'Pax']);
+  });
+
+  it('shows at most maxItems rows and says how many more there are, in the widget’s locale', async () => {
+    const shadow = await render(createElement(spec({ maxItems: 2 })));
+    expect(shadow.querySelectorAll('.list-item')).toHaveLength(2);
+    expect(shadow.querySelector('[part="list-more"]')?.textContent).toBe('+2 more');
+  });
+
+  it('draws the rows as tiles, with no caption row', async () => {
+    const shadow = await render(createElement(spec({ layout: 'tiles' })));
+    expect(shadow.querySelector('.list-container')?.classList.contains('tiles')).toBe(true);
+    expect(shadow.querySelector('.list-head')).toBeNull();
+  });
+});

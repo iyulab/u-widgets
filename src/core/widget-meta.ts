@@ -23,13 +23,15 @@ export const MAPPING_DOCS: Readonly<Record<string, string>> = {
   total: 'Total-flag field — truthy rows draw as absolute totals (waterfall)',
   start: 'Interval start field — number or date-like (gantt)',
   end: 'Interval end field — number or date-like (gantt)',
-  columns: 'Column definitions (table)',
+  columns: 'Column definitions (table); in a list, values shown after the text, each formatted',
   primary: 'Primary text field (list)',
   secondary: 'Secondary text field (list)',
   icon: 'Icon letter field (list)',
   avatar: 'Avatar image URL field (list)',
   trailing: 'Trailing value field (list)',
   badge: 'Badge/tag field (list)',
+  time: 'Time field shown first in each row — a date-time shows its time of day (list)',
+  tone: 'Field holding each row\'s tone: its mark and colour, past dims, now picks out (list)',
 };
 
 /** Field definition property descriptions (from schema $defs/fieldDefinition). */
@@ -166,6 +168,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   columns: 'Number of grid columns',
   widths: 'Column width ratios (number[], "auto", "stretch")',
   spacing: 'Spacing size (small, default, large)',
+  maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
 };
@@ -242,6 +245,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   spacing: choice(['small', 'default', 'large'], 'default'),
   frame: choice(FRAMES),
   overflow: choice(['clip', 'fade', 'scroll'], 'clip'),
+  maxItems: { type: 'number' },
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
@@ -251,6 +255,7 @@ const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, P
   rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
   kv: { layout: choice(['vertical', 'horizontal', 'grid'], 'vertical'), columns: { default: 2, desc: 'Number of grid columns (grid layout)' } },
   steps: { layout: choice(['vertical', 'horizontal'], 'vertical') },
+  list: { layout: choice(['list', 'tiles'], 'list') },
   actions: { layout: choice(['wrap', 'column'], 'wrap') },
   divider: { label: { desc: 'Text on the line' } },
 };
@@ -338,7 +343,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
   'table': ['pageSize', 'compact', 'searchable'],
-  'list': ['compact'],
+  'list': ['compact', 'layout', 'maxItems'],
   'form': ['locale'],
   'confirm': [],
   'markdown': [],

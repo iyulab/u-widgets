@@ -51,6 +51,8 @@ export interface UWidgetLocaleStrings {
   steps: string;
   /** Rating with no label or title — template with {value}, {max}. */
   ratingOutOf: string;
+  /** Under a list cut short by `maxItems` — template with {count}. */
+  moreItems: string;
   // Tone names (core/tone.ts) — what a state shows when it has no words of its own, and its accessible name
   toneOk: string;
   toneInfo: string;
@@ -134,6 +136,7 @@ const EN: UWidgetLocaleStrings = {
   status: 'Status',
   steps: 'Steps',
   ratingOutOf: 'Rating: {value} out of {max}',
+  moreItems: '+{count} more',
   toneOk: 'OK',
   toneInfo: 'Info',
   toneWatch: 'Watch',

@@ -37,7 +37,7 @@ describe('checkSpec', () => {
   it('warns of an option the widget does not have, and of an option value of the wrong type', () => {
     expect(checkSpec({ widget: 'list', data: [], options: { compact: 'yes', dense: true } }).warnings).toEqual([
       'options.compact should be a boolean, not "yes"',
-      'options.dense is not an option of list — it takes compact',
+      'options.dense is not an option of list — it takes compact, layout, maxItems',
     ]);
     expect(checkSpec({ widget: 'gauge', data: { value: 3 }, options: { max: '100' } }).warnings).toEqual(['options.max should be a number, not "100"']);
     expect(checkSpec({ widget: 'metric', data: { value: 3 }, options: { unit: 'kW' } }).warnings).toEqual(['options.unit is not an option of metric — it takes format']);

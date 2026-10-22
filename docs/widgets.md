@@ -44,7 +44,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `gauge` | Gauge with thresholds | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
 | `progress` | Progress bar | — (uses `data.value`) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
-| `list` | Structured list | `primary`, `secondary`, `avatar`, `trailing` |
+| `list` | Structured list — a log, a queue, a timetable | `primary`, `secondary`, `avatar`, `trailing`, `time`, `tone`, `columns` — [List rows](#list-rows) |
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
 | `citation` | Source/reference cards | — (uses data array) |
 | `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.tone` — [Tones](#tones)) |
@@ -190,6 +190,25 @@ The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (ligh
 `alarm` and `accent` follow `--u-widget-positive`, `--u-widget-warning`, `--u-widget-negative` and
 `--u-widget-primary`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
 legend.
+
+## List rows
+
+A `list` row can say more than its text. `mapping.tone` names the field holding each row's tone ([Tones](#tones)): the
+row shows the tone's mark and its text the tone's colour — and in a sequence, `past` dims the row, `now` picks it out
+and `next` is plain. `mapping.time` shows a time first in each row (a date-time as its time of day, in the widget's
+locale). `mapping.columns` (`[{ field, label?, format?, align?, tone? }]`, as in a table) adds values after the text,
+each formatted, under a caption row when any column has a `label`.
+
+`options.maxItems` shows at most that many rows and then a line saying how many more («+3 more», «외 3건»);
+`options.layout: "tiles"` draws each row as a small card, as many to a line as fit.
+
+```json
+{ "widget": "list", "data": [
+    { "at": "2026-10-23T08:30:00", "what": "Pushback", "gate": "A4", "state": "now" },
+    { "at": "2026-10-23T09:10:00", "what": "Arrival", "gate": "B2", "state": "next" }],
+  "mapping": { "primary": "what", "time": "at", "tone": "state", "columns": [{ "field": "gate", "label": "Gate" }] },
+  "options": { "maxItems": 6 } }
+```
 
 ## Status card
 

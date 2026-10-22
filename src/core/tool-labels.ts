@@ -120,6 +120,7 @@ const EN: ToolLabels = {
     spacing: 'Spacing',
     frame: 'Frame',
     overflow: 'Overflow',
+    maxItems: 'Most rows',
   },
   dataFields: {
     value: 'Value',

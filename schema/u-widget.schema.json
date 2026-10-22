@@ -19,7 +19,7 @@
         "chart.gantt",
         "form", "confirm",
         "markdown", "image", "callout",
-        "kv", "code", "citation", "status", "steps",
+        "kv", "code", "citation", "status", "status-card", "steps",
         "rating", "video", "gallery", "math",
         "actions", "divider", "header"
       ],
@@ -273,6 +273,14 @@
         "badge": {
           "type": "string",
           "description": "Badge/tag field (list)"
+        },
+        "time": {
+          "type": "string",
+          "description": "Time field shown first in each row — a date-time shows its time of day (list)"
+        },
+        "tone": {
+          "type": "string",
+          "description": "Field holding each row's tone: its mark and colour, past dims, now picks out (list)"
         }
       },
       "additionalProperties": false

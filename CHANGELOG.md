@@ -4,6 +4,12 @@
 
 ### Added
 
+- `list` rows as a board shows them: `mapping.tone` (each row's tone — its mark and colour; `past` dims a row, `now`
+  picks it out), `mapping.time` (a time first in each row, a date-time as its time of day), `mapping.columns` (values
+  after the text, each formatted, under a caption row when labelled), `options.maxItems` (then «+N more», new locale
+  key `moreItems`) and `options.layout: "tiles"`.
+- The JSON schema names the `status-card` widget, and the list's `time` and `tone` mapping fields.
+
 - `status-card` widget: one asset or place — `title`, `subtitle`, its state as a `tone` (a stripe and a badge with the
   tone's mark and the `status` words, or the tone's name in the widget's locale), `emphasis` (`stamp`: the words as a
   stamp), `readings` (label · value pairs, each formatted with `format` and `unit` and optionally toned), a `meter`

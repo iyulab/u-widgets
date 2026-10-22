@@ -144,6 +144,10 @@ export interface UWidgetMapping {
   trailing?: string;
   /** Badge/tag field (list widget). */
   badge?: string;
+  /** A time shown first in each row — a date-time is shown as its time of day (list widget). */
+  time?: string;
+  /** The field holding each row's tone (`core/tone.ts`): its mark and colour; `past` dims a row, `now` picks it out (list widget). */
+  tone?: string;
 }
 
 /**

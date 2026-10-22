@@ -44,6 +44,7 @@ export const ko: UWidgetLocaleStrings = {
   status: '상태',
   steps: '단계',
   ratingOutOf: '평점: {max}점 중 {value}점',
+  moreItems: '외 {count}건',
   toneOk: '정상',
   toneInfo: '알림',
   toneWatch: '관찰',

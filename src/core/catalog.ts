@@ -77,7 +77,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'gauge', category: 'display', description: 'Arc gauge for a value within a range', mappingKeys: [], dataShape: 'object' },
   { widget: 'progress', category: 'display', description: 'Progress bar for a value within a range', mappingKeys: [], dataShape: 'object' },
   { widget: 'table', category: 'display', description: 'Sortable data table with auto-inferred columns', mappingKeys: ['columns'], dataShape: 'array' },
-  { widget: 'list', category: 'display', description: 'Structured list with avatars and trailing values', mappingKeys: ['primary', 'secondary', 'avatar', 'icon', 'trailing', 'badge'], dataShape: 'array' },
+  { widget: 'list', category: 'display', description: 'Structured list with avatars and trailing values', mappingKeys: ['primary', 'secondary', 'avatar', 'icon', 'trailing', 'badge', 'time', 'tone', 'columns'], dataShape: 'array' },
   // Input
   { widget: 'form', category: 'input', description: 'Data entry form with typed fields', mappingKeys: [], dataShape: 'object' },
   { widget: 'confirm', category: 'input', description: 'Yes/no confirmation dialog', mappingKeys: [], dataShape: 'object' },

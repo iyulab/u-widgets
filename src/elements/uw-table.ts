@@ -4,7 +4,9 @@ import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core
 import { formatValue } from '../core/format.js';
 import { getLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { normalizeTone, toneStyles } from '../core/tone.js';
+import { normalizeTone, toneStyles, TONE_GLYPHS } from '../core/tone.js';
+import { formatTemplate } from '../core/locale.js';
+import { isDateLikeString } from '../core/utils.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
@@ -188,6 +190,12 @@ export class UwTable extends LitElement {
       min-width: 0;
     }
 
+    /* A long word breaks inside its own column instead of running under the values beside it. */
+    .list-primary,
+    .list-secondary {
+      overflow-wrap: anywhere;
+    }
+
     .list-primary {
       font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 500;
@@ -206,6 +214,96 @@ export class UwTable extends LitElement {
       font-weight: 500;
       color: var(--u-widget-text-secondary, #5b6777);
     }
+
+    /* A row's tone: its mark in the tone's colour; a place in a sequence dims what is done and picks out what is now. */
+    .list-mark {
+      flex: none;
+      width: 1em;
+      text-align: center;
+      color: var(--tone);
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
+    }
+    .list-item[data-tone] .list-primary { color: var(--tone); }
+    .list-item[data-tone='past'] { opacity: 0.6; }
+    .list-item[data-tone='past'] .list-primary,
+    .list-item[data-tone='next'] .list-primary { color: var(--u-widget-text, #1a1a2e); }
+    .list-item[data-tone='now'] {
+      background: color-mix(in srgb, var(--tone) 10%, transparent);
+    }
+    .list-item[data-tone='now'] .list-primary { font-weight: 700; }
+
+    .list-time {
+      flex: none;
+      min-width: 3.2em;
+      font-family: var(--u-widget-font-numeric);
+      font-variant-numeric: tabular-nums;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
+      color: var(--u-widget-text-secondary, #5b6777);
+    }
+
+    .list-cell {
+      flex: none;
+      min-width: 3em;
+      text-align: right;
+      font-family: var(--u-widget-font-numeric);
+      font-variant-numeric: tabular-nums;
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
+    }
+    .list-cell[data-align='left'] { text-align: left; }
+    .list-cell[data-align='center'] { text-align: center; }
+    .list-cell[data-tone] { color: var(--tone); font-weight: 600; }
+
+    .list-head {
+      display: flex;
+      gap: 12px;
+      padding: 0 0 4px 8px;
+      border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
+      color: var(--u-widget-text-secondary, #5b6777);
+      font-size: var(--u-widget-font-size-overline, 0.6875rem);
+      flex: none;
+    }
+    .list-head .list-content { flex: 1; }
+
+    .list-more {
+      flex: none;
+      padding: 6px 0 2px 8px;
+      color: var(--u-widget-text-secondary, #5b6777);
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
+    }
+
+    /* A row with a time or columns is one line, like a timetable: the text gives way with an ellipsis. */
+    .one-line .list-primary,
+    .one-line .list-secondary {
+      overflow-wrap: normal;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @container uw-table (max-width: 260px) {
+      .list-item, .list-head { gap: 8px; }
+      .list-cell { min-width: 2em; }
+      .list-time { min-width: 2.8em; }
+    }
+
+    /* Tiles: each row a small card, as many to a line as fit. */
+    .list-container.tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+      align-content: start;
+      gap: 8px;
+    }
+    .tiles .list-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 8px 10px;
+      border: 1px solid var(--u-widget-border, #e2e8f0);
+      border-left: 3px solid var(--tone, var(--u-widget-border, #e2e8f0));
+      border-radius: var(--u-widget-radius, 6px);
+    }
+    .tiles .list-item:last-child { border-bottom: 1px solid var(--u-widget-border, #e2e8f0); }
+    .tiles .list-content { width: 100%; }
+    .tiles .list-cell { text-align: left; }
 
     .list-badge {
       flex-shrink: 0;
@@ -663,12 +761,33 @@ export class UwTable extends LitElement {
     const avatarKey = mapping?.avatar;
     const trailingKey = mapping?.trailing;
     const badgeKey = mapping?.badge;
+    const timeKey = mapping?.time;
+    const toneKey = mapping?.tone;
+    const columns = (mapping?.columns ?? []).filter(c => c && typeof c.field === 'string');
+    const options = this.spec!.options ?? {};
+    const tiles = options.layout === 'tiles';
+    const locale = typeof options.locale === 'string' ? options.locale : undefined;
+    const maxItems = typeof options.maxItems === 'number' && options.maxItems > 0 ? Math.floor(options.maxItems) : undefined;
+    const shown = maxItems !== undefined ? data.slice(0, maxItems) : data;
+    const hidden = data.length - shown.length;
+    // A time column reads a time of day from a date-time a source sends; anything else is shown as it is.
+    const timeText = (v: unknown) => (typeof v === 'string' && isDateLikeString(v) && v.includes('T') ? formatValue(v, 'time', locale) : v ?? '');
+    const head = !tiles && columns.some(c => c.label)
+      ? html`<div class="list-head" part="list-head" aria-hidden="true">
+          ${timeKey ? html`<span class="list-time"></span>` : nothing}
+          <span class="list-content"></span>
+          ${columns.map(c => html`<span class="list-cell" data-align=${c.align ?? 'right'}>${c.label ?? ''}</span>`)}
+        </div>`
+      : nothing;
 
     return html`
-      <div class="list-container${compact ? ' compact' : ''}" part="list" @keydown=${this._onListKeydown}>
-        ${data.map(
-          (item, idx) => html`
-            <div class="list-item" part="list-item"
+      ${head}
+      <div class="list-container${compact ? ' compact' : ''}${tiles ? ' tiles' : ''}${!tiles && (timeKey || columns.length > 0) ? ' one-line' : ''}" part="list" @keydown=${this._onListKeydown}>
+        ${shown.map(
+          (item, idx) => {
+            const tone = toneKey ? normalizeTone(item[toneKey], 'uw-table') : undefined;
+            return html`
+            <div class="list-item" part="list-item" data-tone=${tone ?? nothing}
               tabindex=${idx === this._focusedIdx ? '0' : '-1'}
               @click=${() => this._onRowClick(item, idx)}
               @keydown=${(e: KeyboardEvent) => {
@@ -678,13 +797,15 @@ export class UwTable extends LitElement {
                 }
               }}
             >
+              ${tone && !tiles ? html`<span class="list-mark" part="mark" aria-hidden="true">${TONE_GLYPHS[tone]}</span>` : nothing}
+              ${timeKey ? html`<span class="list-time" part="time">${timeText(item[timeKey])}</span>` : nothing}
               ${avatarKey && item[avatarKey]
                 ? html`<img class="list-avatar" src=${String(item[avatarKey])} alt="" part="avatar" />`
                 : iconKey
                   ? html`<div class="list-icon" part="icon">${this.getIconLetter(item[iconKey])}</div>`
                   : nothing}
               <div class="list-content">
-                <div class="list-primary" part="primary">${item[primaryKey] ?? ''}</div>
+                <div class="list-primary" part="primary" title=${item[primaryKey] == null ? nothing : String(item[primaryKey])}>${item[primaryKey] ?? ''}</div>
                 ${secondaryKey
                   ? html`<div class="list-secondary" part="secondary">${item[secondaryKey] ?? ''}</div>`
                   : nothing}
@@ -692,13 +813,17 @@ export class UwTable extends LitElement {
               ${badgeKey && item[badgeKey] != null
                 ? html`<span class="list-badge" part="badge">${item[badgeKey]}</span>`
                 : nothing}
+              ${columns.map(c => html`<span class="list-cell" part="cell" data-align=${c.align ?? 'right'}
+                  data-tone=${normalizeTone(c.tone, 'uw-table') ?? nothing}>${formatValue(item[c.field], c.format, locale)}</span>`)}
               ${trailingKey && item[trailingKey] != null
                 ? html`<div class="list-trailing" part="trailing">${item[trailingKey]}</div>`
                 : nothing}
             </div>
-          `,
+          `;
+          },
         )}
       </div>
+      ${hidden > 0 ? html`<div class="list-more" part="list-more">${formatTemplate(getLocaleStrings(locale).moreItems, { count: hidden })}</div>` : nothing}
     `;
   }
 

@@ -254,3 +254,12 @@ describe('data field choices', () => {
     expect(WIDGET_DATA_FIELDS.status.find(f => f.key === 'label')?.enum).toBeUndefined();
   });
 });
+
+describe('the JSON schema', () => {
+  it('names every widget the catalog has, and no other', async () => {
+    const { help } = await import('../../src/core/catalog.js');
+    // `compose` has a schema of its own (`composeWidget`); every other widget is one of `widgetType`.
+    const enumWidgets = (schema.$defs.widgetType as unknown as { enum: string[] }).enum;
+    expect([...enumWidgets].sort()).toEqual(help().map(w => w.widget).filter(w => w !== 'compose').sort());
+  });
+});

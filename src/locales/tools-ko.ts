@@ -100,6 +100,7 @@ export const toolLabelsKo: ToolLabels = {
     spacing: '간격',
     frame: '틀',
     overflow: '넘칠 때',
+    maxItems: '최대 행 수',
   },
   dataFields: {
     value: '값',
