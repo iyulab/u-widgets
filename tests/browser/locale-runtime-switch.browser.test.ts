@@ -55,6 +55,8 @@ describe('u-widgets runtime locale switch', () => {
     const w = document.createElement('u-widget') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
     w.spec = { widget: 'form', data: { name: '' }, fields: [{ field: 'name', type: 'text', label: 'Name', required: true }], actions: [{ label: 'Save', action: 'submit' }] };
     document.body.appendChild(w);
+    // The form's fields load with the first form drawn; Save waits for them, so the error comes once they are in.
+    await customElements.whenDefined('formdown-ui');
     await settle(w);
     const form = w.shadowRoot!.querySelector('uw-form')!;
     (form.shadowRoot!.querySelector('button') as HTMLButtonElement).click();

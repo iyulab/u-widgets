@@ -29,6 +29,8 @@
   - `u-widgets/components` draws date and datetime fields with `<u-date-picker>` as a formdown field type, so every
     `<formdown-ui>` on the page draws it, not only the form widget's. A datetime is still sent as
     `YYYY-MM-DDTHH:mm` in local time.
+  - `<formdown-ui>` and the formdown core it reads with load when the first form is drawn, so a page that shows no
+    form does not carry them (about 70 KB gzipped). An action pressed before they have loaded waits for them.
   - The package can be imported in Node again — `@formdown/ui` 0.24 no longer bundles a second copy of Lit's base
     class (an MCP server that reads specs in Node failed to start).
 

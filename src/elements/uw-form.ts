@@ -1,12 +1,23 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import '@formdown/ui';
 import type { FormdownUI } from '@formdown/ui';
-import { typedData, type ValidationMessages } from '@formdown/core';
+import type { ValidationMessages, typedData } from '@formdown/core';
 import type { UWidgetSpec, UWidgetFieldDefinition, UWidgetAction, UWidgetEvent } from '../core/types.js';
 import { getLocaleStrings, type UWidgetLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import { toFormdown } from '../core/formdown.js';
+
+/** formdown's part of the form — `<formdown-ui>` and the core it reads with — loaded when the first form is drawn, so
+ *  a page that shows no form does not carry it (it is most of what the form widget weighs). */
+let formdown: { typedData: typeof typedData } | undefined;
+let loadingFormdown: Promise<void> | undefined;
+
+function loadFormdown(): Promise<void> {
+  loadingFormdown ??= Promise.all([import('@formdown/ui'), import('@formdown/core')]).then(([, core]) => {
+    formdown = { typedData: core.typedData };
+  });
+  return loadingFormdown;
+}
 
 /** The parts of the drawn fields, passed through `<formdown-ui>` so a page styles them as `uw-form::part(…)`. */
 const FIELD_PARTS = [
@@ -176,7 +187,12 @@ export class UwForm extends LitElement {
   theme: string | null = null;
 
   @query('formdown-ui')
-  private _fields!: FormdownUI | null;
+  private _fieldsElement!: FormdownUI | null;
+
+  /** The fields, once `<formdown-ui>` is loaded — before, the element is not yet one. */
+  private get _fields(): FormdownUI | null {
+    return formdown ? this._fieldsElement : null;
+  }
 
   /** The formdown text the fields are drawn from — written again only when the spec's `fields` change. */
   private _content = '';
@@ -185,6 +201,10 @@ export class UwForm extends LitElement {
   private _pendingData: Record<string, unknown> | null = null;
 
   willUpdate(changed: Map<string, unknown>) {
+    if (this.spec?.widget === 'form' && !formdown) {
+      // Drawn again once loaded: the fields take their content and `data` then.
+      void loadFormdown().then(() => this.requestUpdate());
+    }
     if (changed.has('spec') && this.spec) {
       const prev = changed.get('spec') as UWidgetSpec | null | undefined;
       // `u-widget` builds a new spec object on every render (locale propagation, inferred mapping) — only new
@@ -283,7 +303,7 @@ export class UwForm extends LitElement {
   private _values(): Record<string, unknown> {
     const fields = this._fields;
     const schema = fields?.getSchema();
-    const typed = fields && schema ? typedData(fields.getFormData(), schema) : {};
+    const typed = fields && schema && formdown ? formdown.typedData(fields.getFormData(), schema) : {};
     for (const [name, value] of Object.entries(typed)) typed[name] = this._native(name, value);
     return { ...((this.spec?.data as Record<string, unknown>) ?? {}), ...typed };
   }
@@ -291,7 +311,7 @@ export class UwForm extends LitElement {
   /** One field's value as the widget sends it — the same reading as `_values`. */
   private _typed(name: string, value: unknown): unknown {
     const schema = this._fields?.getSchema();
-    return this._native(name, schema ? typedData({ [name]: value }, schema)[name] : value);
+    return this._native(name, schema && formdown ? formdown.typedData({ [name]: value }, schema)[name] : value);
   }
 
   /** A datetime in the native `datetime-local` shape, `YYYY-MM-DDTHH:mm` in local time, whichever control gave it — a
@@ -379,7 +399,15 @@ export class UwForm extends LitElement {
     return isValid;
   }
 
-  private _onAction(action: UWidgetAction) {
+  private async _onAction(action: UWidgetAction) {
+    if (this.spec?.widget === 'form' && action.action !== 'cancel' && !formdown) {
+      // Pressed before the fields have loaded: check and read them once they have, not the bare spec.
+      await loadFormdown();
+      await this.updateComplete;
+      await this._fieldsElement?.updateComplete;
+      // Taken off the page while they loaded: there is no form left to act on.
+      if (!this.isConnected) return;
+    }
     if (action.action === 'submit') {
       if (!this._validate()) return;
       this._emitEvent({
