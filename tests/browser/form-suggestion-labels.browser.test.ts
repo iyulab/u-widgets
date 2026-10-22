@@ -1,8 +1,7 @@
 // A suggestion for a field with options, as a person meets it: the option's label on the button, which one the field
 // holds now (`aria-pressed`), the buttons a group named for the field — and the pick reports the value.
 import { describe, it, expect, afterEach } from 'vitest';
-import '../../src/elements/uw-form.js';
-import type { UwForm } from '../../src/elements/uw-form.js';
+import { whenFormdownLoaded, type UwForm } from '../../src/elements/uw-form.js';
 
 type Updating = HTMLElement & { updateComplete: Promise<unknown> };
 
@@ -10,6 +9,8 @@ async function mount(spec: Record<string, unknown>) {
   const el = document.createElement('uw-form') as UwForm;
   el.spec = spec as unknown as UwForm['spec'];
   document.body.appendChild(el);
+  // <formdown-ui> loads with the first form drawn; run alone, this test is that first form.
+  await whenFormdownLoaded();
   await el.updateComplete;
   const fields = el.shadowRoot!.querySelector('formdown-ui') as Updating;
   await fields.updateComplete;

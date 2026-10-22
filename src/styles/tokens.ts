@@ -5,6 +5,7 @@ import { css } from 'lit';
  *
  * **Token categories:**
  * - Colors: bg, surface, text, text-secondary, border, primary, positive, negative, warning
+ * - Tones: tone-ok … tone-next — the eleven state colours of `core/tone.ts`
  * - Spacing: gap, radius
  * - Typography: font-family, font-size (body tier) + font-size-label/caption/overline
  *   (a 4-tier rem-based scale — kept local to this package rather than referencing
@@ -65,6 +66,19 @@ export const themeStyles = css`
     --u-widget-on-negative: #ffffff;
     --u-widget-on-positive: #ffffff;
 
+    /* ── Tones (core/tone.ts) — a state's colour; the four with a semantic colour already follow it ── */
+    --u-widget-tone-ok: var(--u-widget-positive);
+    --u-widget-tone-info: #2563eb; /* 5.17 on bg — its own blue, not the accent */
+    --u-widget-tone-watch: #a16207; /* 4.92 */
+    --u-widget-tone-warn: var(--u-widget-warning);
+    --u-widget-tone-alarm: var(--u-widget-negative);
+    --u-widget-tone-off: #78716c; /* 4.80 — a warm grey, apart from idle */
+    --u-widget-tone-idle: #64748b; /* 4.76 — a cool grey */
+    --u-widget-tone-accent: var(--u-widget-primary);
+    --u-widget-tone-past: var(--u-widget-text-secondary);
+    --u-widget-tone-now: var(--u-widget-tone-info);
+    --u-widget-tone-next: var(--u-widget-text);
+
     /* ── Chart palette (light) ── */
     --u-widget-chart-color-1: #4f46e5;
     --u-widget-chart-color-2: #0ea5e9;
@@ -116,6 +130,10 @@ export const themeStyles = css`
       --u-widget-on-primary: #1e1e2e;
       --u-widget-on-negative: #1e1e2e;
       --u-widget-on-positive: #1e1e2e;
+      --u-widget-tone-info: #60a5fa;
+      --u-widget-tone-watch: #facc15;
+      --u-widget-tone-off: #a8a29e;
+      --u-widget-tone-idle: #94a3b8;
 
       --u-widget-chart-color-1: #818cf8;
       --u-widget-chart-color-2: #38bdf8;
@@ -150,6 +168,10 @@ export const themeStyles = css`
     --u-widget-on-primary: #1e1e2e;
     --u-widget-on-negative: #1e1e2e;
     --u-widget-on-positive: #1e1e2e;
+    --u-widget-tone-info: #60a5fa;
+    --u-widget-tone-watch: #facc15;
+    --u-widget-tone-off: #a8a29e;
+    --u-widget-tone-idle: #94a3b8;
 
     --u-widget-chart-color-1: #818cf8;
     --u-widget-chart-color-2: #38bdf8;

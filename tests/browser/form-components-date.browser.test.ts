@@ -2,7 +2,7 @@
 // fields, and the form keeps sending what the native inputs sent.
 import { describe, it, expect, afterEach } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import '../../src/elements/uw-form.js';
+import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 import '../../src/components.js';
 import type { UwForm } from '../../src/elements/uw-form.js';
 
@@ -19,6 +19,8 @@ async function mount(data: Record<string, unknown>) {
     ],
   } as UwForm['spec'];
   document.body.appendChild(el);
+  // <formdown-ui> loads with the first form drawn; run alone, this file draws that first form.
+  await whenFormdownLoaded();
   await el.updateComplete;
   // The fields are `<formdown-ui>`'s; it binds a picker by name once the picker is defined.
   const fields = el.shadowRoot!.querySelector('formdown-ui') as HTMLElement & { updateComplete: Promise<unknown> };

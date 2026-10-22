@@ -391,7 +391,7 @@ test('status — 호스트가 내용보다 높아도 항목 줄은 위에 모여
     stage.setAttribute('style', 'position:absolute;top:0;left:0;width:260px');
     const host = document.createElement('u-widget') as HTMLElement & { spec?: unknown };
     host.setAttribute('style', 'height:400px');
-    host.spec = { widget: 'status', data: ['Press', 'Robot', 'Fastener', 'Vision', 'Packer'].map((label) => ({ label, value: 'running', level: 'success' })) };
+    host.spec = { widget: 'status', data: ['Press', 'Robot', 'Fastener', 'Vision', 'Packer'].map((label) => ({ label, value: 'running', tone: 'ok' })) };
     stage.appendChild(host);
     document.body.appendChild(stage);
     await new Promise((r) => setTimeout(r, 700));

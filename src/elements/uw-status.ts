@@ -3,36 +3,26 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-
-type StatusLevel = 'info' | 'success' | 'warning' | 'error' | 'neutral';
+import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Emphasis, type Tone } from '../core/tone.js';
 
 interface StatusItem {
   /** Absent for a badge that shows the value alone ("● Running"). */
   label?: string;
   value: string;
-  level: StatusLevel;
+  tone?: Tone;
+  emphasis?: Emphasis;
 }
-
-const VALID_LEVELS = new Set(['info', 'success', 'warning', 'error', 'neutral']);
-
-/** Level → indicator symbol. */
-const LEVEL_ICONS: Record<StatusLevel, string> = {
-  info: '\u25CF',     // ●
-  success: '\u2713',  // ✓
-  warning: '\u25B2',  // ▲
-  error: '\u2715',    // ✕
-  neutral: '\u25CB',  // ○
-};
 
 /**
  * <uw-status> — Status indicator widget.
  *
- * Renders one or more status items with label, value, and level-based coloring.
+ * Renders one or more status items with label, value, and a tone (`core/tone.ts`) — its colour and mark. An item
+ * with a tone and no value shows the tone's name; `emphasis` (invert · hatch · stamp · blink) adds a second channel.
  * Single item or array of items.
  */
 @customElement('uw-status')
 export class UwStatus extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, toneStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다.
        안쪽 status-list 의 가로 wrap 설계와는 다른 축이다. */
     :host {
@@ -80,26 +70,15 @@ export class UwStatus extends LitElement {
       font-weight: 600;
     }
 
-    /* Level colors */
-    [data-level="info"] .status-icon,
-    [data-level="info"] .status-value {
-      color: var(--u-widget-primary, #4f46e5);
+    [data-tone] .status-icon,
+    [data-tone] .status-value {
+      color: var(--tone);
     }
-    [data-level="success"] .status-icon,
-    [data-level="success"] .status-value {
-      color: var(--u-widget-positive, #15803d);
-    }
-    [data-level="warning"] .status-icon,
-    [data-level="warning"] .status-value {
-      color: var(--u-widget-warning, #d97706);
-    }
-    [data-level="error"] .status-icon,
-    [data-level="error"] .status-value {
-      color: var(--u-widget-negative, #dc2626);
-    }
-    [data-level="neutral"] .status-icon,
-    [data-level="neutral"] .status-value {
-      color: var(--u-widget-text-secondary, #5b6777);
+
+    .status-item[data-emphasis='invert'],
+    .status-item[data-emphasis='hatch'] {
+      padding: 1px 6px;
+      border-radius: 3px;
     }
 
     @container uw-status (max-width: 20rem) {
@@ -123,33 +102,35 @@ export class UwStatus extends LitElement {
     return html`
       <div class="status-list" part="status" role="list" aria-label=${this.spec.title ?? localeStringsOf(this.spec).status}>
         ${items.map(item => html`
-          <div class="status-item" part="status-item" role="listitem" data-level=${item.level}>
-            <span class="status-icon" part="status-icon" aria-hidden="true">${LEVEL_ICONS[item.level]}</span>
+          <div class="status-item" part="status-item" role="listitem" data-tone=${item.tone ?? nothing} data-emphasis=${item.emphasis ?? nothing}>
+            ${item.tone ? html`<span class="status-icon" part="status-icon" aria-hidden="true">${TONE_GLYPHS[item.tone]}</span>` : nothing}
             ${item.label === undefined ? nothing : html`<span class="status-label" part="status-label">${item.label}</span>`}
-            <span class="status-value" part="status-value">${item.value}</span>
+            <span class=${item.emphasis === 'stamp' ? 'status-value tone-stamp' : 'status-value'} part="status-value">${item.value}</span>
           </div>
         `)}
       </div>
     `;
   }
 
-  /** Items with a `value`; `label` is optional — without one an item is a badge showing its value. */
+  /** Items with a `value` or a `tone`; `label` is optional — without one an item is a badge showing its value. */
   private _extractItems(): StatusItem[] {
     const data = this.spec?.data;
     if (!data || typeof data !== 'object') return [];
+    const strings = localeStringsOf(this.spec);
     const rows = (Array.isArray(data) ? data : [data]) as unknown[];
     return rows
-      .filter((item): item is Record<string, unknown> => item != null && typeof item === 'object' && 'value' in item)
-      .map(item => ({
-        ...(item.label !== undefined && item.label !== null && { label: String(item.label) }),
-        value: String(item.value),
-        level: this._resolveLevel(item.level),
-      }));
-  }
-
-  private _resolveLevel(level: unknown): StatusLevel {
-    const s = String(level ?? 'info');
-    return VALID_LEVELS.has(s) ? s as StatusLevel : 'info';
+      .filter((item): item is Record<string, unknown> => item != null && typeof item === 'object')
+      .flatMap(item => {
+        const tone = normalizeTone(item.tone, 'uw-status');
+        const hasValue = item.value !== undefined && item.value !== null && item.value !== '';
+        if (!hasValue && !tone) return [];
+        return [{
+          ...(item.label !== undefined && item.label !== null && { label: String(item.label) }),
+          value: hasValue ? String(item.value) : toneLabel(tone!, strings),
+          ...(tone && { tone }),
+          ...(item.emphasis != null && { emphasis: normalizeEmphasis(item.emphasis, 'uw-status') }),
+        }];
+      });
   }
 }
 

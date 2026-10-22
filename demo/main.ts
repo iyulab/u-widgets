@@ -32,10 +32,10 @@ const specs = {
     ],
     options: { locale: 'en-US' },
   },
-  // v0.11.9+ variant 강조 — e2e 실렌더(색상) 검증 대상
+  // 값의 톤(tone) — e2e 실렌더(색상) 검증 대상
   metricVariant: {
     widget: 'metric',
-    data: { value: 23.5, label: 'Churn Rate', suffix: '%', variant: 'danger' },
+    data: { value: 23.5, label: 'Churn Rate', suffix: '%', tone: 'alarm' },
   },
   gauge: {
     widget: 'gauge',
@@ -66,8 +66,8 @@ const specs = {
         { field: 'name', label: 'Name' },
         { field: 'role', label: 'Role' },
         { field: 'status', label: 'Status' },
-        // variant: v0.12.0 컬럼 강조 — e2e 실렌더(색·굵기) 검증 대상
-        { field: 'salary', label: 'Salary', format: 'currency', align: 'right', variant: 'success' },
+        // tone: 컬럼 강조 — e2e 실렌더(색·굵기) 검증 대상
+        { field: 'salary', label: 'Salary', format: 'currency', align: 'right', tone: 'ok' },
       ],
     },
   },
@@ -360,7 +360,7 @@ const specs = {
     widget: 'callout',
     data: {
       message: 'This is an informational callout. Use it to highlight important notices to users.',
-      level: 'info',
+      tone: 'info',
     },
   },
   video: {
@@ -425,10 +425,10 @@ const specs = {
     widget: 'status',
     title: 'System Status',
     data: [
-      { label: 'API Gateway', value: 'Operational', level: 'success' },
-      { label: 'Database', value: 'Degraded', level: 'warning' },
-      { label: 'CDN', value: 'Operational', level: 'success' },
-      { label: 'Auth Service', value: 'Down', level: 'error' },
+      { label: 'API Gateway', value: 'Operational', tone: 'ok' },
+      { label: 'Database', value: 'Degraded', tone: 'warn' },
+      { label: 'CDN', value: 'Operational', tone: 'ok' },
+      { label: 'Auth Service', value: 'Down', tone: 'alarm' },
     ],
   },
   actions: {

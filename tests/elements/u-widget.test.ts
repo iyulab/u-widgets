@@ -448,7 +448,7 @@ describe('u-widget', () => {
   it('routes status to uw-status', async () => {
     const el = createElement({
       widget: 'status',
-      data: [{ label: 'API', value: 'Up', level: 'success' }],
+      data: [{ label: 'API', value: 'Up', tone: 'ok' }],
     });
     const shadow = await render(el);
     expect(shadow.querySelector('uw-status')).not.toBeNull();

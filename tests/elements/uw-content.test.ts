@@ -323,51 +323,51 @@ describe('uw-content', () => {
       const shadow = await render(el);
       const callout = shadow.querySelector('.callout');
       expect(callout).not.toBeNull();
-      expect(callout?.classList.contains('callout-info')).toBe(true);
+      expect(callout?.getAttribute('data-tone')).toBe('info');
       expect(callout?.textContent).toContain('This is info');
     });
 
     it('renders warning callout', async () => {
       const el = createElement({
         widget: 'callout',
-        data: { message: 'Warning!', level: 'warning' },
+        data: { message: 'Warning!', tone: 'warn' },
       });
       const shadow = await render(el);
       const callout = shadow.querySelector('.callout');
-      expect(callout?.classList.contains('callout-warning')).toBe(true);
+      expect(callout?.getAttribute('data-tone')).toBe('warn');
     });
 
     it('renders error callout', async () => {
       const el = createElement({
         widget: 'callout',
-        data: { message: 'Error occurred', level: 'error' },
+        data: { message: 'Error occurred', tone: 'alarm' },
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.callout-error')).not.toBeNull();
+      expect(shadow.querySelector('.callout')?.getAttribute('data-tone')).toBe('alarm');
     });
 
     it('renders success callout', async () => {
       const el = createElement({
         widget: 'callout',
-        data: { message: 'All done', level: 'success' },
+        data: { message: 'All done', tone: 'ok' },
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.callout-success')).not.toBeNull();
+      expect(shadow.querySelector('.callout')?.getAttribute('data-tone')).toBe('ok');
     });
 
-    it('falls back to info for unknown level', async () => {
+    it('falls back to info for an unknown tone', async () => {
       const el = createElement({
         widget: 'callout',
-        data: { message: 'test', level: 'unknown' },
+        data: { message: 'test', tone: 'unknown' },
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.callout-info')).not.toBeNull();
+      expect(shadow.querySelector('.callout')?.getAttribute('data-tone')).toBe('info');
     });
 
     it('renders title when provided', async () => {
       const el = createElement({
         widget: 'callout',
-        data: { message: 'Details here', title: 'Important', level: 'warning' },
+        data: { message: 'Details here', title: 'Important', tone: 'warn' },
       });
       const shadow = await render(el);
       expect(shadow.querySelector('.callout-title')?.textContent).toBe('Important');
@@ -385,7 +385,7 @@ describe('uw-content', () => {
       // Error level → role="alert"
       const elError = createElement({
         widget: 'callout',
-        data: { message: 'Error', level: 'error' },
+        data: { message: 'Error', tone: 'alarm' },
       });
       const shadowError = await render(elError);
       expect(shadowError.querySelector('.callout')?.getAttribute('role')).toBe('alert');

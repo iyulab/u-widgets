@@ -51,6 +51,18 @@ export interface UWidgetLocaleStrings {
   steps: string;
   /** Rating with no label or title — template with {value}, {max}. */
   ratingOutOf: string;
+  // Tone names (core/tone.ts) — what a state shows when it has no words of its own, and its accessible name
+  toneOk: string;
+  toneInfo: string;
+  toneWatch: string;
+  toneWarn: string;
+  toneAlarm: string;
+  toneOff: string;
+  toneIdle: string;
+  toneAccent: string;
+  tonePast: string;
+  toneNow: string;
+  toneNext: string;
   // Code block
   code: string;
   copy: string;
@@ -122,6 +134,17 @@ const EN: UWidgetLocaleStrings = {
   status: 'Status',
   steps: 'Steps',
   ratingOutOf: 'Rating: {value} out of {max}',
+  toneOk: 'OK',
+  toneInfo: 'Info',
+  toneWatch: 'Watch',
+  toneWarn: 'Warning',
+  toneAlarm: 'Alarm',
+  toneOff: 'Off',
+  toneIdle: 'Idle',
+  toneAccent: 'Highlight',
+  tonePast: 'Done',
+  toneNow: 'Now',
+  toneNext: 'Next',
   // Code block
   code: 'code',
   copy: 'Copy',

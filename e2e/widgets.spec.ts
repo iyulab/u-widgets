@@ -156,13 +156,13 @@ test.describe('Display Widgets', () => {
     expect(rowTops.size).toBeGreaterThanOrEqual(2);
   });
 
-  test('metric variant renders danger color on value', async ({ page }) => {
-    // v0.11.9 variant — CSS-text 유닛 가드만으론 토큰 해석/셰도우 적용을 못 본다: 실렌더 색 검증
+  test('metric tone alarm renders the alarm colour on the value', async ({ page }) => {
+    // 값의 톤 — CSS-text 유닛 가드만으론 토큰 해석/셰도우 적용을 못 본다: 실렌더 색 검증
     const color = await page.evaluate(() => {
       const host = document.getElementById('demo-metric-variant');
       if (!host?.shadowRoot) return null;
       for (const child of host.shadowRoot.querySelectorAll('*')) {
-        const v = child.shadowRoot?.querySelector('.metric[data-variant="danger"] .metric-value');
+        const v = child.shadowRoot?.querySelector('.metric[data-tone="alarm"] .metric-value');
         if (v) return getComputedStyle(v).color;
       }
       return null;
@@ -198,13 +198,13 @@ test.describe('Data Widgets', () => {
     expect(text).toContain('Salary');
   });
 
-  test('table column variant highlights cells', async ({ page }) => {
-    // v0.12.0 컬럼 variant — 실렌더 색·굵기 검증
+  test('table column tone highlights cells', async ({ page }) => {
+    // 컬럼 톤 — 실렌더 색·굵기 검증
     const style = await page.evaluate(() => {
       const host = document.getElementById('demo-table');
       if (!host?.shadowRoot) return null;
       for (const child of host.shadowRoot.querySelectorAll('*')) {
-        const td = child.shadowRoot?.querySelector('td[data-variant="success"]');
+        const td = child.shadowRoot?.querySelector('td[data-tone="ok"]');
         if (td) {
           const cs = getComputedStyle(td);
           return { color: cs.color, weight: cs.fontWeight };

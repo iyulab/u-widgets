@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 import { formatValue } from '../core/format.js';
+import { localeStringsOf } from '../core/locale.js';
+import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 
 interface MetricData {
   value: number | string;
@@ -15,7 +17,8 @@ interface MetricData {
   icon?: string;
   description?: string;
   format?: string;
-  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  tone?: Tone;
+  emphasis?: Emphasis;
   sparkline?: number[];
 }
 
@@ -39,23 +42,6 @@ function sparklinePaths(values: number[]): { line: string; area: string } | unde
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
-const VALID_VARIANTS = new Set(['success', 'warning', 'danger', 'info', 'neutral']);
-const warnedVariants = new Set<string>();
-
-function normalizeVariant(variant: unknown): MetricData['variant'] {
-  if (variant == null) return undefined;
-  if (VALID_VARIANTS.has(variant as string)) return variant as MetricData['variant'];
-  const key = String(variant);
-  if (!warnedVariants.has(key)) {
-    warnedVariants.add(key);
-    console.warn(
-      `[@iyulab/u-widgets] uw-metric: unknown variant "${key}" — expected one of ${[...VALID_VARIANTS].join(', ')}. ` +
-      `Falling back to default styling.`,
-    );
-  }
-  return undefined;
-}
-
 function toMetricData(
   data: Record<string, unknown>,
   locale?: string,
@@ -76,7 +62,8 @@ function toMetricData(
     icon: data.icon as string | undefined,
     description: data.description as string | undefined,
     format: data.format as string | undefined,
-    variant: normalizeVariant(data.variant),
+    tone: normalizeTone(data.tone, 'uw-metric'),
+    emphasis: normalizeEmphasis(data.emphasis, 'uw-metric'),
     sparkline: Array.isArray(data.sparkline)
       ? (data.sparkline as unknown[]).filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
       : undefined,
@@ -85,7 +72,7 @@ function toMetricData(
 
 @customElement('uw-metric')
 export class UwMetric extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, toneStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(metric · stat-group)가 flex item 이어야 호스트 제약이
        그것에 닿는다. */
     :host {
@@ -179,19 +166,12 @@ export class UwMetric extends LitElement {
     }
     .metric-sparkline .line { fill: none; stroke: currentColor; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
     .metric-sparkline .area { fill: currentColor; opacity: 0.14; }
-    .metric[data-variant="success"] .metric-sparkline { color: var(--u-widget-positive, #15803d); }
-    .metric[data-variant="danger"] .metric-sparkline { color: var(--u-widget-negative, #dc2626); }
-    .metric[data-variant="warning"] .metric-sparkline { color: var(--u-widget-warning, #d97706); }
-    .metric[data-variant="neutral"] .metric-sparkline { color: var(--u-widget-text-secondary, #5b6777); }
+    .metric[data-tone] .metric-sparkline { color: var(--tone); }
 
     .metric-description { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
 
-    /* ── variant colors ── */
-    .metric[data-variant="success"] .metric-value { color: var(--u-widget-positive, #15803d); }
-    .metric[data-variant="danger"] .metric-value { color: var(--u-widget-negative, #dc2626); }
-    .metric[data-variant="warning"] .metric-value { color: var(--u-widget-warning, #d97706); }
-    .metric[data-variant="info"]    .metric-value { color: var(--u-widget-primary, #4f46e5); }
-    .metric[data-variant="neutral"] .metric-value { color: var(--u-widget-text-secondary, #5b6777); }
+    /* ── tone (core/tone.ts) ── */
+    .metric[data-tone] .metric-value { color: var(--tone); }
 
     /* ── stat-group ── */
     /* 겹침 방지: 셀은 콘텐츠(max-content)보다 좁아질 수 없고, 넘치는 항목은 다음 행으로 wrap.
@@ -298,12 +278,13 @@ export class UwMetric extends LitElement {
       : undefined;
 
     return html`
-      <div class="metric" part="metric" aria-label=${ariaLabel ?? nothing} data-variant=${m.variant ?? nothing}>
+      <div class="metric" part="metric" aria-label=${ariaLabel ?? nothing} data-tone=${m.tone ?? nothing} data-emphasis=${m.emphasis ?? nothing}>
         ${m.icon ? html`<div class="metric-icon" part="icon">${m.icon}</div>` : nothing}
         ${m.label ? html`<div class="metric-label" part="label">${m.label}</div>` : nothing}
         <div class="metric-value" part="value">
           ${m.prefix ?? ''}${m.value}${m.unit ? html`<span class="metric-unit">${m.unit}</span>` : ''}${m.suffix ?? ''}
         </div>
+        ${m.tone && m.emphasis === 'stamp' ? html`<span class="tone-stamp" part="stamp">${toneLabel(m.tone, localeStringsOf(this.spec))}</span>` : nothing}
         ${m.change != null
           ? html`<span class="metric-change" data-trend=${m.trend ?? 'flat'} part="change"
               >${trendArrow} ${m.change > 0 ? '+' : ''}${m.change}%</span

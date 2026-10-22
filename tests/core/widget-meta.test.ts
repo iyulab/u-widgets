@@ -249,8 +249,8 @@ describe('option value types', () => {
 
 describe('data field choices', () => {
   it('lists the values of a field typed as a union of string literals', () => {
-    const level = WIDGET_DATA_FIELDS.status.find(f => f.key === 'level');
-    expect(level?.enum).toEqual(['info', 'success', 'warning', 'error', 'neutral']);
+    const tone = WIDGET_DATA_FIELDS.status.find(f => f.key === 'tone');
+    expect(tone?.enum).toEqual(['ok', 'info', 'watch', 'warn', 'alarm', 'off', 'idle', 'accent', 'past', 'now', 'next']);
     expect(WIDGET_DATA_FIELDS.status.find(f => f.key === 'label')?.enum).toBeUndefined();
   });
 });

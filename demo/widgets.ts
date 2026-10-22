@@ -55,7 +55,7 @@ const catalog: Record<string, WidgetDoc> = {
       },
       'With variant': {
         widget: 'metric',
-        data: { value: 99.7, label: 'Uptime', suffix: '%', variant: 'success', change: 0.2, trend: 'up' },
+        data: { value: 99.7, label: 'Uptime', suffix: '%', tone: 'ok', change: 0.2, trend: 'up' },
       },
     },
   },
@@ -98,9 +98,9 @@ const catalog: Record<string, WidgetDoc> = {
       'With format & variant': {
         widget: 'stat-group',
         data: [
-          { value: 15000000, label: 'Total Sales', format: 'currency:KRW', variant: 'success' },
-          { value: 23.5, label: 'Churn Rate', format: 'percent', variant: 'danger' },
-          { value: 1284, label: 'Active Users', format: 'number', variant: 'info' },
+          { value: 15000000, label: 'Total Sales', format: 'currency:KRW', tone: 'ok' },
+          { value: 23.5, label: 'Churn Rate', format: 'percent', tone: 'alarm' },
+          { value: 1284, label: 'Active Users', format: 'number', tone: 'info' },
         ],
         options: { locale: 'ko-KR' },
       },
@@ -1020,19 +1020,19 @@ const catalog: Record<string, WidgetDoc> = {
     variants: {
       'Info + title': {
         widget: 'callout',
-        data: { title: 'Did you know?', message: 'This is an informational callout with helpful context for the user.', level: 'info' },
+        data: { title: 'Did you know?', message: 'This is an informational callout with helpful context for the user.', tone: 'info' },
       },
       'Warning': {
         widget: 'callout',
-        data: { message: 'Be careful! This action may have unexpected side effects.', level: 'warning' },
+        data: { message: 'Be careful! This action may have unexpected side effects.', tone: 'warn' },
       },
       'Error': {
         widget: 'callout',
-        data: { message: 'Something went wrong. Please check your configuration and try again.', level: 'error' },
+        data: { message: 'Something went wrong. Please check your configuration and try again.', tone: 'alarm' },
       },
       'Success': {
         widget: 'callout',
-        data: { message: 'Operation completed successfully! All changes have been saved.', level: 'success' },
+        data: { message: 'Operation completed successfully! All changes have been saved.', tone: 'ok' },
       },
     },
   },
@@ -1386,26 +1386,26 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'status',
         title: 'System Status',
         data: [
-          { label: 'API Gateway', value: 'Operational', level: 'success' },
-          { label: 'Database', value: 'Degraded', level: 'warning' },
-          { label: 'CDN', value: 'Operational', level: 'success' },
-          { label: 'Auth Service', value: 'Down', level: 'error' },
-          { label: 'Backup', value: 'Scheduled', level: 'info' },
+          { label: 'API Gateway', value: 'Operational', tone: 'ok' },
+          { label: 'Database', value: 'Degraded', tone: 'warn' },
+          { label: 'CDN', value: 'Operational', tone: 'ok' },
+          { label: 'Auth Service', value: 'Down', tone: 'alarm' },
+          { label: 'Backup', value: 'Scheduled', tone: 'info' },
         ],
       },
       'All levels': {
         widget: 'status',
         data: [
-          { label: 'Info', value: 'Informational', level: 'info' },
-          { label: 'Success', value: 'All good', level: 'success' },
-          { label: 'Warning', value: 'Caution', level: 'warning' },
-          { label: 'Error', value: 'Failed', level: 'error' },
-          { label: 'Neutral', value: 'N/A', level: 'neutral' },
+          { label: 'Info', value: 'Informational', tone: 'info' },
+          { label: 'Success', value: 'All good', tone: 'ok' },
+          { label: 'Warning', value: 'Caution', tone: 'warn' },
+          { label: 'Error', value: 'Failed', tone: 'alarm' },
+          { label: 'Neutral', value: 'N/A', tone: 'idle' },
         ],
       },
       'Single status': {
         widget: 'status',
-        data: { label: 'Build', value: 'Passing', level: 'success' },
+        data: { label: 'Build', value: 'Passing', tone: 'ok' },
       },
     },
   },
@@ -1540,7 +1540,7 @@ const catalog: Record<string, WidgetDoc> = {
         widget: 'compose',
         layout: 'stack',
         children: [
-          { widget: 'callout', data: { message: 'System update completed.', level: 'success' } },
+          { widget: 'callout', data: { message: 'System update completed.', tone: 'ok' } },
           { widget: 'metric', data: { value: 100, unit: '%', label: 'Deployment' } },
           { widget: 'progress', data: { value: 100, max: 100 } },
         ],

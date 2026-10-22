@@ -25,7 +25,7 @@ async function colorScheme(value: 'dark' | 'light') {
 
 async function statusWidget() {
   const el = document.createElement('u-widget') as HTMLElement & { spec: unknown };
-  el.spec = { widget: 'status', data: { label: 'Pump A', level: 'neutral', value: 'running' } };
+  el.spec = { widget: 'status', data: { label: 'Pump A', tone: 'idle', value: 'running' } };
   document.body.appendChild(el);
   await settle();
   return el;

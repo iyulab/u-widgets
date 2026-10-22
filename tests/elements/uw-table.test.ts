@@ -114,28 +114,28 @@ describe('uw-table', () => {
         mapping: {
           columns: [
             { field: 'metric', label: 'Metric' },
-            { field: 'value', label: 'Value', variant: 'success' },
+            { field: 'value', label: 'Value', tone: 'ok' },
           ],
         },
       });
       const shadow = await render(el);
       const tds = shadow.querySelectorAll('tbody td');
-      expect(tds[0]?.getAttribute('data-variant')).toBeNull();
-      expect(tds[1]?.getAttribute('data-variant')).toBe('success');
+      expect(tds[0]?.getAttribute('data-tone')).toBeNull();
+      expect(tds[1]?.getAttribute('data-tone')).toBe('ok');
     });
 
-    it('ignores an unknown variant and warns once', async () => {
+    it('ignores an unknown tone and warns once', async () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const el = createElement({
         widget: 'table',
         data: [{ value: 1 }],
         mapping: {
-          columns: [{ field: 'value', variant: 'primary' }],
+          columns: [{ field: 'value', tone: 'primary' }],
         },
       });
       const shadow = await render(el);
       const td = shadow.querySelector('tbody td');
-      expect(td?.getAttribute('data-variant')).toBeNull();
+      expect(td?.getAttribute('data-tone')).toBeNull();
       expect(warnSpy).toHaveBeenCalled();
       expect(String(warnSpy.mock.calls[0][0])).toContain('primary');
       warnSpy.mockRestore();

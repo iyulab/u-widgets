@@ -4,7 +4,7 @@
 // reaches an input two shadow roots down is the cascade's answer, which happy-dom does not give. Same for an error:
 // it has to show, in the widget's negative color, beside a field marked invalid.
 import { describe, it, expect, afterEach } from 'vitest';
-import '../../src/elements/uw-form.js';
+import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 import type { UwForm } from '../../src/elements/uw-form.js';
 
 type Updating = HTMLElement & { updateComplete: Promise<unknown> };
@@ -14,6 +14,8 @@ async function mount(spec: Record<string, unknown>, style = ''): Promise<{ el: U
   if (style) el.setAttribute('style', style);
   el.spec = spec as unknown as UwForm['spec'];
   document.body.appendChild(el);
+  // <formdown-ui> loads with the first form drawn; run alone, this file draws that first form.
+  await whenFormdownLoaded();
   await el.updateComplete;
   const fields = el.shadowRoot!.querySelector('formdown-ui') as Updating;
   await fields.updateComplete;

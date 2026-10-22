@@ -44,6 +44,8 @@ export { widgetEntry } from './core/entries.js';
 export type { WidgetEntry } from './core/entries.js';
 export { registerLocale, getLocaleStrings, formatTemplate, getDefaultLocale, setDefaultLocale, getEffectiveLocale, resolveLocale, onLocaleChange, getLocaleRevision } from './core/locale.js';
 export type { UWidgetLocaleStrings } from './core/locale.js';
+export { TONES, EMPHASES, TONE_GLYPHS, isTone, isEmphasis, toneLabel } from './core/tone.js';
+export type { Tone, Emphasis } from './core/tone.js';
 export { getPrimaryDataField } from './core/primary-field.js';
 
 export type { UWidgetElementProps } from './types/jsx.js';

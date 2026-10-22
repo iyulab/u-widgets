@@ -5,7 +5,7 @@
 // threw away the user's input. Only a new `data` or `fields` from the caller is a new form.
 import { describe, it, expect, afterEach } from 'vitest';
 import '../../src/elements/u-widget.js';
-import '../../src/elements/uw-form.js';
+import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 
 type Updating = HTMLElement & { updateComplete: Promise<unknown> };
 const formIn = (w: Element) => w.shadowRoot!.querySelector('uw-form') as Updating;
@@ -13,6 +13,8 @@ const formIn = (w: Element) => w.shadowRoot!.querySelector('uw-form') as Updatin
 const fieldsIn = (w: Element) => formIn(w).shadowRoot!.querySelector('formdown-ui') as Updating;
 const inputIn = (w: Element) => fieldsIn(w).shadowRoot!.querySelector('input')!;
 const settle = async (w: Updating) => {
+  // <formdown-ui> loads with the first form drawn; run alone, this file draws that first form.
+  await whenFormdownLoaded();
   await w.updateComplete; await formIn(w)?.updateComplete; await fieldsIn(w)?.updateComplete;
   await new Promise((r) => setTimeout(r, 20));
 };

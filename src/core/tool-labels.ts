@@ -138,6 +138,8 @@ const EN: ToolLabels = {
     message: 'Message',
     title: 'Title',
     level: 'Level',
+    tone: 'Tone',
+    emphasis: 'Emphasis',
     language: 'Language',
     expression: 'Expression',
     text: 'Text',

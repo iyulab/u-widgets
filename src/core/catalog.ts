@@ -273,7 +273,7 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   },
   'callout': {
     widget: 'callout',
-    data: { message: 'This is an informational callout.', level: 'info' },
+    data: { message: 'This is an informational callout.', tone: 'info' },
   },
   'code': {
     widget: 'code',
@@ -288,8 +288,8 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
   'status': {
     widget: 'status',
     data: [
-      { label: 'API', value: 'Operational', level: 'success' },
-      { label: 'DB', value: 'Degraded', level: 'warning' },
+      { label: 'API', value: 'Operational', tone: 'ok' },
+      { label: 'DB', value: 'Degraded', tone: 'warn' },
     ],
   },
   'steps': {
@@ -724,7 +724,7 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
       label: 'Info with title',
       spec: {
         widget: 'callout',
-        data: { title: 'Did you know?', message: 'u-widgets auto-infers mappings from data shape.', level: 'info' },
+        data: { title: 'Did you know?', message: 'u-widgets auto-infers mappings from data shape.', tone: 'info' },
       },
     },
   ],
@@ -781,11 +781,11 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
         widget: 'status',
         title: 'System Status',
         data: [
-          { label: 'API Gateway', value: 'Operational', level: 'success' },
-          { label: 'Database', value: 'Degraded', level: 'warning' },
-          { label: 'CDN', value: 'Operational', level: 'success' },
-          { label: 'Auth Service', value: 'Down', level: 'error' },
-          { label: 'Backup', value: 'Scheduled', level: 'info' },
+          { label: 'API Gateway', value: 'Operational', tone: 'ok' },
+          { label: 'Database', value: 'Degraded', tone: 'warn' },
+          { label: 'CDN', value: 'Operational', tone: 'ok' },
+          { label: 'Auth Service', value: 'Down', tone: 'alarm' },
+          { label: 'Backup', value: 'Scheduled', tone: 'info' },
         ],
       },
     },

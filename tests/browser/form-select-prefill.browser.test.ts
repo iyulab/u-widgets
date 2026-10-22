@@ -4,7 +4,7 @@
 // when its value is set shows nothing chosen (Chromium). happy-dom resolves selectedness differently, which is why
 // this lives here.
 import { describe, it, expect } from 'vitest';
-import '../../src/elements/uw-form.js';
+import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 import type { UwForm } from '../../src/elements/uw-form.js';
 
 describe('uw-form select', () => {
@@ -19,6 +19,8 @@ describe('uw-form select', () => {
       ],
     } as UwForm['spec'];
     document.body.appendChild(el);
+    // <formdown-ui> loads with the first form drawn; run alone, this file draws that first form.
+    await whenFormdownLoaded();
     await el.updateComplete;
     const fields = el.shadowRoot!.querySelector('formdown-ui') as HTMLElement & { updateComplete: Promise<unknown> };
     await fields.updateComplete;

@@ -1,3 +1,5 @@
+import type { Tone } from './tone.js';
+
 // ── Widget Type Identifiers ──
 
 /**
@@ -77,12 +79,8 @@ export interface UWidgetColumnDefinition {
   format?: 'number' | `number:${number}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes';
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
-  /**
-   * Semantic emphasis applied to this column's cells (bold + color token).
-   * Reuses uw-metric's variant vocabulary so highlight semantics stay
-   * consistent across the widget catalog.
-   */
-  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+  /** The tone (`core/tone.ts`) this column's cells are drawn in — bold, in the tone's colour. */
+  tone?: Tone;
 }
 
 /**

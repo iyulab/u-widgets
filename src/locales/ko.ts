@@ -44,6 +44,17 @@ export const ko: UWidgetLocaleStrings = {
   status: '상태',
   steps: '단계',
   ratingOutOf: '평점: {max}점 중 {value}점',
+  toneOk: '정상',
+  toneInfo: '알림',
+  toneWatch: '관찰',
+  toneWarn: '경고',
+  toneAlarm: '경보',
+  toneOff: '꺼짐',
+  toneIdle: '대기',
+  toneAccent: '강조',
+  tonePast: '완료',
+  toneNow: '진행 중',
+  toneNext: '다음',
 
   // Code block
   code: '코드',

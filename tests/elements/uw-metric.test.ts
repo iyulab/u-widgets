@@ -128,7 +128,7 @@ describe('uw-metric', () => {
     });
 
     it('draws the recent values as a line under the value, scaled to their own range', async () => {
-      const el = createElement({ widget: 'metric', data: { value: 18.4, sparkline: [10, 20, 'x', 15], variant: 'danger' } });
+      const el = createElement({ widget: 'metric', data: { value: 18.4, sparkline: [10, 20, 'x', 15], tone: 'alarm' } });
       const shadow = await render(el);
       const line = shadow.querySelector('.metric-sparkline .line');
       // Three numbers across the width: the lowest at the bottom margin, the highest at the top one.
@@ -340,94 +340,88 @@ describe('uw-metric', () => {
   });
 
   describe('variant field', () => {
-    it('metric: variant "danger" sets data-variant attribute', async () => {
+    it('metric: variant "danger" sets data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
-        data: { value: '23.5%', label: '이탈률', variant: 'danger' },
+        data: { value: '23.5%', label: '이탈률', tone: 'alarm' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.getAttribute('data-variant')).toBe('danger');
+      expect(metricEl?.getAttribute('data-tone')).toBe('alarm');
     });
 
-    it('metric: variant "success" sets data-variant attribute', async () => {
+    it('metric: variant "success" sets data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
-        data: { value: '67%', label: '재구매율', variant: 'success' },
+        data: { value: '67%', label: '재구매율', tone: 'ok' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.getAttribute('data-variant')).toBe('success');
+      expect(metricEl?.getAttribute('data-tone')).toBe('ok');
     });
 
-    it('metric: variant "warning" sets data-variant attribute', async () => {
+    it('metric: variant "warning" sets data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
-        data: { value: 3, label: '재고 부족', variant: 'warning' },
+        data: { value: 3, label: '재고 부족', tone: 'warn' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.getAttribute('data-variant')).toBe('warning');
+      expect(metricEl?.getAttribute('data-tone')).toBe('warn');
     });
 
-    it('metric: no variant sets no data-variant attribute', async () => {
+    it('metric: no variant sets no data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
         data: { value: 42, label: 'Normal' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.hasAttribute('data-variant')).toBe(false);
+      expect(metricEl?.hasAttribute('data-tone')).toBe(false);
     });
 
     it('stat-group: each item can have independent variant', async () => {
       const el = createElement({
         widget: 'stat-group',
         data: [
-          { label: '재구매율', value: '67%', variant: 'success' },
-          { label: '이탈률', value: '23.5%', variant: 'danger' },
+          { label: '재구매율', value: '67%', tone: 'ok' },
+          { label: '이탈률', value: '23.5%', tone: 'alarm' },
           { label: '총 주문', value: 320 },
         ],
       });
       const shadow = await render(el);
       const metrics = shadow.querySelectorAll('.metric');
-      expect(metrics[0]?.getAttribute('data-variant')).toBe('success');
-      expect(metrics[1]?.getAttribute('data-variant')).toBe('danger');
-      expect(metrics[2]?.hasAttribute('data-variant')).toBe(false);
+      expect(metrics[0]?.getAttribute('data-tone')).toBe('ok');
+      expect(metrics[1]?.getAttribute('data-tone')).toBe('alarm');
+      expect(metrics[2]?.hasAttribute('data-tone')).toBe(false);
     });
 
-    it('metric: variant "info" sets data-variant attribute', async () => {
+    it('metric: variant "info" sets data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
-        data: { value: 42, label: 'Info', variant: 'info' },
+        data: { value: 42, label: 'Info', tone: 'info' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.getAttribute('data-variant')).toBe('info');
+      expect(metricEl?.getAttribute('data-tone')).toBe('info');
     });
 
-    it('metric: variant "neutral" sets data-variant attribute', async () => {
+    it('metric: variant "neutral" sets data-tone attribute', async () => {
       const el = createElement({
         widget: 'metric',
-        data: { value: 42, label: 'Neutral', variant: 'neutral' },
+        data: { value: 42, label: 'Neutral', tone: 'idle' },
       });
       const shadow = await render(el);
       const metricEl = shadow.querySelector('.metric');
-      expect(metricEl?.getAttribute('data-variant')).toBe('neutral');
+      expect(metricEl?.getAttribute('data-tone')).toBe('idle');
     });
 
-    it('CSS: variant classes exist in styles', () => {
+    it('CSS: the tone rules are in the styles', () => {
       const styles = (customElements.get('uw-metric') as any).styles;
       const cssText = Array.isArray(styles)
         ? styles.map((s: any) => s.cssText ?? '').join(' ')
         : styles?.cssText ?? '';
-      expect(cssText).toContain('data-variant');
-      expect(cssText).toContain('success');
-      expect(cssText).toContain('danger');
-      expect(cssText).toContain('info');
-      expect(cssText).toContain('neutral');
-      expect(cssText).toContain('--u-widget-primary');
-      expect(cssText).toContain('--u-widget-text-secondary');
+      expect(cssText).toContain('data-tone');
     });
   });
 

@@ -47,7 +47,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `list` | Structured list | `primary`, `secondary`, `avatar`, `trailing` |
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
 | `citation` | Source/reference cards | — (uses data array) |
-| `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.level`) |
+| `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.tone` — [Tones](#tones)) |
 | `steps` | Multi-step progress | — (uses data array) |
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
 | `video` | HTML5 video player | — (uses `data.src`; subtitle / caption tracks in `data.tracks`: `[{ src, srclang?, label?, kind?, default? }]`, WebVTT) |
@@ -82,8 +82,8 @@ When `mapping` is omitted, the renderer infers it from data structure:
 // Chart
 "mapping": { "x": "fieldName", "y": ["field1", "field2"], "color": "fieldName" }
 
-// Table (optional `variant` bolds + colors a column's cells: success|warning|danger|info|neutral)
-"mapping": { "columns": [{ "field": "id", "label": "ID", "format": "number", "align": "right" }, { "field": "yield", "label": "Yield", "variant": "success" }] }
+// Table (optional `tone` bolds a column's cells in that tone's colour — see Tones)
+"mapping": { "columns": [{ "field": "id", "label": "ID", "format": "number", "align": "right" }, { "field": "yield", "label": "Yield", "tone": "ok" }] }
 
 // List
 "mapping": { "primary": "name", "secondary": "description", "avatar": "imageUrl", "trailing": "score" }
@@ -160,12 +160,42 @@ runs on scrolls, so none of it becomes unreachable, and media scales down with i
 argument and returns the compact layout for a small one; `<uw-chart>` passes its own size and
 rebuilds the option when the layout changes. Anything set in `options.echarts` still wins.
 
+## Tones
+
+A widget that colours a value by its state takes a **tone** — one of eleven, the same in every widget (`status` items,
+`metric` and `stat-group` values, `table` columns, `callout`):
+
+| Tone | Means | Mark |
+|---|---|---|
+| `ok` | normal | ✓ |
+| `info` | something to know, not a fault — its own blue, apart from the accent | ● |
+| `watch` | an early sign, before a warning | ◆ |
+| `warn` | a warning | ▲ |
+| `alarm` | a fault — act now | ✕ |
+| `off` | switched off, not running | – |
+| `idle` | on, waiting for work | ○ |
+| `accent` | picked out, with no judgement (the primary colour) | ★ |
+| `past` · `now` · `next` | where an item is in a sequence — a timeline, a queue, a schedule | ✓ · ▶ · › |
+
+An app maps its own state names (`cooking`, `boarding`, `free`) to a tone; the tone is what is drawn. A word that is not
+a tone draws as no tone and warns once in the console, naming the tones. A `status` item with a tone and no `value`
+shows the tone's name in the widget's locale («Alarm», «경보»).
+
+```json
+{ "widget": "status", "data": [{ "label": "Pump A", "value": "Running", "tone": "ok" }, { "label": "Pump B", "tone": "alarm" }] }
+```
+
+The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (light and dark — see Theming); `ok`, `warn`,
+`alarm` and `accent` follow `--u-widget-positive`, `--u-widget-warning`, `--u-widget-negative` and
+`--u-widget-primary`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
+legend.
+
 ## Metric Data
 
 `metric` (and each item of `stat-group`) reads `value` and, optionally, `label`, `unit`, `prefix`, `suffix`, `change`
-(a percentage, with `trend`: `up` · `down` · `flat`), `icon`, `description`, `variant` (the value's colour) and
+(a percentage, with `trend`: `up` · `down` · `flat`), `icon`, `description`, `tone` (the value's colour — [Tones](#tones)) and
 `sparkline` — the recent values, oldest first, drawn as a small line under the value. The line is scaled to its own
-range (it shows the shape, not the size), takes the variant's colour or the primary one, and needs two numbers or more.
+range (it shows the shape, not the size), takes the tone's colour or the primary one, and needs two numbers or more.
 
 ```json
 { "widget": "metric", "data": { "value": 18.4, "unit": "Tbps", "label": "Traffic", "sparkline": [14.2, 15.8, 17.1, 16.4, 18.4] } }
@@ -648,7 +678,7 @@ getWidgetOptions('gauge');
 
 getWidgetDataFields('status');
 // → [{ key: 'label', label: 'Label', type: 'string', ... },
-//    { key: 'level', label: 'Level', type: '"info" | "success" | ...', enum: ['info', 'success', 'warning', 'error', 'neutral'] }, ...]
+//    { key: 'tone', label: 'Tone', type: '"ok" | "info" | ...', enum: ['ok', 'info', 'watch', 'warn', 'alarm', 'off', 'idle', 'accent', 'past', 'now', 'next'] }, ...]
 
 getWidgetLabel('chart.bar');   // → 'Bar chart'
 ```

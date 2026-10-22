@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { UWidgetSpec } from '../../src/core/types.js';
 
 let UwStatus: typeof import('../../src/elements/uw-status.js').UwStatus;
@@ -33,12 +33,12 @@ describe('uw-status', () => {
     });
 
     it('renders an item without a label as a badge showing its value — no label, no colon', () => {
-      const el = render({ widget: 'status', data: { value: 'Running', level: 'success' } });
+      const el = render({ widget: 'status', data: { value: 'Running', tone: 'ok' } });
       const item = shadow(el).querySelector('.status-item')!;
       expect(item).not.toBeNull();
       expect(item.querySelector('.status-label')).toBeNull();
       expect(item.querySelector('.status-value')!.textContent).toBe('Running');
-      expect(item.getAttribute('data-level')).toBe('success');
+      expect(item.getAttribute('data-tone')).toBe('ok');
     });
 
     it('keeps array items that have a value, labelled or not, and skips those without one', () => {
@@ -52,8 +52,8 @@ describe('uw-status', () => {
       const el = render({
         widget: 'status',
         data: [
-          { label: 'API', value: 'Up', level: 'success' },
-          { label: 'DB', value: 'Down', level: 'error' },
+          { label: 'API', value: 'Up', tone: 'ok' },
+          { label: 'DB', value: 'Down', tone: 'alarm' },
         ],
       });
       const items = shadow(el).querySelectorAll('.status-item');
@@ -63,7 +63,7 @@ describe('uw-status', () => {
     it('renders single status from object data', () => {
       const el = render({
         widget: 'status',
-        data: { label: 'Service', value: 'Running', level: 'success' },
+        data: { label: 'Service', value: 'Running', tone: 'ok' },
       });
       const items = shadow(el).querySelectorAll('.status-item');
       expect(items.length).toBe(1);
@@ -72,7 +72,7 @@ describe('uw-status', () => {
     it('renders label text', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'API Gateway', value: 'OK', level: 'success' }],
+        data: [{ label: 'API Gateway', value: 'OK', tone: 'ok' }],
       });
       const label = shadow(el).querySelector('.status-label');
       expect(label?.textContent?.trim()).toBe('API Gateway');
@@ -81,7 +81,7 @@ describe('uw-status', () => {
     it('renders value text', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'API', value: 'Operational', level: 'success' }],
+        data: [{ label: 'API', value: 'Operational', tone: 'ok' }],
       });
       const value = shadow(el).querySelector('.status-value');
       expect(value?.textContent?.trim()).toBe('Operational');
@@ -92,64 +92,83 @@ describe('uw-status', () => {
     it('applies info level', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'Info', level: 'info' }],
+        data: [{ label: 'Test', value: 'Info', tone: 'info' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('info');
+      expect(item?.getAttribute('data-tone')).toBe('info');
     });
 
     it('applies success level', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'OK', level: 'success' }],
+        data: [{ label: 'Test', value: 'OK', tone: 'ok' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('success');
+      expect(item?.getAttribute('data-tone')).toBe('ok');
     });
 
     it('applies warning level', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'Slow', level: 'warning' }],
+        data: [{ label: 'Test', value: 'Slow', tone: 'warn' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('warning');
+      expect(item?.getAttribute('data-tone')).toBe('warn');
     });
 
     it('applies error level', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'Down', level: 'error' }],
+        data: [{ label: 'Test', value: 'Down', tone: 'alarm' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('error');
+      expect(item?.getAttribute('data-tone')).toBe('alarm');
     });
 
     it('applies neutral level', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'N/A', level: 'neutral' }],
+        data: [{ label: 'Test', value: 'N/A', tone: 'idle' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('neutral');
+      expect(item?.getAttribute('data-tone')).toBe('idle');
     });
 
-    it('defaults to info for missing level', () => {
+    it('draws an item with no tone plainly — no tone, no mark', () => {
       const el = render({
         widget: 'status',
         data: [{ label: 'Test', value: 'Val' }],
       });
       const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('info');
+      expect(item?.hasAttribute('data-tone')).toBe(false);
+      expect(shadow(el).querySelector('.status-icon')).toBeNull();
     });
 
-    it('defaults to info for unknown level', () => {
+    it('draws an unknown tone as no tone and warns once, naming the tones', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'Val', level: 'bogus' }],
+        data: [{ label: 'Test', value: 'Val', tone: 'bogus' }, { label: 'Again', value: 'Val', tone: 'bogus' }],
       });
-      const item = shadow(el).querySelector('.status-item');
-      expect(item?.getAttribute('data-level')).toBe('info');
+      expect(shadow(el).querySelector('.status-item')?.hasAttribute('data-tone')).toBe(false);
+      expect(warn.mock.calls.filter(c => String(c[0]).includes('"bogus"'))).toHaveLength(1);
+      expect(String(warn.mock.calls[0][0])).toContain('ok, info, watch, warn, alarm, off, idle, accent, past, now, next');
+      warn.mockRestore();
+    });
+
+    it('shows the tone’s name for an item with a tone and no value, in the widget’s locale', () => {
+      const el = render({
+        widget: 'status',
+        data: [{ label: 'Pump', tone: 'alarm' }, { tone: 'next' }],
+      });
+      const values = [...shadow(el).querySelectorAll('.status-value')].map(v => v.textContent);
+      expect(values).toEqual(['Alarm', 'Next']);
+    });
+
+    it('takes every one of the eleven tones', () => {
+      const tones = ['ok', 'info', 'watch', 'warn', 'alarm', 'off', 'idle', 'accent', 'past', 'now', 'next'];
+      const el = render({ widget: 'status', data: tones.map(tone => ({ value: tone, tone })) });
+      expect([...shadow(el).querySelectorAll('.status-item')].map(i => i.getAttribute('data-tone'))).toEqual(tones);
     });
   });
 
@@ -157,7 +176,7 @@ describe('uw-status', () => {
     it('renders icon for each item', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'OK', level: 'success' }],
+        data: [{ label: 'Test', value: 'OK', tone: 'ok' }],
       });
       const icon = shadow(el).querySelector('.status-icon');
       expect(icon).toBeTruthy();
@@ -167,7 +186,7 @@ describe('uw-status', () => {
     it('renders success checkmark symbol', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'OK', level: 'success' }],
+        data: [{ label: 'Test', value: 'OK', tone: 'ok' }],
       });
       const icon = shadow(el).querySelector('.status-icon');
       expect(icon?.textContent).toBe('\u2713'); // ✓
@@ -176,7 +195,7 @@ describe('uw-status', () => {
     it('renders error cross symbol', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'Down', level: 'error' }],
+        data: [{ label: 'Test', value: 'Down', tone: 'alarm' }],
       });
       const icon = shadow(el).querySelector('.status-icon');
       expect(icon?.textContent).toBe('\u2715'); // ✕
@@ -233,7 +252,7 @@ describe('uw-status', () => {
     it('exposes status-icon part', () => {
       const el = render({
         widget: 'status',
-        data: [{ label: 'Test', value: 'OK' }],
+        data: [{ label: 'Test', value: 'OK', tone: 'ok' }],
       });
       expect(shadow(el).querySelector('[part="status-icon"]')).toBeTruthy();
     });
@@ -274,5 +293,19 @@ describe('uw-status', () => {
       const items = shadow(el).querySelectorAll('.status-item');
       expect(items.length).toBe(1);
     });
+  });
+});
+
+describe('uw-status emphasis', () => {
+  const shadowOf = (el: HTMLElement) => el.shadowRoot!;
+  it('marks an item with its emphasis and draws a stamp as the value stamped', async () => {
+    const el = document.createElement('uw-status') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = { widget: 'status', data: [{ label: 'Oven', value: 'Late', tone: 'alarm', emphasis: 'invert' }, { label: 'Order 12', value: 'Done', tone: 'past', emphasis: 'stamp' }] };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const items = [...shadowOf(el).querySelectorAll('.status-item')];
+    expect(items.map(i => i.getAttribute('data-emphasis'))).toEqual(['invert', 'stamp']);
+    expect(items[1].querySelector('.status-value')?.classList.contains('tone-stamp')).toBe(true);
+    el.remove();
   });
 });

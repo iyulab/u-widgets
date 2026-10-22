@@ -66,11 +66,11 @@ bind('w-status-server', {
   widget: 'status',
   title: 'Service Health',
   data: [
-    { label: 'API Gateway', value: 'Operational', level: 'success' },
-    { label: 'Database (Primary)', value: 'Operational', level: 'success' },
-    { label: 'Database (Replica)', value: 'Degraded', level: 'warning' },
-    { label: 'Redis Cache', value: 'Operational', level: 'success' },
-    { label: 'Worker Queue', value: 'Down', level: 'error' },
+    { label: 'API Gateway', value: 'Operational', tone: 'ok' },
+    { label: 'Database (Primary)', value: 'Operational', tone: 'ok' },
+    { label: 'Database (Replica)', value: 'Degraded', tone: 'warn' },
+    { label: 'Redis Cache', value: 'Operational', tone: 'ok' },
+    { label: 'Worker Queue', value: 'Down', tone: 'alarm' },
   ],
 });
 

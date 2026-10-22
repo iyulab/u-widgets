@@ -3,11 +3,12 @@ import { escapeHtml } from '../core/escape.js';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { normalizeTone, toneStyles } from '../core/tone.js';
 import { getLocaleStrings } from '../core/locale.js';
 
 @customElement('uw-content')
 export class UwContent extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, toneStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(markdown · image · callout)가 flex item 이어야 호스트
        제약이 그것에 닿는다. display:block 이면 루트의 flex 선언이 무시된다. */
     :host {
@@ -165,27 +166,9 @@ export class UwContent extends LitElement {
       line-height: 1.5;
     }
 
-    .callout-info {
-      background: color-mix(in srgb, var(--u-widget-primary, #4f46e5) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-primary, #4f46e5);
-      color: var(--u-widget-text, #1a1a2e);
-    }
-
-    .callout-warning {
-      background: color-mix(in srgb, var(--u-widget-warning, #d97706) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-warning, #d97706);
-      color: var(--u-widget-text, #1a1a2e);
-    }
-
-    .callout-error {
-      background: color-mix(in srgb, var(--u-widget-negative, #dc2626) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-negative, #dc2626);
-      color: var(--u-widget-text, #1a1a2e);
-    }
-
-    .callout-success {
-      background: color-mix(in srgb, var(--u-widget-positive, #15803d) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--u-widget-positive, #15803d);
+    .callout {
+      background: color-mix(in srgb, var(--tone) 12%, var(--u-widget-bg, #fff));
+      border-left-color: var(--tone);
       color: var(--u-widget-text, #1a1a2e);
     }
 
@@ -284,13 +267,11 @@ export class UwContent extends LitElement {
     if (!data) return nothing;
 
     const message = String(data.message ?? '');
-    const level = String(data.level ?? 'info');
+    const tone = normalizeTone(data.tone, 'uw-content') ?? 'info';
     const title = data.title as string | undefined;
-    const validLevels = ['info', 'warning', 'error', 'success'];
-    const cls = validLevels.includes(level) ? level : 'info';
 
-    const isUrgent = cls === 'warning' || cls === 'error';
-    return html`<div class="callout callout-${cls}" part="callout" role=${isUrgent ? 'alert' : 'note'} aria-live=${isUrgent ? 'assertive' : 'polite'}>
+    const isUrgent = tone === 'warn' || tone === 'alarm';
+    return html`<div class="callout" part="callout" data-tone=${tone} role=${isUrgent ? 'alert' : 'note'} aria-live=${isUrgent ? 'assertive' : 'polite'}>
       ${title ? html`<div class="callout-title" part="callout-title">${title}</div>` : nothing}
       <div part="callout-message">${message}</div>
     </div>`;

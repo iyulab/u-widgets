@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+### Added
+
+- Tones: one vocabulary of eleven for every widget that colours a value by its state — `ok` · `info` · `watch` · `warn`
+  · `alarm` · `off` · `idle` · `accent` · `past` · `now` · `next` (`watch` is the early sign before a warning, `off` is
+  switched off and `idle` waiting for work, `past` · `now` · `next` are places in a sequence). Each has a mark (✓ ● ◆ ▲ ✕
+  – ○ ★ ✓ ▶ ›), a name in the widget's locale (new keys `toneOk` … `toneNext`, in Korean too) and a colour token,
+  `--u-widget-tone-<tone>`, in light and dark; `info` is a blue of its own rather than the accent. `TONES`, `isTone`,
+  `toneLabel(tone, strings)`, `TONE_GLYPHS`, `EMPHASES`, `isEmphasis` and the types `Tone`, `Emphasis` are exported.
+- `emphasis` on a `status` item and a `metric` value — `invert` (a fill of its tone), `hatch`, `stamp` (the value, or
+  for a metric the tone's name, as a rubber stamp) or `blink` (a steady outline instead under reduced motion): a second
+  channel besides colour for a state that must not be missed.
+- A `status` item may have a `tone` and no `value`; it shows the tone's name.
+
+### Changed
+
+- **Breaking:** the closed five-level vocabularies are replaced by `tone`:
+
+  | Was | Now |
+  |---|---|
+  | `status` item `level` | `tone` |
+  | `metric` / `stat-group` item `variant` | `tone` |
+  | `table` column `variant` | `tone` |
+  | `callout` `level` | `tone` (`warn` and `alarm` are announced, as `warning` and `error` were) |
+  | `success` · `warning` · `error` / `danger` · `info` · `neutral` | `ok` · `warn` · `alarm` · `info` · `idle` |
+
+  The rename is mechanical; the old words are not read. A word that is not a tone draws as no tone and warns once in
+  the console, naming the tones. A `status` item with no tone is drawn plainly — no colour, no mark — where it was
+  `info` before. The parts and their names (`status-icon`, `status-value`, …) are as before; the attribute a page can
+  style by is `data-tone` (was `data-level` / `data-variant`).
+
 ## [0.40.0] - 2026-10-23
 
 MCP server 0.7.4 follows `^0.40.0`.

@@ -66,7 +66,7 @@ export const DATA_FIELD_DOCS: Readonly<Record<string, string>> = {
   // content
   content: 'Body text or markdown content',
   message: 'Message body text',
-  level: 'Severity level (info, warning, error, success)',
+  tone: 'State tone (ok, info, watch, warn, alarm, off, idle, accent, past, now, next)',
   title: 'Heading or title text',
   src: 'Source URL (image)',
   alt: 'Alt text (image)',
@@ -373,6 +373,8 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'icon', type: 'string', desc: 'Emoji or short text icon' },
     { key: 'description', type: 'string', desc: 'Sub-label below value' },
     { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone of the value' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
   ],
   'stat-group': [
     { key: 'label', type: 'string', desc: 'Display label', required: true },
@@ -385,6 +387,8 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'icon', type: 'string', desc: 'Emoji or short text icon' },
     { key: 'description', type: 'string', desc: 'Sub-label below value' },
     { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone of the value' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
   ],
   'gauge': [
     { key: 'value', type: 'number', desc: 'Current value on the arc', required: true },
@@ -404,7 +408,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'callout': [
     { key: 'message', type: 'string', desc: 'Body text', required: true },
     { key: 'title', type: 'string', desc: 'Optional heading' },
-    { key: 'level', type: '"info" | "warning" | "error" | "success"', desc: 'Severity' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone (default info) — warn and alarm are announced' },
   ],
   'code': [
     { key: 'content', type: 'string', desc: 'Code text content', required: true },
@@ -449,7 +453,8 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'status': [
     { key: 'label', type: 'string', desc: 'Status label' },
     { key: 'value', type: 'string', desc: 'Status value', required: true },
-    { key: 'level', type: '"info" | "success" | "warning" | "error" | "neutral"', desc: 'Severity level (default info)' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone: colour and mark; without a value the tone\'s name is shown' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
   ],
 });
 
@@ -473,7 +478,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'chart.treemap': 'No mapping. data is [{name, value, children?}].',
   'chart.histogram': 'Flat number[] or objects with single numeric field → frequency distribution',
   'chart.gantt': 'mapping omittable. First string → y (row), first two number/date-like fields → start, end, next string → label. color groups intervals.',
-  'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?, sparkline?}.',
+  'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?, sparkline?, tone?}.',
   'stat-group': 'No mapping needed. data is [{label, value, ...}]. Optional: icon (emoji), description (sub-label).',
   'gauge': 'No mapping needed. data is {value}. Set min/max/unit in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
@@ -483,12 +488,12 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'confirm': 'Uses title, description, actions. data is optional.',
   'markdown': 'No mapping. data is {content: "markdown string"}.',
   'image': 'No mapping. data is {src, alt?, caption?}.',
-  'callout': 'No mapping. data is {message, title?, level?}.',
+  'callout': 'No mapping. data is {message, title?, tone?}.',
   'compose': 'Uses children[] and layout. Each child is a widget spec.',
   'kv': 'No mapping. data is {key: val, ...} or [{key, value}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
-  'status': 'No mapping. data is {label, value, level?} or array of those. level: info/success/warning/error/neutral.',
+  'status': 'No mapping. data is {label?, value?, tone?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
   'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',
   'gallery': 'No mapping. data is [{src, alt?, caption?}]. columns/aspectRatio in options.',
   'steps': 'No mapping. data is [{label, status?, description?, icon?}]. status: done/active/pending/error. icon: emoji/text override. layout: vertical/horizontal.',

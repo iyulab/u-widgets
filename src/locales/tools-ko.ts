@@ -118,6 +118,8 @@ export const toolLabelsKo: ToolLabels = {
     message: '메시지',
     title: '제목',
     level: '수준',
+    tone: '상태 톤',
+    emphasis: '강조',
     language: '언어',
     expression: '수식',
     text: '텍스트',
