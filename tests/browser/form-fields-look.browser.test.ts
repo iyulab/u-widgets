@@ -4,6 +4,7 @@
 // reaches an input two shadow roots down is the cascade's answer, which happy-dom does not give. Same for an error:
 // it has to show, in the widget's negative color, beside a field marked invalid.
 import { describe, it, expect, afterEach } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 import type { UwForm } from '../../src/elements/uw-form.js';
 
@@ -29,9 +30,12 @@ describe('uw-form fields look like the widget', () => {
   it('a theme token on the widget reaches the drawn input', async () => {
     const { root } = await mount(
       { widget: 'form', fields: [{ field: 'name', label: 'Name' }] },
-      '--u-widget-border: rgb(1, 2, 3); --u-widget-text: rgb(4, 5, 6)',
+      // The fields ease into new colours; with no easing the colours read are the final ones, not part-way.
+      '--u-widget-border: rgb(1, 2, 3); --u-widget-text: rgb(4, 5, 6); --formdown-transition-fast: 0s; --formdown-transition-normal: 0s',
     );
     const input = root.querySelector('input[name="name"]')!;
+    // A field under the pointer shows its hover border — an earlier test can leave the pointer where this one draws.
+    await userEvent.unhover(input);
     expect(getComputedStyle(input).borderTopColor).toBe('rgb(1, 2, 3)');
     expect(getComputedStyle(input).color).toBe('rgb(4, 5, 6)');
   });

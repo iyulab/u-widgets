@@ -112,6 +112,8 @@ export class UwGauge extends LitElement {
     /* 글자 크기는 viewBox 단위다. 기본 표시 폭 160px 에서 viewBox 200 이 0.8 배로 그려지므로
        ×1.25 를 걸어 종전 HTML 겹침과 같은 픽셀 크기(1.75rem · caption · overline)가 되게 한다. */
     .gauge-value {
+      font-family: var(--u-widget-font-numeric);
+      font-variant-numeric: tabular-nums;
       font-size: calc(1.75rem * 1.25);
       font-weight: 700;
       fill: var(--u-widget-text, #1a1a2e);

@@ -8,6 +8,7 @@
  */
 
 import { dataFieldLabel, optionLabel } from './tool-labels.js';
+import { FRAMES } from './frame.js';
 
 /** Mapping key descriptions (from schema $defs/mapping.properties). */
 export const MAPPING_DOCS: Readonly<Record<string, string>> = {
@@ -165,7 +166,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   columns: 'Number of grid columns',
   widths: 'Column width ratios (number[], "auto", "stretch")',
   spacing: 'Spacing size (small, default, large)',
-  card: 'Render inside a card container with shadow and border',
+  frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
 };
 
 /**
@@ -238,7 +239,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   columns: { type: 'number' },
   widths: { type: '(number | "auto" | "stretch")[]' },
   spacing: choice(['small', 'default', 'large'], 'default'),
-  card: { type: 'boolean', default: false },
+  frame: choice(FRAMES),
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
@@ -342,7 +343,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'image': [],
   'callout': [],
   // `layout` and `columns` are top-level spec fields of compose, not options.
-  'compose': ['widths', 'card'],
+  'compose': ['widths', 'frame'],
   'kv': ['layout', 'columns'],
   'code': ['lineNumbers', 'highlight', 'maxHeight', 'wrap'],
   'citation': ['compact', 'numbered'],

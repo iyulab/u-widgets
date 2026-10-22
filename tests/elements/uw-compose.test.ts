@@ -292,24 +292,24 @@ describe('uw-compose', () => {
     });
   });
 
-  describe('card option', () => {
-    it('applies child-card class when options.card is true', async () => {
+  describe('frame option', () => {
+    it('draws every child in the frame options.frame names', async () => {
       const el = createElement({
         widget: 'compose',
         layout: 'grid',
         columns: 2,
-        options: { card: true },
+        options: { frame: 'ticket' },
         children: [
           { widget: 'metric', data: { value: 42 } },
           { widget: 'metric', data: { value: 100 } },
         ],
       });
       const shadow = await render(el);
-      const children = shadow.querySelectorAll('.child-card');
-      expect(children.length).toBe(2);
+      const children = [...shadow.querySelectorAll('.child')];
+      expect(children.map(c => c.getAttribute('data-frame'))).toEqual(['ticket', 'ticket']);
     });
 
-    it('does not apply child-card class by default', async () => {
+    it('draws no frame by default', async () => {
       const el = createElement({
         widget: 'compose',
         children: [
@@ -317,7 +317,7 @@ describe('uw-compose', () => {
         ],
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.child-card')).toBeNull();
+      expect(shadow.querySelector('[data-frame]')).toBeNull();
     });
   });
 

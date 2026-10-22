@@ -1592,7 +1592,7 @@ const catalog: Record<string, WidgetDoc> = {
         title: 'Dashboard',
         layout: 'grid',
         columns: 2,
-        options: { card: true },
+        options: { frame: 'card' },
         children: [
           { widget: 'metric', data: { value: 99.9, unit: '%', label: 'Uptime', icon: '\u2705' } },
           { widget: 'metric', data: { value: 142, label: 'Requests/s', icon: '\u26A1' } },

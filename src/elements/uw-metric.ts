@@ -93,6 +93,8 @@ export class UwMetric extends LitElement {
     }
 
     .metric-value {
+      font-family: var(--u-widget-font-numeric);
+      font-variant-numeric: tabular-nums;
       font-size: 2rem;
       font-weight: 700;
       line-height: 1.1;

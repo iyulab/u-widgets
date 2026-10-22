@@ -117,7 +117,7 @@ const EN: ToolLabels = {
     columns: 'Columns',
     widths: 'Column widths',
     spacing: 'Spacing',
-    card: 'Card',
+    frame: 'Frame',
   },
   dataFields: {
     value: 'Value',

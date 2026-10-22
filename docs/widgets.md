@@ -589,6 +589,38 @@ fill (`--u-widget-on-primary`) at their defaults — set them with it when the a
 | `--u-widget-bg` | `#fff` | Background |
 | `--u-widget-surface` | `#f1f5f9` | Surface / hover |
 | `--u-widget-border` | `#e2e8f0` | Borders |
+| `--u-widget-font-family` | `system-ui, …` | Body face — charts read it too |
+| `--u-widget-font-display` | the body face | Titles, the `header` widget, a stamp |
+| `--u-widget-font-numeric` | the body face | Figures — a metric's value, a gauge's reading, a right-aligned table column (digits of one width) |
+| `--u-widget-tone-ok` … `--u-widget-tone-next` | see [Tones](#tones) | A state's colour |
+
+### Skin — a page's own look
+
+A page that has a look of its own — a paper ledger, a neon sign, an engraved plate — sets it as tokens on the widgets,
+and every widget reads the same ones, charts included: the paper is `--u-widget-bg`, the ink `--u-widget-text`, the
+faint ink `--u-widget-text-secondary`, the rules `--u-widget-border`, with the three faces above, `--u-widget-radius` and
+`--u-widget-shadow`. Set on the element, they win over the theme — a paper card in a dark page keeps its dark ink, and a
+chart on it draws its labels in that ink, not the dark theme's. Give such a widget the `theme` of its paper, not of the
+page — `theme="light"` on a light paper in a dark page — so the tone colours are the ones made for a light ground.
+
+`options.frame` draws the widget, with its title, in a panel of that paper — so a page need not draw one under it:
+
+| Frame | Looks like |
+|---|---|
+| `card` | a surface with a border and the shadow |
+| `flat` | the surface alone |
+| `glow` | a card with a halo in the accent (or in `--tone`, when the page sets it) |
+| `plate` | a heavy rule with an inner hairline — an engraved plate |
+| `ticket` | scalloped top and bottom edges — a ticket stub |
+| `postage` | perforated all round — a stamp |
+| `tape` | a sheet stuck on slightly askew |
+
+```html
+<u-widget style="--u-widget-bg:#f4ecd8; --u-widget-text:#2b2118; --u-widget-font-display:'Playfair Display', serif"
+  spec='{"widget":"metric","title":"Takings","data":{"value":1284},"options":{"frame":"ticket"}}'></u-widget>
+```
+
+In a `compose`, `options.frame` draws every child in that frame. A word that is not a frame draws none and warns once.
 
 ### Dark mode
 

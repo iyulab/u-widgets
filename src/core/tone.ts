@@ -100,8 +100,10 @@ export const toneStyles = css`
     background: var(--tone, var(--u-widget-text));
     color: var(--u-widget-bg);
   }
-  [data-emphasis='invert'] * {
+  /* Doubled attribute: this must outrank a widget's own colour for a part (.status-label { color }), which comes later. */
+  [data-emphasis='invert'][data-emphasis] * {
     --tone: currentColor;
+    color: inherit;
   }
   [data-emphasis='hatch'] {
     background-image: repeating-linear-gradient(
@@ -115,10 +117,12 @@ export const toneStyles = css`
   }
   .tone-stamp {
     display: none;
+    width: fit-content;
     padding: 1px 6px;
     border: 2px solid var(--tone, currentColor);
     border-radius: 3px;
     color: var(--tone, currentColor);
+    font-family: var(--u-widget-font-display);
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;

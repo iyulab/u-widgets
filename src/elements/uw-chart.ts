@@ -204,7 +204,8 @@ export class UwChart extends LitElement {
     if (!textColor) return; // no theme vars available
 
     // Global text style
-    option.textStyle = { ...(option.textStyle as Record<string, unknown>), color: textColor };
+    const fontFamily = this._readCSSVar('--u-widget-font-family');
+    option.textStyle = { ...(option.textStyle as Record<string, unknown>), color: textColor, ...(fontFamily && { fontFamily }) };
 
     // Axis styling — deep-merge into existing axis config preserving all existing properties
     const mergeAxisTheme = (axis: unknown): unknown => {
@@ -268,6 +269,7 @@ export class UwChart extends LitElement {
       this._readCSSVar('--u-widget-text'),
       this._readCSSVar('--u-widget-text-secondary'),
       this._readCSSVar('--u-widget-border'),
+      this._readCSSVar('--u-widget-font-family'),
     ].join('|');
   }
 

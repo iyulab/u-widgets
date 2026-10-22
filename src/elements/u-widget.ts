@@ -8,6 +8,8 @@ import { suggestWidget } from '../core/suggest.js';
 import { widgetEntry, type WidgetEntry } from '../core/entries.js';
 import { resolveLocale, onLocaleChange, getLocaleRevision, getLocaleStrings, formatTemplate, splitTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
+import { normalizeFrame } from '../core/frame.js';
+import { frameStyles } from '../styles/frames.js';
 import './uw-metric.js';
 import './uw-gauge.js';
 import './uw-table.js';
@@ -44,6 +46,7 @@ const MISSING_ENTRY_GRACE_MS = 5000;
 export class UWidget extends LitElement {
   static styles = [
     themeStyles,
+    frameStyles,
     css`
       /* 세로 flex 인 이유: 이 엘리먼트는 라우터라 실제 위젯을 shadow 안에 «위임»하는데,
          display:block 이면 그 자식이 flex item 이 아니어서 호스트 높이가 위젯에 닿지 않는다.
@@ -92,18 +95,12 @@ export class UWidget extends LitElement {
       .fallback-hint { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-primary, #4f46e5); margin-bottom: 6px; }
       .fallback-card pre { margin: 0; white-space: pre-wrap; font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); max-height: 200px; overflow-y: auto; }
 
-      /* 카드 모드는 사슬에 한 겹을 더하므로 그 겹도 제약을 통과시켜야 한다. */
+      /* 틀(frame)은 사슬에 한 겹을 더하므로 그 겹도 제약을 통과시켜야 한다. 모양은 frameStyles(core/frame.ts). */
       .card-container {
         display: flex;
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
-        padding: 16px 20px;
-        border-radius: var(--u-widget-radius, 6px);
-        border: 1px solid var(--u-widget-border, #e2e8f0);
-        background: var(--u-widget-bg, #fff);
-        box-shadow: var(--u-widget-shadow);
-        transition: box-shadow var(--u-widget-duration-normal, 200ms);
       }
 
       .card-container > * {
@@ -161,6 +158,7 @@ export class UWidget extends LitElement {
 
       /* ── widget title ── */
       .widget-title {
+        font-family: var(--u-widget-font-display);
         font-size: var(--u-widget-font-size, 0.875rem);
         font-weight: 600;
         color: var(--u-widget-text, #1a1a2e);
@@ -213,6 +211,7 @@ export class UWidget extends LitElement {
 
       /* ── header widget ── */
       .header-widget {
+        font-family: var(--u-widget-font-display);
         font-weight: 600;
         color: var(--u-widget-text, #1a1a2e);
         margin: 0;
@@ -442,10 +441,10 @@ export class UWidget extends LitElement {
       ? html`<div class="widget-title" part="title">${resolved.title}</div>`
       : nothing;
 
-    // Wrap in card container if options.card is set
-    const isCard = Boolean((resolved.options as Record<string, unknown>)?.card);
-    if (isCard) {
-      widgetHtml = html`<div class="card-container" part="card">${titleHtml}${widgetHtml}</div>`;
+    // Draw the widget in its frame (core/frame.ts) when options.frame names one
+    const frame = normalizeFrame((resolved.options as Record<string, unknown>)?.frame, 'u-widget');
+    if (frame) {
+      widgetHtml = html`<div class="card-container" part="card" data-frame=${frame}>${titleHtml}${widgetHtml}</div>`;
     } else if (titleHtml !== nothing) {
       widgetHtml = html`${titleHtml}${widgetHtml}`;
     }

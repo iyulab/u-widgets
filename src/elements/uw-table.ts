@@ -116,6 +116,12 @@ export class UwTable extends LitElement {
       text-align: right;
     }
 
+    /* A right-aligned column is a column of figures: set in the figure face, digits of one width. */
+    td[data-align='right'] {
+      font-family: var(--u-widget-font-numeric);
+      font-variant-numeric: tabular-nums;
+    }
+
     /* ── column tone (core/tone.ts): bold, in the tone's colour ── */
     td[data-tone] {
       font-weight: 600;

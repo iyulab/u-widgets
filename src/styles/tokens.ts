@@ -7,7 +7,7 @@ import { css } from 'lit';
  * - Colors: bg, surface, text, text-secondary, border, primary, positive, negative, warning
  * - Tones: tone-ok … tone-next — the eleven state colours of `core/tone.ts`
  * - Spacing: gap, radius
- * - Typography: font-family, font-size (body tier) + font-size-label/caption/overline
+ * - Typography: font-family, font-display (titles · headings · stamps), font-numeric (figures), font-size (body tier) + font-size-label/caption/overline
  *   (a 4-tier rem-based scale — kept local to this package rather than referencing
  *   @iyulab/components' --u-text-* tokens, since u-widgets is designed to be usable
  *   standalone without that package installed)
@@ -96,6 +96,9 @@ export const themeStyles = css`
     /* ── Typography ── */
     --u-widget-font-family: system-ui, -apple-system, sans-serif;
     --u-widget-font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    /* A page's display face (titles, headings, stamps) and the face its figures are set in — the body face unless set. */
+    --u-widget-font-display: var(--u-widget-font-family);
+    --u-widget-font-numeric: var(--u-widget-font-family);
     --u-widget-font-size: 0.875rem;
     --u-widget-font-size-label: 0.8125rem;
     --u-widget-font-size-caption: 0.75rem;

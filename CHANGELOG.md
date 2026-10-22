@@ -14,6 +14,12 @@
   for a metric the tone's name, as a rubber stamp) or `blink` (a steady outline instead under reduced motion): a second
   channel besides colour for a state that must not be missed.
 - A `status` item may have a `tone` and no `value`; it shows the tone's name.
+- `options.frame` on any widget draws it, with its title, in a panel — `card` · `flat` · `glow` · `plate` · `ticket`
+  (scalloped edges) · `postage` (perforated) · `tape` (askew) — of the page's palette tokens, so a page need not draw a
+  panel under a chart. `FRAMES`, `isFrame` and the type `Frame` are exported.
+- Typeface tokens: `--u-widget-font-display` (titles, the `header` widget, a stamp) and `--u-widget-font-numeric` (a
+  metric's value, a gauge's reading, a right-aligned table column — with digits of one width); both are the body face
+  unless set. Charts now draw their text in `--u-widget-font-family`, so a page's face reaches them too.
 
 ### Changed
 
@@ -31,6 +37,9 @@
   the console, naming the tones. A `status` item with no tone is drawn plainly — no colour, no mark — where it was
   `info` before. The parts and their names (`status-icon`, `status-value`, …) are as before; the attribute a page can
   style by is `data-tone` (was `data-level` / `data-variant`).
+- **Breaking:** `options.card: true` is `options.frame: "card"` — on a `compose` (each child in a card, as before) and on
+  any widget. The panel's look is the frame's: the `.child-card` class is gone; a child in a frame carries
+  `data-frame`.
 
 ## [0.40.0] - 2026-10-23
 

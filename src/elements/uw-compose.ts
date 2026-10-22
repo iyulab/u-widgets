@@ -2,10 +2,12 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetChildSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { normalizeFrame } from '../core/frame.js';
+import { frameStyles } from '../styles/frames.js';
 
 @customElement('uw-compose')
 export class UwCompose extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, frameStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다.
        이 위젯은 제약을 200px 로 줬을 때는 자연 높이가 그보다 작아 «발동조차 하지
        않았고», 120px 로 세게 주자 72px 가 상자 밖으로 샜다 — 미측정은 통과가 아니었다. */
@@ -64,15 +66,6 @@ export class UwCompose extends LitElement {
 
     .layout-grid > * {
       min-height: 60px;
-    }
-
-    .child-card {
-      padding: 16px 20px;
-      border-radius: var(--u-widget-radius, 6px);
-      border: 1px solid var(--u-widget-border, #e2e8f0);
-      background: var(--u-widget-bg, #fff);
-      box-shadow: var(--u-widget-shadow);
-      transition: box-shadow var(--u-widget-duration-normal, 200ms);
     }
 
     /* ── collapsed child (details/summary) ── */
@@ -176,7 +169,7 @@ export class UwCompose extends LitElement {
     const span = child.span ? Math.max(1, Math.floor(Number(child.span) || 1)) : 0;
     const spanStyle = span > 1 ? `grid-column: span ${span}` : '';
     const options = (this.spec?.options ?? {}) as Record<string, unknown>;
-    const isCard = Boolean(options.card);
+    const frame = normalizeFrame(options.frame, 'uw-compose');
 
     const widgetHtml = html`<u-widget .spec=${child as UWidgetSpec} theme=${t ?? nothing} nested></u-widget>`;
 
@@ -191,11 +184,7 @@ export class UwCompose extends LitElement {
       `;
     }
 
-    const cls = isCard ? 'child child-card' : 'child';
-    if (spanStyle) {
-      return html`<div class=${cls} style=${spanStyle} part="child">${widgetHtml}</div>`;
-    }
-    return html`<div class=${cls} part="child">${widgetHtml}</div>`;
+    return html`<div class="child" style=${spanStyle || nothing} part="child" data-frame=${frame ?? nothing}>${widgetHtml}</div>`;
   }
 }
 

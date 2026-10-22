@@ -97,7 +97,7 @@ export const toolLabelsKo: ToolLabels = {
     columns: '열 수',
     widths: '열 너비',
     spacing: '간격',
-    card: '카드',
+    frame: '틀',
   },
   dataFields: {
     value: '값',
