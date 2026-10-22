@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import '../../src/elements/uw-form.js';
-import type { UwForm } from '../../src/elements/uw-form.js';
+import { whenFormdownLoaded, type UwForm } from '../../src/elements/uw-form.js';
 import { registerLocale } from '../../src/core/locale.js';
 import { toFormdown } from '../../src/core/formdown.js';
 
@@ -26,6 +26,12 @@ type FieldsElement = HTMLElement & {
 /** Waits for the widget and the fields it draws. */
 async function render(el: UwForm): Promise<ShadowRoot> {
   await el.updateComplete;
+  // `<formdown-ui>` loads with the first form drawn and the widget draws again once it has — wait for that, or the
+  // first test in a run finds an element that is not upgraded yet (no shadow root).
+  if (el.spec?.widget === 'form') {
+    await whenFormdownLoaded();
+    await el.updateComplete;
+  }
   const fd = el.shadowRoot!.querySelector('formdown-ui') as FieldsElement | null;
   if (fd) {
     await fd.updateComplete;

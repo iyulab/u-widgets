@@ -19,6 +19,11 @@ function loadFormdown(): Promise<void> {
   return loadingFormdown;
 }
 
+/** Resolves once formdown's part of the form is loaded — the form draws its fields on the next update after it. */
+export function whenFormdownLoaded(): Promise<void> {
+  return loadFormdown();
+}
+
 /** The parts of the drawn fields, passed through `<formdown-ui>` so a page styles them as `uw-form::part(…)`. */
 const FIELD_PARTS = [
   'field', 'label', 'input', 'field-error', 'radio-group', 'checkbox-group', 'description',
