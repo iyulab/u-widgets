@@ -42,6 +42,8 @@ function datePicker(mode: 'date' | 'datetime') {
     const min = dayBound(attributes.min);
     const max = dayBound(attributes.max);
     const placeholder = field.placeholder ?? (typeof attributes.placeholder === 'string' ? attributes.placeholder : undefined);
+    // html-sink: attr — name and placeholder are attribute-escaped (quotes included); min/max are an ISO day by
+    // pattern (dayBound) and mode is one of two literals
     return `<u-date-picker id="${escapeAttr(field.name)}" name="${escapeAttr(field.name)}" mode="${mode}"${min ? ` min="${min}"` : ''}${
       max ? ` max="${max}"` : ''
     }${placeholder ? ` placeholder="${escapeAttr(placeholder)}"` : ''}${field.required ? ' required' : ''} part="input"></u-date-picker>`;
