@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-10-23
+
+MCP server 0.7.5 follows `^0.41.0`.
+
 ### Added
 
 - `table` rows and cells with a state: `mapping.tone` names a field with each row's tone (a stripe, a tint and the
