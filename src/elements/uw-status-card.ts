@@ -3,19 +3,13 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { formatValue } from '../core/format.js';
+import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Emphasis, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
 
 interface Reading {
   label: string;
   value: string;
-  tone?: Tone;
-}
-
-interface Meter {
-  /** 0–1 along the bar. */
-  fraction: number;
-  text: string;
   tone?: Tone;
 }
 
@@ -62,7 +56,7 @@ function text(value: unknown): string | undefined {
  */
 @customElement('uw-status-card')
 export class UwStatusCard extends LitElement {
-  static styles = [themeStyles, toneStyles, css`
+  static styles = [themeStyles, toneStyles, meterStyles, css`
     :host {
       display: flex;
       flex-direction: column;
@@ -198,26 +192,6 @@ export class UwStatusCard extends LitElement {
     }
     .reading[data-tone] dd { color: var(--tone); }
 
-    .meter { display: flex; align-items: center; gap: 8px; }
-    .meter-track {
-      flex: 1 1 auto;
-      height: 6px;
-      border-radius: 3px;
-      background: color-mix(in srgb, var(--u-widget-text-secondary, #5b6777) 20%, transparent);
-      overflow: hidden;
-    }
-    .meter-fill {
-      height: 100%;
-      background: var(--tone, var(--u-widget-primary, #4f46e5));
-    }
-    .meter-text {
-      flex: none;
-      font-family: var(--u-widget-font-numeric);
-      font-variant-numeric: tabular-nums;
-      font-size: var(--u-widget-font-size-caption, 0.75rem);
-      color: var(--u-widget-text-secondary, #5b6777);
-    }
-
     .note {
       color: var(--u-widget-text-secondary, #5b6777);
       font-size: var(--u-widget-font-size-caption, 0.75rem);
@@ -269,13 +243,7 @@ export class UwStatusCard extends LitElement {
                   <dt>${r.label}</dt><dd>${r.value}</dd>
                 </div>`)}
             </dl>` : nothing}
-          ${card.meter ? html`
-            <div class="meter" part="meter" data-tone=${card.meter.tone ?? nothing}>
-              <div class="meter-track" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(card.meter.fraction * 100)} aria-label=${card.meter.text}>
-                <div class="meter-fill" style="width:${(card.meter.fraction * 100).toFixed(1)}%"></div>
-              </div>
-              <span class="meter-text">${card.meter.text}</span>
-            </div>` : nothing}
+          ${card.meter ? renderMeter(card.meter) : nothing}
           ${card.note ? html`<div class="note" part="note">${card.note}</div>` : nothing}
         </div>
         ${card.emphasis === 'stamp' && status ? html`<span class="tone-stamp" part="stamp">${status}</span>` : nothing}
@@ -299,20 +267,7 @@ export class UwStatusCard extends LitElement {
         value: value(r.value, r.format, r.unit),
         ...(r.tone != null && { tone: normalizeTone(r.tone, 'uw-status-card') }),
       }));
-    let meter: Meter | undefined;
-    if (d.meter && typeof d.meter === 'object') {
-      const m = d.meter as Record<string, unknown>;
-      const v = Number(m.value);
-      const min = m.min == null ? 0 : Number(m.min);
-      const max = m.max == null ? 100 : Number(m.max);
-      if (Number.isFinite(v) && Number.isFinite(min) && Number.isFinite(max) && max > min) {
-        meter = {
-          fraction: Math.min(1, Math.max(0, (v - min) / (max - min))),
-          text: value(v, m.format, m.unit),
-          ...(m.tone != null && { tone: normalizeTone(m.tone, 'uw-status-card') }),
-        };
-      }
-    }
+    const meter = readMeter(d.meter, value, 'uw-status-card');
     return {
       title,
       subtitle: text(d.subtitle),

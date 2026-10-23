@@ -257,8 +257,7 @@ name); `options.counts: true` adds a key with how many cells are in each tone.
 `title` and, optionally, `subtitle`, `tone` (the stripe and the badge's colour and mark), `status` (the badge's words —
 the tone's name in the widget's locale when left out), `emphasis` (`stamp` puts the words on the card as a stamp),
 `readings` (`[{ label, value, unit?, format?, tone? }]` — each value formatted as `format` says, a reading's own tone
-colouring its value), `meter` (`{ value, min?, max?, unit?, format?, tone? }`, a bar from `min` 0 to `max` 100 unless
-given), `image` (a URL or an inline `data:image/…` — the card's picture) or `icon` (a short text or emoji instead), and
+colouring its value), `meter` (a value against its range — [Meters](#meters)), `image` (a URL or an inline `data:image/…` — the card's picture) or `icon` (a short text or emoji instead), and
 `note` (a line at the foot).
 
 ```json
@@ -276,13 +275,25 @@ scrolled (`scroll`).
 ## Metric Data
 
 `metric` (and each item of `stat-group`) reads `value` and, optionally, `label`, `unit`, `prefix`, `suffix`, `change`
-(a percentage, with `trend`: `up` · `down` · `flat`), `icon`, `description`, `tone` (the value's colour — [Tones](#tones)) and
-`sparkline` — the recent values, oldest first, drawn as a small line under the value. The line is scaled to its own
-range (it shows the shape, not the size), takes the tone's colour or the primary one, and needs two numbers or more.
+(a percentage, with `trend`: `up` · `down` · `flat`), `icon`, `tone` (the value's colour — [Tones](#tones)), `emphasis`,
+`meter` (the value against its range — [Meters](#meters)), `note` (a line under the value) and `sparkline` — the recent
+values, oldest first, drawn as a small line under the value. The line is scaled to its own range (it shows the shape,
+not the size), takes the tone's colour or the primary one, and needs two numbers or more.
 
 ```json
 { "widget": "metric", "data": { "value": 18.4, "unit": "Tbps", "label": "Traffic", "sparkline": [14.2, 15.8, 17.1, 16.4, 18.4] } }
+{ "widget": "metric", "data": { "label": "Bored", "value": 1240, "unit": "m", "tone": "now",
+  "meter": { "value": 1240, "max": 2000, "unit": "m", "format": "number" }, "note": "Ring 412 of 668" } }
 ```
+
+### Meters
+
+A `meter` is a value against its range: `{ value, min?, max?, unit?, format?, tone?, form? }` — `min` 0 and `max` 100
+unless given, the value written beside it as `format` and `unit` say. `form` is `bar` (the default) or `ring`. It takes
+its own `tone`'s colour, else its widget's or item's, else the primary one, and is announced as a meter of that range
+with the written value. On a `metric`, a meter of the figure itself writes nothing beside it — the figure is above. A
+value outside the range fills the meter to its end; a meter with no number, or a `max` not
+above `min`, is not drawn.
 
 ## Table Options
 

@@ -19,6 +19,59 @@ describe('uw-metric', () => {
     document.body.innerHTML = '';
   });
 
+  describe('meter', () => {
+    it('draws a bar against the range, in the value tone unless it has its own', async () => {
+      const shadow = await render(createElement({
+        widget: 'metric',
+        data: { label: 'Bore', value: 1240, unit: 'm', tone: 'now', meter: { value: 1240, max: 2000, unit: 'm', format: 'number' } },
+      }));
+      const meter = shadow.querySelector('.meter')!;
+      expect(meter.getAttribute('role')).toBe('meter');
+      expect(meter.getAttribute('data-form')).toBe('bar');
+      expect(meter.getAttribute('data-tone')).toBe('now');
+      expect(meter.getAttribute('aria-label')).toBe('Bore');
+      expect(meter.getAttribute('aria-valuetext')).toBe('1,240 m');
+      expect((shadow.querySelector('.meter-fill') as HTMLElement).style.width).toBe('62.0%');
+      // The figure is already the value above — the meter does not write it again.
+      expect(shadow.querySelector('.meter-text')).toBeNull();
+    });
+
+    it('writes a meter value that is not the figure beside it', async () => {
+      const shadow = await render(createElement({
+        widget: 'metric',
+        data: { label: 'Rings', value: 412, meter: { value: 62, unit: '%' } },
+      }));
+      expect(shadow.querySelector('.meter-text')?.textContent).toBe('62 %');
+    });
+
+    it('draws a ring with form: "ring"', async () => {
+      const shadow = await render(createElement({
+        widget: 'metric',
+        data: { value: 82, unit: '%', meter: { value: 82, form: 'ring', tone: 'ok' } },
+      }));
+      const meter = shadow.querySelector('.meter')!;
+      expect(meter.getAttribute('data-form')).toBe('ring');
+      expect(meter.getAttribute('data-tone')).toBe('ok');
+      expect(shadow.querySelector('.meter-ring-fill')?.getAttribute('stroke-dasharray')).toBe('82.0 100');
+      expect(shadow.querySelector('.meter-track')).toBeNull();
+    });
+
+    it('draws no meter for a value outside any range', async () => {
+      for (const meter of [{ value: 'x' }, { value: 5, min: 10, max: 10 }, {}, 'full']) {
+        const shadow = await render(createElement({ widget: 'metric', data: { value: 1, meter } }));
+        expect(shadow.querySelector('.meter')).toBeNull();
+      }
+    });
+
+    it('gives each stat-group item its own meter', async () => {
+      const shadow = await render(createElement({
+        widget: 'stat-group',
+        data: [{ label: 'A', value: 1, meter: { value: 25 } }, { label: 'B', value: 2 }, { label: 'C', value: 3, meter: { value: 3, max: 4, form: 'ring' } }],
+      }));
+      expect([...shadow.querySelectorAll('.meter')].map(m => m.getAttribute('data-form'))).toEqual(['bar', 'ring']);
+    });
+  });
+
   describe('metric widget', () => {
     it('renders value', async () => {
       const el = createElement({
@@ -228,17 +281,23 @@ describe('uw-metric', () => {
       expect(icon?.textContent).toContain('\uD83D\uDCB0');
     });
 
-    it('renders description when provided', async () => {
+    it('renders a note under the value', async () => {
       const el = createElement({
         widget: 'stat-group',
         data: [
-          { label: 'Users', value: 1200, description: 'Active in last 30 days' },
+          { label: 'Users', value: 1200, note: 'Active in last 30 days' },
         ],
       });
       const shadow = await render(el);
-      const desc = shadow.querySelector('.metric-description');
-      expect(desc).not.toBeNull();
-      expect(desc?.textContent).toBe('Active in last 30 days');
+      const note = shadow.querySelector('.metric-note');
+      expect(note).not.toBeNull();
+      expect(note?.textContent).toBe('Active in last 30 days');
+    });
+
+    it('does not read the old description field', async () => {
+      const el = createElement({ widget: 'stat-group', data: [{ label: 'Users', value: 1200, description: 'Old' }] });
+      const shadow = await render(el);
+      expect(shadow.textContent).not.toContain('Old');
     });
 
     it('hides icon when not provided', async () => {
@@ -252,7 +311,7 @@ describe('uw-metric', () => {
       expect(shadow.querySelector('.metric-icon')).toBeNull();
     });
 
-    it('hides description when not provided', async () => {
+    it('hides the note when not provided', async () => {
       const el = createElement({
         widget: 'stat-group',
         data: [
@@ -260,7 +319,7 @@ describe('uw-metric', () => {
         ],
       });
       const shadow = await render(el);
-      expect(shadow.querySelector('.metric-description')).toBeNull();
+      expect(shadow.querySelector('.metric-note')).toBeNull();
     });
   });
 

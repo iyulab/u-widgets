@@ -3,6 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 import { formatValue } from '../core/format.js';
+import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
 import { localeStringsOf } from '../core/locale.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 
@@ -15,7 +16,10 @@ interface MetricData {
   change?: number;
   trend?: 'up' | 'down' | 'flat';
   icon?: string;
-  description?: string;
+  note?: string;
+  meter?: Meter;
+  /** The value as given, before it is formatted. */
+  raw?: unknown;
   format?: string;
   tone?: Tone;
   emphasis?: Emphasis;
@@ -51,8 +55,11 @@ function toMetricData(
   // 우선순위: 데이터 항목별 format > spec.options.format
   // (stat-group은 항목별 format이 자연스럽고, 단일 metric은 options.format이 자연스러움)
   const format = (data.format as string | undefined) ?? optionFormat;
+  const write = (v: number, f: unknown, unit: unknown) =>
+    `${typeof f === 'string' ? formatValue(v, f, locale) : String(v)}${typeof unit === 'string' && unit !== '' ? ` ${unit}` : ''}`;
   return {
     value: format ? formatValue(rawValue, format, locale) : (rawValue ?? 0),
+    raw: rawValue,
     label: data.label as string | undefined,
     unit: data.unit as string | undefined,
     prefix: data.prefix as string | undefined,
@@ -60,7 +67,8 @@ function toMetricData(
     change: data.change as number | undefined,
     trend: data.trend as MetricData['trend'],
     icon: data.icon as string | undefined,
-    description: data.description as string | undefined,
+    note: typeof data.note === 'string' && data.note !== '' ? data.note : undefined,
+    meter: readMeter(data.meter, write, 'uw-metric'),
     format: data.format as string | undefined,
     tone: normalizeTone(data.tone, 'uw-metric'),
     emphasis: normalizeEmphasis(data.emphasis, 'uw-metric'),
@@ -72,7 +80,7 @@ function toMetricData(
 
 @customElement('uw-metric')
 export class UwMetric extends LitElement {
-  static styles = [themeStyles, toneStyles, css`
+  static styles = [themeStyles, toneStyles, meterStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(metric · stat-group)가 flex item 이어야 호스트 제약이
        그것에 닿는다. */
     :host {
@@ -170,7 +178,8 @@ export class UwMetric extends LitElement {
     .metric-sparkline .area { fill: currentColor; opacity: 0.14; }
     .metric[data-tone] .metric-sparkline { color: var(--tone); }
 
-    .metric-description { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
+    .metric .meter { margin-top: 4px; }
+    .metric-note { font-size: var(--u-widget-font-size-caption, 0.75rem); color: var(--u-widget-text-secondary, #5b6777); margin-top: 2px; line-height: 1.3; }
 
     /* ── tone (core/tone.ts) ── */
     .metric[data-tone] .metric-value { color: var(--tone); }
@@ -292,7 +301,8 @@ export class UwMetric extends LitElement {
               >${trendArrow} ${m.change > 0 ? '+' : ''}${m.change}%</span
             >`
           : nothing}
-        ${m.description ? html`<div class="metric-description" part="description">${m.description}</div>` : nothing}
+        ${m.meter ? renderMeter(m.meter, m.label, m.tone, m.meter.value !== Number(m.raw)) : nothing}
+        ${m.note ? html`<div class="metric-note" part="note">${m.note}</div>` : nothing}
         ${this.renderSparkline(m.sparkline)}
       </div>
     `;

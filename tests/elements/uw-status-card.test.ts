@@ -40,7 +40,10 @@ describe('uw-status-card', () => {
   it('draws a meter against its range, kept within the bar', async () => {
     const root = await card({ title: 'Tank', meter: { value: 150, min: 0, max: 120, unit: 'L' } });
     expect((root.querySelector('.meter-fill') as HTMLElement).style.width).toBe('100.0%');
-    expect(root.querySelector('[role="meter"]')?.getAttribute('aria-valuenow')).toBe('100');
+    const meter = root.querySelector('[role="meter"]')!;
+    // The range is the meter's own; the value it reports stays inside it, the written value says the rest.
+    expect([meter.getAttribute('aria-valuemin'), meter.getAttribute('aria-valuemax'), meter.getAttribute('aria-valuenow')]).toEqual(['0', '120', '120']);
+    expect(meter.getAttribute('aria-valuetext')).toBe(root.querySelector('.meter-text')?.textContent);
     expect(root.querySelector('.meter-text')?.textContent).toBe('150 L');
   });
 

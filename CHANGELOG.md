@@ -4,6 +4,11 @@
 
 ### Added
 
+- `metric` (and each `stat-group` item) takes a `meter` — its value against a range, the way `status-card` has one —
+  and a `note` under the value. A meter's `form` is `bar` or `ring` (on `status-card` too), and it is announced as a
+  meter of its own range (`aria-valuemin` · `aria-valuemax`, the written value as its text) rather than as a
+  percentage.
+
 - `status-grid` widget: many small cells, each with a state — `[{ label?, tone, value?, unit?, format? }]`, the cells
   `square`, `chip` or `dot` (`options.cell`), `options.columns` to a row, and with `options.counts` a key of how many
   cells are in each tone. Each cell is spoken as its label, value and tone.
@@ -66,6 +71,8 @@
   the console, naming the tones. A `status` item with no tone is drawn plainly — no colour, no mark — where it was
   `info` before. The parts and their names (`status-icon`, `status-value`, …) are as before; the attribute a page can
   style by is `data-tone` (was `data-level` / `data-variant`).
+- **Breaking:** the line under a `metric` value is `note` (was `description`) — the word `kv` and `status-card` use for
+  it. The part is `note` (was `description`); `validate` warns about an item that still has `description`.
 - **Breaking:** a `kv` array item is `{ label, value }` (was `{ key, value }`) — the same `label` · `value` the other
   widgets use. An item with `key` is not drawn, and `validate` says it was renamed.
 - **Breaking:** `options.card: true` is `options.frame: "card"` — on a `compose` (each child in a card, as before) and on

@@ -213,6 +213,16 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     });
   }
 
+  // A metric's line under the value is its `note` (`description` is not read — it was renamed, as on kv and status-card).
+  if ((widget === 'metric' || widget === 'stat-group') && obj.data && typeof obj.data === 'object') {
+    const items = (Array.isArray(obj.data) ? obj.data : [obj.data]) as unknown[];
+    items.forEach((item, i) => {
+      if (item != null && typeof item === 'object' && 'description' in item && !('note' in item)) {
+        warnings.push(`${Array.isArray(obj.data) ? `data[${i}]` : 'data'} has "description" — the line under the value is now "note"`);
+      }
+    });
+  }
+
   // A status card is named by its `title`; without one it draws nothing.
   if (widget === 'status-card' && obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data) && !('title' in obj.data)) {
     warnings.push('data has no "title" — the status card draws nothing');

@@ -611,6 +611,13 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
         data: { value: 18.4, label: 'Traffic', unit: 'Tbps', sparkline: [14.2, 15.8, 17.1, 16.4, 18.4] },
       },
     },
+    {
+      label: 'With a meter and a note (the value against its range)',
+      spec: {
+        widget: 'metric',
+        data: { value: 82, unit: '%', label: 'Orders packed', tone: 'ok', meter: { value: 82, form: 'ring' }, note: '1,148 of 1,400' },
+      },
+    },
   ],
   'stat-group': [
     {

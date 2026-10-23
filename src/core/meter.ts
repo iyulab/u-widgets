@@ -1,0 +1,98 @@
+import { css, html, nothing, svg, type TemplateResult } from 'lit';
+import { normalizeTone, type Tone } from './tone.js';
+
+/** How a meter is drawn: a bar along the line, or a ring around its own centre. */
+export const METER_FORMS = ['bar', 'ring'] as const;
+
+export type MeterForm = (typeof METER_FORMS)[number];
+
+/** A value against its range, read from a spec's `meter` object. */
+export interface Meter {
+  value: number;
+  min: number;
+  max: number;
+  /** 0–1 along the range, clamped. */
+  fraction: number;
+  /** The value as written next to the meter — formatted, with its unit. */
+  text: string;
+  tone?: Tone;
+  form: MeterForm;
+}
+
+/**
+ * Reads `{ value, min?, max?, unit?, format?, tone?, form? }` — min 0 and max 100 unless given. Anything that is not a
+ * value inside a range (no number, max not above min) is no meter. `write` formats the value with the meter's `format`
+ * and `unit`, the way the owning widget writes its other values.
+ */
+export function readMeter(
+  raw: unknown,
+  write: (value: number, format: unknown, unit: unknown) => string,
+  widget: string,
+): Meter | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const m = raw as Record<string, unknown>;
+  if (m.value == null || m.value === '') return undefined;
+  const value = Number(m.value);
+  const min = m.min == null ? 0 : Number(m.min);
+  const max = m.max == null ? 100 : Number(m.max);
+  if (!Number.isFinite(value) || !Number.isFinite(min) || !Number.isFinite(max) || max <= min) return undefined;
+  return {
+    value,
+    min,
+    max,
+    fraction: Math.min(1, Math.max(0, (value - min) / (max - min))),
+    text: write(value, m.format, m.unit),
+    ...(m.tone != null && { tone: normalizeTone(m.tone, widget) }),
+    form: m.form === 'ring' ? 'ring' : 'bar',
+  };
+}
+
+// A circle of circumference 100 — the dash length is the percentage.
+const RING_R = 15.9155;
+
+/**
+ * The meter, with its value written beside it. It is a `meter` to assistive technology — the range and the value, and
+ * the written value as its text — and takes the colour of its tone (`data-tone`, from `toneStyles`), else the primary.
+ * `fallbackTone` is the owner's tone, for a meter that has none of its own. `writeValue: false` leaves the value
+ * unwritten beside it — for an owner that already shows that value; it is still the meter's text.
+ */
+export function renderMeter(meter: Meter, label?: string, fallbackTone?: Tone, writeValue = true): TemplateResult {
+  const tone = meter.tone ?? fallbackTone;
+  const pct = meter.fraction * 100;
+  return html`
+    <div class="meter" part="meter" data-form=${meter.form} data-tone=${tone ?? nothing}
+      role="meter" aria-valuemin=${meter.min} aria-valuemax=${meter.max} aria-valuenow=${Math.min(meter.max, Math.max(meter.min, meter.value))}
+      aria-valuetext=${meter.text} aria-label=${label ?? nothing}>
+      ${meter.form === 'ring'
+        ? html`<svg class="meter-ring" viewBox="0 0 36 36" aria-hidden="true">${svg`
+            <circle class="meter-ring-track" cx="18" cy="18" r=${RING_R}></circle>
+            <circle class="meter-ring-fill" cx="18" cy="18" r=${RING_R} pathLength="100"
+              stroke-dasharray="${pct.toFixed(1)} 100"></circle>`}</svg>`
+        : html`<div class="meter-track" aria-hidden="true"><div class="meter-fill" style="width:${pct.toFixed(1)}%"></div></div>`}
+      ${writeValue ? html`<span class="meter-text" aria-hidden="true">${meter.text}</span>` : nothing}
+    </div>`;
+}
+
+/** Styles for `renderMeter` — include them with `toneStyles`. */
+export const meterStyles = css`
+  .meter { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .meter-track {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--u-widget-text-secondary, #5b6777) 20%, transparent);
+    overflow: hidden;
+  }
+  .meter-fill { height: 100%; background: var(--tone, var(--u-widget-primary, #4f46e5)); }
+  .meter-ring { flex: none; width: 2.25em; height: 2.25em; transform: rotate(-90deg); }
+  .meter-ring circle { fill: none; stroke-width: 4; }
+  .meter-ring-track { stroke: color-mix(in srgb, var(--u-widget-text-secondary, #5b6777) 20%, transparent); }
+  .meter-ring-fill { stroke: var(--tone, var(--u-widget-primary, #4f46e5)); stroke-linecap: butt; }
+  .meter-text {
+    flex: none;
+    font-family: var(--u-widget-font-numeric);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--u-widget-font-size-caption, 0.75rem);
+    color: var(--u-widget-text-secondary, #5b6777);
+  }
+`;
