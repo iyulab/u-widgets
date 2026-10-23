@@ -109,6 +109,7 @@ const EN: ToolLabels = {
     wrap: 'Wrap lines',
     numbered: 'Numbered',
     interactive: 'Interactive',
+    sortable: 'Sortable',
     icon: 'Icon',
     autoplay: 'Autoplay',
     controls: 'Playback controls',
@@ -177,6 +178,7 @@ const EN: ToolLabels = {
   widgetOptions: {
     rating: { max: 'Icons' },
     divider: { label: 'Text' },
+    table: { interactive: 'Rows can be picked' },
   },
   widgetDataFields: {
     header: { level: 'Heading level' },

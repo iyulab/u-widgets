@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { TONES } from '../../src/core/tone.js';
 
 const schemaPath = resolve(__dirname, '../../schema/u-widget.schema.json');
 const schema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
@@ -105,5 +106,14 @@ describe('u-widget.schema.json', () => {
   it('action style enum matches types.ts', () => {
     const styleEnum: string[] = schema.$defs.action.properties.style.enum;
     expect(styleEnum).toEqual(['primary', 'danger', 'default']);
+  });
+
+  it('column definition names what a column takes — its tones are the shared ones', () => {
+    const column = schema.$defs.columnDefinition;
+    expect(Object.keys(column.properties).sort()).toEqual(['align', 'cell', 'field', 'format', 'label', 'max', 'tone', 'toneField', 'unit']);
+    expect(column.properties.tone.enum).toEqual([...TONES]);
+    const format = new RegExp(column.properties.format.pattern);
+    for (const ok of ['number', 'number:2', 'currency:EUR', 'percent:1', 'date', 'bytes']) expect(format.test(ok), ok).toBe(true);
+    for (const bad of ['number 2', 'dates', '']) expect(format.test(bad), bad).toBe(false);
   });
 });

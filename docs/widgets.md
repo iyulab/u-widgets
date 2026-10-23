@@ -85,7 +85,7 @@ When `mapping` is omitted, the renderer infers it from data structure:
 // Chart
 "mapping": { "x": "fieldName", "y": ["field1", "field2"], "color": "fieldName" }
 
-// Table (optional `tone` bolds a column's cells in that tone's colour — see Tones)
+// Table (optional `tone` bolds a column's cells in that tone's colour — see Tones; more in Table Options)
 "mapping": { "columns": [{ "field": "id", "label": "ID", "format": "number", "align": "right" }, { "field": "yield", "label": "Yield", "tone": "ok" }] }
 
 // List
@@ -338,6 +338,23 @@ above `min`, is not drawn.
 | `pageSize` | `number` | 페이지당 행 수. 설정 시 하단 페이지 컨트롤 표시 |
 | `searchable` | `boolean` | 검색 입력 필드 표시 (기본: false) |
 | `sortable` | `boolean` | 컬럼 헤더 클릭으로 정렬 (기본: true) |
+| `interactive` | `boolean` | `false` — a table only to be looked at (a wall, a board): no search, sorting, pages, row focus or picking a row (default: true) |
+| `maxItems` | `number` | Show at most this many rows when the table is not paged, then a line saying how many more |
+
+A column (`mapping.columns`) is `{ field, label?, format?, align?, unit?, tone?, toneField?, cell?, max? }`: `unit` is
+written after each value; `tone` draws every cell of the column in a tone, `toneField` names a field of the row with
+that cell's own tone; `cell: "bar"` draws the value as a bar against the column's scale (`max`, else its largest value),
+written beside it, and `cell: "tone"` reads the value as a tone and draws its mark and name. `mapping.tone` names a field
+with each row's tone — a stripe, a tint and the tone's mark in the first cell (`past` dims a row, `now` picks it out).
+
+```json
+{ "widget": "table", "title": "Links",
+  "data": [{ "site": "Busan", "state": "alarm", "util": 97, "utilTone": "alarm" }],
+  "mapping": { "tone": "state", "columns": [{ "field": "site", "label": "Site" },
+    { "field": "state", "label": "State", "cell": "tone" },
+    { "field": "util", "label": "Use", "cell": "bar", "max": 100, "unit": "%", "toneField": "utilTone" }] },
+  "options": { "interactive": false } }
+```
 
 **Example:**
 ```json

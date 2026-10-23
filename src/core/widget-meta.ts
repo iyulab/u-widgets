@@ -155,6 +155,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   numbered: 'Show numbered badges (default true)',
   // rating
   interactive: 'Allow user input (default false)',
+  sortable: 'Sort by a column when its header is clicked (default true)',
   icon: 'Icon type (star, heart, thumb)',
   // video
   autoplay: 'Auto-play on load (default false)',
@@ -241,6 +242,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   wrap: { type: 'boolean', default: false },
   numbered: { type: 'boolean', default: true },
   interactive: { type: 'boolean', default: false },
+  sortable: { type: 'boolean', default: true },
   icon: choice(['star', 'heart', 'thumb'], 'star'),
   autoplay: { type: 'boolean', default: false },
   controls: { type: 'boolean', default: true },
@@ -266,6 +268,10 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
 const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Partial<OptionTypeInfo> & { desc?: string }>>>> = {
   gauge: { min: { default: 0 }, max: { default: 100 }, form: { ...choice(['arc', 'vertical', 'tank', 'thermometer'], 'arc'), desc: 'How the reading is drawn: an arc (default), or a level rising in a column, a tank or a thermometer' } },
   progress: { min: { default: 0 }, max: { default: 100 } },
+  table: {
+    interactive: { default: true, desc: 'Search, sorting, pages and picking a row — false for a table only to be looked at (a wall, a board)' },
+    maxItems: { desc: 'Show at most this many rows (when not paged), then a line saying how many more' },
+  },
   'bar-list': { max: { desc: 'The scale the bars share (default: the largest value)' } },
   rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
   kv: { layout: choice(['vertical', 'horizontal', 'grid'], 'vertical'), columns: { default: 2, desc: 'Number of grid columns (grid layout)' } },
@@ -358,7 +364,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format', 'form', 'band', 'marks'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
   'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems'],
-  'table': ['pageSize', 'compact', 'searchable'],
+  'table': ['pageSize', 'compact', 'searchable', 'sortable', 'interactive', 'maxItems'],
   'list': ['compact', 'layout', 'maxItems'],
   'form': ['locale'],
   'confirm': [],
@@ -548,7 +554,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'gauge': 'No mapping needed. data is {value, tone?}. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
-  'table': 'mapping.columns omittable — auto-inferred from data keys.',
+  'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone.',
   'list': 'mapping omittable if data has primary/secondary keys. Otherwise set mapping.',
   'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults. fieldStates (by field name: suggestions, note, decline) offers values to pick.',
   'confirm': 'Uses title, description, actions. data is optional.',

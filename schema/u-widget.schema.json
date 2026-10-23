@@ -298,18 +298,35 @@
         },
         "format": {
           "type": "string",
-          "enum": ["number", "currency", "percent", "date", "datetime", "time", "bytes"],
-          "description": "Format hint"
+          "pattern": "^(number|currency|percent)(:[^\\s]+)?$|^(date|datetime|time|bytes)$",
+          "description": "Format hint — number, number:2, currency, currency:EUR, percent, percent:1, date, datetime, time, bytes"
         },
         "align": {
           "type": "string",
           "enum": ["left", "center", "right"],
           "description": "Column alignment"
         },
-        "variant": {
+        "tone": {
           "type": "string",
-          "enum": ["success", "warning", "danger", "info", "neutral"],
-          "description": "Semantic emphasis for this column's cells (bold + color token, mirrors uw-metric variant)"
+          "enum": ["ok", "info", "watch", "warn", "alarm", "off", "idle", "accent", "past", "now", "next"],
+          "description": "The tone every cell of the column is drawn in — bold, in the tone's colour"
+        },
+        "toneField": {
+          "type": "string",
+          "description": "A field of the row holding this cell's tone (over tone)"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Written after each value"
+        },
+        "cell": {
+          "type": "string",
+          "enum": ["text", "bar", "tone"],
+          "description": "How a cell is drawn: text, a bar against the column's scale, or the value as a tone (its mark and name)"
+        },
+        "max": {
+          "type": "number",
+          "description": "The scale of a bar column (default: its largest value)"
         }
       },
       "required": ["field"],

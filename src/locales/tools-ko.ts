@@ -89,6 +89,7 @@ export const toolLabelsKo: ToolLabels = {
     wrap: '줄 바꿈',
     numbered: '번호 표시',
     interactive: '직접 입력',
+    sortable: '정렬',
     icon: '아이콘',
     autoplay: '자동 재생',
     controls: '재생 컨트롤',
@@ -157,6 +158,7 @@ export const toolLabelsKo: ToolLabels = {
   widgetOptions: {
     rating: { max: '아이콘 수' },
     divider: { label: '텍스트' },
+    table: { interactive: '조작 가능' },
   },
   widgetDataFields: {
     header: { level: '제목 수준' },

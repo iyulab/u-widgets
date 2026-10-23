@@ -84,6 +84,17 @@ export interface UWidgetColumnDefinition {
   align?: 'left' | 'center' | 'right';
   /** The tone (`core/tone.ts`) this column's cells are drawn in — bold, in the tone's colour. */
   tone?: Tone;
+  /** A field of the row holding this cell's tone — a cell coloured by its own state (over `tone`). */
+  toneField?: string;
+  /** Written after each value. */
+  unit?: string;
+  /**
+   * How a cell is drawn: `text` (the default), `bar` (the value as a bar against the column's scale, written beside
+   * it) or `tone` (the value is a tone — drawn as its mark and its name in the widget's locale).
+   */
+  cell?: 'text' | 'bar' | 'tone';
+  /** The scale of a `bar` column (default: its largest value). */
+  max?: number;
 }
 
 /**

@@ -4,7 +4,7 @@ import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core
 import { formatValue } from '../core/format.js';
 import { getLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { normalizeTone, toneStyles, TONE_GLYPHS } from '../core/tone.js';
+import { normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
 import { isDateLikeString } from '../core/utils.js';
 
@@ -128,6 +128,42 @@ export class UwTable extends LitElement {
     td[data-tone] {
       font-weight: 600;
       color: var(--tone);
+    }
+
+    /* A row's tone: a stripe and a tint, its mark first; a place in a sequence dims what is done and picks out what is now. */
+    tbody tr[data-tone] td:first-child { box-shadow: inset 3px 0 0 var(--tone); }
+    tbody tr[data-tone]:not([data-tone='past']):not([data-tone='next']) td { background: color-mix(in srgb, var(--tone) 9%, transparent); }
+    tbody tr[data-tone='past'] td { opacity: 0.6; }
+    tbody tr[data-tone='now'] td { font-weight: 700; }
+    .row-mark { color: var(--tone); margin-right: 6px; }
+    .cell-mark { margin-right: 4px; }
+
+    /* A bar cell: the value against its column's scale, written beside it. */
+    .cell-bar { display: inline-flex; align-items: center; gap: 8px; width: 100%; min-width: 80px; }
+    .cell-bar-track {
+      flex: 1 1 auto;
+      height: 8px;
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--u-widget-text-secondary, #5b6777) 18%, transparent);
+      overflow: hidden;
+    }
+    /* The bar is in its cell's own tone — not the row's, which the row's stripe and mark already say. */
+    .cell-bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--u-widget-primary, #4f46e5); }
+    td[data-tone] .cell-bar-fill { background: var(--tone); }
+    .cell-bar-text { flex: none; font-family: var(--u-widget-font-numeric); font-variant-numeric: tabular-nums; }
+
+    /* A table only to be looked at — on a wall, on a board: no sorting, no focus, no row to pick. */
+    .table-container[data-static] tbody tr { cursor: default; }
+    /* Its rows do not scroll under a pager, so what follows them — the «more» line — sits right under them. */
+    .table-container[data-static] .table-wrapper { flex: 0 1 auto; }
+    .table-container[data-static] tbody tr:hover td { background: none; }
+    .table-container[data-static] tbody tr[data-tone]:not([data-tone='past']):not([data-tone='next']):hover td {
+      background: color-mix(in srgb, var(--tone) 9%, transparent);
+    }
+    .table-more {
+      padding: 6px 12px;
+      color: var(--u-widget-text-secondary, #5b6777);
+      font-size: var(--u-widget-font-size-caption, 0.75rem);
     }
 
     /* ── list ── */
@@ -508,20 +544,29 @@ export class UwTable extends LitElement {
     const data = this.spec!.data as Record<string, unknown>[];
     const columns = this.getColumns(data);
     const locale = this._locale;
-    const sortable = this.spec!.options?.sortable !== false;
-    const searchable = !!this.spec!.options?.searchable;
+    // `interactive: false` is a table only to be looked at — no search, sort, pages, row focus or selection.
+    const interactive = this.spec!.options?.interactive !== false;
+    const sortable = interactive && this.spec!.options?.sortable !== false;
+    const searchable = interactive && !!this.spec!.options?.searchable;
     const compact = !!this.spec!.options?.compact;
     const rawPageSize = this.spec!.options?.pageSize;
-    const pageSize = rawPageSize != null
+    const pageSize = !interactive ? 0 : rawPageSize != null
       ? Number(rawPageSize)
       : data.length > 1000 ? 100 : 0;
+    const rawMaxItems = this.spec!.options?.maxItems;
+    const maxItems = pageSize === 0 && typeof rawMaxItems === 'number' && rawMaxItems > 0 ? Math.floor(rawMaxItems) : undefined;
+    const rowToneKey = this.spec!.mapping?.tone;
+    const localeName = typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined;
+    const cell = this.cellRenderer(columns, data, localeName);
 
     // Pipeline: filter → sort → paginate
     const filtered = this._searchQuery ? this.filterData(data, columns) : data;
     const sorted = this._sortField && this._sortDir ? this.sortData(filtered) : filtered;
     const totalPages = pageSize > 0 ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
     const page = Math.min(this._page, totalPages - 1);
-    const visible = pageSize > 0 ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted;
+    const paged = pageSize > 0 ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted;
+    const visible = maxItems !== undefined ? paged.slice(0, maxItems) : paged;
+    const hidden = paged.length - visible.length;
     // select reports a row's index in spec.data — its position on screen changes with search, sort
     // and paging. Filtering and sorting keep the row objects, so identity maps them back.
     const sourceIndex = new Map<Record<string, unknown>, number>();
@@ -549,7 +594,7 @@ export class UwTable extends LitElement {
       </nav>
     ` : nothing;
 
-    return html`<div class="table-container${compact ? ' compact' : ''}">
+    return html`<div class="table-container${compact ? ' compact' : ''}" ?data-static=${!interactive}>
       ${searchBox}
       <div class="table-wrapper" part="table">
         <table aria-label=${this.spec!.title ?? locale.dataTable}>
@@ -579,9 +624,18 @@ export class UwTable extends LitElement {
             </tr>
           </thead>
           <tbody @keydown=${this._onTableKeydown}>
-            ${visible.map(
-              (row, idx) => html`
-                <tr part="tr"
+            ${visible.map((row, idx) => {
+              const rowTone = rowToneKey ? normalizeTone(row[rowToneKey], 'uw-table') : undefined;
+              const mark = rowTone
+                ? html`<span class="row-mark" part="mark" role="img" aria-label=${toneLabel(rowTone, locale)}>${TONE_GLYPHS[rowTone]}</span>`
+                : nothing;
+              const cells = columns.map((col, c) => {
+                const { tone, content } = cell(col, row);
+                return html`<td data-align=${col.align ?? 'left'} data-tone=${tone ?? nothing} part="td">${c === 0 ? mark : nothing}${content}</td>`;
+              });
+              return interactive
+                ? html`
+                <tr part="tr" data-tone=${rowTone ?? nothing}
                   tabindex=${idx === this._focusedIdx ? '0' : '-1'}
                   @click=${() => this._onRowClick(row, sourceIndex.get(row) ?? idx)}
                   @keydown=${(e: KeyboardEvent) => {
@@ -590,21 +644,52 @@ export class UwTable extends LitElement {
                       this._onRowClick(row, sourceIndex.get(row) ?? idx);
                     }
                   }}
-                >
-                  ${columns.map(
-                    (col) =>
-                      html`<td data-align=${col.align ?? 'left'} data-tone=${normalizeTone(col.tone, 'uw-table') ?? nothing} part="td"
-                        >${formatValue(row[col.field], col.format, typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined)}</td
-                      >`,
-                  )}
-                </tr>
-              `,
-            )}
+                >${cells}</tr>`
+                : html`<tr part="tr" data-tone=${rowTone ?? nothing}>${cells}</tr>`;
+            })}
           </tbody>
         </table>
       </div>
+      ${hidden > 0 ? html`<div class="table-more" part="more">${formatTemplate(locale.moreItems, { count: hidden })}</div>` : nothing}
       ${paginationBar}
     </div>`;
+  }
+
+  /**
+   * How each cell of these columns is drawn: its value formatted, with the column's unit; coloured by the column's
+   * tone or the row's own (`toneField`); as a bar against the column's scale (`cell: "bar"`) or, when the value is a
+   * tone, as its mark and name (`cell: "tone"`).
+   */
+  private cellRenderer(columns: UWidgetColumnDefinition[], data: Record<string, unknown>[], localeName?: string) {
+    const strings = this._locale;
+    const scales = new Map<string, number>();
+    for (const col of columns) {
+      if (col.cell !== 'bar') continue;
+      const own = Number(col.max);
+      const largest = Math.max(0, ...data.map(r => Number(r[col.field])).filter(Number.isFinite));
+      scales.set(col.field, Number.isFinite(own) && own > 0 ? own : largest);
+    }
+    return (col: UWidgetColumnDefinition, row: Record<string, unknown>): { tone?: Tone; content: unknown } => {
+      const raw = row[col.field];
+      if (col.cell === 'tone') {
+        const tone = normalizeTone(raw, 'uw-table');
+        return tone
+          ? { tone, content: html`<span class="cell-mark" aria-hidden="true">${TONE_GLYPHS[tone]}</span>${toneLabel(tone, strings)}` }
+          : { content: raw ?? '' };
+      }
+      const tone = (col.toneField ? normalizeTone(row[col.toneField], 'uw-table') : undefined) ?? normalizeTone(col.tone, 'uw-table');
+      const empty = raw == null || raw === '';
+      const text = `${formatValue(raw, col.format, localeName)}${col.unit && !empty ? `\u00a0${col.unit}` : ''}`;
+      if (col.cell === 'bar' && !empty && Number.isFinite(Number(raw))) {
+        const scale = scales.get(col.field) ?? 0;
+        const fraction = scale > 0 ? Math.min(1, Math.max(0, Number(raw) / scale)) : 0;
+        return {
+          tone,
+          content: html`<span class="cell-bar"><span class="cell-bar-track" aria-hidden="true"><span class="cell-bar-fill" style="width:${(fraction * 100).toFixed(1)}%"></span></span><span class="cell-bar-text">${text}</span></span>`,
+        };
+      }
+      return { tone, content: text };
+    };
   }
 
   private _onTableKeydown = (e: KeyboardEvent) => {
@@ -770,6 +855,7 @@ export class UwTable extends LitElement {
     const maxItems = typeof options.maxItems === 'number' && options.maxItems > 0 ? Math.floor(options.maxItems) : undefined;
     const shown = maxItems !== undefined ? data.slice(0, maxItems) : data;
     const hidden = data.length - shown.length;
+    const cell = this.cellRenderer(columns, data, locale);
     // A time column reads a time of day from a date-time a source sends; anything else is shown as it is.
     const timeText = (v: unknown) => (typeof v === 'string' && isDateLikeString(v) && v.includes('T') ? formatValue(v, 'time', locale) : v ?? '');
     const head = !tiles && columns.some(c => c.label)
@@ -813,8 +899,10 @@ export class UwTable extends LitElement {
               ${badgeKey && item[badgeKey] != null
                 ? html`<span class="list-badge" part="badge">${item[badgeKey]}</span>`
                 : nothing}
-              ${columns.map(c => html`<span class="list-cell" part="cell" data-align=${c.align ?? 'right'}
-                  data-tone=${normalizeTone(c.tone, 'uw-table') ?? nothing}>${formatValue(item[c.field], c.format, locale)}</span>`)}
+              ${columns.map(c => {
+                const { tone, content } = cell(c, item);
+                return html`<span class="list-cell" part="cell" data-align=${c.align ?? 'right'} data-tone=${tone ?? nothing}>${content}</span>`;
+              })}
               ${trailingKey && item[trailingKey] != null
                 ? html`<div class="list-trailing" part="trailing">${item[trailingKey]}</div>`
                 : nothing}

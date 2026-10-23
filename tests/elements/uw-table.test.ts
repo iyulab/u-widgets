@@ -1191,3 +1191,87 @@ describe('uw-table list — rows as a board shows them', () => {
     expect(shadow.querySelector('.list-head')).toBeNull();
   });
 });
+
+describe('uw-table — tones, bar cells, units and a table to look at', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const links = [
+    { site: 'Seoul', state: 'ok', loss: 0.2, util: 41, utilTone: 'ok' },
+    { site: 'Busan', state: 'alarm', loss: 3.9, util: 97, utilTone: 'alarm' },
+    { site: 'Daegu', state: 'watch', loss: 1.1, util: 70 },
+  ];
+  const table = (mapping: Record<string, unknown>, options: Record<string, unknown> = {}, data: unknown[] = links) =>
+    render(createElement({ widget: 'table', data, mapping, options: { locale: 'en-US', ...options } }));
+
+  it('tones each row from mapping.tone — a stripe, a tint and the tone’s mark, named, in the first cell', async () => {
+    const shadow = await table({ tone: 'state', columns: [{ field: 'site' }, { field: 'loss' }] });
+    const rows = [...shadow.querySelectorAll('tbody tr')];
+    expect(rows.map(r => r.getAttribute('data-tone'))).toEqual(['ok', 'alarm', 'watch']);
+    const mark = rows[1].querySelector('td .row-mark')!;
+    expect(mark.textContent).toBe('✕');
+    expect(mark.getAttribute('aria-label')).toBe('Alarm');
+    expect(rows[1].querySelectorAll('.row-mark')).toHaveLength(1);
+  });
+
+  it('tones a cell from its toneField, over the column tone', async () => {
+    const shadow = await table({ columns: [{ field: 'site' }, { field: 'util', toneField: 'utilTone', tone: 'info' }] });
+    const cells = [...shadow.querySelectorAll('tbody tr td:nth-child(2)')];
+    expect(cells.map(c => c.getAttribute('data-tone'))).toEqual(['ok', 'alarm', 'info']);
+  });
+
+  it('writes a column unit after each value, not after an empty one', async () => {
+    const shadow = await table({ columns: [{ field: 'loss', unit: '%', format: 'number:1' }] }, {}, [{ loss: 0.25 }, { loss: null }]);
+    expect([...shadow.querySelectorAll('tbody td')].map(c => c.textContent)).toEqual(['0.3 %', '—']);
+  });
+
+  it('draws a bar cell against the column’s largest value, or its max', async () => {
+    const widths = async (col: Record<string, unknown>) => [...(await table({ columns: [col] })).querySelectorAll<HTMLElement>('.cell-bar-fill')].map(f => f.style.width);
+    expect(await widths({ field: 'util', cell: 'bar', unit: '%' })).toEqual(['42.3%', '100.0%', '72.2%']);
+    expect(await widths({ field: 'util', cell: 'bar', max: 100 })).toEqual(['41.0%', '97.0%', '70.0%']);
+    const shadow = await table({ columns: [{ field: 'util', cell: 'bar', unit: '%' }] });
+    expect(shadow.querySelector('.cell-bar-text')?.textContent).toBe('41 %');
+  });
+
+  it('draws a tone cell as the tone’s mark and name', async () => {
+    const shadow = await table({ columns: [{ field: 'site' }, { field: 'state', cell: 'tone' }] });
+    const cells = [...shadow.querySelectorAll('tbody tr td:nth-child(2)')];
+    expect(cells.map(c => c.textContent)).toEqual(['✓OK', '✕Alarm', '◆Watch']);
+    expect(cells.map(c => c.getAttribute('data-tone'))).toEqual(['ok', 'alarm', 'watch']);
+  });
+
+  it('with interactive: false, has no search, sorting, pages, row focus or selection', async () => {
+    const many = Array.from({ length: 30 }, (_, i) => ({ n: i }));
+    const el = createElement({ widget: 'table', data: many, options: { interactive: false, searchable: true, pageSize: 10 } });
+    const onSelect = vi.fn();
+    el.addEventListener('u-widget-internal', onSelect);
+    const shadow = await render(el);
+    expect(shadow.querySelector('.search-input')).toBeNull();
+    expect(shadow.querySelector('.pagination')).toBeNull();
+    expect(shadow.querySelector('th[data-sortable]')).toBeNull();
+    expect(shadow.querySelector('th[tabindex]')).toBeNull();
+    expect(shadow.querySelector('tbody tr[tabindex]')).toBeNull();
+    expect(shadow.querySelectorAll('tbody tr')).toHaveLength(30);
+    (shadow.querySelector('tbody tr') as HTMLElement).click();
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('shows maxItems rows and says how many more, when it is not paged', async () => {
+    const shadow = await table({ columns: [{ field: 'site' }] }, { interactive: false, maxItems: 2 });
+    expect(shadow.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(shadow.querySelector('[part="more"]')?.textContent).toBe('+1 more');
+  });
+
+  it('gives a list’s columns the same cells — unit, toneField, tone', async () => {
+    const el = createElement({
+      widget: 'list',
+      data: links,
+      mapping: { primary: 'site', columns: [{ field: 'util', unit: '%', toneField: 'utilTone' }, { field: 'state', cell: 'tone' }] },
+      options: { locale: 'en-US' },
+    });
+    const shadow = await render(el);
+    const cells = [...shadow.querySelectorAll('[part="cell"]')];
+    expect(cells.slice(0, 2).map(c => [c.textContent?.trim(), c.getAttribute('data-tone')])).toEqual([['41 %', 'ok'], ['✓OK', 'ok']]);
+  });
+});

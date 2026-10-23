@@ -4,6 +4,14 @@
 
 ### Added
 
+- `table` rows and cells with a state: `mapping.tone` names a field with each row's tone (a stripe, a tint and the
+  tone's mark, named, in the first cell; `past` dims a row, `now` picks it out) and a column's `toneField` a field with
+  its cell's own tone. A column takes a `unit`, and `cell: "bar"` (the value as a bar against the column's `max`, else
+  its largest value) or `cell: "tone"` (the value read as a tone — its mark and name). `options.interactive: false` is a
+  table only to be looked at — no search, sorting, pages, row focus or picking a row — and `options.maxItems` shows the
+  first rows of a table that is not paged and says how many more. A list's columns take the same.
+- The tools list `sortable` among a table's options.
+
 - `gauge` forms and scale marks: `options.form` draws the reading as an `arc` (as before) or a level rising in a
   `vertical` column, a `tank` or a `thermometer`; `options.band: { lo, hi }` draws the acceptable range beside the
   scale, `options.marks: [{ at, label? }]` labelled lines on it. A gauge's colour can be a state — `data.tone`, or a
@@ -66,6 +74,10 @@
   `3.00 kg` in the tooltip as on the axis.
 
 ### Changed
+
+- The JSON schema's table column is the column as it is: `tone` (one of the eleven) where it still named the old
+  `variant` — a column with a `tone` failed it; `format` takes the forms with a suffix (`number:2`, `currency:EUR`);
+  and the new `unit`, `toneField`, `cell` and `max`.
 
 - **Breaking:** the closed five-level vocabularies are replaced by `tone`:
 
