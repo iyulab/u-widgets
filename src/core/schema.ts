@@ -203,6 +203,16 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     });
   }
 
+  // A kv item is a `label` and a `value` (`key` is not read — it was renamed `label`).
+  if (widget === 'kv' && Array.isArray(obj.data)) {
+    (obj.data as unknown[]).forEach((item, i) => {
+      if (item == null || typeof item !== 'object' || !('label' in item) || !('value' in item)) {
+        const renamed = item != null && typeof item === 'object' && 'key' in item;
+        warnings.push(`data[${i}] has no "label" and "value" — the pair is not drawn${renamed ? ' ("key" is now "label")' : ''}`);
+      }
+    });
+  }
+
   // A status card is named by its `title`; without one it draws nothing.
   if (widget === 'status-card' && obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data) && !('title' in obj.data)) {
     warnings.push('data has no "title" — the status card draws nothing');

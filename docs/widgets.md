@@ -53,7 +53,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
 | `video` | HTML5 video player | — (uses `data.src`; subtitle / caption tracks in `data.tracks`: `[{ src, srclang?, label?, kind?, default? }]`, WebVTT) |
 | `gallery` | Image gallery grid | — (uses data array) |
-| `kv` | Key-value pairs | — (uses data object) |
+| `kv` | Label · value pairs — a stat list | — (an object, or `[{ label, value, unit?, format?, tone?, note? }]`) |
 | `math` | LaTeX math expression | — (uses `data.expression`) |
 
 ### Input
@@ -208,6 +208,19 @@ each formatted, under a caption row when any column has a `label`.
     { "at": "2026-10-23T09:10:00", "what": "Arrival", "gate": "B2", "state": "next" }],
   "mapping": { "primary": "what", "time": "at", "tone": "state", "columns": [{ "field": "gate", "label": "Gate" }] },
   "options": { "maxItems": 6 } }
+```
+
+## Stat list (`kv`)
+
+`kv` lists label · value pairs. Its data is an object (each key a label) or an array of
+`{ label, value, unit?, format?, tone?, note? }` — each value formatted as `format` says with its unit after it,
+coloured and marked by its tone, with a note under it in small type. `options.layout` is `vertical` (labels beside the
+values), `horizontal` (pairs in a row) or `grid` (`options.columns` to a row).
+
+```json
+{ "widget": "kv", "data": [{ "label": "Flow", "value": 412.5, "format": "number:1", "unit": "m³/h" },
+                           { "label": "Pressure", "value": 7.9, "unit": "bar", "tone": "warn", "note": "limit 8" }],
+  "options": { "layout": "grid", "columns": 2 } }
 ```
 
 ## Header

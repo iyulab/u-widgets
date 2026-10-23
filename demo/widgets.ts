@@ -1244,10 +1244,10 @@ const catalog: Record<string, WidgetDoc> = {
       'Array form (ordered)': {
         widget: 'kv',
         data: [
-          { key: 'Name', value: 'Alice Kim' },
-          { key: 'Email', value: 'alice@example.com' },
-          { key: 'Role', value: 'Senior Engineer' },
-          { key: 'Team', value: 'Platform' },
+          { label: 'Name', value: 'Alice Kim' },
+          { label: 'Email', value: 'alice@example.com' },
+          { label: 'Role', value: 'Senior Engineer' },
+          { label: 'Team', value: 'Platform' },
         ],
       },
       'Horizontal layout': {

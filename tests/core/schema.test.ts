@@ -395,6 +395,7 @@ describe('validate — status data', () => {
     expect(validate({ widget: 'status', data: [{ value: 'Up' }, { label: 'DB' }] }).warnings).toContain('data[1] has no "value" or "tone" — the status item is not drawn');
     expect(validate({ widget: 'status', data: [{ label: 'DB', tone: 'alarm' }] }).warnings).toEqual([]);
     expect(validate({ widget: 'status-card', data: { tone: 'ok' } }).warnings).toContain('data has no "title" — the status card draws nothing');
+    expect(validate({ widget: 'kv', data: [{ key: 'Old', value: 1 }] }).warnings).toContain('data[0] has no "label" and "value" — the pair is not drawn ("key" is now "label")');
   });
 
   it('accepts an item with a value and no label', () => {

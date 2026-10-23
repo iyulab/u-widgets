@@ -4,6 +4,9 @@
 
 ### Added
 
+- `kv` is a stat list: an array item takes `unit`, `format` (the value formatted), `tone` (its colour and mark) and a
+  `note` under the value.
+
 - `header` is a title block: besides `text` and `level`, a `kicker` above, a `subtitle` under, the `date` and `time` it
   is for or a running `clock: true`, `aside` label · value pairs (formatted, toned) and the state as a `tone` badge with
   `status` words. It is drawn by its own element, `<uw-header>` (the heading keeps `role="heading"` and its level).
@@ -59,6 +62,8 @@
   the console, naming the tones. A `status` item with no tone is drawn plainly — no colour, no mark — where it was
   `info` before. The parts and their names (`status-icon`, `status-value`, …) are as before; the attribute a page can
   style by is `data-tone` (was `data-level` / `data-variant`).
+- **Breaking:** a `kv` array item is `{ label, value }` (was `{ key, value }`) — the same `label` · `value` the other
+  widgets use. An item with `key` is not drawn, and `validate` says it was renamed.
 - **Breaking:** `options.card: true` is `options.frame: "card"` — on a `compose` (each child in a card, as before) and on
   any widget. The panel's look is the frame's: the `.child-card` class is gone; a child in a frame carries
   `data-frame`.

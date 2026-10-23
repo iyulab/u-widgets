@@ -77,12 +77,12 @@ describe('uw-kv', () => {
   // ── Array Data ──
 
   describe('array data', () => {
-    it('renders key-value pairs from array of {key, value}', async () => {
+    it('renders label · value pairs from an array of {label, value}', async () => {
       const el = createElement({
         widget: 'kv',
         data: [
-          { key: 'Name', value: 'Alice' },
-          { key: 'Email', value: 'alice@example.com' },
+          { label: 'Name', value: 'Alice' },
+          { label: 'Email', value: 'alice@example.com' },
         ],
       });
       const shadow = await render(el);
@@ -94,8 +94,8 @@ describe('uw-kv', () => {
       const el = createElement({
         widget: 'kv',
         data: [
-          { key: 'Status', value: 'Active' },
-          { key: 'Plan', value: 'Enterprise' },
+          { label: 'Status', value: 'Active' },
+          { label: 'Plan', value: 'Enterprise' },
         ],
       });
       const shadow = await render(el);
@@ -111,10 +111,10 @@ describe('uw-kv', () => {
       const el = createElement({
         widget: 'kv',
         data: [
-          { key: 'Valid', value: 'Yes' },
+          { label: 'Valid', value: 'Yes' },
           { nokey: 'Bad' },
           null,
-          { key: 'Also Valid', value: 'Yes' },
+          { label: 'Also Valid', value: 'Yes' },
         ],
       });
       const shadow = await render(el);
@@ -232,5 +232,31 @@ describe('uw-kv', () => {
     expect(shadow.querySelector('[part="kv-pair"]')).not.toBeNull();
     expect(shadow.querySelector('[part="kv-key"]')).not.toBeNull();
     expect(shadow.querySelector('[part="kv-value"]')).not.toBeNull();
+  });
+});
+
+describe('uw-kv as a stat list', () => {
+  it('formats each value with its unit, marks and colours it by its tone, and puts its note under it', async () => {
+    const el = document.createElement('uw-kv') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = { widget: 'kv', data: [
+      { label: 'Flow', value: 412.46, format: 'number:1', unit: 'm³/h' },
+      { label: 'Pressure', value: 7.9, unit: 'bar', tone: 'warn', note: 'limit 8' },
+    ], options: { locale: 'en-US' } };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const pairs = [...el.shadowRoot!.querySelectorAll('.kv-pair')];
+    expect(pairs.map(p => p.querySelector('.kv-value')?.textContent)).toEqual(['412.5 m³/h', '▲7.9 bar']);
+    expect(pairs[1].getAttribute('data-tone')).toBe('warn');
+    expect(pairs[1].querySelector('[part="kv-note"]')?.textContent).toBe('limit 8');
+    el.remove();
+  });
+
+  it('no longer reads an array item’s `key` (it is `label`)', async () => {
+    const el = document.createElement('uw-kv') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = { widget: 'kv', data: [{ key: 'Old', value: 1 }] };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('.kv-pair')).toBeNull();
+    el.remove();
   });
 });

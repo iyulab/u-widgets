@@ -519,7 +519,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'image': 'No mapping. data is {src, alt?, caption?}.',
   'callout': 'No mapping. data is {message, title?, tone?}.',
   'compose': 'Uses children[] and layout. Each child is a widget spec.',
-  'kv': 'No mapping. data is {key: val, ...} or [{key, value}]. layout in options.',
+  'kv': 'No mapping. data is {key: val, ...} or [{label, value, unit?, format?, tone?, note?}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
   'status-card': 'No mapping. data is {title, subtitle?, tone?, status?, emphasis?, readings?: [{label, value, unit?, format?, tone?}], meter?: {value, min?, max?, unit?}, image?, icon?, note?}.',

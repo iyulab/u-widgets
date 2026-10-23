@@ -94,7 +94,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'rating', category: 'content', description: 'Star/heart/thumb rating display or input', mappingKeys: [], dataShape: 'object' },
   { widget: 'video', category: 'content', description: 'Video player with controls, poster, and caption', mappingKeys: [], dataShape: 'object' },
   { widget: 'gallery', category: 'content', description: 'Image gallery grid with captions', mappingKeys: [], dataShape: 'array' },
-  { widget: 'kv', category: 'content', description: 'Key-value pairs display (object or array of {key, value})', mappingKeys: [], dataShape: 'object' },
+  { widget: 'kv', category: 'content', description: 'Label · value pairs — an object, or an array of {label, value, unit?, format?, tone?, note?}', mappingKeys: [], dataShape: 'object' },
   { widget: 'math', category: 'content', description: 'Render LaTeX mathematical expressions via KaTeX', mappingKeys: [], dataShape: 'object' },
   { widget: 'actions', category: 'content', description: 'Standalone action buttons (quick replies, suggested actions)', mappingKeys: [], dataShape: 'none' },
   { widget: 'divider', category: 'content', description: 'Visual separator with optional label', mappingKeys: [], dataShape: 'none' },
@@ -893,9 +893,9 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
       spec: {
         widget: 'kv',
         data: [
-          { key: 'Name', value: 'Alice Kim' },
-          { key: 'Email', value: 'alice@example.com' },
-          { key: 'Role', value: 'Engineer' },
+          { label: 'Name', value: 'Alice Kim' },
+          { label: 'Email', value: 'alice@example.com' },
+          { label: 'Role', value: 'Engineer' },
         ],
       },
     },
