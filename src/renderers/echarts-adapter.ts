@@ -1,4 +1,4 @@
-import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, AxisFormatOption, ChartSeriesOption, LineStyleKeyword } from '../core/types.js';
+import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, ChartSeriesOption, LineStyleKeyword } from '../core/types.js';
 import { escapeHtml } from '../core/escape.js';
 import { formatValue, parseDateText } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
@@ -130,30 +130,31 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
     result.color = options.colors;
   }
 
-  // Apply axis format options
+  // Apply axis format options — a format string in the grammar every widget uses (`formatValue`). The value axis also
+  // writes the chart's `unit` after each figure.
   const locale = options.locale as string | undefined;
-  applyAxisFormat(result, 'xAxis', options.xFormat as AxisFormatOption | undefined, locale);
-  applyAxisFormat(result, 'yAxis', options.yFormat as AxisFormatOption | undefined, locale);
+  const isCartesian = widget === 'chart.bar' || widget === 'chart.line' || widget === 'chart.area';
+  const unit = isCartesian && typeof options.unit === 'string' && options.unit !== '' ? options.unit : undefined;
+  const valueOn: 'xAxis' | 'yAxis' = options.horizontal ? 'xAxis' : 'yAxis';
+  const valueFormat = formatOption(options.valueAxisFormat) ?? formatOption(options.horizontal ? options.xFormat : options.yFormat)
+    ?? (unit ? 'number' : undefined);
+  applyAxisFormat(result, 'xAxis', formatOption(options.xFormat), locale);
+  applyAxisFormat(result, 'yAxis', formatOption(options.yFormat), locale);
 
   // Semantic aliases: valueAxisFormat / categoryAxisFormat route to the value or category
   // axis regardless of horizontal orientation. In horizontal bar/line/area, the value axis
   // is xAxis and the category axis is yAxis — the reverse of vertical orientation.
-  const isCartesian = widget === 'chart.bar' || widget === 'chart.line' || widget === 'chart.area';
-  if (isCartesian && (options.valueAxisFormat || options.categoryAxisFormat)) {
-    const horizontal = !!options.horizontal;
-    const valueKey: 'xAxis' | 'yAxis' = horizontal ? 'xAxis' : 'yAxis';
-    const catKey: 'xAxis' | 'yAxis' = horizontal ? 'yAxis' : 'xAxis';
-    applyAxisFormat(result, valueKey, options.valueAxisFormat as AxisFormatOption | undefined, locale);
-    applyAxisFormat(result, catKey, options.categoryAxisFormat as AxisFormatOption | undefined, locale);
+  if (isCartesian) {
+    applyAxisFormat(result, valueOn, unit ? valueFormat : formatOption(options.valueAxisFormat), locale, unit);
+    applyAxisFormat(result, valueOn === 'xAxis' ? 'yAxis' : 'xAxis', formatOption(options.categoryAxisFormat), locale);
   }
 
   // A value axis no format option reached reads its numbers in the widget locale — ECharts writes
   // English grouping and a dot decimal («50,000» reads as fifty on a German page).
   applyLocaleNumberDefaults(result, locale);
 
-  // A value format the spec gives its value axis is also how the tooltip writes the values.
-  const valueFormat = (options.valueAxisFormat ?? (options.horizontal ? options.xFormat : options.yFormat)) as AxisFormatOption | undefined;
-  if (isCartesian && valueFormat) applyTooltipValueFormat(result, valueFormat, locale);
+  // A value format the spec gives its value axis — and its unit — is also how the tooltip writes the values.
+  if (isCartesian && valueFormat) applyTooltipValueFormat(result, valueFormat, locale, unit);
 
   // valueAxisZero: false — the value axis spans the data instead of always reaching zero, for a series that
   // moves far from zero (a control chart around its centre line, a process temperature). ECharts calls it `scale`.
@@ -1428,7 +1429,7 @@ function buildGantt(
     return s;
   });
 
-  const xFormat = options.xFormat as AxisFormatOption | undefined;
+  const xFormat = formatOption(options.xFormat);
   const endpointFormatter = xFormat ? buildAxisFormatter(xFormat, options.locale as string | undefined, isTime) : undefined;
   const endpointText = (raw: unknown): string => {
     if (!endpointFormatter) return String(raw);
@@ -1543,10 +1544,10 @@ function timeCategories(values: unknown[], options: Record<string, unknown>): st
 }
 
 /** The tooltip writes values with the value axis's format, unless the spec gives the tooltip its own. */
-function applyTooltipValueFormat(result: Record<string, unknown>, fmt: AxisFormatOption, locale?: string): void {
+function applyTooltipValueFormat(result: Record<string, unknown>, fmt: string, locale?: string, unit?: string): void {
   const tooltip = isPlainObject(result.tooltip) ? result.tooltip : undefined;
   if (!tooltip || tooltip.formatter !== undefined) return;
-  const format = buildAxisFormatter(fmt, locale);
+  const format = buildAxisFormatter(fmt, locale, false, unit);
   result.tooltip = { ...tooltip, valueFormatter: (value: unknown) => (typeof value === 'number' ? format(value) : String(value ?? '')) };
 }
 
@@ -1557,69 +1558,30 @@ function localIsoString(ms: number): string {
 }
 
 /**
- * Build a formatter string or function for ECharts axis labels
- * based on an AxisFormatOption.
+ * An axis format option: a format string (`"number:1"`, `"currency:KRW"`, `"compact"`, `"time"` — `formatValue`'s
+ * grammar). Anything else is no format; `validate` names an object written in the shape axes took before.
+ */
+function formatOption(value: unknown): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : undefined;
+}
+
+/**
+ * The axis label formatter for a format string, with an optional unit after each figure.
  *
  * `timestamps`: the axis is a time axis, so a numeric label value is epoch milliseconds. Date
  * formats read it as local wall-clock time — `formatValue` alone passes numbers through as-is, and
- * a UTC ISO string would label a local-midnight tick with the previous day east of UTC.
+ * a UTC ISO string would label a local-midnight tick with the previous day east of UTC. A percent
+ * is in display units on an axis as anywhere (73 is 73%).
  */
-function buildAxisFormatter(fmt: AxisFormatOption, locale?: string, timestamps = false): (value: number | string) => string {
-  const isDateFormat = fmt.type === 'date' || fmt.type === 'datetime' || fmt.type === 'time';
+function buildAxisFormatter(fmt: string, locale?: string, timestamps = false, unit?: string): (value: number | string) => string {
+  const type = fmt.split(':')[0];
+  const isDateFormat = type === 'date' || type === 'datetime' || type === 'time';
   return (raw: number | string) => {
     const value = timestamps && isDateFormat && typeof raw === 'number' && Number.isFinite(raw)
       ? localIsoString(raw)
       : raw;
-    let result: string;
-    // Compact notation short-circuits formatValue — Intl.NumberFormat handles both
-    // number and currency compact formatting (e.g. `₩1.2억`, `$1.2M`).
-    if (fmt.compact && (fmt.type === 'number' || fmt.type === 'currency')) {
-      const num = Number(value);
-      if (!isNaN(num)) {
-        const nfOpts: Intl.NumberFormatOptions = {
-          notation: 'compact',
-          compactDisplay: 'short',
-          maximumFractionDigits: fmt.decimals ?? 1,
-        };
-        if (fmt.type === 'currency' && fmt.currency) {
-          nfOpts.style = 'currency';
-          nfOpts.currency = fmt.currency;
-        }
-        result = new Intl.NumberFormat(locale, nfOpts).format(num);
-      } else {
-        result = String(value);
-      }
-      if (fmt.prefix) result = fmt.prefix + result;
-      if (fmt.suffix) result = result + fmt.suffix;
-      return result;
-    }
-    if (fmt.type) {
-      const formatStr = fmt.type === 'currency' && fmt.currency
-        ? `currency:${fmt.currency}`
-        : fmt.type;
-      result = formatValue(value, formatStr, locale);
-      // For percent type, formatValue divides by 100 — but axis values are already in
-      // display units (e.g. 73 means 73%), so use raw suffix instead
-      if (fmt.type === 'percent') {
-        result = typeof value === 'number'
-          ? new Intl.NumberFormat(locale, { maximumFractionDigits: fmt.decimals ?? 2 }).format(value) + '%'
-          : String(value) + '%';
-      }
-    } else {
-      result = String(value);
-    }
-    if (fmt.decimals !== undefined && fmt.type === 'number') {
-      const num = Number(value);
-      if (!isNaN(num)) {
-        result = new Intl.NumberFormat(locale, {
-          minimumFractionDigits: fmt.decimals,
-          maximumFractionDigits: fmt.decimals,
-        }).format(num);
-      }
-    }
-    if (fmt.prefix) result = fmt.prefix + result;
-    if (fmt.suffix) result = result + fmt.suffix;
-    return result;
+    const text = formatValue(value, fmt, locale);
+    return unit ? `${text}\u00a0${unit}` : text;
   };
 }
 
@@ -1704,13 +1666,14 @@ function localeFormatters(locale?: string): LocaleFormatters {
 function applyAxisFormat(
   result: Record<string, unknown>,
   axisKey: 'xAxis' | 'yAxis',
-  fmt: AxisFormatOption | undefined,
+  fmt: string | undefined,
   locale?: string,
+  unit?: string,
 ): void {
   if (!fmt || !result[axisKey]) return;
 
   const axis = result[axisKey];
-  const formatter = buildAxisFormatter(fmt, locale, isPlainObject(axis) && axis.type === 'time');
+  const formatter = buildAxisFormatter(fmt, locale, isPlainObject(axis) && axis.type === 'time', unit);
 
   if (Array.isArray(axis)) {
     // Dual axis — apply to all value-type axes

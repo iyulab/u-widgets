@@ -433,7 +433,7 @@ const catalog: Record<string, WidgetDoc> = {
           { month: 'Apr', rate: 105 },
         ],
         options: {
-          yFormat: { suffix: '%' },
+          yFormat: 'percent',
           referenceLines: [
             { axis: 'y', value: 100, label: 'Target', color: '#16a34a', style: 'dashed' },
           ],
@@ -447,7 +447,7 @@ const catalog: Record<string, WidgetDoc> = {
           { month: 'Mar', revenue: 15200000 },
         ],
         options: {
-          yFormat: { type: 'currency', currency: 'KRW' },
+          yFormat: 'currency:KRW',
           locale: 'ko-KR',
         },
       },
@@ -911,7 +911,7 @@ const catalog: Record<string, WidgetDoc> = {
           { task: 'Test', from: '2026-03-30', to: '2026-04-10' },
         ],
         options: {
-          xFormat: { type: 'date' },
+          xFormat: 'date',
           referenceLines: [{ axis: 'x', value: '2026-04-06', label: 'Due', color: '#dc2626' }],
         },
       },

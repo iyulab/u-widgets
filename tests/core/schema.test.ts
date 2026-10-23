@@ -399,6 +399,9 @@ describe('validate — status data', () => {
     expect(validate({ widget: 'metric', data: { value: 1, description: 'Old' } }).warnings).toContain('data has "description" — the line under the value is now "note"');
     expect(validate({ widget: 'stat-group', data: [{ label: 'A', value: 1 }, { label: 'B', value: 2, description: 'Old' }] }).warnings).toContain('data[1] has "description" — the line under the value is now "note"');
     expect(validate({ widget: 'metric', data: { value: 1, note: 'Now' } }).warnings).toEqual([]);
+    expect(validate({ widget: 'chart.bar', data: [{ a: 1 }], options: { yFormat: { type: 'number', decimals: 1 } } }).warnings)
+      .toContain('options.yFormat is a format string now — "number:1", "currency:KRW", "compact", "time" (a unit is options.unit); the object is not read');
+    expect(validate({ widget: 'chart.bar', data: [{ a: 1 }], options: { yFormat: 'number:1' } }).warnings).toEqual([]);
   });
 
   it('accepts an item with a value and no label', () => {

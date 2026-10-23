@@ -78,8 +78,8 @@ export interface UWidgetColumnDefinition {
   field: string;
   /** Display header label. Defaults to the field name. */
   label?: string;
-  /** Value formatting hint (e.g., `"number:2"`, `"currency"`, `"currency:EUR"`, `"percent"`). */
-  format?: 'number' | `number:${number}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes';
+  /** Value format (`formatValue` — e.g. `"number:2"`, `"compact"`, `"currency:EUR"`, `"percent"`). */
+  format?: 'number' | `number:${number}` | 'compact' | `compact:${string}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes';
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
   /** The tone (`core/tone.ts`) this column's cells are drawn in — bold, in the tone's colour. */
@@ -370,37 +370,6 @@ export interface ChartSeriesOption {
   type?: string;
   /** Value axis index on a two-axis chart. */
   yAxisIndex?: number;
-}
-
-/**
- * Axis label format option for chart X/Y axes.
- *
- * Physical axis keys: `options.xFormat` / `options.yFormat`
- *
- * Semantic aliases for cartesian charts (bar/line/area):
- * - `options.valueAxisFormat` — formats the value axis regardless of orientation.
- *   In horizontal mode the value axis is xAxis; in vertical mode it is yAxis.
- * - `options.categoryAxisFormat` — formats the category axis regardless of orientation.
- *
- * Prefer the semantic aliases when using `horizontal: true` to avoid confusion.
- */
-export interface AxisFormatOption {
-  /** Format type — delegates to `formatValue()`. */
-  type?: 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
-  /** Static prefix prepended to each label. */
-  prefix?: string;
-  /** Static suffix appended to each label. */
-  suffix?: string;
-  /** Currency code when type is 'currency' (e.g., 'KRW', 'USD'). */
-  currency?: string;
-  /** Number of decimal places for numeric formats. */
-  decimals?: number;
-  /**
-   * Use compact notation (e.g., `1.2M`, `₩1.2억`). Helpful when axis values span
-   * several orders of magnitude and full-length labels would overflow the label
-   * container. Applies to `number` and `currency` types.
-   */
-  compact?: boolean;
 }
 
 // ── Spec Envelope ──

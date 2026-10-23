@@ -580,7 +580,7 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
           { task: 'Test', from: '2026-03-30', to: '2026-04-10' },
         ],
         options: {
-          xFormat: { type: 'date' },
+          xFormat: 'date',
           referenceLines: [{ axis: 'x', value: '2026-04-06', label: 'Due', color: '#dc2626' }],
         },
       },

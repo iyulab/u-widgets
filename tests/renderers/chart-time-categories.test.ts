@@ -20,14 +20,14 @@ describe('chart x values that are ISO times', () => {
   });
 
   it('are left as they are when the spec formats the axis itself, or when they are not all times', () => {
-    expect(line(['2026-10-23T09:00:00'], { xFormat: { type: 'datetime' } }).xAxis.data).toEqual(['2026-10-23T09:00:00']);
+    expect(line(['2026-10-23T09:00:00'], { xFormat: 'datetime' }).xAxis.data).toEqual(['2026-10-23T09:00:00']);
     expect(line(['2026-10-23T09:00:00', 'later']).xAxis.data).toEqual(['2026-10-23T09:00:00', 'later']);
   });
 });
 
 describe('a value axis format', () => {
   it('is how the tooltip writes the values', () => {
-    const o = line(['a', 'b'], { yFormat: { type: 'number', decimals: 2, suffix: ' kg' } });
-    expect(o.tooltip.valueFormatter?.(3)).toBe('3.00 kg');
+    const o = line(['a', 'b'], { yFormat: 'number:2', unit: 'kg' });
+    expect(o.tooltip.valueFormatter?.(3)).toBe('3.00\u00a0kg');
   });
 });

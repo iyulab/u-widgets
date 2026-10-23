@@ -223,6 +223,16 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
     });
   }
 
+  // An axis format is a format string — the object axes took before is not read.
+  if (obj.options && typeof obj.options === 'object') {
+    for (const key of ['xFormat', 'yFormat', 'valueAxisFormat', 'categoryAxisFormat'] as const) {
+      const value = (obj.options as Record<string, unknown>)[key];
+      if (value != null && typeof value === 'object') {
+        warnings.push(`options.${key} is a format string now — "number:1", "currency:KRW", "compact", "time" (a unit is options.unit); the object is not read`);
+      }
+    }
+  }
+
   // A status card is named by its `title`; without one it draws nothing.
   if (widget === 'status-card' && obj.data && typeof obj.data === 'object' && !Array.isArray(obj.data) && !('title' in obj.data)) {
     warnings.push('data has no "title" — the status card draws nothing');

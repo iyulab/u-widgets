@@ -258,6 +258,14 @@ describe('formatValue — fixed fraction digits (number:N · percent:N)', () => 
     expect(formatValue(73.456, 'percent:1', 'en')).toBe('73.5%');
   });
 
+  it('compact writes a short figure — one fraction digit unless given, or a currency', () => {
+    expect(formatValue(1_234_567, 'compact', 'en-US')).toBe('1.2M');
+    expect(formatValue(1_234_567, 'compact:2', 'en-US')).toBe('1.23M');
+    expect(formatValue(950, 'compact', 'en-US')).toBe('950');
+    expect(formatValue(123_000_000, 'compact:KRW', 'ko-KR')).toBe(new Intl.NumberFormat('ko-KR', { notation: 'compact', compactDisplay: 'short', maximumFractionDigits: 1, style: 'currency', currency: 'KRW' }).format(123_000_000));
+    expect(formatValue('n/a', 'compact', 'en-US')).toBe('n/a');
+  });
+
   it('NEGATIVE — a parameter that is not a count is ignored (Intl default)', () => {
     expect(formatValue(1.23456, 'number:x', 'en')).toBe(formatValue(1.23456, 'number', 'en'));
     expect(formatValue(1.23456, 'number:99', 'en')).toBe(formatValue(1.23456, 'number', 'en'));

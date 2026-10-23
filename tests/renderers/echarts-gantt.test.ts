@@ -208,7 +208,7 @@ describe('chart.gantt', () => {
     const result = gantt({
       data: [{ task: 'Design', from: '2026-03-02', to: '2026-03-13' }],
       mapping: { y: 'task', start: 'from', end: 'to' },
-      options: { xFormat: { type: 'date' } },
+      options: { xFormat: 'date' },
     });
     const formatter = ((result.xAxis as Obj).axisLabel as Obj).formatter as (v: number) => string;
     // ECharts places day ticks at local midnight — east of UTC that is the previous day in UTC.

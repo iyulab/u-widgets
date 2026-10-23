@@ -199,13 +199,15 @@ The `type` override (and `options.echarts.series[].type` passthrough) may only r
   "widget": "chart.bar",
   "data": [{ "month": "Jan", "revenue": 12000000 }],
   "options": {
-    "yFormat": { "type": "currency", "currency": "KRW" },
+    "yFormat": "compact:KRW",
     "locale": "ko-KR"
   }
 }
 ```
 
-`xFormat` / `yFormat` accept: `type` (`number`, `currency`, `percent`, `date`, `bytes`), `prefix`, `suffix`, `currency`, `decimals`.
+`xFormat` / `yFormat` (and `valueAxisFormat` / `categoryAxisFormat`, which follow `horizontal`) are a format as any value's
+is written — `number`, `number:1`, `compact`, `compact:KRW`, `currency:EUR`, `percent`, `date`, `datetime`, `time`,
+`bytes`. `options.unit` is written after each figure on the value axis and in the tooltip.
 
 Without them, a value axis and the tooltip write numbers in the widget locale (`de`: `50.000` · `2,5`). A formatter set
 through `options.echarts` (`yAxis.axisLabel.formatter`, `tooltip.valueFormatter`) still wins.

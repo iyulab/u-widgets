@@ -45,8 +45,9 @@ describe('value axes and tooltips read numbers in the widget locale', () => {
   });
 
   it('yFormat still decides', () => {
-    const fmt = axisFmt(option({ data, mapping, options: { locale: 'de', yFormat: { type: 'percent' } } }).yAxis);
-    expect(fmt(50)).toBe('50%');
+    const fmt = axisFmt(option({ data, mapping, options: { locale: 'de', yFormat: 'percent' } }).yAxis);
+    // A percent written as the locale writes one — the value is in display units (50 is 50%).
+    expect(fmt(50)).toBe(new Intl.NumberFormat('de', { style: 'percent', maximumFractionDigits: 2 }).format(0.5));
   });
 
   it('a formatter from options.echarts wins', () => {

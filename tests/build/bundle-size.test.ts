@@ -132,7 +132,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('shared chunks total is under 10 KB gzip', () => {
+  it('shared chunks total is under 11 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
     // The editor names chunk is loaded only by `./tools` and its locales — counted in the tools budget.
@@ -153,6 +153,9 @@ describe('bundle size budget', () => {
     // and `tabular` (columns → rows, nested → dotted paths) beside `infer` — 7.28 KB measured.
     // 0.34.0: + `schema` (validate), now shared by the core entry and `./tools` (`checkSpec` runs it first) — the core
     // entry shrank by 1.3 KB, the chunk is 1.8 KB; 9.6 KB measured.
-    expect(totalGzip).toBeLessThan(10 * 1024);
+    // Re-baselined from 10 KB for the compact format (`compact`, `compact:KRW` — every widget's values and the chart
+    // axes, now one grammar) and validate's notes on two renamed shapes (a metric's `description`, an axis format
+    // object): 10.15 KB measured.
+    expect(totalGzip).toBeLessThan(11 * 1024);
   });
 });

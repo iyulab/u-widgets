@@ -436,7 +436,7 @@ the same row.
   past the data is drawn, at a round axis bound just beyond it.
 - **`options.referenceLines`** with `axis: 'x'` draws a vertical line at a value or date
   (makespan, due date). `options.xFormat` formats the value/time axis — e.g.
-  `{ type: 'date' }` on a time axis.
+  `"date"` on a time axis.
 
 When `mapping` is omitted: first string → `y`, first two number or date-like fields →
 `start`/`end`, next string → `label`.

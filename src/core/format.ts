@@ -1,4 +1,4 @@
-type FormatType = 'number' | 'currency' | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
+type FormatType = 'number' | 'compact' | 'currency' | 'percent' | 'date' | 'datetime' | 'time' | 'bytes';
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
@@ -11,8 +11,10 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
 /**
  * Format a value according to a format hint string.
  *
- * Supported formats: `"number"`, `"number:2"` (fixed fraction digits), `"currency"`, `"currency:EUR"`, `"percent"`, `"percent:1"`,
- * `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for unknown formats.
+ * Supported formats: `"number"`, `"number:2"` (fixed fraction digits), `"compact"`, `"compact:2"` (`1.2K`, `3.4M` — up to
+ * that many fraction digits, one by default), `"compact:KRW"` (a currency, compact — `₩1.2억`), `"currency"`,
+ * `"currency:EUR"`, `"percent"`, `"percent:1"`, `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for
+ * unknown formats. It is the one grammar a format is written in — a value's `format`, a column's, a chart axis's.
  *
  * @param value - The value to format (coerced to number where needed).
  * @param format - Format hint, optionally with a parameter after `:` (e.g., `"currency:USD"`).
@@ -24,6 +26,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * ```ts
  * formatValue(1234.5, 'number')       // "1,234.5"
  * formatValue(0.97444, 'number:4')    // "0.9744"
+ * formatValue(1234567, 'compact')     // "1.2M"
  * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
  * formatValue(73, 'percent')          // "73%"
  * formatValue(1536000, 'bytes')       // "1.5 MB"
@@ -39,6 +42,8 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
   switch (type as FormatType) {
     case 'number':
       return formatNumber(value, locale, digits(param));
+    case 'compact':
+      return formatCompact(value, param, locale);
     case 'currency':
       return formatCurrency(value, param, locale);
     case 'percent':
@@ -71,6 +76,24 @@ function formatNumber(value: unknown, locale?: string, fractionDigits?: number):
     return new Intl.NumberFormat(locale, fixed).format(num);
   } catch {
     return new Intl.NumberFormat(undefined, fixed).format(num);
+  }
+}
+
+/** `compact` · `compact:2` (fraction digits, one by default) · `compact:KRW` (a currency, compact). */
+function formatCompact(value: unknown, param: string | undefined, locale?: string): string {
+  const num = Number(value);
+  if (isNaN(num)) return String(value);
+  const currency = param !== undefined && /^[A-Za-z]{3}$/.test(param) ? param.toUpperCase() : undefined;
+  const options: Intl.NumberFormatOptions = {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: currency ? 1 : (digits(param) ?? 1),
+    ...(currency && { style: 'currency', currency }),
+  };
+  try {
+    return new Intl.NumberFormat(locale ?? (currency ? 'en-US' : undefined), options).format(num);
+  } catch {
+    return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(num);
   }
 }
 

@@ -116,7 +116,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   band: 'The acceptable band of the scale ({ lo, hi }), drawn beside it',
   marks: 'Labelled lines on the scale ([{ at, label? }]) — a set level, a limit',
   label: 'Label template ({value}, {percent})',
-  format: "Value format hint — 'number', 'number:2' (fixed decimals), 'percent', 'currency:EUR' … in the widget's locale (gauge/progress default: number)",
+  format: "Value format — 'number', 'number:2' (fixed decimals), 'compact' (1.2K), 'percent', 'currency:EUR' … in the widget's locale (gauge/progress default: number)",
   // chart
   smooth: 'Smooth curves (line/area)',
   stack: 'Stack series (bar/line/area)',
@@ -137,8 +137,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   grid: 'Show/hide grid lines',
   animate: 'Enable/disable animation',
   showLabel: 'Show/hide data labels',
-  xFormat: 'X-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
-  yFormat: 'Y-axis label format {type?, prefix?, suffix?, currency?, decimals?}',
+  xFormat: 'X-axis label format, as a value format is written — number:1, compact, currency:KRW, percent, date, time',
+  yFormat: 'Y-axis label format, as a value format is written — number:1, compact, currency:KRW, percent, date, time',
   valueAxisZero: 'Value axis reaches zero (default); false spans the data — for values far from zero (bar/line/area)',
   xAxisType: "'value' — points at their numeric x (uneven times or distances), not evenly spaced categories (line/area)",
   // table / list
@@ -228,8 +228,8 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   grid: { type: 'boolean', default: true },
   animate: { type: 'boolean', default: true },
   showLabel: { type: 'boolean' },
-  xFormat: { type: 'object' },
-  yFormat: { type: 'object' },
+  xFormat: { type: 'string' },
+  yFormat: { type: 'string' },
   valueAxisZero: { type: 'boolean', default: true },
   xAxisType: { type: '"category" | "value"', default: 'category' },
   pageSize: { type: 'number' },
@@ -273,6 +273,9 @@ const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, P
     maxItems: { desc: 'Show at most this many rows (when not paged), then a line saying how many more' },
   },
   'bar-list': { max: { desc: 'The scale the bars share (default: the largest value)' } },
+  'chart.bar': { unit: { desc: 'Written after each figure on the value axis and in the tooltip' } },
+  'chart.line': { unit: { desc: 'Written after each figure on the value axis and in the tooltip' } },
+  'chart.area': { unit: { desc: 'Written after each figure on the value axis and in the tooltip' } },
   rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
   kv: { layout: choice(['vertical', 'horizontal', 'grid'], 'vertical'), columns: { default: 2, desc: 'Number of grid columns (grid layout)' } },
   steps: { layout: choice(['vertical', 'horizontal'], 'vertical') },
@@ -346,9 +349,9 @@ function withNamesAndEnums(fields: Record<string, readonly Omit<DataFieldInfo, '
 
 /** Relevant option keys per widget type. Only lists keys from OPTION_DOCS. */
 export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
-  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
-  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
-  'chart.area': ['smooth', 'stack', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
+  'chart.bar': ['stack', 'horizontal', 'histogram', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'unit', 'valueAxisZero', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
+  'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'unit', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
+  'chart.area': ['smooth', 'stack', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'unit', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel', 'echarts'],
   'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel', 'echarts'],

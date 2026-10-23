@@ -75,6 +75,22 @@
 
 ### Changed
 
+- **Breaking:** a format is written one way everywhere. A chart's `xFormat` · `yFormat` · `valueAxisFormat` ·
+  `categoryAxisFormat` is a format string, as a value's `format` and a column's are — the object is not read, and
+  `validate` names it:
+
+  | Was | Now |
+  |---|---|
+  | `{ type: 'time' }` (any `type` alone) | `'time'` |
+  | `{ type: 'number', decimals: 1 }` | `'number:1'` |
+  | `{ type: 'currency', currency: 'KRW' }` | `'currency:KRW'` |
+  | `{ type: 'number', compact: true }` · with `currency` | `'compact'` · `'compact:KRW'` |
+  | `{ suffix: '%' }` | `'percent'` |
+  | `{ suffix: ' kg' }` | `options.unit: 'kg'` (the value axis and the tooltip) |
+
+  A percent on an axis is written as the widget's locale writes one (`50 %` in German). The grammar gains `compact`
+  (`1.2M`), `compact:2` and `compact:KRW` (`₩1.2억`) for every widget's values too.
+
 - The JSON schema's table column is the column as it is: `tone` (one of the eleven) where it still named the old
   `variant` — a column with a `tone` failed it; `format` takes the forms with a suffix (`number:2`, `currency:EUR`);
   and the new `unit`, `toneField`, `cell` and `max`.
