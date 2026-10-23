@@ -153,6 +153,7 @@ const EN: ToolLabels = {
     level: 'Level',
     tone: 'Tone',
     emphasis: 'Emphasis',
+    glyph: 'Mark',
     language: 'Language',
     expression: 'Expression',
     text: 'Text',

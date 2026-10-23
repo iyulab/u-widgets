@@ -133,6 +133,7 @@ export const toolLabelsKo: ToolLabels = {
     level: '수준',
     tone: '상태 톤',
     emphasis: '강조',
+    glyph: '표시 기호',
     language: '언어',
     expression: '수식',
     text: '텍스트',

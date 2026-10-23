@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `status-card` takes `data.glyph`: the badge's mark in place of its tone's (✓ ▲ ✕ …) — a state an app names its own way
+  keeps its own mark.
+
+### Fixed
+
+- The `warn` tone reads on a light page: its text and mark are `#b45309` (5.0:1 on the page, 3.8:1 on its own badge),
+  where they took the warning colour `#d97706` (3.2:1, and 2.5–2.8:1 on a badge). `--u-widget-warning` — a fill, a chart's
+  series — is unchanged, and the dark theme keeps `#fbbf24`. Every tone is now checked at 4.5:1 on the page and 3:1 on
+  its own badge, in both themes.
+
 ## [0.41.1] - 2026-10-23
 
 ### Changed

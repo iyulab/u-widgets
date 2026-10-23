@@ -70,7 +70,9 @@ export const themeStyles = css`
     --u-widget-tone-ok: var(--u-widget-positive);
     --u-widget-tone-info: #2563eb; /* 5.17 on bg — its own blue, not the accent */
     --u-widget-tone-watch: #a16207; /* 4.92 */
-    --u-widget-tone-warn: var(--u-widget-warning);
+    /* 5.02 on bg — darker than the warning colour (a fill, a chart's series): a tone is read as text and as a mark, and
+       #d97706 was 3.19 on bg and 2.75 on its own badge. */
+    --u-widget-tone-warn: #b45309;
     --u-widget-tone-alarm: var(--u-widget-negative);
     --u-widget-tone-off: #78716c; /* 4.80 — a warm grey, apart from idle */
     --u-widget-tone-idle: #64748b; /* 4.76 — a cool grey */
@@ -134,6 +136,7 @@ export const themeStyles = css`
       --u-widget-on-positive: #1e1e2e;
       --u-widget-tone-info: #60a5fa;
       --u-widget-tone-watch: #facc15;
+      --u-widget-tone-warn: #fbbf24;
       --u-widget-tone-off: #a8a29e;
       --u-widget-tone-idle: #94a3b8;
 
@@ -172,6 +175,7 @@ export const themeStyles = css`
     --u-widget-on-positive: #1e1e2e;
     --u-widget-tone-info: #60a5fa;
     --u-widget-tone-watch: #facc15;
+    --u-widget-tone-warn: #fbbf24;
     --u-widget-tone-off: #a8a29e;
     --u-widget-tone-idle: #94a3b8;
 

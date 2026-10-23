@@ -18,6 +18,8 @@ interface Card {
   subtitle?: string;
   tone?: Tone;
   status?: string;
+  /** The badge's mark — the tone's own when not given. */
+  glyph?: string;
   emphasis?: Emphasis;
   image?: string;
   icon?: string;
@@ -233,7 +235,7 @@ export class UwStatusCard extends LitElement {
             ${card.subtitle ? html`<div class="subtitle" part="subtitle">${card.subtitle}</div>` : nothing}
           </div>
           </div>
-          ${status ? html`<span class="badge" part="badge">${card.tone ? html`<span class="glyph" aria-hidden="true">${TONE_GLYPHS[card.tone]}</span>` : nothing}${status}</span>` : nothing}
+          ${status ? html`<span class="badge" part="badge">${card.tone ? html`<span class="glyph" aria-hidden="true">${card.glyph ?? TONE_GLYPHS[card.tone]}</span>` : nothing}${status}</span>` : nothing}
         </div>
         <div class="body">
           ${card.readings.length > 0 ? html`
@@ -273,6 +275,7 @@ export class UwStatusCard extends LitElement {
       subtitle: text(d.subtitle),
       tone: normalizeTone(d.tone, 'uw-status-card'),
       status: text(d.status),
+      glyph: text(d.glyph),
       emphasis: normalizeEmphasis(d.emphasis, 'uw-status-card'),
       image: safeImage(d.image),
       icon: text(d.icon),

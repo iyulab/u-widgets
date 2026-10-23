@@ -195,3 +195,44 @@ describe('WCAG AA color contrast (minimum 4.5:1)', () => {
     });
   });
 });
+
+describe('tone contrast — a tone is read as text and as a mark', () => {
+  /** The declarations of the block `selector` opens, as written. */
+  function declared(selector: string): Record<string, string> {
+    const css = themeStyles.cssText;
+    const start = css.indexOf(`${selector} {`);
+    const body = css.slice(start + selector.length + 2, css.indexOf('}', start));
+    return Object.fromEntries([...body.matchAll(/(--u-widget-[\w-]+):\s*([^;]+);/g)].map(m => [m[1]!, m[2]!.trim()]));
+  }
+  /** Every token of a theme with each `var()` resolved within it, in the form the contrast check reads (`#ffffff`). */
+  function resolved(all: Record<string, string>): Record<string, string> {
+    const resolve = (value: string): string => {
+      const ref = /^var\((--u-widget-[\w-]+)\)$/.exec(value);
+      return ref ? resolve(all[ref[1]!]!) : value;
+    };
+    const long = (v: string) => (/^#[0-9a-f]{3}$/i.test(v) ? `#${[...v.slice(1)].map(c => c + c).join('')}` : v);
+    return Object.fromEntries(Object.entries(all).map(([k, v]) => [k, long(resolve(v))]));
+  }
+  /** `hex` laid at `alpha` over `under` — a badge's tint of its tone. */
+  const over = (hex: string, alpha: number, under: string) => {
+    const c = (h: string, i: number) => parseInt(h.slice(1 + 2 * i, 3 + 2 * i), 16);
+    return `#${[0, 1, 2].map(i => Math.round(c(hex, i) * alpha + c(under, i) * (1 - alpha)).toString(16).padStart(2, '0')).join('')}`;
+  };
+  // A dark theme declares only what it changes; the rest is the light declaration, resolved against the dark values.
+  const light = declared(':host(:not([nested]))');
+  const themes = { light: resolved(light), dark: resolved({ ...light, ...declared(':host([theme="dark"]:not([nested]))') }) };
+  const TONES = ['ok', 'info', 'watch', 'warn', 'alarm', 'off', 'idle', 'accent'] as const;
+
+  for (const [theme, t] of Object.entries(themes)) {
+    for (const tone of TONES) {
+      it(`${theme} ${tone}: 4.5:1 on the page, 3:1 on its own badge`, () => {
+        const ink = t[`--u-widget-tone-${tone}`]!;
+        const bg = t['--u-widget-bg']!;
+        expect(contrastRatio(ink, bg)).toBeGreaterThanOrEqual(4.5);
+        // A status badge is a 14% tint of its tone (uw-status-card): its glyph and word are drawn in the tone on it.
+        for (const page of [bg, t['--u-widget-surface']!]) expect(contrastRatio(ink, over(ink, 0.14, page))).toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+});
+

@@ -37,6 +37,12 @@ describe('uw-status-card', () => {
     expect(root.querySelector('[part="badge"]')?.textContent).toBe('✕경보');
   });
 
+  it('marks the badge with the glyph it is given, in place of the tone’s', async () => {
+    const root = await card({ title: 'Line 2', tone: 'warn', status: 'Delayed', glyph: '!' }, { locale: 'en-US' });
+    expect(root.querySelector('[part="badge"]')?.textContent).toBe('!Delayed');
+    expect(root.querySelector('.card')!.getAttribute('data-tone')).toBe('warn');
+  });
+
   it('draws a meter against its range, kept within the bar', async () => {
     const root = await card({ title: 'Tank', meter: { value: 150, min: 0, max: 120, unit: 'L' } });
     expect((root.querySelector('.meter-fill') as HTMLElement).style.width).toBe('100.0%');
