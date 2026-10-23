@@ -21,6 +21,7 @@ import './uw-code.js';
 import './uw-citation.js';
 import './uw-status.js';
 import './uw-status-card.js';
+import './uw-header.js';
 import './uw-steps.js';
 import './uw-rating.js';
 import './uw-video.js';
@@ -211,16 +212,6 @@ export class UWidget extends LitElement {
       .divider-spacing-large { margin: 24px 0; }
 
       /* ── header widget ── */
-      .header-widget {
-        font-family: var(--u-widget-font-display);
-        font-weight: 600;
-        color: var(--u-widget-text, #1a1a2e);
-        margin: 0;
-      }
-
-      .header-widget[data-level='1'] { font-size: 1.5rem; }
-      .header-widget[data-level='2'] { font-size: 1.25rem; }
-      .header-widget[data-level='3'] { font-size: 1.1rem; }
 
       /* ── responsive: narrow container ── */
       @container u-widget (max-width: 20rem) {
@@ -251,9 +242,6 @@ export class UWidget extends LitElement {
           font-size: var(--u-widget-font-size-label, 0.8125rem);
         }
 
-        .header-widget[data-level='1'] { font-size: 1.25rem; }
-        .header-widget[data-level='2'] { font-size: 1.1rem; }
-        .header-widget[data-level='3'] { font-size: 1rem; }
       }
     `,
   ];
@@ -419,7 +407,7 @@ export class UWidget extends LitElement {
         widgetHtml = this.renderDivider(resolved);
         break;
       case 'header':
-        widgetHtml = this.renderHeader(resolved);
+        widgetHtml = html`<uw-header .spec=${resolved} theme=${t ?? nothing} nested></uw-header>`;
         break;
       default:
         // chart.* types are handled by uw-chart if loaded (separate entry point)
@@ -505,19 +493,6 @@ export class UWidget extends LitElement {
   }
 
   /** Render inline header widget. */
-  private renderHeader(spec: UWidgetSpec) {
-    const data = spec.data as Record<string, unknown> | undefined;
-    const text = String(data?.text ?? spec.title ?? '');
-    const level = String(data?.level ?? '2');
-
-    if (!text) return nothing;
-
-    return html`
-      <div class="header-widget" data-level=${level} part="header" role="heading" aria-level=${level}>
-        ${text}
-      </div>
-    `;
-  }
 
   /** Dispatch an action event from the global action bar or actions widget. */
   private _dispatchAction(spec: UWidgetSpec, action: UWidgetAction) {

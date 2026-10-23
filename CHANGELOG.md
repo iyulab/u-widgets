@@ -4,6 +4,10 @@
 
 ### Added
 
+- `header` is a title block: besides `text` and `level`, a `kicker` above, a `subtitle` under, the `date` and `time` it
+  is for or a running `clock: true`, `aside` label · value pairs (formatted, toned) and the state as a `tone` badge with
+  `status` words. It is drawn by its own element, `<uw-header>` (the heading keeps `role="heading"` and its level).
+
 - `list` rows as a board shows them: `mapping.tone` (each row's tone — its mark and colour; `past` dims a row, `now`
   picks it out), `mapping.time` (a time first in each row, a date-time as its time of day), `mapping.columns` (values
   after the text, each formatted, under a caption row when labelled), `options.maxItems` (then «+N more», new locale

@@ -210,6 +210,19 @@ each formatted, under a caption row when any column has a `label`.
   "options": { "maxItems": 6 } }
 ```
 
+## Header
+
+`header` is a heading — `text` at `level` 1–3 — with what usually stands around a board's or a section's title:
+a `kicker` above it (a series, a site), a `subtitle` under it, and on the far side the `date` and `time` it is for
+(a date-time shows its time of day) or a running `clock: true` (hours and minutes, refreshed while on the page), a few
+`aside` pairs (`[{ label, value, unit?, format?, tone? }]`) and the state of the whole as a `tone` badge with its
+`status` words. Narrow, the far side wraps under the heading.
+
+```json
+{ "widget": "header", "data": { "kicker": "Port of Incheon", "text": "Harbour cranes", "level": 1, "clock": true,
+  "aside": [{ "label": "Working", "value": 9 }, { "label": "Down", "value": 1, "tone": "alarm" }], "tone": "watch" } }
+```
+
 ## Status card
 
 `status-card` is one asset or place — a pump, a rack, a stall, a ticket — with its state and a few readings. It reads

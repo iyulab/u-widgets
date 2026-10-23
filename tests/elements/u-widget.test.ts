@@ -594,7 +594,7 @@ describe('u-widget', () => {
       data: { text: 'Dashboard' },
     });
     const shadow = await render(el);
-    const header = shadow.querySelector('[role="heading"]');
+    const header = shadow.querySelector('uw-header')?.shadowRoot?.querySelector('[role="heading"]');
     expect(header).not.toBeNull();
     expect(header?.textContent?.trim()).toBe('Dashboard');
   });
@@ -605,7 +605,7 @@ describe('u-widget', () => {
       data: { text: 'Title', level: 1 },
     });
     const shadow = await render(el);
-    const header = shadow.querySelector('[role="heading"]');
+    const header = shadow.querySelector('uw-header')?.shadowRoot?.querySelector('[role="heading"]');
     expect(header?.getAttribute('aria-level')).toBe('1');
     expect(header?.getAttribute('data-level')).toBe('1');
   });
@@ -616,7 +616,7 @@ describe('u-widget', () => {
       data: { text: 'Subtitle' },
     });
     const shadow = await render(el);
-    const header = shadow.querySelector('[role="heading"]');
+    const header = shadow.querySelector('uw-header')?.shadowRoot?.querySelector('[role="heading"]');
     expect(header?.getAttribute('aria-level')).toBe('2');
   });
 
@@ -636,7 +636,7 @@ describe('u-widget', () => {
       data: {},
     });
     const shadow = await render(el);
-    const header = shadow.querySelector('[role="heading"]');
+    const header = shadow.querySelector('uw-header')?.shadowRoot?.querySelector('[role="heading"]');
     expect(header?.textContent?.trim()).toBe('From Title');
   });
 

@@ -98,7 +98,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'math', category: 'content', description: 'Render LaTeX mathematical expressions via KaTeX', mappingKeys: [], dataShape: 'object' },
   { widget: 'actions', category: 'content', description: 'Standalone action buttons (quick replies, suggested actions)', mappingKeys: [], dataShape: 'none' },
   { widget: 'divider', category: 'content', description: 'Visual separator with optional label', mappingKeys: [], dataShape: 'none' },
-  { widget: 'header', category: 'content', description: 'Section heading (h1–h3)', mappingKeys: [], dataShape: 'object' },
+  { widget: 'header', category: 'content', description: 'A title block: heading (h1–h3) with kicker, subtitle, date and time or a clock, a few values and a state', mappingKeys: [], dataShape: 'object' },
   // Composition
   { widget: 'compose', category: 'composition', description: 'Combine multiple widgets with layout hints', mappingKeys: [], dataShape: 'none' },
 ]);

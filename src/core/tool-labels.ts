@@ -158,6 +158,11 @@ const EN: ToolLabels = {
     meter: 'Meter',
     image: 'Picture',
     note: 'Note',
+    kicker: 'Kicker',
+    date: 'Date',
+    time: 'Time',
+    clock: 'Clock',
+    aside: 'Side values',
   },
   widgetOptions: {
     rating: { max: 'Icons' },

@@ -429,6 +429,14 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'header': [
     { key: 'text', type: 'string', desc: 'Heading text', required: true },
     { key: 'level', type: '1 | 2 | 3', desc: 'Heading level (default 2)' },
+    { key: 'kicker', type: 'string', desc: 'A line above the heading — a series, a site' },
+    { key: 'subtitle', type: 'string', desc: 'A line under the heading' },
+    { key: 'date', type: 'string', desc: 'The date it is for, shown in the widget locale' },
+    { key: 'time', type: 'string', desc: 'The time it is for — a date-time shows its time of day' },
+    { key: 'clock', type: 'boolean', desc: 'Show a running clock (hours and minutes) instead of a time' },
+    { key: 'aside', type: 'Array<{ label, value, unit?, format?, tone? }>', desc: 'A few label · value pairs beside the heading' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'The state of the whole, as a badge' },
+    { key: 'status', type: 'string', desc: 'The badge\'s words (default: the tone\'s name)' },
   ],
   'video': [
     { key: 'src', type: 'string', desc: 'Video URL', required: true },
@@ -523,7 +531,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'math': 'No mapping. data is {expression}. Renders LaTeX via KaTeX. displayMode in options.',
   'actions': 'No data. Uses actions[] array. layout in options (wrap/column).',
   'divider': 'No data. label/spacing in options.',
-  'header': 'data is {text, level?}. level defaults to 2.',
+  'header': 'data is {text, level?, kicker?, subtitle?, date?, time? | clock: true, aside?: [{label, value, unit?}], tone?, status?}. level defaults to 2.',
 };
 
 /** Events emitted per widget category. */

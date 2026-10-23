@@ -138,6 +138,11 @@ export const toolLabelsKo: ToolLabels = {
     meter: '미터',
     image: '그림',
     note: '메모',
+    kicker: '머리말',
+    date: '날짜',
+    time: '시각',
+    clock: '시계',
+    aside: '곁 값',
   },
   widgetOptions: {
     rating: { max: '아이콘 수' },
