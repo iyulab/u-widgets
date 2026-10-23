@@ -168,6 +168,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   columns: 'Number of grid columns',
   widths: 'Column width ratios (number[], "auto", "stretch")',
   spacing: 'Spacing size (small, default, large)',
+  cell: 'Cell shape: square (label inside), chip (a wider pill) or dot (the tone alone)',
+  counts: 'Add a key: how many cells are in each tone',
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
@@ -246,6 +248,8 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   frame: choice(FRAMES),
   overflow: choice(['clip', 'fade', 'scroll'], 'clip'),
   maxItems: { type: 'number' },
+  cell: choice(['square', 'chip', 'dot'], 'square'),
+  counts: { type: 'boolean', default: false },
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
@@ -356,6 +360,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'citation': ['compact', 'numbered'],
   'status': [],
   'status-card': ['overflow'],
+  'status-grid': ['columns', 'cell', 'counts'],
   'steps': ['layout', 'compact'],
   'rating': ['max', 'interactive', 'icon', 'label'],
   'video': ['autoplay', 'controls', 'loop', 'muted'],
@@ -467,6 +472,13 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'snippet', type: 'string', desc: 'Excerpt text' },
     { key: 'source', type: 'string', desc: 'Source name' },
   ],
+  'status-grid': [
+    { key: 'label', type: 'string', desc: 'The cell\'s name — a seat, a bed, a bay' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state' },
+    { key: 'value', type: 'string | number', desc: 'A value under the name' },
+    { key: 'unit', type: 'string', desc: 'The value\'s unit' },
+    { key: 'format', type: 'string', desc: 'The value\'s format (number:1, percent, …)' },
+  ],
   'status-card': [
     { key: 'title', type: 'string', desc: 'The asset or place', required: true },
     { key: 'subtitle', type: 'string', desc: 'A second line under the name' },
@@ -522,6 +534,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'kv': 'No mapping. data is {key: val, ...} or [{label, value, unit?, format?, tone?, note?}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
+  'status-grid': 'No mapping. data is [{label?, tone, value?, unit?, format?}]. columns, cell (square/chip/dot) and counts in options.',
   'status-card': 'No mapping. data is {title, subtitle?, tone?, status?, emphasis?, readings?: [{label, value, unit?, format?, tone?}], meter?: {value, min?, max?, unit?}, image?, icon?, note?}.',
   'status': 'No mapping. data is {label?, value?, tone?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
   'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',

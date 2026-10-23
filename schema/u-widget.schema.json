@@ -19,7 +19,7 @@
         "chart.gantt",
         "form", "confirm",
         "markdown", "image", "callout",
-        "kv", "code", "citation", "status", "status-card", "steps",
+        "kv", "code", "citation", "status", "status-card", "status-grid", "steps",
         "rating", "video", "gallery", "math",
         "actions", "divider", "header"
       ],

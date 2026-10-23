@@ -56,6 +56,7 @@ const EN: ToolLabels = {
     'citation': 'Citation',
     'status': 'Status',
     'status-card': 'Status card',
+    'status-grid': 'Status grid',
     'steps': 'Steps',
     'rating': 'Rating',
     'video': 'Video',
@@ -121,6 +122,8 @@ const EN: ToolLabels = {
     frame: 'Frame',
     overflow: 'Overflow',
     maxItems: 'Most rows',
+    cell: 'Cell shape',
+    counts: 'Counts',
   },
   dataFields: {
     value: 'Value',
@@ -163,6 +166,7 @@ const EN: ToolLabels = {
     time: 'Time',
     clock: 'Clock',
     aside: 'Side values',
+    format: 'Value format',
   },
   widgetOptions: {
     rating: { max: 'Icons' },

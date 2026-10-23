@@ -4,6 +4,10 @@
 
 ### Added
 
+- `status-grid` widget: many small cells, each with a state — `[{ label?, tone, value?, unit?, format? }]`, the cells
+  `square`, `chip` or `dot` (`options.cell`), `options.columns` to a row, and with `options.counts` a key of how many
+  cells are in each tone. Each cell is spoken as its label, value and tone.
+
 - `kv` is a stat list: an array item takes `unit`, `format` (the value formatted), `tone` (its colour and mark) and a
   `note` under the value.
 

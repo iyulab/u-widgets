@@ -36,6 +36,7 @@ export const toolLabelsKo: ToolLabels = {
     'citation': '인용',
     'status': '상태',
     'status-card': '상태 카드',
+    'status-grid': '상태 격자',
     'steps': '단계',
     'rating': '평점',
     'video': '동영상',
@@ -101,6 +102,8 @@ export const toolLabelsKo: ToolLabels = {
     frame: '틀',
     overflow: '넘칠 때',
     maxItems: '최대 행 수',
+    cell: '칸 모양',
+    counts: '개수',
   },
   dataFields: {
     value: '값',
@@ -143,6 +146,7 @@ export const toolLabelsKo: ToolLabels = {
     time: '시각',
     clock: '시계',
     aside: '곁 값',
+    format: '값 서식',
   },
   widgetOptions: {
     rating: { max: '아이콘 수' },

@@ -19,7 +19,7 @@ export const KNOWN_WIDGETS: readonly string[] = [
   'metric', 'stat-group', 'gauge', 'progress',
   'table', 'list', 'form', 'confirm', 'compose',
   'markdown', 'image', 'callout', 'math',
-  'kv', 'code', 'citation', 'status', 'status-card', 'steps', 'rating',
+  'kv', 'code', 'citation', 'status', 'status-card', 'status-grid', 'steps', 'rating',
   'video', 'gallery', 'actions', 'divider', 'header',
 ];
 

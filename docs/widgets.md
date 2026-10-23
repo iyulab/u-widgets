@@ -48,6 +48,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
 | `citation` | Source/reference cards | — (uses data array) |
 | `status` | Inline status badge | — (uses `data.value`, `data.label?`, `data.tone` — [Tones](#tones)) |
+| `status-grid` | Many small cells, each with a state | — (uses `data[].tone`, `data[].label` — [Status grid](#status-grid)) |
 | `status-card` | One asset or place: name, state, readings | — (uses `data.title`, `data.tone`, `data.readings` — [Status card](#status-card)) |
 | `steps` | Multi-step progress | — (uses data array) |
 | `rating` | Star/heart/thumb rating | — (uses `data.value`) |
@@ -234,6 +235,20 @@ a `kicker` above it (a series, a site), a `subtitle` under it, and on the far si
 ```json
 { "widget": "header", "data": { "kicker": "Port of Incheon", "text": "Harbour cranes", "level": 1, "clock": true,
   "aside": [{ "label": "Working", "value": 9 }, { "label": "Down", "value": 1, "tone": "alarm" }], "tone": "watch" } }
+```
+
+## Status grid
+
+`status-grid` is many small cells, each with a state — the seats of a hall, the beds of a ward, the bays of a rack,
+the lamps of an annunciator. Its data is `[{ label?, tone, value?, unit?, format? }]`: each cell in its tone, with its
+label (and value) inside and the whole spoken as its name. `options.columns` fixes how many go to a row (otherwise as
+many as fit); `options.cell` is `square` (default), `chip` (a wider pill) or `dot` (the tone alone — the label stays its
+name); `options.counts: true` adds a key with how many cells are in each tone.
+
+```json
+{ "widget": "status-grid", "title": "Ward 4B",
+  "data": [{ "label": "01", "tone": "ok" }, { "label": "02", "tone": "alarm" }, { "label": "03", "tone": "idle" }],
+  "options": { "columns": 6, "counts": true } }
 ```
 
 ## Status card

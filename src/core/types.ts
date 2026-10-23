@@ -52,6 +52,7 @@ export type WidgetType =
   | 'citation'
   | 'status'
   | 'status-card'
+  | 'status-grid'
   | 'steps'
   | 'rating'
   | 'video'

@@ -89,6 +89,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'code', category: 'content', description: 'Syntax-highlighted code block with line numbers and copy button', mappingKeys: [], dataShape: 'object' },
   { widget: 'citation', category: 'content', description: 'Source/reference cards with title, URL, snippet, and source', mappingKeys: [], dataShape: 'array' },
   { widget: 'status', category: 'content', description: 'Status indicators with label, value, and a tone (colour and mark)', mappingKeys: [], dataShape: 'array' },
+  { widget: 'status-grid', category: 'content', description: 'Many small cells, each with a state — seats, beds, bays, lamps — and a count per state', mappingKeys: [], dataShape: 'array' },
   { widget: 'status-card', category: 'content', description: 'One asset or place: its name, its state as a tone, a few readings, a meter and a picture', mappingKeys: [], dataShape: 'object' },
   { widget: 'steps', category: 'content', description: 'Multi-step progress indicator (done/active/pending/error)', mappingKeys: [], dataShape: 'array' },
   { widget: 'rating', category: 'content', description: 'Star/heart/thumb rating display or input', mappingKeys: [], dataShape: 'object' },
@@ -285,6 +286,16 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
     data: [
       { title: 'u-widgets Documentation', url: 'https://github.com/iyulab/u-widgets', source: 'GitHub' },
     ],
+  },
+  'status-grid': {
+    widget: 'status-grid',
+    data: [
+      { label: '1', tone: 'ok' },
+      { label: '2', tone: 'ok' },
+      { label: '3', tone: 'alarm' },
+      { label: '4', tone: 'idle' },
+    ],
+    options: { counts: true },
   },
   'status-card': {
     widget: 'status-card',
@@ -796,6 +807,21 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
           { label: 'Auth Service', value: 'Down', tone: 'alarm' },
           { label: 'Backup', value: 'Scheduled', tone: 'info' },
         ],
+      },
+    },
+  ],
+  'status-grid': [
+    {
+      label: 'A ward\'s beds',
+      spec: {
+        widget: 'status-grid',
+        title: 'Ward 4B',
+        data: [
+          { label: '01', tone: 'ok' }, { label: '02', tone: 'ok' }, { label: '03', tone: 'alarm' },
+          { label: '04', tone: 'idle' }, { label: '05', tone: 'ok' }, { label: '06', tone: 'watch' },
+          { label: '07', tone: 'off' }, { label: '08', tone: 'ok' },
+        ],
+        options: { columns: 4, counts: true },
       },
     },
   ],
