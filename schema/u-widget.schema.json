@@ -298,8 +298,8 @@
         },
         "format": {
           "type": "string",
-          "pattern": "^(number|currency|percent)(:[^\\s]+)?$|^(date|datetime|time|bytes)$",
-          "description": "Format hint — number, number:2, currency, currency:EUR, percent, percent:1, date, datetime, time, bytes"
+          "pattern": "^(number|compact|currency|percent)(:[^\\s]+)?$|^(date|datetime|time|bytes)$",
+          "description": "Format — number, number:2, compact, compact:KRW, currency, currency:EUR, percent, percent:1, date, datetime, time, bytes"
         },
         "align": {
           "type": "string",

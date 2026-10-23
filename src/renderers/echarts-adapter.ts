@@ -1530,7 +1530,8 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  * what a source sends; as labels they are unreadable. `undefined` when the values are not all such times.
  */
 function timeCategories(values: unknown[], options: Record<string, unknown>): string[] | undefined {
-  if (options.xFormat || options.categoryAxisFormat || options.horizontal || options.xAxisType) return undefined;
+  // Only a format that is read counts — an axis format written as the old object is not, so the labels stay readable.
+  if (formatOption(options.xFormat) || formatOption(options.categoryAxisFormat) || options.horizontal || options.xAxisType) return undefined;
   if (values.length === 0 || !values.every((v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v))) return undefined;
   // Read as the date formats read them: a date alone is local midnight, not UTC.
   const times = values.map((v) => parseDateText(v as string));

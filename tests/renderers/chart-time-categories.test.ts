@@ -23,6 +23,11 @@ describe('chart x values that are ISO times', () => {
     expect(line(['2026-10-23T09:00:00'], { xFormat: 'datetime' }).xAxis.data).toEqual(['2026-10-23T09:00:00']);
     expect(line(['2026-10-23T09:00:00', 'later']).xAxis.data).toEqual(['2026-10-23T09:00:00', 'later']);
   });
+
+  it('are labelled when the axis format is the old object, which is not read', () => {
+    const labels = line(['2026-10-23T09:00:00', '2026-10-23T10:00:00'], { xFormat: { type: 'time' } }).xAxis.data;
+    expect(labels.every(l => !l.includes('T'))).toBe(true);
+  });
 });
 
 describe('a value axis format', () => {

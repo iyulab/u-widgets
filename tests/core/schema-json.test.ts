@@ -113,7 +113,7 @@ describe('u-widget.schema.json', () => {
     expect(Object.keys(column.properties).sort()).toEqual(['align', 'cell', 'field', 'format', 'label', 'max', 'tone', 'toneField', 'unit']);
     expect(column.properties.tone.enum).toEqual([...TONES]);
     const format = new RegExp(column.properties.format.pattern);
-    for (const ok of ['number', 'number:2', 'currency:EUR', 'percent:1', 'date', 'bytes']) expect(format.test(ok), ok).toBe(true);
+    for (const ok of ['number', 'number:2', 'compact', 'compact:KRW', 'currency:EUR', 'percent:1', 'date', 'bytes']) expect(format.test(ok), ok).toBe(true);
     for (const bad of ['number 2', 'dates', '']) expect(format.test(bad), bad).toBe(false);
   });
 });
