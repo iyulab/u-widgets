@@ -383,3 +383,73 @@ describe('uw-gauge — value in the widget locale (#1426 class)', () => {
     expect(valueText(await render(el))).toBe('79.17');
   });
 });
+
+describe('uw-gauge — forms, band, marks and tone', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const gauge = (options: Record<string, unknown>, data: Record<string, unknown> = { value: 60 }) =>
+    render(createElement({ widget: 'gauge', data, options }));
+
+  it('draws a level for vertical, tank and thermometer — the same meter, the reading above it', async () => {
+    for (const form of ['vertical', 'tank', 'thermometer']) {
+      const shadow = await gauge({ form, unit: '%' });
+      const container = shadow.querySelector('.gauge-container')!;
+      expect(container.getAttribute('data-form')).toBe(form);
+      expect(container.getAttribute('role')).toBe('meter');
+      expect(container.getAttribute('aria-valuetext')).toBe('60%');
+      expect(shadow.querySelector('.gauge-level-value')?.textContent).toContain('60');
+      expect(shadow.querySelector('.gauge-level')).not.toBeNull();
+      expect(shadow.querySelector('.gauge-track')).toBeNull();
+    }
+  });
+
+  it('raises a vertical level to its fraction of the scale', async () => {
+    const shadow = await gauge({ form: 'vertical', min: 0, max: 200 }, { value: 50 });
+    const level = shadow.querySelector('[part="level"]')!;
+    // The column runs from y 54 to 194: a quarter of it is 35 high.
+    expect(Number(level.getAttribute('height'))).toBeCloseTo(35);
+  });
+
+  it('falls back to the arc for an unknown form', async () => {
+    const shadow = await gauge({ form: 'dial' });
+    expect(shadow.querySelector('.gauge-container')?.getAttribute('data-form')).toBe('arc');
+    expect(shadow.querySelector('.gauge-track')).not.toBeNull();
+  });
+
+  it('draws the band beside the scale, a lone lo running to the top', async () => {
+    const level = await gauge({ form: 'vertical', min: 0, max: 100, band: { lo: 50 } });
+    const line = level.querySelector('[part="band"]')!;
+    expect([Number(line.getAttribute('y1')), Number(line.getAttribute('y2'))]).toEqual([54, 124]);
+    expect((await gauge({ band: { lo: 20, hi: 80 } })).querySelector('path.gauge-band')).not.toBeNull();
+    expect((await gauge({ band: { lo: 80, hi: 20 } })).querySelector('[part="band"]')).toBeNull();
+    expect((await gauge({ band: {} })).querySelector('[part="band"]')).toBeNull();
+  });
+
+  it('draws the marks with their labels, widening the arc to hold them', async () => {
+    const arc = await gauge({ marks: [{ at: 90, label: 'Trip' }, { at: 10 }, { label: 'no place' }] });
+    expect(arc.querySelectorAll('[part="mark"]')).toHaveLength(2);
+    expect([...arc.querySelectorAll('.gauge-mark')].map(t => t.textContent)).toEqual(['Trip']);
+    expect(arc.querySelector('svg')?.getAttribute('viewBox')).toBe('-18 -14 236 209');
+    const plain = await gauge({});
+    expect(plain.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 200 195');
+    const tank = await gauge({ form: 'tank', marks: [{ at: 80, label: 'High' }] });
+    expect(tank.querySelector('.gauge-mark')?.textContent).toBe('High');
+  });
+
+  it('takes its colour from data.tone over the thresholds, and from a threshold tone', async () => {
+    const thresholds = [{ to: 50, color: 'green' }, { to: 100, tone: 'alarm', label: 'Hot' }];
+    const byStep = await gauge({ thresholds }, { value: 70 });
+    expect(byStep.querySelector('.gauge-fill')?.getAttribute('stroke')).toBe('var(--u-widget-tone-alarm)');
+    const byData = await gauge({ thresholds }, { value: 70, tone: 'watch' });
+    expect(byData.querySelector('.gauge-fill')?.getAttribute('stroke')).toBe('var(--u-widget-tone-watch)');
+    const level = await gauge({ form: 'tank', thresholds }, { value: 20 });
+    expect(level.querySelector('[part="level"]')?.getAttribute('fill')).toBe('#16a34a');
+  });
+
+  it('gives progress a threshold tone too', async () => {
+    const shadow = await render(createElement({ widget: 'progress', data: { value: 90 }, options: { thresholds: [{ to: 100, tone: 'warn' }] } }));
+    expect((shadow.querySelector('.progress-bar-fill') as HTMLElement).style.background).toBe('var(--u-widget-tone-warn)');
+  });
+});

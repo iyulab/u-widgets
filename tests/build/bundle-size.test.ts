@@ -80,7 +80,7 @@ describe('bundle size budget', () => {
     expect(size).toBeLessThan(11.5 * 1024);
   });
 
-  it('tools bundle (with its names chunk) is under 20.5 KB gzip', () => {
+  it('tools bundle (with its names chunk) is under 22 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-tools.js')) + gzipSize(resolve(DIST, toolLabelsChunk()));
     // includes EXAMPLES, WIDGET_OPTIONS, WIDGET_DATA_FIELDS, WIDGET_INFERENCE, OPTION_TYPES.
     // Re-baselined from 13 KB for chart.gantt's catalog entry, template and two examples (0.20.0,
@@ -101,7 +101,10 @@ describe('bundle size budget', () => {
     // Re-baselined from 19 KB for the header block, the stat list and the status grid: 19.43 KB measured. This entry is
     // the catalog — every widget brings its fields, options, template and example (about 0.3–0.5 KB each); the budget
     // grows with the widgets, a jump well past that is what it is here to catch.
-    expect(size).toBeLessThan(20.5 * 1024);
+    // Re-baselined from 20.5 KB for the bar list and the gauge's forms, band and marks: 20.67 KB measured — the bar
+    // list's fields, options, template and two examples, three gauge options and two examples, their names in English
+    // and Korean.
+    expect(size).toBeLessThan(22 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {

@@ -108,6 +108,8 @@ export const toolLabelsKo: ToolLabels = {
     form: '그리는 꼴',
     glyph: '그림 기호',
     glyphValue: '기호 하나의 값',
+    band: '허용 구간',
+    marks: '눈금 표시',
   },
   dataFields: {
     value: '값',

@@ -112,7 +112,9 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   min: 'Minimum range value',
   max: 'Maximum range value',
   unit: 'Display unit string',
-  thresholds: 'Color threshold breakpoints',
+  thresholds: 'Colour steps: up to each `to`, a colour or a tone (and a label)',
+  band: 'The acceptable band of the scale ({ lo, hi }), drawn beside it',
+  marks: 'Labelled lines on the scale ([{ at, label? }]) — a set level, a limit',
   label: 'Label template ({value}, {percent})',
   format: "Value format hint — 'number', 'number:2' (fixed decimals), 'percent', 'currency:EUR' … in the widget's locale (gauge/progress default: number)",
   // chart
@@ -201,7 +203,9 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   min: { type: 'number' },
   max: { type: 'number' },
   unit: { type: 'string' },
-  thresholds: { type: '{ to: number, color: string, label?: string }[]' },
+  thresholds: { type: '{ to: number, color?: string, tone?: string, label?: string }[]' },
+  band: { type: 'object' },
+  marks: { type: '{ at: number, label?: string }[]' },
   label: { type: 'string' },
   smooth: { type: 'boolean', default: false },
   stack: { type: 'boolean', default: false },
@@ -260,7 +264,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
 const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Partial<OptionTypeInfo> & { desc?: string }>>>> = {
-  gauge: { min: { default: 0 }, max: { default: 100 } },
+  gauge: { min: { default: 0 }, max: { default: 100 }, form: { ...choice(['arc', 'vertical', 'tank', 'thermometer'], 'arc'), desc: 'How the reading is drawn: an arc (default), or a level rising in a column, a tank or a thermometer' } },
   progress: { min: { default: 0 }, max: { default: 100 } },
   'bar-list': { max: { desc: 'The scale the bars share (default: the largest value)' } },
   rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
@@ -351,7 +355,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.gantt': ['categories', 'colors', 'referenceLines', 'xFormat', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'metric': ['format'],
   'stat-group': ['format'],
-  'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format'],
+  'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format', 'form', 'band', 'marks'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
   'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems'],
   'table': ['pageSize', 'compact', 'searchable'],
@@ -415,7 +419,8 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
   ],
   'gauge': [
-    { key: 'value', type: 'number', desc: 'Current value on the arc', required: true },
+    { key: 'value', type: 'number', desc: 'The reading', required: true },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state, decided elsewhere — its colour, over the thresholds' },
   ],
   'progress': [
     { key: 'value', type: 'number', desc: 'Current value', required: true },
@@ -540,7 +545,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'chart.gantt': 'mapping omittable. First string → y (row), first two number/date-like fields → start, end, next string → label. color groups intervals.',
   'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?, sparkline?, tone?, meter?, note?}.',
   'stat-group': 'No mapping needed. data is [{label, value, ...}]. Optional: icon (emoji), note (a line under the value), meter.',
-  'gauge': 'No mapping needed. data is {value}. Set min/max/unit in options.',
+  'gauge': 'No mapping needed. data is {value, tone?}. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
   'table': 'mapping.columns omittable — auto-inferred from data keys.',

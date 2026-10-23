@@ -128,6 +128,8 @@ const EN: ToolLabels = {
     form: 'Drawn as',
     glyph: 'Glyph',
     glyphValue: 'Per glyph',
+    band: 'Acceptable band',
+    marks: 'Marks',
   },
   dataFields: {
     value: 'Value',

@@ -41,7 +41,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` (bars of a group share a colour) |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
-| `gauge` | Gauge with thresholds | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
+| `gauge` | A reading against its scale — an arc, a column, a tank or a thermometer ([Gauge](#gauge)) | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
 | `progress` | Progress bar | — (uses `data.value`) |
 | `bar-list` | Items compared as bars or glyph counts | — (uses `data[].label`, `data[].value` — [Bar list](#bar-list)) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
@@ -236,6 +236,22 @@ a `kicker` above it (a series, a site), a `subtitle` under it, and on the far si
 ```json
 { "widget": "header", "data": { "kicker": "Port of Incheon", "text": "Harbour cranes", "level": 1, "clock": true,
   "aside": [{ "label": "Working", "value": 9 }, { "label": "Down", "value": 1, "tone": "alarm" }], "tone": "watch" } }
+```
+
+## Gauge
+
+`gauge` is a reading against its scale (`options.min` 0 to `options.max` 100, `options.unit`, the value written as
+`options.format` says). `options.form` draws it as an `arc` (the default) or as a level rising from the bottom — a
+`vertical` column, a `tank` or a `thermometer` — with the reading written above it. Its colour is `data.tone` when the
+state is decided elsewhere, else the `options.thresholds` step it is under: `[{ to, color | tone, label? }]`, the label
+written under the reading. `options.band: { lo, hi }` is the acceptable range, drawn beside the scale in the `ok` tone
+(`lo` or `hi` alone runs to the scale's end); `options.marks: [{ at, label? }]` are labelled lines on the scale — a set
+level, an alarm limit.
+
+```json
+{ "widget": "gauge", "title": "Cold room", "data": { "value": 3.4, "tone": "ok" },
+  "options": { "form": "thermometer", "min": -5, "max": 15, "unit": "°C", "format": "number:1",
+               "band": { "lo": 2, "hi": 8 }, "marks": [{ "at": 8, "label": "8°" }, { "at": 2, "label": "2°" }] } }
 ```
 
 ## Bar list

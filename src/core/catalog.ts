@@ -657,6 +657,22 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
         },
       },
     },
+    {
+      label: 'A thermometer with its acceptable band and limits',
+      spec: {
+        widget: 'gauge',
+        title: 'Cold room',
+        data: { value: 3.4, tone: 'ok' },
+        options: {
+          form: 'thermometer', min: -5, max: 15, unit: '°C', format: 'number:1',
+          band: { lo: 2, hi: 8 }, marks: [{ at: 8, label: '8°' }, { at: 2, label: '2°' }],
+        },
+      },
+    },
+    {
+      label: 'A tank level',
+      spec: { widget: 'gauge', title: 'Tank T-2', data: { value: 64 }, options: { form: 'tank', unit: '%', marks: [{ at: 90, label: 'High' }] } },
+    },
   ],
   'progress': [
     {

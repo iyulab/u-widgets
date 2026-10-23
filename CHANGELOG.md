@@ -4,6 +4,11 @@
 
 ### Added
 
+- `gauge` forms and scale marks: `options.form` draws the reading as an `arc` (as before) or a level rising in a
+  `vertical` column, a `tank` or a `thermometer`; `options.band: { lo, hi }` draws the acceptable range beside the
+  scale, `options.marks: [{ at, label? }]` labelled lines on it. A gauge's colour can be a state — `data.tone`, or a
+  `tone` instead of a `color` on a threshold step (on `progress` too).
+
 - `bar-list` widget: items compared as bars, without a chart's axes — `[{ label, value, max?, unit?, format?, tone?,
   note? }]`, each row its label, written value and a bar in its tone, on one scale (`options.max`, else the largest
   value) or an item's own `max`. `options.form: "pictogram"` draws a row of glyphs instead (`options.glyph`, one per
