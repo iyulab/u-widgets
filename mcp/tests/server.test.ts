@@ -180,7 +180,7 @@ describe('validate tool', () => {
     expect(unknown.warnings).toContain('did you mean "list"?');
     const option = parseText(await client.callTool({ name: 'validate', arguments: { spec: { widget: 'list', data: [], options: { dense: true } } } })) as { valid: boolean; warnings: string[] };
     expect(option.valid).toBe(true);
-    expect(option.warnings).toEqual(['options.dense is not an option of list — it takes compact']);
+    expect(option.warnings).toEqual(['options.dense is not an option of list — it takes compact, layout, maxItems']);
   });
 
   it('returns errors for wrong data type', async () => {
