@@ -76,6 +76,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array' },
   { widget: 'gauge', category: 'display', description: 'Arc gauge for a value within a range', mappingKeys: [], dataShape: 'object' },
   { widget: 'progress', category: 'display', description: 'Progress bar for a value within a range', mappingKeys: [], dataShape: 'object' },
+  { widget: 'bar-list', category: 'display', description: 'Items compared as bars or glyph counts — a label, its value and a bar each, toned', mappingKeys: [], dataShape: 'array' },
   { widget: 'table', category: 'display', description: 'Sortable data table with auto-inferred columns', mappingKeys: ['columns'], dataShape: 'array' },
   { widget: 'list', category: 'display', description: 'Structured list with avatars and trailing values', mappingKeys: ['primary', 'secondary', 'avatar', 'icon', 'trailing', 'badge', 'time', 'tone', 'columns'], dataShape: 'array' },
   // Input
@@ -230,6 +231,14 @@ const TEMPLATES: Record<string, UWidgetSpec> = {
     widget: 'progress',
     data: { value: 65 },
     options: { min: 0, max: 100, unit: '%' },
+  },
+  'bar-list': {
+    widget: 'bar-list',
+    data: [
+      { label: 'North', value: 42 },
+      { label: 'South', value: 31 },
+      { label: 'East', value: 12, tone: 'warn' },
+    ],
   },
   'table': {
     widget: 'table',
@@ -663,6 +672,28 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
             { to: 100, color: 'green' },
           ],
         },
+      },
+    },
+  ],
+  'bar-list': [
+    {
+      label: 'Stock against each shelf, one low',
+      spec: {
+        widget: 'bar-list',
+        title: 'Vaccine stock',
+        data: [
+          { label: 'Flu', value: 34, max: 40, unit: 'doses' },
+          { label: 'Tetanus', value: 9, max: 30, unit: 'doses', tone: 'warn', note: 'Order placed' },
+          { label: 'Hepatitis B', value: 18, max: 20, unit: 'doses' },
+        ],
+      },
+    },
+    {
+      label: 'A tally as glyphs (one per 5)',
+      spec: {
+        widget: 'bar-list',
+        data: [{ label: 'Calls waiting', value: 25 }, { label: 'Callbacks', value: 10 }],
+        options: { form: 'pictogram', glyph: '☎', glyphValue: 5, max: 40 },
       },
     },
   ],

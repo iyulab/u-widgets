@@ -25,6 +25,7 @@ export const toolLabelsKo: ToolLabels = {
     'stat-group': '지표 묶음',
     'gauge': '게이지',
     'progress': '진행 막대',
+    'bar-list': '막대 목록',
     'table': '표',
     'list': '목록',
     'form': '입력 양식',
@@ -104,6 +105,9 @@ export const toolLabelsKo: ToolLabels = {
     maxItems: '최대 행 수',
     cell: '칸 모양',
     counts: '개수',
+    form: '그리는 꼴',
+    glyph: '그림 기호',
+    glyphValue: '기호 하나의 값',
   },
   dataFields: {
     value: '값',

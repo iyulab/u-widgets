@@ -22,6 +22,7 @@ import './uw-citation.js';
 import './uw-status.js';
 import './uw-status-card.js';
 import './uw-status-grid.js';
+import './uw-bar-list.js';
 import './uw-header.js';
 import './uw-steps.js';
 import './uw-rating.js';
@@ -388,6 +389,9 @@ export class UWidget extends LitElement {
         break;
       case 'status-card':
         widgetHtml = html`<uw-status-card .spec=${resolved} theme=${t ?? nothing} nested></uw-status-card>`;
+        break;
+      case 'bar-list':
+        widgetHtml = html`<uw-bar-list .spec=${resolved} theme=${t ?? nothing} nested></uw-bar-list>`;
         break;
       case 'status-grid':
         widgetHtml = html`<uw-status-grid .spec=${resolved} theme=${t ?? nothing} nested></uw-status-grid>`;

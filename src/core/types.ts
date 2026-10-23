@@ -39,6 +39,7 @@ export type WidgetType =
   | 'stat-group'
   | 'gauge'
   | 'progress'
+  | 'bar-list'
   | 'table'
   | 'list'
   | 'form'

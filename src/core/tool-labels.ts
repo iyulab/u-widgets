@@ -45,6 +45,7 @@ const EN: ToolLabels = {
     'stat-group': 'Stat group',
     'gauge': 'Gauge',
     'progress': 'Progress bar',
+    'bar-list': 'Bar list',
     'table': 'Table',
     'list': 'List',
     'form': 'Form',
@@ -124,6 +125,9 @@ const EN: ToolLabels = {
     maxItems: 'Most rows',
     cell: 'Cell shape',
     counts: 'Counts',
+    form: 'Drawn as',
+    glyph: 'Glyph',
+    glyphValue: 'Per glyph',
   },
   dataFields: {
     value: 'Value',

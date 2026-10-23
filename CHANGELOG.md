@@ -4,6 +4,11 @@
 
 ### Added
 
+- `bar-list` widget: items compared as bars, without a chart's axes — `[{ label, value, max?, unit?, format?, tone?,
+  note? }]`, each row its label, written value and a bar in its tone, on one scale (`options.max`, else the largest
+  value) or an item's own `max`. `options.form: "pictogram"` draws a row of glyphs instead (`options.glyph`, one per
+  `options.glyphValue`), `options.maxItems` shows the first rows and says how many more.
+
 - `metric` (and each `stat-group` item) takes a `meter` — its value against a range, the way `status-card` has one —
   and a `note` under the value. A meter's `form` is `bar` or `ring` (on `status-card` too), and it is announced as a
   meter of its own range (`aria-valuemin` · `aria-valuemax`, the written value as its text) rather than as a

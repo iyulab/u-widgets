@@ -11,7 +11,7 @@
     "widgetType": {
       "type": "string",
       "enum": [
-        "metric", "stat-group", "gauge", "progress",
+        "metric", "stat-group", "gauge", "progress", "bar-list",
         "table", "list",
         "chart.bar", "chart.line", "chart.area", "chart.pie",
         "chart.scatter", "chart.radar", "chart.heatmap", "chart.box",

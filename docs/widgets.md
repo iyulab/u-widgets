@@ -43,6 +43,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
 | `gauge` | Gauge with thresholds | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
 | `progress` | Progress bar | — (uses `data.value`) |
+| `bar-list` | Items compared as bars or glyph counts | — (uses `data[].label`, `data[].value` — [Bar list](#bar-list)) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
 | `list` | Structured list — a log, a queue, a timetable | `primary`, `secondary`, `avatar`, `trailing`, `time`, `tone`, `columns` — [List rows](#list-rows) |
 | `code` | Syntax-highlighted code | — (uses `data.content`) |
@@ -235,6 +236,25 @@ a `kicker` above it (a series, a site), a `subtitle` under it, and on the far si
 ```json
 { "widget": "header", "data": { "kicker": "Port of Incheon", "text": "Harbour cranes", "level": 1, "clock": true,
   "aside": [{ "label": "Working", "value": 9 }, { "label": "Down", "value": 1, "tone": "alarm" }], "tone": "watch" } }
+```
+
+## Bar list
+
+`bar-list` compares items as bars — rides an hour, stock on a shelf, calls in a queue — without a chart's axes. Its data
+is `[{ label, value, max?, unit?, format?, tone?, note? }]`: each row its label, its value written as `format` and
+`unit` say, and a bar under them in its tone (or the primary colour), with an optional `note` below. The bars share one
+scale — `options.max`, else the largest value — unless an item has its own `max` (a stock against its own shelf).
+`options.form: "pictogram"` draws each value as a row of glyphs instead: `options.glyph` (default `●`), one for each
+`options.glyphValue` (default 1), the rest of the item's scale as faint glyphs; a row that would need more than sixty
+glyphs is drawn as a bar. `options.maxItems` shows that many rows and a line saying how many more. Each row is spoken as
+its label and value.
+
+```json
+{ "widget": "bar-list", "title": "Vaccine stock",
+  "data": [{ "label": "Flu", "value": 34, "max": 40, "unit": "doses" },
+           { "label": "Tetanus", "value": 9, "max": 30, "unit": "doses", "tone": "warn", "note": "Order placed" }] }
+{ "widget": "bar-list", "data": [{ "label": "Calls waiting", "value": 25 }],
+  "options": { "form": "pictogram", "glyph": "☎", "glyphValue": 5, "max": 40 } }
 ```
 
 ## Status grid

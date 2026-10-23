@@ -170,6 +170,9 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   spacing: 'Spacing size (small, default, large)',
   cell: 'Cell shape: square (label inside), chip (a wider pill) or dot (the tone alone)',
   counts: 'Add a key: how many cells are in each tone',
+  form: 'How each value is drawn: bar (default) or pictogram (a row of glyphs)',
+  glyph: 'The glyph a pictogram repeats (default ●)',
+  glyphValue: 'How much one glyph stands for (default 1)',
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
@@ -250,12 +253,16 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   maxItems: { type: 'number' },
   cell: choice(['square', 'chip', 'dot'], 'square'),
   counts: { type: 'boolean', default: false },
+  form: choice(['bar', 'pictogram'], 'bar'),
+  glyph: { type: 'string' },
+  glyphValue: { type: 'number', default: 1 },
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
 const WIDGET_OPTION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Partial<OptionTypeInfo> & { desc?: string }>>>> = {
   gauge: { min: { default: 0 }, max: { default: 100 } },
   progress: { min: { default: 0 }, max: { default: 100 } },
+  'bar-list': { max: { desc: 'The scale the bars share (default: the largest value)' } },
   rating: { max: { default: 5, desc: 'Number of icons' }, label: { desc: 'Label text' } },
   kv: { layout: choice(['vertical', 'horizontal', 'grid'], 'vertical'), columns: { default: 2, desc: 'Number of grid columns (grid layout)' } },
   steps: { layout: choice(['vertical', 'horizontal'], 'vertical') },
@@ -346,6 +353,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'stat-group': ['format'],
   'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
+  'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems'],
   'table': ['pageSize', 'compact', 'searchable'],
   'list': ['compact', 'layout', 'maxItems'],
   'form': ['locale'],
@@ -412,6 +420,15 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'progress': [
     { key: 'value', type: 'number', desc: 'Current value', required: true },
     { key: 'max', type: 'number', desc: 'Maximum bound (default 100)' },
+  ],
+  'bar-list': [
+    { key: 'label', type: 'string', desc: 'The item', required: true },
+    { key: 'value', type: 'number', desc: 'Its amount — the bar’s length', required: true },
+    { key: 'max', type: 'number', desc: 'Its own scale (default: the list’s)' },
+    { key: 'unit', type: 'string', desc: 'The value’s unit' },
+    { key: 'format', type: 'string', desc: 'The value’s format (number:1, percent, …)' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state: the bar’s colour' },
+    { key: 'note', type: 'string', desc: 'A line under the bar' },
   ],
   'markdown': [
     { key: 'content', type: 'string', desc: 'Markdown text', required: true },
@@ -525,6 +542,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'stat-group': 'No mapping needed. data is [{label, value, ...}]. Optional: icon (emoji), note (a line under the value), meter.',
   'gauge': 'No mapping needed. data is {value}. Set min/max/unit in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
+  'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
   'table': 'mapping.columns omittable — auto-inferred from data keys.',
   'list': 'mapping omittable if data has primary/secondary keys. Otherwise set mapping.',
   'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults. fieldStates (by field name: suggestions, note, decline) offers values to pick.',
