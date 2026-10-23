@@ -203,9 +203,20 @@ export class UwChart extends LitElement {
 
     if (!textColor) return; // no theme vars available
 
+    // Text sizes follow the widget's type tokens (caption for axes and the chart's own text, label for the legend), so a
+    // page that rescales its type — a large-text wall display — rescales the chart with it. A size the option already
+    // carries (the compact layout's) is kept.
+    const caption = this._readFontPx('--u-widget-font-size-caption');
+    const label = this._readFontPx('--u-widget-font-size-label');
+
     // Global text style
     const fontFamily = this._readCSSVar('--u-widget-font-family');
-    option.textStyle = { ...(option.textStyle as Record<string, unknown>), color: textColor, ...(fontFamily && { fontFamily }) };
+    option.textStyle = {
+      ...(caption ? { fontSize: caption } : {}),
+      ...(option.textStyle as Record<string, unknown>),
+      color: textColor,
+      ...(fontFamily && { fontFamily }),
+    };
 
     // Axis styling — deep-merge into existing axis config preserving all existing properties
     const mergeAxisTheme = (axis: unknown): unknown => {
@@ -218,7 +229,7 @@ export class UwChart extends LitElement {
       const existingSplitStyle = existingSplit.lineStyle as Record<string, unknown> ?? {};
       return {
         ...a,
-        axisLabel: { ...(a.axisLabel as Record<string, unknown> ?? {}), color: secondaryColor || textColor },
+        axisLabel: { ...(caption ? { fontSize: caption } : {}), ...(a.axisLabel as Record<string, unknown> ?? {}), color: secondaryColor || textColor },
         axisLine: { ...existingLine, lineStyle: { ...existingLineStyle, color: borderColor || secondaryColor } },
         splitLine: { ...existingSplit, lineStyle: { ...existingSplitStyle, color: borderColor } },
       };
@@ -237,7 +248,7 @@ export class UwChart extends LitElement {
     // Legend — merge textStyle preserving existing properties
     if (option.legend && typeof option.legend === 'object') {
       const leg = option.legend as Record<string, unknown>;
-      option.legend = { ...leg, textStyle: { ...(leg.textStyle as Record<string, unknown> ?? {}), color: textColor } };
+      option.legend = { ...leg, textStyle: { ...(label ? { fontSize: label } : {}), ...(leg.textStyle as Record<string, unknown> ?? {}), color: textColor } };
     }
   }
 
@@ -261,6 +272,21 @@ export class UwChart extends LitElement {
     return getComputedStyle(this).getPropertyValue(name).trim();
   }
 
+  private _fontProbe?: HTMLSpanElement;
+
+  /** A font-size token in px, as the browser resolves it here (rem, em, calc) — 0 when the token is unset. */
+  private _readFontPx(name: string): number {
+    if (!this._readCSSVar(name) || !this.shadowRoot) return 0;
+    if (!this._fontProbe) {
+      this._fontProbe = document.createElement('span');
+      this._fontProbe.setAttribute('aria-hidden', 'true');
+      this._fontProbe.style.cssText = 'position: absolute; visibility: hidden; pointer-events: none;';
+      this.shadowRoot.appendChild(this._fontProbe);
+    }
+    this._fontProbe.style.fontSize = `var(${name})`;
+    return parseFloat(getComputedStyle(this._fontProbe).fontSize) || 0;
+  }
+
   /** Every token _updateChart reads, in one string — equal keys draw the same chart. */
   private _readThemeKey(): string {
     return [
@@ -270,6 +296,8 @@ export class UwChart extends LitElement {
       this._readCSSVar('--u-widget-text-secondary'),
       this._readCSSVar('--u-widget-border'),
       this._readCSSVar('--u-widget-font-family'),
+      this._readCSSVar('--u-widget-font-size-caption'),
+      this._readCSSVar('--u-widget-font-size-label'),
     ].join('|');
   }
 

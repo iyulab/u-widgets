@@ -38,8 +38,10 @@ import '@iyulab/u-widgets/themes/shadcn.css';      // follow Shadcn/ui + Tailwin
 
 `themes/components.css` is a **bridge, not a copy**: every declaration reads
 `var(<the other package's token>, <the default below>)`, so the widgets follow that sheet as it
-changes, and fall back to their own defaults when it is not loaded. It deliberately leaves the
-chart palette and the font *sizes* alone — there is no corresponding axis to map them onto.
+changes, and fall back to their own defaults when it is not loaded. It maps the chart palette slot
+for slot (`--u-chart-color-1…8`) and the four font sizes to the steps of the same names
+(`--u-text-body-size`, `-label-`, `-caption-`, `-overline-`) — so a page that rescales its type, a
+large-text wall display, rescales the widgets and their charts with it.
 
 ## Colors
 
@@ -97,7 +99,10 @@ static `var()` in a stylesheet — this is why it's a numbered sequence rather t
 | `--u-widget-font-size-overline` | `0.6875rem` | Overline tier |
 
 Kept local to this package rather than referencing `@iyulab/components`' `--u-text-*` tokens,
-since `u-widgets` is designed to be usable standalone without that package installed.
+since `u-widgets` is designed to be usable standalone without that package installed (the
+`themes/components.css` bridge connects them). A chart draws its axis labels and its own text at
+the caption size and its legend at the label size, read when it draws — set those tokens and the
+canvas text follows; the compact layout of a small chart keeps its own smaller sizes.
 
 ## Chart Size
 

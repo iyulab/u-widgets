@@ -38,10 +38,9 @@
  *              여덟 색의 «순서와 구분성» 은 그 자체가 설계라, 역할색으로 흉내 내지 않고
  *              **한 벌로 검증된** 하우스 축을 칸 대 칸으로 잇는다. 그 축이 없는 판(components
  *              1.46 이하)에서는 폴백이 종전 위젯 팔레트를 그대로 낸다.
- *   안 잇는다  **글자 «크기»**(`--u-widget-font-size*`) — 하우스의 타이포 축은 단마다
- *              size·weight·leading·tracking 넷을 갖는 4단 스케일인데 위젯 쪽은 size
- *              하나뿐이라, 단을 짝지으려면 «어느 단인가» 를 우리가 정해야 한다.
- *              패밀리는 그런 선택이 없어 여기 있다.
+ *   잇는다     **글자 크기** 넷 — 위젯의 본문 · label · caption · overline 은 하우스 사다리의 같은
+ *              이름 단(`--u-text-*-size`)이다. 크기만 잇고 굵기 · 행간 · 자간은 위젯이 정한다. 그래서
+ *              글자 사다리를 키운 화면(벽걸이 보드)에서 위젯과 차트 글자도 함께 커진다.
  * ==========================================================================
  */
 
@@ -76,9 +75,13 @@
   --u-widget-on-positive:    var(--u-success-txt-color, #ffffff);
   --u-widget-on-negative:    var(--u-danger-txt-color,  #ffffff);
 
-  /* ── 타이포(패밀리만 — 본문 · 고정폭) ── */
+  /* ── 타이포 — 패밀리(본문 · 고정폭)와 크기 넷(같은 이름의 단) ── */
   --u-widget-font-family:    var(--u-font-base, system-ui, -apple-system, sans-serif);
   --u-widget-font-mono:      var(--u-font-mono, ui-monospace, 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace);
+  --u-widget-font-size:          var(--u-text-body-size,     0.875rem);
+  --u-widget-font-size-label:    var(--u-text-label-size,    0.8125rem);
+  --u-widget-font-size-caption:  var(--u-text-caption-size,  0.75rem);
+  --u-widget-font-size-overline: var(--u-text-overline-size, 0.6875rem);
 
   /* ── 형태 ── */
   --u-widget-radius:         var(--u-radius-md, 6px);

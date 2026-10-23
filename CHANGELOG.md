@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Chart text follows the widget's type tokens: axis labels and the chart's own text at `--u-widget-font-size-caption`,
+  the legend at `--u-widget-font-size-label` (the compact layout of a small chart keeps its smaller sizes). With the
+  defaults this is the same 12px for axes; the legend goes from 12px to 13px.
+- `themes/components.css` also bridges the four font sizes to the steps of the same names (`--u-text-body-size`,
+  `-label-`, `-caption-`, `-overline-`), so a page that rescales its type — a large-text wall display — rescales the
+  widgets and their charts with it. Under the house ladder the label step is 12px where the widget default was 13px.
+
 ### Removed
 
 - `--u-widget-duration-normal` — nothing has read it since the form widget moved to `<formdown-ui>` (0.40.0), so
