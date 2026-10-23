@@ -12,7 +12,7 @@ import { css } from 'lit';
  *   @iyulab/components' --u-text-* tokens, since u-widgets is designed to be usable
  *   standalone without that package installed)
  * - Chart: chart-height, chart-color-1..10
- * - Motion: duration-fast/normal/slow — every transition reads these; they drop to 0ms under
+ * - Motion: duration-fast/slow — every transition reads these; they drop to 0ms under
  *   `prefers-reduced-motion: reduce`
  *
  * **Theme modes:**
@@ -109,7 +109,6 @@ export const themeStyles = css`
 
     /* ── Motion — transition durations; zero under prefers-reduced-motion (below) ── */
     --u-widget-duration-fast: 150ms;
-    --u-widget-duration-normal: 200ms;
     --u-widget-duration-slow: 300ms;
 
     /* ── Shadow ── */
@@ -198,7 +197,6 @@ export const themeStyles = css`
   @media (prefers-reduced-motion: reduce) {
     :host(:not([nested])) {
       --u-widget-duration-fast: 0ms;
-      --u-widget-duration-normal: 0ms;
       --u-widget-duration-slow: 0ms;
     }
   }

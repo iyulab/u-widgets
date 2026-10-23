@@ -88,7 +88,6 @@
 
   /* ── 모션 — 하우스의 지속시간 축(동작 줄이기면 하우스 시트가 0 으로 누른다) ── */
   --u-widget-duration-fast:   var(--u-duration-fast,   150ms);
-  --u-widget-duration-normal: var(--u-duration-normal, 200ms);
   --u-widget-duration-slow:   var(--u-duration-slow,   300ms);
 }
 
@@ -101,7 +100,6 @@
          uw-gallery, uw-gauge, uw-kv, uw-math, uw-metric, uw-rating, uw-status,
          uw-steps, uw-table, uw-video) {
     --u-widget-duration-fast:   0ms;
-    --u-widget-duration-normal: 0ms;
     --u-widget-duration-slow:   0ms;
   }
 }

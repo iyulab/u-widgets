@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Removed
+
+- `--u-widget-duration-normal` — nothing has read it since the form widget moved to `<formdown-ui>` (0.40.0), so
+  setting it had no effect. Transitions read `--u-widget-duration-fast` and `--u-widget-duration-slow`.
+
 ## [0.41.0] - 2026-10-23
 
 MCP server 0.7.5 follows `^0.41.0`.
