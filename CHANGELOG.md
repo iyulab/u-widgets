@@ -16,6 +16,8 @@
 ### Changed
 
 - README: the install section names the components bridge.
+- The skill's widget catalog lists `status-card`, `status-grid`, `bar-list` and `header` (with their `uw-*` elements);
+  it called `header` inline, without a tag.
 
 ## [0.42.0] - 2026-10-24
 

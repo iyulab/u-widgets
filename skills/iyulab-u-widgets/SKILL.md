@@ -54,7 +54,7 @@ heavy — importing the core module alone doesn't pull them in.
 ## Widget Catalog
 
 `spec.widget` selects one of these. Most map 1:1 to a `uw-*` custom element (also independently
-usable directly, e.g. `<uw-metric .spec=${...}>`); a few (`actions`/`divider`/`header`) are rendered
+usable directly, e.g. `<uw-metric .spec=${...}>`); a few (`actions`/`divider`) are rendered
 inline by `<u-widget>` itself and have no separate tag.
 
 | `widget` | Element | Description |
@@ -69,6 +69,9 @@ inline by `<u-widget>` itself and have no separate tag.
 | `code` | `uw-code` | Syntax-highlighted code block |
 | `citation` | `uw-citation` | Source citation card |
 | `status` | `uw-status` | Status badge/indicator |
+| `status-card` | `uw-status-card` | One asset or place — its name, its state (a tone) and a few readings |
+| `status-grid` | `uw-status-grid` | Many small cells, each with a state (seats, beds, bays) — optional counts per tone |
+| `bar-list` | `uw-bar-list` | Items compared as bars on one scale, or as pictogram glyphs |
 | `steps` | `uw-steps` | Step/stage progress tracker |
 | `rating` | `uw-rating` | Star (or custom) rating display |
 | `video` | `uw-video` | Embedded video player |
@@ -77,7 +80,7 @@ inline by `<u-widget>` itself and have no separate tag.
 | `chart.bar`, `.line`, `.area`, `.pie`, `.scatter`, `.radar`, `.heatmap`, `.box`, `.funnel`, `.waterfall`, `.treemap`, `.histogram`, `.gantt` | `uw-chart` | ECharts-backed chart (`u-widgets/charts`) |
 | `actions` | *(inline)* | Standalone group of action buttons |
 | `divider` | *(inline)* | Horizontal rule, optionally labeled |
-| `header` | *(inline)* | Inline heading (`data.level` 1–6) |
+| `header` | `uw-header` | A board's or a section's title block — heading, kicker, subtitle, date · clock, aside pairs, overall tone |
 
 `suggestWidget(name)` (exported from the core module) suggests a close match when an unknown
 `widget` value is used — `<u-widget>` shows this suggestion in its fallback card instead of
