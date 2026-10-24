@@ -192,6 +192,15 @@ describe('uw-status', () => {
       expect(icon?.textContent).toBe('\u2713'); // ✓
     });
 
+    it('marks an item with the glyph it is given, in place of its tone’s', () => {
+      const el = render({
+        widget: 'status',
+        data: [{ label: 'Line 2', value: 'Delayed', tone: 'warn', glyph: '!' }],
+      });
+      expect(shadow(el).querySelector('.status-icon')?.textContent).toBe('!');
+      expect(shadow(el).querySelector('.status-item')?.getAttribute('data-tone')).toBe('warn');
+    });
+
     it('renders error cross symbol', () => {
       const el = render({
         widget: 'status',

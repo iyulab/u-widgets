@@ -4,8 +4,10 @@
 
 ### Added
 
-- `status-card` takes `data.glyph`: the badge's mark in place of its tone's (✓ ▲ ✕ …) — a state an app names its own way
-  keeps its own mark.
+- A toned value takes its own mark in place of its tone's (✓ ▲ ✕ …), so a state an app names its own way keeps its own
+  mark: `glyph` on a `status-card`'s, a `header`'s, a `kv` item's and a `status` item's data, and `mapping.glyph` — the
+  field holding each row's mark — on a `table` and a `list`. `toneMark(tone, glyph)` is the same for a host's own drawing.
+  A `table` lists `mapping.tone` among its mapping keys, as it already read it.
 
 ### Fixed
 

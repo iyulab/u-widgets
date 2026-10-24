@@ -31,7 +31,8 @@ export const MAPPING_DOCS: Readonly<Record<string, string>> = {
   trailing: 'Trailing value field (list)',
   badge: 'Badge/tag field (list)',
   time: 'Time field shown first in each row — a date-time shows its time of day (list)',
-  tone: 'Field holding each row\'s tone: its mark and colour, past dims, now picks out (list)',
+  tone: 'Field holding each row\'s tone: its mark and colour, past dims, now picks out (list, table)',
+  glyph: 'Field holding each row\'s mark, in place of its tone\'s (list, table)',
 };
 
 /** Field definition property descriptions (from schema $defs/fieldDefinition). */
@@ -475,6 +476,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'aside', type: 'Array<{ label, value, unit?, format?, tone? }>', desc: 'A few label · value pairs beside the heading' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'The state of the whole, as a badge' },
     { key: 'status', type: 'string', desc: 'The badge\'s words (default: the tone\'s name)' },
+    { key: 'glyph', type: 'string', desc: 'The badge\'s mark (default: the tone\'s — ✓ ▲ ✕ …)' },
   ],
   'video': [
     { key: 'src', type: 'string', desc: 'Video URL', required: true },
@@ -529,6 +531,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'label', type: 'string', desc: 'Status label' },
     { key: 'value', type: 'string', desc: 'Status value', required: true },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone: colour and mark; without a value the tone\'s name is shown' },
+    { key: 'glyph', type: 'string', desc: 'Its mark (default: the tone\'s — ✓ ▲ ✕ …)' },
     { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
   ],
 });
@@ -558,7 +561,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'gauge': 'No mapping needed. data is {value, tone?}. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
-  'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone.',
+  'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone, mapping.glyph one with its mark (default: the tone’s).',
   'list': 'mapping omittable if data has primary/secondary keys. Otherwise set mapping.',
   'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults. fieldStates (by field name: suggestions, note, decline) offers values to pick.',
   'confirm': 'Uses title, description, actions. data is optional.',
@@ -566,12 +569,12 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'image': 'No mapping. data is {src, alt?, caption?}.',
   'callout': 'No mapping. data is {message, title?, tone?}.',
   'compose': 'Uses children[] and layout. Each child is a widget spec.',
-  'kv': 'No mapping. data is {key: val, ...} or [{label, value, unit?, format?, tone?, note?}]. layout in options.',
+  'kv': 'No mapping. data is {key: val, ...} or [{label, value, unit?, format?, tone?, glyph?, note?}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
   'status-grid': 'No mapping. data is [{label?, tone, value?, unit?, format?}]. columns, cell (square/chip/dot) and counts in options.',
   'status-card': 'No mapping. data is {title, subtitle?, tone?, status?, glyph?, emphasis?, readings?: [{label, value, unit?, format?, tone?}], meter?: {value, min?, max?, unit?}, image?, icon?, note?}.',
-  'status': 'No mapping. data is {label?, value?, tone?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
+  'status': 'No mapping. data is {label?, value?, tone?, glyph?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
   'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',
   'gallery': 'No mapping. data is [{src, alt?, caption?}]. columns/aspectRatio in options.',
   'steps': 'No mapping. data is [{label, status?, description?, icon?}]. status: done/active/pending/error. icon: emoji/text override. layout: vertical/horizontal.',
@@ -579,7 +582,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'math': 'No mapping. data is {expression}. Renders LaTeX via KaTeX. displayMode in options.',
   'actions': 'No data. Uses actions[] array. layout in options (wrap/column).',
   'divider': 'No data. label/spacing in options.',
-  'header': 'data is {text, level?, kicker?, subtitle?, date?, time? | clock: true, aside?: [{label, value, unit?}], tone?, status?}. level defaults to 2.',
+  'header': 'data is {text, level?, kicker?, subtitle?, date?, time? | clock: true, aside?: [{label, value, unit?}], tone?, status?, glyph?}. level defaults to 2.',
 };
 
 /** Events emitted per widget category. */

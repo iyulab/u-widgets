@@ -4,12 +4,14 @@ import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import { formatValue } from '../core/format.js';
-import { normalizeTone, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
+import { normalizeTone, toneMark, toneStyles, type Tone } from '../core/tone.js';
 
 interface Pair {
   label: string;
   value: string;
   tone?: Tone;
+  /** The value's mark — its tone's when not given. */
+  glyph?: string;
   note?: string;
 }
 
@@ -17,8 +19,8 @@ interface Pair {
  * <uw-kv> — Key-value pair display widget.
  *
  * Renders structured key-value data in vertical, horizontal, or grid layout.
- * Data can be a flat object or an array of `{ label, value, unit?, format?, tone?, note? }` — each value formatted with
- * its unit, coloured and marked by its tone, with a note under it.
+ * Data can be a flat object or an array of `{ label, value, unit?, format?, tone?, glyph?, note? }` — each value formatted
+ * with its unit, coloured and marked by its tone (or its own `glyph`), with a note under it.
  */
 @customElement('uw-kv')
 export class UwKv extends LitElement {
@@ -164,7 +166,7 @@ export class UwKv extends LitElement {
         ${pairs.map(p => html`
           <div class="kv-pair" part="kv-pair" role="listitem" data-tone=${p.tone ?? nothing}>
             <span class="kv-key" part="kv-key">${p.label}</span>
-            <span class="kv-value" part="kv-value">${p.tone ? html`<span class="kv-mark" aria-hidden="true">${TONE_GLYPHS[p.tone]}</span>` : nothing}${p.value}</span>
+            <span class="kv-value" part="kv-value">${p.tone ? html`<span class="kv-mark" aria-hidden="true">${toneMark(p.tone, p.glyph)}</span>` : nothing}${p.value}</span>
             ${p.note ? html`<span class="kv-note" part="kv-note">${p.note}</span>` : nothing}
           </div>
         `)}
@@ -188,6 +190,7 @@ export class UwKv extends LitElement {
             label: String(item.label),
             value: `${typeof item.format === 'string' ? formatValue(item.value, item.format, locale) : String(item.value)}${unit}`,
             ...(tone && { tone }),
+            ...(typeof item.glyph === 'string' && item.glyph !== '' && { glyph: item.glyph }),
             ...(item.note != null && item.note !== '' && { note: String(item.note) }),
           };
         });

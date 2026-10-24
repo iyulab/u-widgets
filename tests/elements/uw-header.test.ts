@@ -32,6 +32,12 @@ describe('uw-header', () => {
     expect(root.querySelector('[part="status"]')?.textContent).toBe('▲Warning');
   });
 
+  it('marks its badge with the glyph it is given, in place of its tone’s', async () => {
+    const { root } = await header({ text: 'Kitchen', tone: 'warn', status: 'Busy', glyph: '!' });
+    expect(root.querySelector('[part="status"]')?.textContent).toBe('!Busy');
+    expect(root.querySelector('[part="status"]')?.getAttribute('data-tone')).toBe('warn');
+  });
+
   it('runs a clock while asked for, and stops it when taken off the page', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 9, 23, 9, 5));

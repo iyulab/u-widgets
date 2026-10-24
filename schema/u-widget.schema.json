@@ -280,7 +280,11 @@
         },
         "tone": {
           "type": "string",
-          "description": "Field holding each row's tone: its mark and colour, past dims, now picks out (list)"
+          "description": "Field holding each row's tone: its mark and colour, past dims, now picks out (list, table)"
+        },
+        "glyph": {
+          "type": "string",
+          "description": "Field holding each row's mark, in place of its tone's (list, table)"
         }
       },
       "additionalProperties": false

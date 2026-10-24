@@ -40,6 +40,12 @@ export const TONE_GLYPHS: Readonly<Record<Tone, string>> = {
   next: '›',   // ›
 };
 
+/** The mark a toned value is drawn with: its own `glyph` when it gives one (a state an app names its own way keeps its
+ *  own mark), else its tone's. */
+export function toneMark(tone: Tone, glyph?: unknown): string {
+  return typeof glyph === 'string' && glyph !== '' ? glyph : TONE_GLYPHS[tone];
+}
+
 export function isTone(value: unknown): value is Tone {
   return typeof value === 'string' && TONE_SET.has(value);
 }

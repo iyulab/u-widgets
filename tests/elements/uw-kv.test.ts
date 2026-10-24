@@ -251,6 +251,17 @@ describe('uw-kv as a stat list', () => {
     el.remove();
   });
 
+  it('marks a value with the glyph it is given, in place of its tone’s', async () => {
+    const el = document.createElement('uw-kv') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = { widget: 'kv', data: [{ label: 'Pressure', value: 7.9, tone: 'warn', glyph: '!' }], options: { locale: 'en-US' } };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const pair = el.shadowRoot!.querySelector('.kv-pair')!;
+    expect(pair.querySelector('.kv-value')?.textContent).toBe('!7.9');
+    expect(pair.getAttribute('data-tone')).toBe('warn');
+    el.remove();
+  });
+
   it('no longer reads an array item’s `key` (it is `label`)', async () => {
     const el = document.createElement('uw-kv') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
     el.spec = { widget: 'kv', data: [{ key: 'Old', value: 1 }] };

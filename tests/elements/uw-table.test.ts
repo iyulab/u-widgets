@@ -1215,6 +1215,20 @@ describe('uw-table — tones, bar cells, units and a table to look at', () => {
     expect(rows[1].querySelectorAll('.row-mark')).toHaveLength(1);
   });
 
+  it('marks a row with its own glyph from mapping.glyph, its tone’s when the row gives none', async () => {
+    const data = links.map((l, i) => (i === 1 ? { ...l, mark: '!' } : l));
+    const shadow = await table({ tone: 'state', glyph: 'mark', columns: [{ field: 'site' }] }, {}, data);
+    const marks = [...shadow.querySelectorAll('tbody tr .row-mark')].map(m => m.textContent);
+    expect(marks).toEqual(['✓', '!', '◆']);
+    expect(shadow.querySelectorAll('tbody tr')[1].getAttribute('data-tone')).toBe('alarm');
+  });
+
+  it('marks a list row with its own glyph from mapping.glyph', async () => {
+    const data = links.map((l, i) => (i === 1 ? { ...l, mark: '!' } : l));
+    const shadow = await render(createElement({ widget: 'list', data, mapping: { primary: 'site', tone: 'state', glyph: 'mark' } }));
+    expect([...shadow.querySelectorAll('.list-mark')].map(m => m.textContent)).toEqual(['✓', '!', '◆']);
+  });
+
   it('tones a cell from its toneField, over the column tone', async () => {
     const shadow = await table({ columns: [{ field: 'site' }, { field: 'util', toneField: 'utilTone', tone: 'info' }] });
     const cells = [...shadow.querySelectorAll('tbody tr td:nth-child(2)')];

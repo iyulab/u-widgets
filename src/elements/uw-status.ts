@@ -3,13 +3,15 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Emphasis, type Tone } from '../core/tone.js';
+import { normalizeEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 
 interface StatusItem {
   /** Absent for a badge that shows the value alone ("● Running"). */
   label?: string;
   value: string;
   tone?: Tone;
+  /** The item's mark — its tone's when not given. */
+  glyph?: string;
   emphasis?: Emphasis;
 }
 
@@ -103,7 +105,7 @@ export class UwStatus extends LitElement {
       <div class="status-list" part="status" role="list" aria-label=${this.spec.title ?? localeStringsOf(this.spec).status}>
         ${items.map(item => html`
           <div class="status-item" part="status-item" role="listitem" data-tone=${item.tone ?? nothing} data-emphasis=${item.emphasis ?? nothing}>
-            ${item.tone ? html`<span class="status-icon" part="status-icon" aria-hidden="true">${TONE_GLYPHS[item.tone]}</span>` : nothing}
+            ${item.tone ? html`<span class="status-icon" part="status-icon" aria-hidden="true">${toneMark(item.tone, item.glyph)}</span>` : nothing}
             ${item.label === undefined ? nothing : html`<span class="status-label" part="status-label">${item.label}</span>`}
             <span class=${item.emphasis === 'stamp' ? 'status-value tone-stamp' : 'status-value'} part="status-value">${item.value}</span>
           </div>
@@ -128,6 +130,7 @@ export class UwStatus extends LitElement {
           ...(item.label !== undefined && item.label !== null && { label: String(item.label) }),
           value: hasValue ? String(item.value) : toneLabel(tone!, strings),
           ...(tone && { tone }),
+          ...(typeof item.glyph === 'string' && item.glyph !== '' && { glyph: item.glyph }),
           ...(item.emphasis != null && { emphasis: normalizeEmphasis(item.emphasis, 'uw-status') }),
         }];
       });

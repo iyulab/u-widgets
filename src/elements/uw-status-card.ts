@@ -4,7 +4,7 @@ import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { formatValue } from '../core/format.js';
 import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
-import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Emphasis, type Tone } from '../core/tone.js';
+import { normalizeEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
 
 interface Reading {
@@ -235,7 +235,7 @@ export class UwStatusCard extends LitElement {
             ${card.subtitle ? html`<div class="subtitle" part="subtitle">${card.subtitle}</div>` : nothing}
           </div>
           </div>
-          ${status ? html`<span class="badge" part="badge">${card.tone ? html`<span class="glyph" aria-hidden="true">${card.glyph ?? TONE_GLYPHS[card.tone]}</span>` : nothing}${status}</span>` : nothing}
+          ${status ? html`<span class="badge" part="badge">${card.tone ? html`<span class="glyph" aria-hidden="true">${toneMark(card.tone, card.glyph)}</span>` : nothing}${status}</span>` : nothing}
         </div>
         <div class="body">
           ${card.readings.length > 0 ? html`

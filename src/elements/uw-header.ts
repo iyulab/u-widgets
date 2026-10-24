@@ -3,7 +3,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { formatValue } from '../core/format.js';
-import { normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
+import { normalizeTone, toneLabel, toneMark, toneStyles, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
 
 interface Aside {
@@ -185,7 +185,7 @@ export class UwHeader extends LitElement {
           <div class="side">
             ${asides.length > 0 ? html`<dl class="asides" part="aside">${asides.map(a => html`
               <div class="aside" data-tone=${a.tone ?? nothing}><dt>${a.label}</dt><dd>${a.value}</dd></div>`)}</dl>` : nothing}
-            ${status ? html`<span class="status" part="status" data-tone=${tone ?? nothing}>${tone ? html`<span aria-hidden="true">${TONE_GLYPHS[tone]}</span>` : nothing}${status}</span>` : nothing}
+            ${status ? html`<span class="status" part="status" data-tone=${tone ?? nothing}>${tone ? html`<span aria-hidden="true">${toneMark(tone, d.glyph)}</span>` : nothing}${status}</span>` : nothing}
             ${dateText || timeText ? html`
               <div class="when" part="when">
                 ${dateText ? html`<div class="date" part="date">${dateText}</div>` : nothing}

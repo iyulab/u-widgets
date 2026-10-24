@@ -4,7 +4,7 @@ import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core
 import { formatValue } from '../core/format.js';
 import { getLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { normalizeTone, toneLabel, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
+import { normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
 import { isDateLikeString } from '../core/utils.js';
 
@@ -556,6 +556,7 @@ export class UwTable extends LitElement {
     const rawMaxItems = this.spec!.options?.maxItems;
     const maxItems = pageSize === 0 && typeof rawMaxItems === 'number' && rawMaxItems > 0 ? Math.floor(rawMaxItems) : undefined;
     const rowToneKey = this.spec!.mapping?.tone;
+    const rowGlyphKey = this.spec!.mapping?.glyph;
     const localeName = typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined;
     const cell = this.cellRenderer(columns, data, localeName);
 
@@ -627,7 +628,7 @@ export class UwTable extends LitElement {
             ${visible.map((row, idx) => {
               const rowTone = rowToneKey ? normalizeTone(row[rowToneKey], 'uw-table') : undefined;
               const mark = rowTone
-                ? html`<span class="row-mark" part="mark" role="img" aria-label=${toneLabel(rowTone, locale)}>${TONE_GLYPHS[rowTone]}</span>`
+                ? html`<span class="row-mark" part="mark" role="img" aria-label=${toneLabel(rowTone, locale)}>${toneMark(rowTone, rowGlyphKey ? row[rowGlyphKey] : undefined)}</span>`
                 : nothing;
               const cells = columns.map((col, c) => {
                 const { tone, content } = cell(col, row);
@@ -848,6 +849,7 @@ export class UwTable extends LitElement {
     const badgeKey = mapping?.badge;
     const timeKey = mapping?.time;
     const toneKey = mapping?.tone;
+    const glyphKey = mapping?.glyph;
     const columns = (mapping?.columns ?? []).filter(c => c && typeof c.field === 'string');
     const options = this.spec!.options ?? {};
     const tiles = options.layout === 'tiles';
@@ -883,7 +885,7 @@ export class UwTable extends LitElement {
                 }
               }}
             >
-              ${tone && !tiles ? html`<span class="list-mark" part="mark" aria-hidden="true">${TONE_GLYPHS[tone]}</span>` : nothing}
+              ${tone && !tiles ? html`<span class="list-mark" part="mark" aria-hidden="true">${toneMark(tone, glyphKey ? item[glyphKey] : undefined)}</span>` : nothing}
               ${timeKey ? html`<span class="list-time" part="time">${timeText(item[timeKey])}</span>` : nothing}
               ${avatarKey && item[avatarKey]
                 ? html`<img class="list-avatar" src=${String(item[avatarKey])} alt="" part="avatar" />`

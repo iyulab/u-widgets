@@ -161,6 +161,8 @@ export interface UWidgetMapping {
   time?: string;
   /** The field holding each row's tone (`core/tone.ts`): its mark and colour; `past` dims a row, `now` picks it out (list widget). */
   tone?: string;
+  /** The field holding each row's mark, in place of its tone's (list and table widgets). */
+  glyph?: string;
 }
 
 /**
