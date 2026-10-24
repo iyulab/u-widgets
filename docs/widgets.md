@@ -188,9 +188,10 @@ shows the tone's name in the widget's locale («Alarm», «경보»).
 { "widget": "status", "data": [{ "label": "Pump A", "value": "Running", "tone": "ok" }, { "label": "Pump B", "tone": "alarm" }] }
 ```
 
-The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (light and dark — see Theming); `ok`, `warn`,
-`alarm` and `accent` follow `--u-widget-positive`, `--u-widget-warning`, `--u-widget-negative` and
-`--u-widget-primary`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
+The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (light and dark — see Theming); `ok`,
+`alarm` and `accent` follow `--u-widget-positive`, `--u-widget-negative` and `--u-widget-primary`. `warn` has a
+colour of its own (`#b45309`, dark `#fbbf24`) so it reads as text on the page; the components bridge takes it from
+`--u-warning-color-strong`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
 legend.
 
 ## List rows

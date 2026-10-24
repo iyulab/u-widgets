@@ -72,7 +72,11 @@ import '@iyulab/u-widgets';
 // import '@iyulab/u-widgets/math';
 // Korean for the text widgets write themselves (pagination, validation, region names):
 // import '@iyulab/u-widgets/locales/ko';
+// In an app themed with @iyulab/components tokens (e.g. @iyulab/house-style) — follow its palette and type:
+// import '@iyulab/u-widgets/themes/components.css';
 ```
+
+Without the bridge the widgets keep their own palette and type — they do not need `@iyulab/components`.
 
 `spec` is a property, not an attribute — set it from script (`el.spec = {…}`) or with a framework binding
 (Lit `.spec=${…}`, React `spec={…}` via `@iyulab/u-widgets/react`).

@@ -55,7 +55,6 @@ large-text wall display, rescales the widgets and their charts with it.
 | `--u-widget-primary` | `#4f46e5` | `#818cf8` |
 | `--u-widget-positive` | `#15803d` | `#4ade80` |
 | `--u-widget-negative` | `#dc2626` | `#f87171` |
-| `--u-widget-warning` | `#d97706` | `#fbbf24` |
 | `--u-widget-on-primary` | `#ffffff` | `#1e1e2e` |
 | `--u-widget-on-negative` | `#ffffff` | `#1e1e2e` |
 | `--u-widget-on-positive` | `#ffffff` | `#1e1e2e` |

@@ -59,7 +59,6 @@ export const themeStyles = css`
     --u-widget-primary: #4f46e5;
     --u-widget-positive: #15803d; /* 5.02 on bg (was #16a34a = 3.30) */
     --u-widget-negative: #dc2626;
-    --u-widget-warning: #d97706;
 
     /* on-color for filled surfaces; flips per theme (see CHANGELOG 0.14.0) */
     --u-widget-on-primary: #ffffff;
@@ -130,7 +129,6 @@ export const themeStyles = css`
       --u-widget-primary: #818cf8;
       --u-widget-positive: #4ade80;
       --u-widget-negative: #f87171;
-      --u-widget-warning: #fbbf24;
       --u-widget-on-primary: #1e1e2e;
       --u-widget-on-negative: #1e1e2e;
       --u-widget-on-positive: #1e1e2e;
@@ -169,7 +167,6 @@ export const themeStyles = css`
     --u-widget-primary: #818cf8;
     --u-widget-positive: #4ade80;
     --u-widget-negative: #f87171;
-    --u-widget-warning: #fbbf24;
     --u-widget-on-primary: #1e1e2e;
     --u-widget-on-negative: #1e1e2e;
     --u-widget-on-positive: #1e1e2e;

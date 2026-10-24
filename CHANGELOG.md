@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- With the components bridge (`themes/components.css`), the `warn` tone follows the app again: its text and mark take
+  `--u-warning-color-strong`. Since 0.42.0 gave `warn` a colour of its own, the bridge set only `--u-widget-warning`,
+  which nothing read, so a themed app kept the widget's `#b45309`.
+
+### Removed
+
+- `--u-widget-warning`. Nothing has read it since 0.42.0 — setting it changed nothing. Set `--u-widget-tone-warn` for
+  the `warn` tone's colour.
+
+### Changed
+
+- README: the install section names the components bridge.
+
 ## [0.42.0] - 2026-10-24
 
 ### Added

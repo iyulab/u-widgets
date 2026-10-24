@@ -57,7 +57,6 @@ describe('themeStyles', () => {
     it('defines semantic color tokens', () => {
       expect(cssText).toContain('--u-widget-positive:');
       expect(cssText).toContain('--u-widget-negative:');
-      expect(cssText).toContain('--u-widget-warning:');
     });
 
     it('defines spacing tokens', () => {

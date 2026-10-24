@@ -57,7 +57,10 @@
   --u-widget-primary:        var(--u-primary-color,     #4f46e5);
   --u-widget-positive:       var(--u-success-color,     #15803d);
   --u-widget-negative:       var(--u-danger-color,      #dc2626);
-  --u-widget-warning:        var(--u-warning-color,     #d97706);
+
+  /* warn 톤의 글자 · 표식 — 하우스의 «글자용» 경고색에 잇는다. 바탕 경고색(`--u-warning-color`)은
+     바탕 위 글자로 대비가 모자라 위젯도 따로 값을 둔다(0.42.0). */
+  --u-widget-tone-warn:      var(--u-warning-color-strong, #b45309);
 
   /* ── 차트 팔레트 — 칸 대 칸, 순서 그대로 ── */
   --u-widget-chart-color-1:  var(--u-chart-color-1, #4f46e5);
