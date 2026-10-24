@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.42.0] - 2026-10-24
 
 ### Added
 
@@ -15,6 +15,10 @@
   where they took the warning colour `#d97706` (3.2:1, and 2.5–2.8:1 on a badge). `--u-widget-warning` — a fill, a chart's
   series — is unchanged, and the dark theme keeps `#fbbf24`. Every tone is now checked at 4.5:1 on the page and 3:1 on
   its own badge, in both themes.
+
+### Changed
+
+- The MCP server (`@iyulab/u-widgets-mcp` 0.7.6) follows `^0.42.0`.
 
 ## [0.41.1] - 2026-10-23
 
