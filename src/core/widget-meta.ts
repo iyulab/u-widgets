@@ -558,7 +558,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'chart.gantt': 'mapping omittable. First string → y (row), first two number/date-like fields → start, end, next string → label. color groups intervals.',
   'metric': 'No mapping needed. data is {value, label?, unit?, change?, trend?, sparkline?, tone?, meter?, note?}.',
   'stat-group': 'No mapping needed. data is [{label, value, ...}]. Optional: icon (emoji), note (a line under the value), meter.',
-  'gauge': 'No mapping needed. data is {value, tone?}. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
+  'gauge': 'No mapping needed. data is {value, tone?, min?, max?} — a scale the data gives wins over options. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
   'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone, mapping.glyph one with its mark (default: the tone’s).',

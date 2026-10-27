@@ -41,7 +41,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` (bars of a group share a colour) |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
-| `gauge` | A reading against its scale — an arc, a column, a tank or a thermometer ([Gauge](#gauge)) | — (uses `data.value`; the shown value is `options.format`, default `number`, in the widget's locale) |
+| `gauge` | A reading against its scale — an arc, a column, a tank or a thermometer ([Gauge](#gauge)) | — (uses `data.value`, and `data.min` / `data.max` for the scale when given; the shown value is `options.format`, default `number`, in the widget's locale) |
 | `progress` | Progress bar | — (uses `data.value`) |
 | `bar-list` | Items compared as bars or glyph counts | — (uses `data[].label`, `data[].value` — [Bar list](#bar-list)) |
 | `table` | Data table (sortable) | `columns` (auto-inferred) |
@@ -242,7 +242,8 @@ a `kicker` above it (a series, a site), a `subtitle` under it, and on the far si
 ## Gauge
 
 `gauge` is a reading against its scale (`options.min` 0 to `options.max` 100, `options.unit`, the value written as
-`options.format` says). `options.form` draws it as an `arc` (the default) or as a level rising from the bottom — a
+`options.format` says). A scale the source gives — a capacity, a floor — rides in the data (`data.min`, `data.max`) and
+wins over the options, in every form; the options are the scale where the data gives none. `options.form` draws it as an `arc` (the default) or as a level rising from the bottom — a
 `vertical` column, a `tank` or a `thermometer` — with the reading written above it. Its colour is `data.tone` when the
 state is decided elsewhere, else the `options.thresholds` step it is under: `[{ to, color | tone, label? }]`, the label
 written under the reading. `options.band: { lo, hi }` is the acceptable range, drawn beside the scale in the `ok` tone

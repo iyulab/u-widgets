@@ -4,6 +4,11 @@
 
 ### Fixed
 
+- `gauge` reads `data.min` and `data.max` in every form. The arc and the level forms took the scale from `options`
+  only — a capacity the source gave in `data.max` was ignored and the scale stayed at 100 — while `progress` already
+  read `data.max`. The data now wins over the options, in `gauge` and `progress` alike; a value that is not a number
+  (text that does not read as one, `null`, a boolean) is not a scale.
+
 - With the components bridge (`themes/components.css`), the `warn` tone follows the app again: its text and mark take
   `--u-warning-color-strong`. Since 0.42.0 gave `warn` a colour of its own, the bridge set only `--u-widget-warning`,
   which nothing read, so a themed app kept the widget's `#b45309`.

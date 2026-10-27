@@ -448,6 +448,37 @@ describe('uw-gauge — forms, band, marks and tone', () => {
     expect(level.querySelector('[part="level"]')?.getAttribute('fill')).toBe('#16a34a');
   });
 
+  it('takes the scale from the data when the data gives it — in every form, as the progress bar does', async () => {
+    const arc = async (options: Record<string, unknown>, data: Record<string, unknown>) =>
+      (await gauge(options, data)).querySelector('.gauge-fill')?.getAttribute('d');
+    // A capacity the source gives is the arc's end, as if the options had said so.
+    expect(await arc({}, { value: 630, max: 1260 })).toBe(await arc({ max: 1260 }, { value: 630 }));
+    expect(await arc({}, { value: 630, max: 1260 })).not.toBe(await arc({}, { value: 630 }));
+    // The data wins over the options; the options stand where the data gives nothing.
+    const scale = async (options: Record<string, unknown>, data: Record<string, unknown>, form = 'arc') => {
+      const meter = (await gauge({ form, ...options }, data)).querySelector('.gauge-container');
+      return [meter?.getAttribute('aria-valuemin'), meter?.getAttribute('aria-valuemax')];
+    };
+    expect(await scale({ min: 0, max: 100 }, { value: 5, min: -20, max: 40 })).toEqual(['-20', '40']);
+    expect(await scale({ min: -5, max: 15 }, { value: 5 })).toEqual(['-5', '15']);
+    expect(await scale({ min: -5, max: 15 }, { value: 5, max: 30 })).toEqual(['-5', '30']);
+    for (const form of ['vertical', 'tank', 'thermometer']) expect(await scale({}, { value: 5, max: 40 }, form)).toEqual(['0', '40']);
+    // A text that reads as a number counts; what does not is not a scale.
+    expect(await scale({}, { value: 5, max: '1260' })).toEqual(['0', '1260']);
+    expect(await scale({ max: 50 }, { value: 5, max: 'many' })).toEqual(['0', '50']);
+    expect(await scale({ max: 50 }, { value: 5, max: null })).toEqual(['0', '50']);
+    expect(await scale({ max: 50 }, { value: 5, max: '' })).toEqual(['0', '50']);
+    expect(await scale({ max: 50 }, { value: 5, max: true })).toEqual(['0', '50']);
+  });
+
+  it('gives progress the same scale — the data first, then the options', async () => {
+    const fill = async (options: Record<string, unknown>, data: Record<string, unknown>) =>
+      ((await render(createElement({ widget: 'progress', data, options }))).querySelector('.progress-bar-fill') as HTMLElement).style.width;
+    expect(await fill({ max: 200 }, { value: 50 })).toBe('25%');
+    expect(await fill({ max: 200 }, { value: 50, max: 100 })).toBe('50%');
+    expect(await fill({}, { value: 50 })).toBe('50%');
+  });
+
   it('gives progress a threshold tone too', async () => {
     const shadow = await render(createElement({ widget: 'progress', data: { value: 90 }, options: { thresholds: [{ to: 100, tone: 'warn' }] } }));
     expect((shadow.querySelector('.progress-bar-fill') as HTMLElement).style.background).toBe('var(--u-widget-tone-warn)');

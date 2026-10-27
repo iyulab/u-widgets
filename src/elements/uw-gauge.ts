@@ -235,9 +235,19 @@ export class UwGauge extends LitElement {
     return this.renderGauge();
   }
 
+  /** The options, with the scale the data gives: a capacity or a floor is the source's value, so `data.min` and
+   *  `data.max` win over `options.min` and `options.max` — in every form, as the progress bar already read it. */
   private getOptions(): GaugeOptions {
     const opts = (this.spec!.options ?? {}) as Partial<GaugeOptions>;
-    return { ...DEFAULT_GAUGE_OPTIONS, ...opts };
+    const data = this.spec!.data as Record<string, unknown>;
+    const scale: Partial<Pick<GaugeOptions, 'min' | 'max'>> = {};
+    for (const end of ['min', 'max'] as const) {
+      const given = data[end];
+      if (given === null || given === undefined || given === '' || typeof given === 'boolean') continue;
+      const n = Number(given);
+      if (Number.isFinite(n)) scale[end] = n;
+    }
+    return { ...DEFAULT_GAUGE_OPTIONS, ...opts, ...scale };
   }
 
   private getValue(): number {
@@ -477,9 +487,9 @@ export class UwGauge extends LitElement {
   private renderProgress() {
     const data = this.spec!.data as Record<string, unknown>;
     const value = Number(data.value ?? 0);
-    const max = Number(data.max ?? (this.spec!.options as Record<string, unknown>)?.max ?? 100);
-    const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
     const opts = this.getOptions();
+    const max = opts.max;
+    const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
     const color = this.getThresholdColor(value, opts);
     const label = this.formatLabel(value, pct);
 
