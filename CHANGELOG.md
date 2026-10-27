@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-10-27
+
 ### Fixed
 
 - `gauge` reads `data.min` and `data.max` in every form. The arc and the level forms took the scale from `options`
@@ -23,6 +25,7 @@
 - README: the install section names the components bridge.
 - The skill's widget catalog lists `status-card`, `status-grid`, `bar-list` and `header` (with their `uw-*` elements);
   it called `header` inline, without a tag.
+- The MCP server (`@iyulab/u-widgets-mcp` 0.7.7) follows `^0.43.0`.
 
 ## [0.42.0] - 2026-10-24
 
