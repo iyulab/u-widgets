@@ -7,6 +7,7 @@ import { themeStyles } from '../styles/tokens.js';
 import { normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
 import { isDateLikeString } from '../core/utils.js';
+import { checkMediaUrl } from '../core/media.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
@@ -874,6 +875,7 @@ export class UwTable extends LitElement {
         ${shown.map(
           (item, idx) => {
             const tone = toneKey ? normalizeTone(item[toneKey], 'uw-table') : undefined;
+            const avatarSrc = avatarKey && item[avatarKey] ? checkMediaUrl(String(item[avatarKey]), { inlineImage: true }).src : '';
             return html`
             <div class="list-item" part="list-item" data-tone=${tone ?? nothing}
               tabindex=${idx === this._focusedIdx ? '0' : '-1'}
@@ -887,8 +889,8 @@ export class UwTable extends LitElement {
             >
               ${tone && !tiles ? html`<span class="list-mark" part="mark" aria-hidden="true">${toneMark(tone, glyphKey ? item[glyphKey] : undefined)}</span>` : nothing}
               ${timeKey ? html`<span class="list-time" part="time">${timeText(item[timeKey])}</span>` : nothing}
-              ${avatarKey && item[avatarKey]
-                ? html`<img class="list-avatar" src=${String(item[avatarKey])} alt="" part="avatar" />`
+              ${avatarKey && avatarSrc
+                ? html`<img class="list-avatar" src=${avatarSrc} alt="" part="avatar" />`
                 : iconKey
                   ? html`<div class="list-icon" part="icon">${this.getIconLetter(item[iconKey])}</div>`
                   : nothing}

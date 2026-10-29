@@ -3,16 +3,20 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
+import { checkMediaUrl } from '../core/media.js';
+import { mediaBlocked, mediaBlockedStyles } from '../styles/media-blocked.js';
 
 interface GalleryItem {
   src: string;
+  /** The URL was refused by origin: draw the `alt` text instead of the picture. */
+  blocked: boolean;
   alt?: string;
   caption?: string;
 }
 
 @customElement('uw-gallery')
 export class UwGallery extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, mediaBlockedStyles, css`
     /* 세로 flex 인 이유: 아래 격자가 flex item 이어야 호스트 제약이 그것에 닿는다. */
     :host {
       display: flex;
@@ -72,12 +76,16 @@ export class UwGallery extends LitElement {
 
     const items = (data as Record<string, unknown>[])
       .filter((d) => d && typeof d.src === 'string' && d.src)
-      .map((d) => ({
-        src: this._sanitizeUrl(String(d.src)),
-        alt: d.alt ? String(d.alt) : undefined,
-        caption: d.caption ? String(d.caption) : undefined,
-      }))
-      .filter((item) => item.src); // Remove items with blocked URLs
+      .map((d) => {
+        const media = checkMediaUrl(String(d.src));
+        return {
+          src: media.src,
+          blocked: media.blocked,
+          alt: d.alt ? String(d.alt) : undefined,
+          caption: d.caption ? String(d.caption) : undefined,
+        };
+      })
+      .filter((item) => item.src || item.blocked); // Drop items whose URL is a script or data URL; keep a stand-in for one refused by origin
 
     if (items.length === 0) return nothing;
 
@@ -107,21 +115,17 @@ export class UwGallery extends LitElement {
   private _renderItem(item: GalleryItem, aspectStyle: string) {
     return html`
       <figure class="gallery-item" part="gallery-item" role="listitem" style=${aspectStyle || nothing}>
-        <img
+        ${item.blocked
+          ? mediaBlocked(item.alt)
+          : html`<img
           src=${item.src}
           alt=${item.alt ?? ''}
           loading="lazy"
           part="gallery-image"
-        />
+        />`}
         ${item.caption ? html`<figcaption class="gallery-caption" part="gallery-caption">${item.caption}</figcaption>` : nothing}
       </figure>
     `;
-  }
-
-  private _sanitizeUrl(url: string): string {
-    const stripped = url.replace(/[\s\u200B\u200C\u200D\uFEFF\u00AD\u200E\u200F]/g, '');
-    if (/^(javascript|data|vbscript):/i.test(stripped)) return '';
-    return url;
   }
 }
 

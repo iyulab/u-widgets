@@ -1,6 +1,7 @@
 import { help } from './catalog.js';
 import { result, validate, type ValidationIssue, type ValidationResult } from './schema.js';
 import { WIDGET_OPTIONS, getWidgetOptions } from './widget-meta.js';
+import { checkMediaUrl, getMediaOrigins } from './media.js';
 
 /** The top-level keys a spec may carry, besides `widget` — anything else is not read by any widget. */
 const SPEC_KEYS = new Set([
@@ -61,7 +62,35 @@ export function checkSpec(spec: unknown): ValidationResult {
     }
   }
 
+  warnings.push(...mediaWarnings(widget, obj.data));
+
   return result(base.issues, warnings);
+}
+
+/**
+ * The media URLs a widget will not request because the host restricted where media may load from
+ * (`setMediaOrigins`) and the URL is outside — the widget draws its `alt` text instead, which a spec's author
+ * would otherwise take for a broken image. With no restriction set a URL to another site is ordinary and says nothing.
+ */
+function mediaWarnings(widget: string, data: unknown): string[] {
+  if (getMediaOrigins() === null) return [];
+  const urls: Array<[string, unknown]> = [];
+  const record = data !== null && typeof data === 'object' && !Array.isArray(data) ? data as Record<string, unknown> : undefined;
+  if (widget === 'image' && record) urls.push(['data.src', record.src]);
+  else if (widget === 'video' && record) {
+    urls.push(['data.src', record.src], ['data.poster', record.poster]);
+    if (Array.isArray(record.tracks)) record.tracks.forEach((t, i) => urls.push([`data.tracks[${i}].src`, (t as Record<string, unknown> | null)?.src]));
+  } else if (widget === 'gallery' && Array.isArray(data)) {
+    data.forEach((d, i) => urls.push([`data[${i}].src`, (d as Record<string, unknown> | null)?.src]));
+  }
+
+  const out: string[] = [];
+  for (const [where, value] of urls) {
+    if (typeof value !== 'string' || !value) continue;
+    const media = checkMediaUrl(value);
+    if (media.blocked) out.push(`${where} is outside the origins media may load from (setMediaOrigins) — it will not be requested`);
+  }
+  return out;
 }
 
 type FieldCheck = (value: unknown) => string | undefined;

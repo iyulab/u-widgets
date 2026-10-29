@@ -2,6 +2,8 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
+import { checkMediaUrl } from '../core/media.js';
+import { mediaBlocked, mediaBlockedStyles } from '../styles/media-blocked.js';
 
 interface VideoTrack {
   src: string;
@@ -13,7 +15,7 @@ interface VideoTrack {
 
 @customElement('uw-video')
 export class UwVideo extends LitElement {
-  static styles = [themeStyles, css`
+  static styles = [themeStyles, mediaBlockedStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트가 flex item 이어야 호스트 제약이 그것에 닿는다. */
     :host {
       display: flex;
@@ -75,12 +77,23 @@ export class UwVideo extends LitElement {
     if (!data) return nothing;
 
     const rawSrc = String(data.src ?? '');
-    const src = this._sanitizeUrl(rawSrc);
-    if (!src) return nothing;
+    const media = checkMediaUrl(rawSrc);
+    if (!media.src && !media.blocked) return nothing;
 
-    const poster = data.poster ? this._sanitizeUrl(String(data.poster)) : undefined;
     const alt = String(data.alt ?? '');
     const caption = data.caption as string | undefined;
+
+    if (media.blocked) {
+      return html`
+      <div class="video-container" part="video">
+        ${mediaBlocked(alt || undefined)}
+        ${caption ? html`<div class="video-caption" part="caption">${caption}</div>` : nothing}
+      </div>
+    `;
+    }
+
+    const src = media.src;
+    const poster = data.poster ? checkMediaUrl(String(data.poster)).src || undefined : undefined;
     const tracks = this._tracks(data.tracks);
 
     const opts = (this.spec.options ?? {}) as Record<string, unknown>;
@@ -126,7 +139,7 @@ export class UwVideo extends LitElement {
     for (const item of raw) {
       if (!item || typeof item !== 'object') continue;
       const t = item as Record<string, unknown>;
-      const src = this._sanitizeUrl(String(t.src ?? ''));
+      const src = checkMediaUrl(String(t.src ?? '')).src;
       if (!src) continue;
       const kind = typeof t.kind === 'string' && kinds.has(t.kind) ? t.kind : 'subtitles';
       out.push({
@@ -138,12 +151,6 @@ export class UwVideo extends LitElement {
       });
     }
     return out;
-  }
-
-  private _sanitizeUrl(url: string): string {
-    const stripped = url.replace(/[\s\u200B\u200C\u200D\uFEFF\u00AD\u200E\u200F]/g, '');
-    if (/^(javascript|data|vbscript):/i.test(stripped)) return '';
-    return url;
   }
 }
 

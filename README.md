@@ -224,6 +224,23 @@ widget.addEventListener('u-widget-event', (e) => {
 });
 ```
 
+## Where media loads from
+
+`image`, `gallery`, `video` (its source, poster and subtitle tracks), the `status-card` picture and the list avatar of a
+`list` take a URL from the spec, and the browser requests it as soon as the widget is drawn — the request itself
+leaves the page, even if the answer is never read. A spec that comes from somewhere you do not trust (a model's output,
+a retrieved document) can put what it knows in that URL. Say which origins media may load from:
+
+```js
+import { setMediaOrigins } from '@iyulab/u-widgets';
+
+setMediaOrigins(['self', 'https://cdn.example.com']); // before the first widget is drawn
+```
+
+A URL outside the list is not requested; the widget draws its `alt` text where the media would be. `'self'` is the
+page's own origin (where a relative URL points), `[]` allows nothing, and `setMediaOrigins(null)` lifts the restriction.
+Nothing is restricted until you call it. `checkSpec` names the URLs the restriction will refuse.
+
 ## React
 
 `@iyulab/u-widgets/react` 서브패스가 `<u-widget>`의 일급 React 래퍼 `UWidget`을 제공합니다. `spec`을 문자열로 직렬화(`JSON.stringify`)하지 않고 객체 prop으로 그대로 넘길 수 있으며, `u-widget-event`는 `onWidgetEvent` 콜백 prop으로 노출됩니다.

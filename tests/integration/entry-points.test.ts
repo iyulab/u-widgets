@@ -42,6 +42,10 @@ describe('entry point: u-widgets (index)', () => {
     expect(typeof mod.getLocaleStrings).toBe('function');
     expect(typeof mod.formatTemplate).toBe('function');
     expect(typeof mod.getDefaultLocale).toBe('function');
+
+    // Media origins
+    expect(typeof mod.setMediaOrigins).toBe('function');
+    expect(typeof mod.getMediaOrigins).toBe('function');
   });
 
   it('exports UWidget class', () => {

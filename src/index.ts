@@ -47,6 +47,7 @@ export type { UWidgetLocaleStrings } from './core/locale.js';
 export { TONES, EMPHASES, TONE_GLYPHS, isTone, isEmphasis, toneLabel, toneMark } from './core/tone.js';
 export type { Tone, Emphasis } from './core/tone.js';
 export { getPrimaryDataField } from './core/primary-field.js';
+export { setMediaOrigins, getMediaOrigins } from './core/media.js';
 
 export type { UWidgetElementProps } from './types/jsx.js';
 

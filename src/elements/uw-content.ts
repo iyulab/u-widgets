@@ -5,10 +5,12 @@ import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 import { normalizeTone, toneStyles } from '../core/tone.js';
 import { getLocaleStrings } from '../core/locale.js';
+import { checkMediaUrl } from '../core/media.js';
+import { mediaBlocked, mediaBlockedStyles } from '../styles/media-blocked.js';
 
 @customElement('uw-content')
 export class UwContent extends LitElement {
-  static styles = [themeStyles, toneStyles, css`
+  static styles = [themeStyles, toneStyles, mediaBlockedStyles, css`
     /* 세로 flex 인 이유: 아래 렌더 루트(markdown · image · callout)가 flex item 이어야 호스트
        제약이 그것에 닿는다. display:block 이면 루트의 flex 선언이 무시된다. */
     :host {
@@ -252,12 +254,12 @@ export class UwContent extends LitElement {
     const rawSrc = String(data.src ?? '');
     const alt = String(data.alt ?? '');
     const caption = data.caption as string | undefined;
-    const src = this.sanitizeUrl(rawSrc);
+    const media = checkMediaUrl(rawSrc);
 
-    if (!src) return nothing;
+    if (!media.src && !media.blocked) return nothing;
 
     return html`<div class="image-container" part="image">
-      <img src=${src} alt=${alt} loading="lazy" />
+      ${media.blocked ? mediaBlocked(alt) : html`<img src=${media.src} alt=${alt} loading="lazy" />`}
       ${caption ? html`<div class="image-caption" part="caption">${caption}</div>` : nothing}
     </div>`;
   }

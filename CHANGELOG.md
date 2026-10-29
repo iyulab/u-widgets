@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `setMediaOrigins(origins)` and `getMediaOrigins()` — say which origins media may load from. `image`, `gallery`,
+  `video` (source, poster, subtitle tracks), the `status-card` picture and the `list` avatar request the URL the spec
+  gives as soon as they are drawn, which lets a spec from an untrusted source put what it knows in a URL and have the
+  browser send it out. They now all pass one check: with origins set, a URL outside them is not requested and the
+  widget draws its `alt` text instead (`part="blocked"`); `'self'` is the page's own origin and `[]` allows nothing.
+  Nothing is restricted until it is called. `checkSpec` warns of each `image`, `gallery` and `video` URL the
+  restriction refuses. An inline `data:image/…` in a `status-card` or an avatar still draws, as it always did.
+
 ### Fixed
 
 - The page theme (`<html data-theme>` or `<html theme>`) now reaches a `<u-widget>` that sits inside another element's

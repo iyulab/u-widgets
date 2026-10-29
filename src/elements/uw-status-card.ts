@@ -6,6 +6,7 @@ import { formatValue } from '../core/format.js';
 import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
+import { checkMediaUrl } from '../core/media.js';
 
 interface Reading {
   label: string;
@@ -32,14 +33,11 @@ const OVERFLOWS = new Set(['clip', 'fade', 'scroll']);
 
 /**
  * An image the card may show: a web address, a path, or an inline image (`data:image/…` — a drawn symbol). Script
- * schemes and other inline data are refused.
+ * schemes and other inline data are refused, and with media origins set (`setMediaOrigins`) so is an address outside them.
  */
 function safeImage(src: unknown): string | undefined {
   if (typeof src !== 'string' || src === '') return undefined;
-  const stripped = src.replace(/[\s​‌‍﻿­‎‏]/g, '');
-  if (/^(javascript|vbscript):/i.test(stripped)) return undefined;
-  if (/^data:/i.test(stripped) && !/^data:image\//i.test(stripped)) return undefined;
-  return src;
+  return checkMediaUrl(src, { inlineImage: true }).src || undefined;
 }
 
 function text(value: unknown): string | undefined {
