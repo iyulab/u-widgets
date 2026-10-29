@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import '../../src/elements/u-widget.js';
 import type { UWidget } from '../../src/elements/u-widget.js';
 import type { UWidgetEvent } from '../../src/core/types.js';
+import { installGlobalThemeSync } from '../../src/theme-sync.js';
 
 function createElement(spec: Record<string, unknown>): UWidget {
   const el = document.createElement('u-widget') as UWidget;
@@ -725,5 +726,36 @@ describe('u-widget', () => {
     const shadow = await render(el);
     const btn = shadow.querySelector('.global-actions button') as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
+  });
+});
+
+describe('u-widget inside another element\'s shadow root', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    document.documentElement.removeAttribute('data-theme');
+  });
+
+  it('follows the page theme — the page-wide sync cannot reach it by querySelectorAll', async () => {
+    installGlobalThemeSync();
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const el = document.createElement('u-widget') as UWidget;
+    el.spec = { widget: 'metric', data: { value: 1.8 } } as unknown as UWidget['spec'];
+    host.attachShadow({ mode: 'open' }).appendChild(el);
+
+    expect(el.getAttribute('theme')).toBe('dark');
+
+    document.documentElement.setAttribute('data-theme', 'light');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(el.getAttribute('theme')).toBe('light');
+
+    // a widget that left is no longer written to
+    el.remove();
+    document.documentElement.setAttribute('data-theme', 'dark');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(el.getAttribute('theme')).toBe('light');
+
+    document.documentElement.removeAttribute('data-theme');
   });
 });

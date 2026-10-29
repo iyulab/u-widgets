@@ -10,6 +10,7 @@ import { resolveLocale, onLocaleChange, getLocaleRevision, getLocaleStrings, for
 import { themeStyles } from '../styles/tokens.js';
 import { normalizeFrame } from '../core/frame.js';
 import { frameStyles } from '../styles/frames.js';
+import { trackShadowWidget, untrackShadowWidget } from '../theme-sync.js';
 import './uw-metric.js';
 import './uw-gauge.js';
 import './uw-table.js';
@@ -291,10 +292,13 @@ export class UWidget extends LitElement {
     this._unsubscribeLocale = onLocaleChange(() => this.requestUpdate());
     if (this._detachedLocaleRevision !== undefined && this._detachedLocaleRevision !== getLocaleRevision()) this.requestUpdate();
     this._detachedLocaleRevision = undefined;
+    // Inside another element's shadow root the page-wide theme sync cannot find this widget; it reports itself.
+    trackShadowWidget(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    untrackShadowWidget(this);
     this.removeEventListener('u-widget-internal', this._handleInternalEvent as EventListener);
     this._unsubscribeLocale?.();
     this._unsubscribeLocale = undefined;

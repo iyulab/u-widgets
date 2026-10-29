@@ -80,6 +80,88 @@ describe('installGlobalThemeSync', () => {
     });
   });
 
+  describe('다른 요소의 shadow root 안의 위젯', () => {
+    const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+    const hosts: HTMLElement[] = [];
+
+    function widgetInShadow(): { host: HTMLElement; widget: HTMLElement } {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      hosts.push(host);
+      const widget = document.createElement('u-widget');
+      host.attachShadow({ mode: 'open' }).appendChild(widget);
+      return { host, widget };
+    }
+
+    afterEach(() => {
+      document.documentElement.removeAttribute('data-theme');
+      hosts.splice(0).forEach(h => h.remove());
+    });
+
+    it('🔴자기를 알린 shadow 안 위젯도 페이지의 테마를 받고, 바뀌면 따라간다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const { installGlobalThemeSync, trackShadowWidget } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      const { widget } = widgetInShadow();
+      expect(widget.hasAttribute('theme')).toBe(false); // 아무도 알리기 전 — document 훑기는 닿지 못한다
+      trackShadowWidget(widget);
+      expect(widget.getAttribute('theme')).toBe('dark');
+
+      document.documentElement.setAttribute('data-theme', 'light');
+      await flush();
+      expect(widget.getAttribute('theme')).toBe('light');
+
+      document.documentElement.removeAttribute('data-theme');
+      await flush();
+      expect(widget.hasAttribute('theme')).toBe(false);
+    });
+
+    it('동기화가 설치되기 전에 알린 위젯도 설치 때 테마를 받는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const { installGlobalThemeSync, trackShadowWidget } = await importFreshThemeSync();
+      const { widget } = widgetInShadow();
+      trackShadowWidget(widget);
+      expect(widget.hasAttribute('theme')).toBe(false);
+      installGlobalThemeSync();
+      expect(widget.getAttribute('theme')).toBe('dark');
+    });
+
+    it('떠난 위젯은 더 이상 건드리지 않는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const { installGlobalThemeSync, trackShadowWidget, untrackShadowWidget } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      const { widget } = widgetInShadow();
+      trackShadowWidget(widget);
+      untrackShadowWidget(widget);
+      widget.removeAttribute('theme');
+      document.documentElement.setAttribute('data-theme', 'light');
+      await flush();
+      expect(widget.hasAttribute('theme')).toBe(false);
+    });
+
+    it('페이지가 shadow 안 위젯에 직접 준 theme은 덮어쓰지 않는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const { installGlobalThemeSync, trackShadowWidget } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      const { widget } = widgetInShadow();
+      widget.setAttribute('theme', 'light');
+      trackShadowWidget(widget);
+      expect(widget.getAttribute('theme')).toBe('light');
+    });
+
+    it('light DOM의 위젯은 알려도 따로 기억하지 않는다 — 기존 훑기가 맡는다', async () => {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const { installGlobalThemeSync, trackShadowWidget } = await importFreshThemeSync();
+      installGlobalThemeSync();
+      const widget = document.createElement('u-widget');
+      document.body.appendChild(widget);
+      trackShadowWidget(widget);
+      await flush();
+      expect(widget.getAttribute('theme')).toBe('dark'); // 훑기가 준 것
+      widget.remove();
+    });
+  });
+
   describe('선언이 없으면 auto 모드를 건드리지 않는다', () => {
     // MutationObserver 콜백은 마이크로태스크로 돈다.
     const flush = () => new Promise(resolve => setTimeout(resolve, 0));

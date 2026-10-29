@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- The page theme (`<html data-theme>` or `<html theme>`) now reaches a `<u-widget>` that sits inside another element's
+  shadow root. The sync looked widgets up with `document.querySelectorAll`, which does not cross a shadow boundary, so
+  a widget there kept the light tokens on a dark page. A widget in a shadow tree now reports itself when it connects
+  and follows every later change of the page's declaration; one that disconnects is no longer written to.
+
 ## [0.43.0] - 2026-10-27
 
 ### Fixed
