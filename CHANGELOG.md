@@ -9,6 +9,16 @@
   already written — a saved report, an earlier conversation — is not telling the user anything new, and a screen reader
   broke off for every warning callout in it. The look of the tone is unchanged.
 
+### Fixed
+
+- Number formats never write a signed zero. A negative value that rounds to zero (`-0.00001` at `number:2`, a tiny
+  negative percentage, currency or compact value) read `-0.00`; it is now `0.00`. A value that does not round to
+  zero keeps its sign.
+- `number` without digits no longer writes a small nonzero value as `0`. Its default (at most three decimals) turned
+  every value below 0.0005 — data in a small unit — into a column of zeros. Such a value now keeps four significant
+  digits in scientific notation (`7.729E-8`, `7,729E-8` in German). `number:N` is unchanged: fixed decimals, as
+  asked.
+
 ## [0.44.0] - 2026-10-29
 
 ### Added

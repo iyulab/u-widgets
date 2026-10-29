@@ -11,7 +11,8 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
 /**
  * Format a value according to a format hint string.
  *
- * Supported formats: `"number"`, `"number:2"` (fixed fraction digits), `"compact"`, `"compact:2"` (`1.2K`, `3.4M` — up to
+ * Supported formats: `"number"` (a value too small for three fraction digits keeps four significant digits, in
+ * scientific notation — `7.729E-8`), `"number:2"` (fixed fraction digits), `"compact"`, `"compact:2"` (`1.2K`, `3.4M` — up to
  * that many fraction digits, one by default), `"compact:KRW"` (a currency, compact — `₩1.2억`), `"currency"`,
  * `"currency:EUR"`, `"percent"`, `"percent:1"`, `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for
  * unknown formats. It is the one grammar a format is written in — a value's `format`, a column's, a chart axis's.
@@ -26,6 +27,8 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * ```ts
  * formatValue(1234.5, 'number')       // "1,234.5"
  * formatValue(0.97444, 'number:4')    // "0.9744"
+ * formatValue(7.7291e-8, 'number')    // "7.729E-8"
+ * formatValue(-0.00001, 'number:2')   // "0.00" — never "-0.00"
  * formatValue(1234567, 'compact')     // "1.2M"
  * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
  * formatValue(73, 'percent')          // "73%"
@@ -68,14 +71,36 @@ function digits(param: string | undefined): number | undefined {
   return n <= 20 ? n : undefined;
 }
 
+/**
+ * Format with `nf`, never as a signed zero: a negative value that rounds to zero is written as zero — the sign of
+ * something too small to show is not information, and «-0» / «-0.00» reads as a defect.
+ */
+function fmt(nf: Intl.NumberFormat, num: number): string {
+  const text = nf.format(num);
+  return (num < 0 || Object.is(num, -0)) && text === nf.format(-0) ? nf.format(0) : text;
+}
+
+/**
+ * Below this, the default of `number` (at most three fraction digits) would write a nonzero value as `0`.
+ * Such a value is written in scientific notation with four significant digits instead (`7.729E-8`).
+ */
+const SMALLEST_FIXED = 0.0005;
+
 function formatNumber(value: unknown, locale?: string, fractionDigits?: number): string {
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  const fixed = fractionDigits === undefined ? {} : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits };
+  // `number` without digits names no scale — a value it would erase keeps its significant digits.
+  // `number:N` names the scale: fixed-point, as asked.
+  const fixed: Intl.NumberFormatOptions =
+    fractionDigits !== undefined
+      ? { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }
+      : num !== 0 && Math.abs(num) < SMALLEST_FIXED
+        ? { notation: 'scientific', maximumSignificantDigits: 4 }
+        : {};
   try {
-    return new Intl.NumberFormat(locale, fixed).format(num);
+    return fmt(new Intl.NumberFormat(locale, fixed), num);
   } catch {
-    return new Intl.NumberFormat(undefined, fixed).format(num);
+    return fmt(new Intl.NumberFormat(undefined, fixed), num);
   }
 }
 
@@ -91,9 +116,9 @@ function formatCompact(value: unknown, param: string | undefined, locale?: strin
     ...(currency && { style: 'currency', currency }),
   };
   try {
-    return new Intl.NumberFormat(locale ?? (currency ? 'en-US' : undefined), options).format(num);
+    return fmt(new Intl.NumberFormat(locale ?? (currency ? 'en-US' : undefined), options), num);
   } catch {
-    return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(num);
+    return fmt(new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }), num);
   }
 }
 
@@ -106,19 +131,19 @@ function formatCurrency(value: unknown, currencyCode?: string, locale?: string):
   const resolvedLocale = locale ?? 'en-US';
   try {
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase());
-    return new Intl.NumberFormat(resolvedLocale, {
+    return fmt(new Intl.NumberFormat(resolvedLocale, {
       style: 'currency',
       currency,
       ...(isZeroDecimal && {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
       }),
-    }).format(num);
+    }), num);
   } catch {
-    return new Intl.NumberFormat(resolvedLocale, {
+    return fmt(new Intl.NumberFormat(resolvedLocale, {
       style: 'currency',
       currency: 'USD',
-    }).format(num);
+    }), num);
   }
 }
 
@@ -127,17 +152,18 @@ function formatPercent(value: unknown, locale?: string, fractionDigits?: number)
   if (isNaN(num)) return String(value);
   if (locale) {
     try {
-      return new Intl.NumberFormat(locale, {
+      return fmt(new Intl.NumberFormat(locale, {
         style: 'percent',
         ...(fractionDigits === undefined
           ? { maximumFractionDigits: 2 }
           : { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }),
-      }).format(num / 100);
+      }), num / 100);
     } catch {
       // Invalid locale fallback
     }
   }
-  return (fractionDigits === undefined ? String(num) : num.toFixed(fractionDigits)) + '%';
+  const text = fractionDigits === undefined ? String(num) : num.toFixed(fractionDigits);
+  return (Number(text) === 0 ? text.replace(/^-/, '') : text) + '%';
 }
 
 /** A date (and time) as a string writes it: ISO 8601 (`2025-01-15T14:30:00Z`) and the variations APIs use —

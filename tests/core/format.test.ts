@@ -23,6 +23,39 @@ describe('formatValue', () => {
     it('handles non-numeric', () => {
       expect(formatValue('abc', 'number')).toBe('abc');
     });
+
+    it('keeps a value too small for three fraction digits — four significant digits, scientific', () => {
+      expect(formatValue(7.7291e-8, 'number', 'en')).toBe('7.729E-8');
+      expect(formatValue(-6.553e-8, 'number', 'en')).toBe('-6.553E-8');
+      expect(formatValue(0.00012, 'number', 'en')).toBe('1.2E-4');
+      expect(formatValue(7.7291e-8, 'number', 'de')).toBe('7,729E-8');
+      // at and above the threshold, and zero, keep the plain default
+      expect(formatValue(0.0005, 'number', 'en')).toBe('0.001');
+      expect(formatValue(0.25, 'number', 'en')).toBe('0.25');
+      expect(formatValue(0, 'number', 'en')).toBe('0');
+    });
+
+    it('number:N stays fixed-point — the author named the scale', () => {
+      expect(formatValue(0.00012, 'number:4', 'en')).toBe('0.0001');
+      expect(formatValue(7.7291e-8, 'number:4', 'en')).toBe('0.0000');
+    });
+  });
+
+  describe('never a signed zero', () => {
+    it('a negative value that rounds to zero is written as zero', () => {
+      expect(formatValue(-6.553e-8, 'number:4', 'en')).toBe('0.0000');
+      expect(formatValue(-0.0001, 'number:2', 'en')).toBe('0.00');
+      expect(formatValue(-0, 'number', 'en')).toBe('0');
+      expect(formatValue(-0.0004, 'percent', 'en')).toBe('0%');
+      expect(formatValue(-0.001, 'percent:1')).toBe('0.0%');
+      expect(formatValue(-0.001, 'currency:USD', 'en-US')).toBe('$0.00');
+      expect(formatValue(-0.01, 'compact', 'en')).toBe('0');
+    });
+
+    it('a negative value that does not round to zero keeps its sign', () => {
+      expect(formatValue(-0.006, 'number:2', 'en')).toBe('-0.01');
+      expect(formatValue(-1234, 'number', 'en')).toBe('-1,234');
+    });
   });
 
   describe('currency', () => {

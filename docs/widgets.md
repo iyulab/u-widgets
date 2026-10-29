@@ -111,7 +111,7 @@ commonly answers in, so `data` can be passed as it came:
 
 | Format | Output |
 |---|---|
-| `number` | `1,234` |
+| `number` | `1,234` — a nonzero value too small for three decimals keeps four significant digits: `7.729E-8` |
 | `number:2` | `1,234.50` — fixed decimals (0–20) |
 | `currency` | `$1,234.00` (기본: USD) |
 | `currency:KRW` | `₩1,234` |
@@ -123,6 +123,8 @@ commonly answers in, so `data` can be passed as it came:
 | `datetime` | `2025-01-15 14:30` |
 | `time` | `14:30` |
 | `bytes` | `1.2 GB` |
+
+A negative value that rounds to zero is written as zero in every number format — `0.00`, never `-0.00`.
 
 `date`, `datetime` and `time` read a value written in ISO 8601 (`2025-01-15T14:30:00Z`), with a space or dots between
 its parts (`2025-01-15 14:30`, `2025.01.15`), or as compact digits (`20250115`, `202501151430`,
