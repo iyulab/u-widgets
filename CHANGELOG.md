@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-10-29
+
 ### Added
 
 - `setMediaOrigins(origins)` and `getMediaOrigins()` — say which origins media may load from. `image`, `gallery`,
@@ -18,6 +20,10 @@
   shadow root. The sync looked widgets up with `document.querySelectorAll`, which does not cross a shadow boundary, so
   a widget there kept the light tokens on a dark page. A widget in a shadow tree now reports itself when it connects
   and follows every later change of the page's declaration; one that disconnects is no longer written to.
+
+### Changed
+
+- The MCP server (`@iyulab/u-widgets-mcp` 0.7.8) follows `^0.44.0`.
 
 ## [0.43.0] - 2026-10-27
 
