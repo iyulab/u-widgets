@@ -179,6 +179,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   glyphValue: 'How much one glyph stands for (default 1)',
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
+  live: 'Whether the box is announced to assistive technology as it appears: auto (default; warn and alarm assertively, the other tones politely) or off (for content already written — a saved report, an earlier conversation)',
   frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
 };
 
@@ -257,6 +258,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   spacing: choice(['small', 'default', 'large'], 'default'),
   frame: choice(FRAMES),
   overflow: choice(['clip', 'fade', 'scroll'], 'clip'),
+  live: choice(['auto', 'off'], 'auto'),
   maxItems: { type: 'number' },
   cell: choice(['square', 'chip', 'dot'], 'square'),
   counts: { type: 'boolean', default: false },
@@ -374,7 +376,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'confirm': [],
   'markdown': [],
   'image': [],
-  'callout': [],
+  'callout': ['live'],
   // `layout` and `columns` are top-level spec fields of compose, not options.
   'compose': ['widths', 'frame'],
   'kv': ['layout', 'columns'],
@@ -456,7 +458,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'callout': [
     { key: 'message', type: 'string', desc: 'Body text', required: true },
     { key: 'title', type: 'string', desc: 'Optional heading' },
-    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone (default info) — warn and alarm are announced' },
+    { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone (default info) — warn and alarm are announced unless options.live is off' },
   ],
   'code': [
     { key: 'content', type: 'string', desc: 'Code text content', required: true },

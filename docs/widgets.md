@@ -194,6 +194,11 @@ colour of its own (`#b45309`, dark `#fbbf24`) so it reads as text on the page; t
 `--u-warning-color-strong`. `TONES`, `isTone` and `toneLabel(tone, strings)` are exported for an app that draws its own
 legend.
 
+A `callout` is announced to assistive technology as it appears — a `warn` or `alarm` one at once (`role="alert"`), the other
+tones at the next pause. That fits a message that says something has just happened. For content already written — a saved
+report, an earlier conversation — set `options.live` to `"off"`: the callout is then a plain `note` that is not announced,
+and keeps the look of its tone. The default is `"auto"`.
+
 ## List rows
 
 A `list` row can say more than its text. `mapping.tone` names the field holding each row's tone ([Tones](#tones)): the

@@ -272,8 +272,12 @@ export class UwContent extends LitElement {
     const tone = normalizeTone(data.tone, 'uw-content') ?? 'info';
     const title = data.title as string | undefined;
 
-    const isUrgent = tone === 'warn' || tone === 'alarm';
-    return html`<div class="callout" part="callout" data-tone=${tone} role=${isUrgent ? 'alert' : 'note'} aria-live=${isUrgent ? 'assertive' : 'polite'}>
+    // A callout is announced as it appears: a warning at once, the rest at the next pause. A host that shows content
+    // already written (a saved report, an earlier conversation) is not telling the user anything new, so `options.live: 'off'`
+    // draws it as a plain note.
+    const live = this.spec!.options?.live !== 'off';
+    const isUrgent = live && (tone === 'warn' || tone === 'alarm');
+    return html`<div class="callout" part="callout" data-tone=${tone} role=${isUrgent ? 'alert' : 'note'} aria-live=${live ? (isUrgent ? 'assertive' : 'polite') : nothing}>
       ${title ? html`<div class="callout-title" part="callout-title">${title}</div>` : nothing}
       <div part="callout-message">${message}</div>
     </div>`;

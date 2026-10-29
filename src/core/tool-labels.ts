@@ -123,6 +123,7 @@ const EN: ToolLabels = {
     spacing: 'Spacing',
     frame: 'Frame',
     overflow: 'Overflow',
+    live: 'Announce',
     maxItems: 'Most rows',
     cell: 'Cell shape',
     counts: 'Counts',

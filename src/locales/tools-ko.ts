@@ -103,6 +103,7 @@ export const toolLabelsKo: ToolLabels = {
     spacing: '간격',
     frame: '틀',
     overflow: '넘칠 때',
+    live: '낭독 알림',
     maxItems: '최대 행 수',
     cell: '칸 모양',
     counts: '개수',

@@ -346,6 +346,28 @@ describe('uw-content', () => {
       expect(shadow.querySelector('.callout')?.getAttribute('data-tone')).toBe('alarm');
     });
 
+    it('announces a warning at once and the other tones at the next pause', async () => {
+      for (const [tone, role, live] of [['warn', 'alert', 'assertive'], ['alarm', 'alert', 'assertive'], ['info', 'note', 'polite'], ['ok', 'note', 'polite']]) {
+        const shadow = await render(createElement({ widget: 'callout', data: { message: 'm', tone } }));
+        const callout = shadow.querySelector('.callout')!;
+        expect([tone, callout.getAttribute('role'), callout.getAttribute('aria-live')]).toEqual([tone, role, live]);
+      }
+    });
+
+    it('options.live "off" draws content already written as a plain note, for every tone', async () => {
+      for (const tone of ['warn', 'alarm', 'info']) {
+        const shadow = await render(createElement({ widget: 'callout', data: { message: 'm', tone }, options: { live: 'off' } }));
+        const callout = shadow.querySelector('.callout')!;
+        expect([tone, callout.getAttribute('role'), callout.hasAttribute('aria-live')]).toEqual([tone, 'note', false]);
+        expect(callout.getAttribute('data-tone')).toBe(tone); // only the announcement is off — the look is the tone's
+      }
+    });
+
+    it('options.live "auto" is the default behaviour', async () => {
+      const shadow = await render(createElement({ widget: 'callout', data: { message: 'm', tone: 'warn' }, options: { live: 'auto' } }));
+      expect(shadow.querySelector('.callout')?.getAttribute('role')).toBe('alert');
+    });
+
     it('renders success callout', async () => {
       const el = createElement({
         widget: 'callout',
