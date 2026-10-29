@@ -179,6 +179,9 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
     warnUnregisteredComponentKeys(passthrough);
     result = deepMerge(result, passthrough, ELEMENTWISE_KEYS);
     followLegendToFoot(result, passthrough);
+    // An axis or a tooltip only the passthrough declares (a chart drawn wholly through options.echarts) gets the
+    // locale default too — only where no formatter is set, so one given there still wins.
+    applyLocaleNumberDefaults(result, locale);
   }
 
   // Guard series-type false affordance: catches both options.series[i].type
@@ -1610,7 +1613,8 @@ function localeNumberFormatter(locale?: string): (value: number) => string {
  * - a `value` / `log` axis without a label formatter (xFormat · yFormat · valueAxisFormat set one);
  * - a tooltip without `formatter` / `valueFormatter`, unless a time axis is present (its values are
  *   timestamps that ECharts formats as dates).
- * Runs before the `options.echarts` passthrough, so a formatter the spec sets there still wins.
+ * Runs before the `options.echarts` passthrough and again on the merged option — an axis or a tooltip only the
+ * passthrough declares gets the default too. It fills only where no formatter is set, so one the spec sets there still wins.
  */
 function applyLocaleNumberDefaults(result: Record<string, unknown>, locale?: string): void {
   const { axisFormatter, valueFormatter } = localeFormatters(locale);

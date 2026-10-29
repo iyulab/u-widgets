@@ -81,3 +81,30 @@ describe('value axes and tooltips read numbers in the widget locale', () => {
     expect(tooltip.valueFormatter).toBeUndefined();
   });
 });
+
+describe('a chart drawn wholly through options.echarts', () => {
+  const echarts = {
+    xAxis: { type: 'value', name: 'x' },
+    yAxis: { type: 'value', name: 't', scale: true },
+    tooltip: { trigger: 'axis' },
+    series: [{ type: 'line', data: [[0, 10000], [1, 0.5]] }],
+  };
+
+  it('its value axes and tooltip read numbers in the widget locale', () => {
+    const o = option({ data: [], options: { locale: 'de', echarts } });
+    expect(axisFmt(o.yAxis)(10000)).toBe('10.000');
+    expect(axisFmt(o.xAxis)(0.5)).toBe('0,5');
+    expect(((o.tooltip as Obj).valueFormatter as Fmt)(0.5)).toBe('0,5');
+    expect((o.yAxis as Obj).scale).toBe(true);
+  });
+
+  it('a formatter it sets itself still wins', () => {
+    const own = (v: unknown) => `#${String(v)}`;
+    const o = option({
+      data: [],
+      options: { locale: 'de', echarts: { ...echarts, yAxis: { ...echarts.yAxis, axisLabel: { formatter: own } }, tooltip: { trigger: 'axis', valueFormatter: own } } },
+    });
+    expect(axisFmt(o.yAxis)).toBe(own);
+    expect((o.tooltip as Obj).valueFormatter).toBe(own);
+  });
+});

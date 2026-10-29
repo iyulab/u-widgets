@@ -18,6 +18,10 @@
   every value below 0.0005 — data in a small unit — into a column of zeros. Such a value now keeps four significant
   digits in scientific notation (`7.729E-8`, `7,729E-8` in German). `number:N` is unchanged: fixed decimals, as
   asked.
+- A chart drawn wholly through `options.echarts` (`data: []`, its axes and series declared there) reads its numbers
+  in the widget locale too. The locale default for value axes and the tooltip ran before the passthrough was merged,
+  so an axis or a tooltip only the passthrough declared wrote `10,000` and `0.5` on a German page. It now also runs on
+  the merged option — still only where no formatter is set, so one given through `options.echarts` keeps winning.
 
 ## [0.44.0] - 2026-10-29
 
