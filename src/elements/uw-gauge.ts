@@ -340,8 +340,8 @@ export class UwGauge extends LitElement {
       top += l.height;
       // The subtitle's text is written in updated(), which may shorten it — Lit owns no part inside it.
       return l.kind === 'subtitle'
-        ? svg`<text class="gauge-subtitle" part="subtitle" x=${cx} y=${y} text-anchor="middle"
-            dominant-baseline="central" fill=${color}></text>`
+        ? svg`<g class="gauge-subtitle-group"><title></title><text class="gauge-subtitle" part="subtitle" x=${cx} y=${y}
+            text-anchor="middle" dominant-baseline="central" fill=${color}></text></g>`
         : svg`<text class="gauge-${l.kind}" part=${l.kind} x=${cx} y=${y} text-anchor="middle"
             dominant-baseline="central">${l.text}</text>`;
     });
@@ -429,7 +429,7 @@ export class UwGauge extends LitElement {
           <text class="gauge-level-value" part="value" x=${W / 2} y="18" text-anchor="middle" dominant-baseline="central">${shown}${unit
             ? svg`<tspan class="gauge-level-unit" part="unit" dx="3">${unit}</tspan>`
             : nothing}</text>
-          ${activeLabel ? svg`<text class="gauge-subtitle" part="subtitle" x=${W / 2} y="40" text-anchor="middle" dominant-baseline="central" fill=${color}></text>` : nothing}
+          ${activeLabel ? svg`<g class="gauge-subtitle-group"><title></title><text class="gauge-subtitle" part="subtitle" x=${W / 2} y="40" text-anchor="middle" dominant-baseline="central" fill=${color}></text></g>` : nothing}
           ${shape}
           ${bandLine}
           ${ticks}
@@ -466,13 +466,20 @@ export class UwGauge extends LitElement {
     this._fitSubtitle();
   }
 
-  /** SVG text has no text-overflow, so a label wider than the arc's inner span is cut with an ellipsis here. */
+  /**
+   * SVG text has no text-overflow, so a label wider than the arc's inner span is cut with an ellipsis here. The cut
+   * label's full text stays on the page: the group's `<title>` shows it on hover. (A screen reader reads it from the
+   * meter's `aria-valuetext`, which always carries the whole label.)
+   */
   private _fitSubtitle() {
     const subtitle = this.renderRoot.querySelector<SVGTextElement>('text.gauge-subtitle');
     if (!subtitle) return;
+    const title = subtitle.parentElement?.querySelector(':scope > title');
     const full = this._subtitle;
     subtitle.textContent = full;
+    if (title) title.textContent = '';
     if (typeof subtitle.getComputedTextLength !== 'function' || subtitle.getComputedTextLength() <= this._subtitleWidth) return;
+    if (title) title.textContent = full;
     let lo = 0;
     let hi = full.length;
     while (lo < hi) {

@@ -28,6 +28,7 @@ describe('uw-gauge — 중앙 라벨 말줄임', () => {
   }
 
   const subtitle = (el: HTMLElement) => el.shadowRoot!.querySelector<SVGTextElement>('text.gauge-subtitle')!;
+  const titleOf = (el: HTMLElement) => subtitle(el).parentElement!.querySelector(':scope > title')!.textContent;
 
   it('긴 라벨은 호 안쪽 폭에 맞춰 말줄임표로 끝난다', async () => {
     const el = await mount('Excellent Working Condition Status Across All Sites');
@@ -74,5 +75,16 @@ describe('uw-gauge — 중앙 라벨 말줄임', () => {
     };
     await el.updateComplete;
     expect(subtitle(el).textContent).toBe('Good');
+    expect(titleOf(el)).toBe('');
+  });
+
+  it('잘린 라벨의 전체 문구는 그룹의 title 로 남는다 — 짧은 라벨에는 title 이 없다', async () => {
+    const long = 'Grenzwert überschritten und weiter steigend';
+    const el = await mount(long);
+    expect(subtitle(el).textContent).toMatch(/…$/);
+    expect(titleOf(el)).toBe(long);
+    // 화면 낭독기는 meter 의 aria-valuetext 로 전체를 읽는다
+    expect(el.shadowRoot!.querySelector('[role="meter"]')!.getAttribute('aria-valuetext')).toContain(long);
+    expect(titleOf(await mount('Good'))).toBe('');
   });
 });
