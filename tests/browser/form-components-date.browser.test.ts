@@ -1,6 +1,6 @@
 // `u-widgets/components` — an app that opts in gets `<u-date-picker>` for date and datetime
 // fields, and the form keeps sending what the native inputs sent.
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { whenFormdownLoaded } from '../../src/elements/uw-form.js';
 import '../../src/components.js';
@@ -25,8 +25,9 @@ async function mount(data: Record<string, unknown>) {
   // The fields are `<formdown-ui>`'s; it binds a picker by name once the picker is defined.
   const fields = el.shadowRoot!.querySelector('formdown-ui') as HTMLElement & { updateComplete: Promise<unknown> };
   await fields.updateComplete;
-  await new Promise((r) => setTimeout(r, 20));
   const root = fields.shadowRoot!;
+  // Wait for the condition, not a fixed delay: under a loaded machine the pickers land after any guess.
+  await vi.waitFor(() => expect(root.querySelectorAll('u-date-picker')).toHaveLength(2), { timeout: 5000 });
   const changes: unknown[] = [];
   el.addEventListener('u-widget-internal', (e) => changes.push((e as CustomEvent).detail.data));
   const [due, at] = root.querySelectorAll('u-date-picker') as NodeListOf<Picker>;
