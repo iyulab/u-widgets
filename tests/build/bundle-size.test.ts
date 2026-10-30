@@ -157,6 +157,8 @@ describe('bundle size budget', () => {
     // Re-baselined from 10 KB for the compact format (`compact`, `compact:KRW` — every widget's values and the chart
     // axes, now one grammar) and validate's notes on two renamed shapes (a metric's `description`, an axis format
     // object): 10.15 KB measured.
-    expect(totalGzip).toBeLessThan(11 * 1024);
+    // Re-baselined from 11 KB for the spreadsheet-code reader point (`setNumberCodeReader`, its two one-time warnings):
+    // 11.07 KB measured. The engine itself is not here — it stays in `@iyulab/components`, imported only by `./components`.
+    expect(totalGzip).toBeLessThan(11.5 * 1024);
   });
 });

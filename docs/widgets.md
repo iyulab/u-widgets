@@ -703,7 +703,7 @@ language. An app that already uses `@iyulab/components` can opt in to its date p
 
 ```ts
 import '@iyulab/u-widgets';
-import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 2.8
+import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 2.36
 ```
 
 The fields then render `<u-date-picker>` (typed entry, calendar, the app's locale). What the form
@@ -713,6 +713,17 @@ registered as formdown's `date` and `datetime-local` field types, so any `<formd
 The same import makes u-widgets follow the components locale: its default locale is `Locale.get()`
 and moves with every `Locale.set()`, so one call switches the whole app. A widget's own `locale`
 still wins.
+
+### Number-format codes
+
+With the same import, a `format` can be a spreadsheet number-format code — `"#,##0.00"`, `"0.0%"`, `"#,##0;[Red](#,##0)"`,
+`"#,##0원"` — read by the engine that the `@iyulab/components` table and sheet read their column `format` with, so one
+code writes one text in all three. It covers up to four `;` sections (positive; negative; zero; text), `0` `#` `?`
+placeholders with `.` and grouping `,`, trailing-comma scaling, `%`, quoted and escaped literals, and `[$₩-412]`; separators
+follow the widget's locale. A code with syntax the engine does not support (conditions such as `[>100]`, scientific `E+`,
+fractions) is shown as the plain value, with a console warning. A section color (`[Red]`) is not drawn by a widget — the
+text is. Without the import, a code is shown as the plain value and the console says to import it. The words above
+(`number`, `number:2`, `compact`, `currency:EUR`, `percent`, …) work with or without it.
 
 ## Locale
 

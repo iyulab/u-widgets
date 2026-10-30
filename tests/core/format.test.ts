@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { describe, it, expect } from 'vitest';
-import { formatValue } from '../../src/core/format.js';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { formatValue, setNumberCodeReader } from '../../src/core/format.js';
 
 describe('formatValue', () => {
   it('returns em-dash for null/undefined', () => {
@@ -302,5 +302,61 @@ describe('formatValue — fixed fraction digits (number:N · percent:N)', () => 
   it('NEGATIVE — a parameter that is not a count is ignored (Intl default)', () => {
     expect(formatValue(1.23456, 'number:x', 'en')).toBe(formatValue(1.23456, 'number', 'en'));
     expect(formatValue(1.23456, 'number:99', 'en')).toBe(formatValue(1.23456, 'number', 'en'));
+  });
+});
+
+describe('formatValue — spreadsheet number-format codes', () => {
+  afterEach(() => {
+    setNumberCodeReader(undefined);
+    vi.restoreAllMocks();
+  });
+
+  it('without a reader a code is shown as the plain value, with one warning per code', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(formatValue(1234.5, '#,##0.00-unread', 'en')).toBe('1234.5');
+    expect(formatValue(7, '#,##0.00-unread', 'en')).toBe('7');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0]?.[0])).toContain("@iyulab/u-widgets/components");
+  });
+
+  it('a word u-widgets knows is never a code, and an unknown format with no digit placeholder stays plain', () => {
+    const read = vi.fn(() => ({ text: 'read' }));
+    setNumberCodeReader(read);
+    expect(formatValue(1234.5, 'number', 'en')).toBe('1,234.5');
+    expect(formatValue(73, 'percent:1', 'en')).toBe('73.0%');
+    expect(formatValue(3, 'nonsense', 'en')).toBe('3');
+    expect(read).not.toHaveBeenCalled();
+  });
+
+  it('a reader gets the whole code and the locale, and its text is the answer', () => {
+    const read = vi.fn((_value: unknown, code: string) => ({ text: `<${code}>`, tone: 'danger' }));
+    setNumberCodeReader(read);
+    expect(formatValue(-5, '#,##0;[Red](#,##0)', 'de')).toBe('<#,##0;[Red](#,##0)>');
+    expect(read).toHaveBeenCalledWith(-5, '#,##0;[Red](#,##0)', 'de');
+  });
+
+  it('a code the reader does not support shows the plain value, with one warning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    setNumberCodeReader(() => null);
+    expect(formatValue(1234, '[>100]0.0-unsupported', 'en')).toBe('1234');
+    expect(formatValue(5, '[>100]0.0-unsupported', 'en')).toBe('5');
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('null stays the em-dash — no reader is asked', () => {
+    const read = vi.fn(() => ({ text: 'read' }));
+    setNumberCodeReader(read);
+    expect(formatValue(null, '#,##0')).toBe('—');
+    expect(read).not.toHaveBeenCalled();
+  });
+
+  it('the shared engine writes the same text the table and sheet write for one code', async () => {
+    const { applyNumberFormat } = await import('@iyulab/components/dist/utilities/numberFormat.js');
+    setNumberCodeReader((value, code, locale) => applyNumberFormat(value, code, locale));
+    expect(formatValue(1234.5, '#,##0.00', 'en')).toBe('1,234.50');
+    expect(formatValue(0.256, '0.0%', 'en')).toBe('25.6%');
+    expect(formatValue(-0.00001, '#,##0.00', 'en')).toBe('0.00');
+    expect(formatValue(-1234, '#,##0;[Red](#,##0)', 'en')).toBe('(1,234)');
+    expect(formatValue(1234.5, '#,##0.00', 'de')).toBe('1.234,50');
   });
 });

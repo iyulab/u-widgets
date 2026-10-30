@@ -22,6 +22,17 @@
 - A `meter` takes `target`: a bar draws a mark across the track at that value — a bullet graph, the value and what it is
   measured against — and announces it («72 %, Target 85 %»). On a `metric`, a meter of the figure itself takes the
   metric's `target`. `metric` and `status-card` both draw it; a ring draws no mark.
+- A `format` can be a spreadsheet number-format code — `"#,##0.00"`, `"0.0%"`, `"#,##0;[Red](#,##0)"` — once
+  `@iyulab/u-widgets/components` is imported. It is read by `applyNumberFormat` of `@iyulab/components`, the engine its
+  table and sheet read their column `format` with, so one code writes one text in a table, a sheet and a widget (and
+  never a signed zero). A code the engine does not support, or any code without the import, is shown as the plain value
+  with a console warning; the format words (`number:2`, `compact`, `currency:EUR`, …) are unchanged. A `format` is typed as any string for this.
+
+### Changed
+
+- The optional peer `@iyulab/components` is `>=2.36.0` (was `>=2.8.0`) — the `u-widgets/components` entry now imports its
+  number-format engine, which 2.36.0 introduced. A package that does not import `u-widgets/components` does not need
+  `@iyulab/components` at all; one that does should move to 2.36 or later.
 
 ### Fixed
 

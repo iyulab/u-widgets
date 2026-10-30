@@ -3,8 +3,11 @@
  *
  * Opt-in integration with `@iyulab/components`: `uw-form` draws `date` and `datetime` fields with
  * `<u-date-picker>` instead of the browser's native inputs — the same typed entry and calendar the
- * rest of an `@iyulab/components` app uses, in the app's locale rather than the browser's.
- * Requires `@iyulab/components` (optional peer). Without this import u-widgets stays native and
+ * rest of an `@iyulab/components` app uses, in the app's locale rather than the browser's. A `format`
+ * written as a spreadsheet number-format code (`"#,##0.00"`, `"0.0%"`, `"#,##0;[Red](#,##0)"`) is read with
+ * the engine `@iyulab/components` shares with its table and sheet — the same code writes the same text in
+ * all three. Without this import such a `format` is shown as the plain value, with a console warning.
+ * Requires `@iyulab/components` 2.36 or later (optional peer). Without this import u-widgets stays native and
  * runs without it.
  *
  * u-widgets also follows the `@iyulab/components` locale: its default locale becomes `Locale.get()` and moves with
@@ -24,6 +27,8 @@
 import '@iyulab/components/dist/components/date-picker/UDatePicker.js';
 import { Locale } from '@iyulab/components/dist/utilities/Locale.js';
 import { getDefaultExtensionManager, type Field } from '@formdown/core';
+import { applyNumberFormat } from '@iyulab/components/dist/utilities/numberFormat.js';
+import { setNumberCodeReader } from './core/format.js';
 import { setDefaultLocale } from './core/locale.js';
 
 const escapeAttr = (text: string) =>
@@ -55,6 +60,10 @@ function datePicker(mode: 'date' | 'datetime') {
 const fieldTypes = getDefaultExtensionManager().getFieldTypeRegistry();
 if (!fieldTypes.has('date')) fieldTypes.register({ type: 'date', generator: datePicker('date') });
 if (!fieldTypes.has('datetime-local')) fieldTypes.register({ type: 'datetime-local', generator: datePicker('datetime') });
+
+// One number-format vocabulary for the app: a `format` written as a spreadsheet code (`#,##0.00`, `0.0%`) is read by the
+// engine the `@iyulab/components` table and sheet read their column `format` with, so one code writes one text everywhere.
+setNumberCodeReader((value, code, locale) => applyNumberFormat(value, code, locale));
 
 // One language for the app: u-widgets' default locale is the components locale, now and after every switch.
 setDefaultLocale(Locale.get());

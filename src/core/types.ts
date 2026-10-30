@@ -78,8 +78,8 @@ export interface UWidgetColumnDefinition {
   field: string;
   /** Display header label. Defaults to the field name. */
   label?: string;
-  /** Value format (`formatValue` — e.g. `"number:2"`, `"compact"`, `"currency:EUR"`, `"percent"`). */
-  format?: 'number' | `number:${number}` | 'compact' | `compact:${string}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes';
+  /** Value format (`formatValue` — e.g. `"number:2"`, `"compact"`, `"currency:EUR"`, `"percent"`; with `@iyulab/u-widgets/components` imported also a spreadsheet code such as `"#,##0.00"`). */
+  format?: 'number' | `number:${number}` | 'compact' | `compact:${string}` | 'currency' | `currency:${string}` | 'percent' | `percent:${number}` | 'date' | 'datetime' | 'time' | 'bytes' | (string & Record<never, never>);
   /** Text alignment within the column. */
   align?: 'left' | 'center' | 'right';
   /** The tone (`core/tone.ts`) this column's cells are drawn in — bold, in the tone's colour. */

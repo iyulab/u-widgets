@@ -43,7 +43,7 @@ auto-inferred from the data shape when omitted — see
 | `u-widgets` | Everything below except `chart.*` and `math` | — |
 | `u-widgets/charts` | `chart.*` types (`uw-chart`) | `echarts` |
 | `u-widgets/math` | `math` type (`uw-math`) | `katex` |
-| `u-widgets/components` | `uw-form` draws `date` / `datetime` fields with `<u-date-picker>` (typed entry, calendar, app locale); submitted values keep the native shape. u-widgets' default locale follows the components `Locale` (one `Locale.set()` switches both) | `@iyulab/components` ≥ 2.8 |
+| `u-widgets/components` | `uw-form` draws `date` / `datetime` fields with `<u-date-picker>` (typed entry, calendar, app locale); submitted values keep the native shape. u-widgets' default locale follows the components `Locale` (one `Locale.set()` switches both). A `format` written as a spreadsheet number-format code (`"#,##0.00"`, `"0.0%"`) is read by the engine the components table and sheet share | `@iyulab/components` ≥ 2.36 |
 | `u-widgets/cdn` | Single `<script>` bundle (core + charts), for non-bundler usage | — |
 
 Chart and math widgets are split out because their rendering libraries (`echarts`, `katex`) are

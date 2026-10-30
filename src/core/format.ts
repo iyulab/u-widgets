@@ -2,6 +2,48 @@ type FormatType = 'number' | 'compact' | 'currency' | 'percent' | 'date' | 'date
 
 const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
+/**
+ * Reads a spreadsheet number-format code (`#,##0.00`, `0.0%`, `#,##0;[Red](#,##0)`). Answers `null` when the code uses
+ * syntax it does not support. A code's section color (`[Red]`) may come back as a `tone`; `formatValue` writes the text
+ * and leaves the tone to the host.
+ */
+export type NumberCodeReader = (value: unknown, code: string, locale?: string) => { text: string; tone?: string } | null;
+
+let codeReader: NumberCodeReader | undefined;
+
+/**
+ * Turn on reading of spreadsheet format codes — what `@iyulab/u-widgets/components` does by importing it, with the
+ * engine `@iyulab/components` shares with its table and sheet. Without a reader a code-shaped `format` is written as
+ * the plain value, with a console warning.
+ */
+export function setNumberCodeReader(reader: NumberCodeReader | undefined): void {
+  codeReader = reader;
+}
+
+/** A `format` that is none of u-widgets' words but carries a digit placeholder (`0` `#` `?`) is a spreadsheet code. */
+function isNumberCode(format: string | undefined): format is string {
+  return format !== undefined && /[0#?]/.test(format);
+}
+
+const warned = new Set<string>();
+
+function warnOnce(message: string): void {
+  if (warned.has(message)) return;
+  warned.add(message);
+  console.warn(`[@iyulab/u-widgets] ${message}`);
+}
+
+function formatByCode(value: unknown, code: string, locale?: string): string {
+  if (!codeReader) {
+    warnOnce(`format "${code}" is a spreadsheet number-format code — import '@iyulab/u-widgets/components' to read it; the value is shown as is.`);
+    return String(value);
+  }
+  const read = codeReader(value, code, locale);
+  if (read) return read.text;
+  warnOnce(`format "${code}" uses syntax the number-format engine does not support — the value is shown as is.`);
+  return String(value);
+}
+
 // ISO 4217 zero-decimal currencies — no fractional digits by standard
 const ZERO_DECIMAL_CURRENCIES = new Set([
   'KRW', 'JPY', 'VND', 'IDR', 'BIF', 'CLP', 'GNF', 'ISK',
@@ -15,7 +57,8 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * scientific notation — `7.729E-8`), `"number:2"` (fixed fraction digits), `"compact"`, `"compact:2"` (`1.2K`, `3.4M` — up to
  * that many fraction digits, one by default), `"compact:KRW"` (a currency, compact — `₩1.2억`), `"currency"`,
  * `"currency:EUR"`, `"percent"`, `"percent:1"`, `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for
- * unknown formats. It is the one grammar a format is written in — a value's `format`, a column's, a chart axis's.
+ * unknown formats, except a spreadsheet number-format code (`"#,##0.00"`, `"0.0%"`), which `@iyulab/u-widgets/components`
+ * reads with the engine `@iyulab/components` shares with its table and sheet. It is the one grammar a format is written in — a value's `format`, a column's, a chart axis's.
  *
  * @param value - The value to format (coerced to number where needed).
  * @param format - Format hint, optionally with a parameter after `:` (e.g., `"currency:USD"`).
@@ -60,7 +103,7 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
     case 'bytes':
       return formatBytes(value);
     default:
-      return String(value);
+      return isNumberCode(format) ? formatByCode(value, format, locale) : String(value);
   }
 }
 
