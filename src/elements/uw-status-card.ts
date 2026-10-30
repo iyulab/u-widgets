@@ -1,7 +1,7 @@
 import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
-import { localeStringsOf } from '../core/locale.js';
+import { formatTemplate, localeStringsOf } from '../core/locale.js';
 import { formatValue } from '../core/format.js';
 import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
@@ -243,7 +243,7 @@ export class UwStatusCard extends LitElement {
                   <dt>${r.label}</dt><dd>${r.value}</dd>
                 </div>`)}
             </dl>` : nothing}
-          ${card.meter ? renderMeter(card.meter) : nothing}
+          ${card.meter ? renderMeter(card.meter, undefined, undefined, true, (t) => formatTemplate(strings.metricTarget, { target: t })) : nothing}
           ${card.note ? html`<div class="note" part="note">${card.note}</div>` : nothing}
         </div>
         ${card.emphasis === 'stamp' && status ? html`<span class="tone-stamp" part="stamp">${status}</span>` : nothing}

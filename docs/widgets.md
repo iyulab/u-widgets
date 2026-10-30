@@ -345,12 +345,21 @@ the figure in its format and unit («Target 2.5 %»).
 
 ### Meters
 
-A `meter` is a value against its range: `{ value, min?, max?, unit?, format?, tone?, form? }` — `min` 0 and `max` 100
+A `meter` is a value against its range: `{ value, min?, max?, unit?, format?, tone?, form?, target? }` — `min` 0 and `max` 100
 unless given, the value written beside it as `format` and `unit` say. `form` is `bar` (the default) or `ring`. It takes
 its own `tone`'s colour, else its widget's or item's, else the primary one, and is announced as a meter of that range
 with the written value. On a `metric`, a meter of the figure itself writes nothing beside it — the figure is above. A
 value outside the range fills the meter to its end; a meter with no number, or a `max` not
 above `min`, is not drawn.
+
+`target` draws a mark across a bar at that value — a bullet graph: the value, and what it is measured against. It is
+written into what is announced («62 %, Target 80 %») and shown on hover; a ring draws no mark. On a `metric`, a meter of
+the figure itself takes the metric's `target` when it has none of its own.
+
+```json
+{ "widget": "metric", "data": { "label": "OEE", "value": 72, "unit": "%", "target": 85,
+  "meter": { "value": 72, "unit": "%" } } }
+```
 
 ## Table Options
 

@@ -549,4 +549,32 @@ describe('uw-metric', () => {
       expect(shadow.querySelector('[part="target"]')).toBeNull();
     });
   });
+
+  describe('meter target (bullet)', () => {
+    it('marks the target across the bar and writes it into what is announced', async () => {
+      const shadow = await render(createElement({
+        widget: 'metric',
+        data: { label: 'OEE', value: 72, unit: '%', meter: { value: 72, unit: '%', target: 85 } },
+      }));
+      const mark = shadow.querySelector('.meter-target') as HTMLElement;
+      expect(mark.style.left).toBe('85.0%');
+      // The unit stands after a no-break space, as the metric writes it.
+      expect(shadow.querySelector('.meter')!.getAttribute('aria-valuetext')).toBe('72 %, Target 85 %');
+    });
+
+    it('a meter of the figure itself takes the metric target — another meter does not', async () => {
+      const own = await render(createElement({ widget: 'metric', data: { value: 72, target: 85, meter: { value: 72 } } }));
+      expect((own.querySelector('.meter-target') as HTMLElement).style.left).toBe('85.0%');
+      const other = await render(createElement({ widget: 'metric', data: { value: 412, target: 500, meter: { value: 62 } } }));
+      expect(other.querySelector('.meter-target')).toBeNull();
+    });
+
+    it('a ring draws no mark, and a meter without a target has none', async () => {
+      const ring = await render(createElement({ widget: 'metric', data: { value: 72, meter: { value: 72, form: 'ring', target: 85 } } }));
+      expect(ring.querySelector('.meter-target')).toBeNull();
+      const plain = await render(createElement({ widget: 'metric', data: { value: 72, meter: { value: 72 } } }));
+      expect(plain.querySelector('.meter-target')).toBeNull();
+      expect(plain.querySelector('.meter')!.getAttribute('aria-valuetext')).toBe('72');
+    });
+  });
 });

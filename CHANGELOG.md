@@ -19,6 +19,9 @@
   the `%` written after `change` (`"pt"`, or `""` for an absolute amount). `target` is the comparison value, written
   under the figure in the value's format and unit («Target 2.5 %», «목표 2.5 %» in Korean — new locale string
   `metricTarget`).
+- A `meter` takes `target`: a bar draws a mark across the track at that value — a bullet graph, the value and what it is
+  measured against — and announces it («72 %, Target 85 %»). On a `metric`, a meter of the figure itself takes the
+  metric's `target`. `metric` and `status-card` both draw it; a ring draws no mark.
 
 ### Fixed
 

@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 import { formatValue } from '../core/format.js';
-import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
+import { meterStyles, readMeter, renderMeter, withTarget, type Meter } from '../core/meter.js';
 import { localeStringsOf, formatTemplate } from '../core/locale.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 
@@ -51,6 +51,22 @@ function sparklinePaths(values: number[]): { line: string; area: string } | unde
 }
 
 const round = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * A meter of the figure itself (the same value) takes the metric's `target` when it has none of its own — the bar then
+ * reads as a bullet graph: the value, and the mark it is measured against.
+ */
+function meterWithTarget(
+  meter: Meter | undefined,
+  data: Record<string, unknown>,
+  write: (value: number, format: unknown, unit: unknown) => string,
+): Meter | undefined {
+  if (!meter || meter.target != null || meter.value !== Number(data.value)) return meter;
+  const target = typeof data.target === 'number' ? data.target : NaN;
+  if (!Number.isFinite(target)) return meter;
+  const raw = data.meter as Record<string, unknown>;
+  return { ...meter, ...withTarget(meter, target, write(target, raw.format, raw.unit)) };
+}
 
 const POLARITIES = ['higher-better', 'lower-better', 'neutral'] as const;
 type Polarity = (typeof POLARITIES)[number];
@@ -107,7 +123,7 @@ function toMetricData(
         : undefined,
     icon: data.icon as string | undefined,
     note: typeof data.note === 'string' && data.note !== '' ? data.note : undefined,
-    meter: readMeter(data.meter, write, 'uw-metric'),
+    meter: meterWithTarget(readMeter(data.meter, write, 'uw-metric'), data, write),
     format: data.format as string | undefined,
     tone: normalizeTone(data.tone, 'uw-metric'),
     emphasis: normalizeEmphasis(data.emphasis, 'uw-metric'),
@@ -349,7 +365,7 @@ export class UwMetric extends LitElement {
         ${m.target != null
           ? html`<div class="metric-target" part="target">${formatTemplate(localeStringsOf(this.spec).metricTarget, { target: m.target })}</div>`
           : nothing}
-        ${m.meter ? renderMeter(m.meter, m.label, m.tone, m.meter.value !== Number(m.raw)) : nothing}
+        ${m.meter ? renderMeter(m.meter, m.label, m.tone, m.meter.value !== Number(m.raw), (t) => formatTemplate(localeStringsOf(this.spec).metricTarget, { target: t })) : nothing}
         ${m.note ? html`<div class="metric-note" part="note">${m.note}</div>` : nothing}
         ${this.renderSparkline(m.sparkline)}
       </div>
