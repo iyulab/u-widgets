@@ -512,6 +512,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'status-grid': [
     { key: 'label', type: 'string', desc: 'The cell\'s name — a seat, a bed, a bay' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour (stamp: a heavy frame)' },
     { key: 'value', type: 'string | number', desc: 'A value under the name' },
     { key: 'unit', type: 'string', desc: 'The value\'s unit' },
     { key: 'format', type: 'string', desc: 'The value\'s format (number:1, percent, …)' },
@@ -574,7 +575,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'kv': 'No mapping. data is {key: val, ...} or [{label, value, unit?, format?, tone?, glyph?, note?}]. layout in options.',
   'code': 'No mapping. data is {content, language?}. lineNumbers/highlight/maxHeight/wrap in options.',
   'citation': 'No mapping. data is {title, url?, snippet?, source?} or array of those. compact/numbered in options.',
-  'status-grid': 'No mapping. data is [{label?, tone, value?, unit?, format?}]. columns, cell (square/chip/dot) and counts in options.',
+  'status-grid': 'No mapping. data is [{label?, tone, emphasis?, value?, unit?, format?}]. columns, cell (square/chip/dot) and counts in options.',
   'status-card': 'No mapping. data is {title, subtitle?, tone?, status?, glyph?, emphasis?, readings?: [{label, value, unit?, format?, tone?}], meter?: {value, min?, max?, unit?}, image?, icon?, note?}.',
   'status': 'No mapping. data is {label?, value?, tone?, glyph?} or array of those. tone: ok/info/watch/warn/alarm/off/idle/accent/past/now/next.',
   'video': 'No mapping. data is {src, poster?, alt?, caption?, tracks?}. autoplay/controls/loop/muted in options.',

@@ -4,6 +4,10 @@
 
 ### Added
 
+- `status-grid` cells take an `emphasis` — `invert` (a cell filled with its tone), `hatch`, `blink`, or `stamp` (a heavy frame; a cell
+  is too small for a stamp's text) — the second channel besides colour that `status-card`, `stat-list` and the other state-coloured
+  widgets already draw. A cell with an emphasis word the widget does not know is drawn without one, as before.
+
 - `callout` takes `options.live`: `"auto"` (the default — a `warn` or `alarm` callout is announced at once, the other tones at
   the next pause, as before) or `"off"`, which draws it as a plain `note` that is not announced. A host that shows content
   already written — a saved report, an earlier conversation — is not telling the user anything new, and a screen reader

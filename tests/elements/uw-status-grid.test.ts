@@ -28,6 +28,12 @@ describe('uw-status-grid', () => {
     expect(root.querySelector('[part="grid"]')?.getAttribute('aria-label')).toBe('Ward 4B');
   });
 
+  it('marks a cell’s emphasis, the second channel besides its colour', async () => {
+    const root = await grid([{ label: '01', tone: 'ok' }, { label: '02', tone: 'alarm', emphasis: 'invert' }, { label: '03', tone: 'idle', emphasis: 'hatch' }, { label: '04', tone: 'warn', emphasis: 'nonsense' }]);
+    const cells = [...root.querySelectorAll('[part="cell"]')];
+    expect(cells.map(c => c.getAttribute('data-emphasis'))).toEqual([null, 'invert', 'hatch', null]);
+  });
+
   it('counts the cells in each tone, in the tones’ order, when asked', async () => {
     const root = await grid(beds, { counts: true });
     expect([...root.querySelectorAll('[part="counts"] li')].map(l => l.textContent)).toEqual(['✓OK2', '✕Alarm1', '○Idle1']);

@@ -3,13 +3,14 @@ import { customElement, property } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
 import { formatValue } from '../core/format.js';
-import { normalizeTone, toneLabel, toneStyles, TONES, TONE_GLYPHS, type Tone } from '../core/tone.js';
+import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, TONES, TONE_GLYPHS, type Emphasis, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
 
 interface Cell {
   label?: string;
   value?: string;
   tone?: Tone;
+  emphasis?: Emphasis;
 }
 
 const SHAPES = new Set(['square', 'chip', 'dot']);
@@ -21,7 +22,8 @@ function text(value: unknown): string | undefined {
 /**
  * <uw-status-grid> — many small cells, each with a state: seats, beds, bays, lamps, dice on a wafer.
  *
- * Each cell has a `tone` (`core/tone.ts`) and optionally a `label` and a `value`. `options.columns` fixes how many go to
+ * Each cell has a `tone` (`core/tone.ts`) and optionally a `label`, a `value` and an `emphasis` — the second channel besides colour
+ * (`invert` a cell filled with its tone, `hatch` hatched, `blink` blinking, `stamp` a heavy frame: a cell is too small for a stamp's text). `options.columns` fixes how many go to
  * a row (otherwise as many as fit); `options.cell` is `square` (default — the label inside), `chip` (a wider pill) or
  * `dot` (the tone alone, the label as its name). `options.counts` adds a key: how many cells are in each tone, with the
  * tone's mark and name.
@@ -70,6 +72,13 @@ export class UwStatusGrid extends LitElement {
     }
     .grid[data-cell='chip'] .cell { aspect-ratio: auto; padding: 3px 6px; border-radius: 999px; }
     .grid[data-cell='dot'] .cell { border-radius: 50%; background: var(--tone-fill); border: none; }
+    /* The shared emphasis rules set a background the cell's own would outrank (same specificity, later), so the cell says them itself. */
+    .cell[data-emphasis='invert'] { background: var(--tone-fill); color: var(--u-widget-bg, #fff); }
+    .cell[data-emphasis='invert'] .cell-value { color: inherit; }
+    .cell[data-emphasis='hatch'] {
+      background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--tone-fill) 38%, transparent) 0 5px, color-mix(in srgb, var(--tone-fill) 10%, transparent) 5px 10px);
+    }
+    .cell[data-emphasis='stamp'] { border-width: 2px; border-color: var(--tone-fill); font-weight: 700; }
     .cell-label {
       max-width: 100%;
       font-weight: 600;
@@ -126,7 +135,7 @@ export class UwStatusGrid extends LitElement {
       <ul class="grid" part="grid" data-cell=${shape} role="list" aria-label=${this.spec?.title ?? strings.status}
         style=${columns ? `grid-template-columns: repeat(${columns}, minmax(0, 1fr))` : nothing}>
         ${cells.map(c => html`
-          <li class="cell" part="cell" data-tone=${c.tone ?? nothing} aria-label=${name(c) || nothing} title=${name(c) || nothing}>
+          <li class="cell" part="cell" data-tone=${c.tone ?? nothing} data-emphasis=${c.emphasis ?? nothing} aria-label=${name(c) || nothing} title=${name(c) || nothing}>
             ${shape !== 'dot' && c.label ? html`<span class="cell-label" aria-hidden="true">${c.label}</span>` : nothing}
             ${shape !== 'dot' && c.value ? html`<span class="cell-value" aria-hidden="true">${c.value}</span>` : nothing}
           </li>`)}
@@ -149,6 +158,7 @@ export class UwStatusGrid extends LitElement {
         value: c.value == null || c.value === '' ? undefined
           : `${typeof c.format === 'string' ? formatValue(c.value, c.format, locale) : String(c.value)}${text(c.unit) ? ` ${c.unit}` : ''}`,
         tone: normalizeTone(c.tone, 'uw-status-grid'),
+        emphasis: normalizeEmphasis(c.emphasis, 'uw-status-grid'),
       }));
   }
 }
