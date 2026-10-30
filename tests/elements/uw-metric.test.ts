@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import '../../src/elements/uw-metric.js';
 import type { UwMetric } from '../../src/elements/uw-metric.js';
 
@@ -492,6 +492,61 @@ describe('uw-metric', () => {
         : styles?.cssText ?? '';
       expect(cssText).toContain('container');
       expect(cssText).toContain('uw-metric');
+    });
+  });
+
+  describe('polarity · target', () => {
+    const change = async (data: Record<string, unknown>) =>
+      (await render(createElement({ widget: 'metric', data: { value: 3.2, change: 0.4, ...data } }))).querySelector('.metric-change')!;
+
+    it('without polarity a rise is good news and a fall bad — the look before polarity existed', async () => {
+      expect((await change({ trend: 'up' })).getAttribute('data-sense')).toBe('good');
+      expect((await change({ trend: 'down' })).getAttribute('data-sense')).toBe('bad');
+      expect((await change({ trend: 'flat' })).getAttribute('data-sense')).toBe('neutral');
+      expect((await change({})).getAttribute('data-sense')).toBe('neutral');
+    });
+
+    it('lower-better turns a rise into bad news — the arrow still points up', async () => {
+      const el = await change({ trend: 'up', polarity: 'lower-better' });
+      expect(el.getAttribute('data-sense')).toBe('bad');
+      expect(el.textContent).toContain('↑');
+      expect((await change({ trend: 'down', polarity: 'lower-better' })).getAttribute('data-sense')).toBe('good');
+    });
+
+    it('neutral shows the direction without judging it', async () => {
+      expect((await change({ trend: 'up', polarity: 'neutral' })).getAttribute('data-sense')).toBe('neutral');
+      expect((await change({ trend: 'down', polarity: 'neutral' })).getAttribute('data-sense')).toBe('neutral');
+    });
+
+    it('an unknown polarity warns once and reads as none', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      expect((await change({ trend: 'up', polarity: 'smaller' })).getAttribute('data-sense')).toBe('good');
+      await change({ trend: 'up', polarity: 'smaller' });
+      expect(warn.mock.calls.filter(([m]) => String(m).includes('polarity "smaller"'))).toHaveLength(1);
+      warn.mockRestore();
+    });
+
+    it('writes the change in its unit — % unless given', async () => {
+      expect((await change({ trend: 'up' })).textContent).toContain('+0.4%');
+      expect((await change({ trend: 'up', changeUnit: 'pt' })).textContent).toContain('+0.4pt');
+      expect((await change({ trend: 'up', changeUnit: '' })).textContent?.trim()).toMatch(/\+0\.4$/);
+    });
+
+    it('writes the target like the value, under it', async () => {
+      const shadow = await render(createElement({
+        widget: 'metric',
+        data: { label: 'Defect rate', value: 3.2, unit: '%', target: 2.5, polarity: 'lower-better' },
+      }));
+      expect(shadow.querySelector('[part="target"]')?.textContent).toBe('Target 2.5 %');
+      const formatted = await render(createElement({
+        widget: 'metric', options: { format: 'number:1' }, data: { value: 1240, target: 1500 },
+      }));
+      expect(formatted.querySelector('[part="target"]')?.textContent).toBe('Target 1,500.0');
+    });
+
+    it('draws no target line without a target', async () => {
+      const shadow = await render(createElement({ widget: 'metric', data: { value: 1 } }));
+      expect(shadow.querySelector('[part="target"]')).toBeNull();
     });
   });
 });

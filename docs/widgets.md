@@ -326,6 +326,17 @@ scrolled (`scroll`).
 values, oldest first, drawn as a small line under the value. The line is scaled to its own range (it shows the shape,
 not the size), takes the tone's colour or the primary one, and needs two numbers or more.
 
+The arrow of `trend` says direction; the colour of the change says whether that is good news, and `polarity` decides
+which: `higher-better` (a rise is good — what a metric without `polarity` shows), `lower-better` (a defect rate, a lead
+time, a cost: a rise is bad) or `neutral` (the direction without a judgement). `changeUnit` is written after `change`
+— `%` unless given (`"pt"`, or `""` for an absolute amount). `target` is the value to compare against, written under
+the figure in its format and unit («Target 2.5 %»).
+
+```json
+{ "widget": "metric", "data": { "label": "Defect rate", "value": 3.2, "unit": "%", "change": 0.4, "changeUnit": "pt",
+  "trend": "up", "polarity": "lower-better", "target": 2.5 } }
+```
+
 ```json
 { "widget": "metric", "data": { "value": 18.4, "unit": "Tbps", "label": "Traffic", "sparkline": [14.2, 15.8, 17.1, 16.4, 18.4] } }
 { "widget": "metric", "data": { "label": "Bored", "value": 1240, "unit": "m", "tone": "now",

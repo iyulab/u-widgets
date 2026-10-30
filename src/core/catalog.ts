@@ -614,6 +614,13 @@ const EXAMPLES: Record<string, { label: string; spec: UWidgetSpec }[]> = {
       },
     },
     {
+      label: 'Lower is better, against a target (a rise is bad news)',
+      spec: {
+        widget: 'metric',
+        data: { value: 3.2, unit: '%', label: 'Defect rate', change: 0.4, changeUnit: 'pt', trend: 'up', polarity: 'lower-better', target: 2.5 },
+      },
+    },
+    {
       label: 'With a sparkline (the recent values, oldest first)',
       spec: {
         widget: 'metric',

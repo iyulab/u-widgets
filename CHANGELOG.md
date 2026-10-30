@@ -12,6 +12,13 @@
   the next pause, as before) or `"off"`, which draws it as a plain `note` that is not announced. A host that shows content
   already written — a saved report, an earlier conversation — is not telling the user anything new, and a screen reader
   broke off for every warning callout in it. The look of the tone is unchanged.
+- `metric` and `stat-group` items take `polarity`, `changeUnit` and `target`. The change was coloured by direction —
+  a rise green, a fall red — so a defect rate, a lead time or a cost that went up read as good news. `polarity` says
+  which way is good: `higher-better`, `lower-better` (a rise is drawn in the negative colour, the arrow still points
+  up) or `neutral` (the direction without a judgement). Without it a metric looks as before. `changeUnit` replaces
+  the `%` written after `change` (`"pt"`, or `""` for an absolute amount). `target` is the comparison value, written
+  under the figure in the value's format and unit («Target 2.5 %», «목표 2.5 %» in Korean — new locale string
+  `metricTarget`).
 
 ### Fixed
 

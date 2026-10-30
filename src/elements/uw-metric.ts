@@ -4,7 +4,7 @@ import type { UWidgetSpec } from '../core/types.js';
 import { themeStyles } from '../styles/tokens.js';
 import { formatValue } from '../core/format.js';
 import { meterStyles, readMeter, renderMeter, type Meter } from '../core/meter.js';
-import { localeStringsOf } from '../core/locale.js';
+import { localeStringsOf, formatTemplate } from '../core/locale.js';
 import { normalizeEmphasis, normalizeTone, toneLabel, toneStyles, type Emphasis, type Tone } from '../core/tone.js';
 
 interface MetricData {
@@ -15,6 +15,12 @@ interface MetricData {
   suffix?: string;
   change?: number;
   trend?: 'up' | 'down' | 'flat';
+  /** What a move up means — colours the change. Absent reads as `higher-better`, the look before it existed. */
+  polarity?: Polarity;
+  /** Written after `change` — `%` unless given (`pt`, `''` for an absolute amount). */
+  changeUnit?: string;
+  /** The comparison value, formatted like the value. */
+  target?: string;
   icon?: string;
   note?: string;
   meter?: Meter;
@@ -46,6 +52,33 @@ function sparklinePaths(values: number[]): { line: string; area: string } | unde
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
+const POLARITIES = ['higher-better', 'lower-better', 'neutral'] as const;
+type Polarity = (typeof POLARITIES)[number];
+const warnedPolarity = new Set<string>();
+
+/** `value` as a polarity, or `undefined` — an unknown word warns once, like a tone. */
+function normalizePolarity(value: unknown): Polarity | undefined {
+  if (value == null || value === '') return undefined;
+  if ((POLARITIES as readonly unknown[]).includes(value)) return value as Polarity;
+  const word = String(value);
+  if (!warnedPolarity.has(word)) {
+    warnedPolarity.add(word);
+    console.warn(`[@iyulab/u-widgets] uw-metric: unknown polarity "${word}" — expected one of ${POLARITIES.join(', ')}.`);
+  }
+  return undefined;
+}
+
+/**
+ * Whether the change is good news. Direction (`trend`) and judgement are separate: a defect rate going up is bad.
+ * `neutral` shows the direction without judging it; no polarity keeps the old reading (up is good).
+ */
+function changeSense(trend: MetricData['trend'], polarity: Polarity | undefined): 'good' | 'bad' | 'neutral' {
+  if (trend !== 'up' && trend !== 'down') return 'neutral';
+  if (polarity === 'neutral') return 'neutral';
+  const up = polarity === 'lower-better' ? 'bad' : 'good';
+  return trend === 'up' ? up : up === 'good' ? 'bad' : 'good';
+}
+
 function toMetricData(
   data: Record<string, unknown>,
   locale?: string,
@@ -66,6 +99,12 @@ function toMetricData(
     suffix: data.suffix as string | undefined,
     change: data.change as number | undefined,
     trend: data.trend as MetricData['trend'],
+    polarity: normalizePolarity(data.polarity),
+    changeUnit: typeof data.changeUnit === 'string' ? data.changeUnit : undefined,
+    target:
+      typeof data.target === 'number' || (typeof data.target === 'string' && data.target !== '')
+        ? `${(data.prefix as string | undefined) ?? ''}${format ? formatValue(data.target, format, locale) : String(data.target)}${typeof data.unit === 'string' && data.unit !== '' ? ` ${data.unit}` : ''}${(data.suffix as string | undefined) ?? ''}`
+        : undefined,
     icon: data.icon as string | undefined,
     note: typeof data.note === 'string' && data.note !== '' ? data.note : undefined,
     meter: readMeter(data.meter, write, 'uw-metric'),
@@ -145,15 +184,21 @@ export class UwMetric extends LitElement {
       gap: 2px;
     }
 
-    .metric-change[data-trend='up'] {
+    /* Colour says good or bad news, not direction — the arrow says direction (polarity decides which is which). */
+    .metric-change[data-sense='good'] {
       color: var(--u-widget-positive, #15803d);
     }
 
-    .metric-change[data-trend='down'] {
+    .metric-change[data-sense='bad'] {
       color: var(--u-widget-negative, #dc2626);
     }
 
-    .metric-change[data-trend='flat'] {
+    .metric-change[data-sense='neutral'] {
+      color: var(--u-widget-text-secondary, #5b6777);
+    }
+
+    .metric-target {
+      font-size: var(--u-widget-font-size-label, 0.8125rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -297,9 +342,12 @@ export class UwMetric extends LitElement {
         </div>
         ${m.tone && m.emphasis === 'stamp' ? html`<span class="tone-stamp" part="stamp">${toneLabel(m.tone, localeStringsOf(this.spec))}</span>` : nothing}
         ${m.change != null
-          ? html`<span class="metric-change" data-trend=${m.trend ?? 'flat'} part="change"
-              >${trendArrow} ${m.change > 0 ? '+' : ''}${m.change}%</span
+          ? html`<span class="metric-change" data-trend=${m.trend ?? 'flat'} data-sense=${changeSense(m.trend, m.polarity)} part="change"
+              >${trendArrow} ${m.change > 0 ? '+' : ''}${m.change}${m.changeUnit ?? '%'}</span
             >`
+          : nothing}
+        ${m.target != null
+          ? html`<div class="metric-target" part="target">${formatTemplate(localeStringsOf(this.spec).metricTarget, { target: m.target })}</div>`
           : nothing}
         ${m.meter ? renderMeter(m.meter, m.label, m.tone, m.meter.value !== Number(m.raw)) : nothing}
         ${m.note ? html`<div class="metric-note" part="note">${m.note}</div>` : nothing}

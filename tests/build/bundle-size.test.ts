@@ -120,9 +120,10 @@ describe('bundle size budget', () => {
     expect(readFileSync(file, 'utf-8')).not.toContain('Prev');
   });
 
-  it('Korean editor-names bundle is under 2 KB gzip and carries no copy of the names registry', () => {
+  it('Korean editor-names bundle is under 2.25 KB gzip and carries no copy of the names registry', () => {
     const file = resolve(DIST, 'u-widgets-tools-locale-ko.js');
-    expect(gzipSize(file)).toBeLessThan(2 * 1024);
+    // Re-baselined from 2 KB for the metric's polarity, change unit and target names: 2.03 KB measured.
+    expect(gzipSize(file)).toBeLessThan(2.25 * 1024);
     expect(readFileSync(file, 'utf-8')).not.toContain('Bar chart');
   });
 
