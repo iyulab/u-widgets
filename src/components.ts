@@ -10,7 +10,7 @@
  * A table's search box matches as the components select and table filters do — case and diacritics folded, Korean
  * initials (`ㅅㅇ` finds `서울`), and rows narrowing while a Korean syllable is still being typed; without this import it
  * matches the text case-insensitively and waits for the syllable.
- * Requires `@iyulab/components` 2.36 or later (optional peer). Without this import u-widgets stays native and
+ * Requires `@iyulab/components` 2.38 or later (optional peer). Without this import u-widgets stays native and
  * runs without it.
  *
  * u-widgets also follows the `@iyulab/components` locale: its default locale becomes `Locale.get()` and moves with

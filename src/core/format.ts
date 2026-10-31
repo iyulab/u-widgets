@@ -38,14 +38,7 @@ function formatByCode(value: unknown, code: string, locale?: string): string {
     warnOnce(`format "${code}" is a spreadsheet number-format code — import '@iyulab/u-widgets/components' to read it; the value is shown as is.`);
     return String(value);
   }
-  // A reader answers `null` for syntax it does not support, but a code can also be one the platform cannot write (more
-  // integer digit placeholders than `Intl.NumberFormat` takes throws a RangeError) — a widget never fails to draw over a format.
-  let read: ReturnType<NumberCodeReader> = null;
-  try {
-    read = codeReader(value, code, locale);
-  } catch {
-    // shown as is, below
-  }
+  const read = codeReader(value, code, locale);
   if (read) return read.text;
   warnOnce(`format "${code}" uses syntax the number-format engine does not support — the value is shown as is.`);
   return String(value);

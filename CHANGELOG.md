@@ -9,6 +9,12 @@
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
   unchanged.
 
+### Changed
+
+- The optional peer `@iyulab/components` is `>=2.38.0` (was `>=2.36.0`). From 2.38.0 its number-format engine answers `null` for a
+  code the platform cannot write, instead of throwing a `RangeError`, so the guard u-widgets kept around the reader is gone — the
+  value is shown as it is, with the console warning an unsupported code gets. A host on 2.36 or 2.37 moves to 2.38 or later.
+
 ### Fixed
 
 - **Screen readers no longer announce «clickable» on table rows, sortable headers and list items.** Measured with NVDA

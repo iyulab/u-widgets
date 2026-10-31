@@ -703,7 +703,7 @@ language. An app that already uses `@iyulab/components` can opt in to its date p
 
 ```ts
 import '@iyulab/u-widgets';
-import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 2.36
+import '@iyulab/u-widgets/components';   // needs @iyulab/components ≥ 2.38
 ```
 
 The fields then render `<u-date-picker>` (typed entry, calendar, the app's locale). What the form
