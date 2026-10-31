@@ -9,6 +9,12 @@
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
   unchanged.
 
+### Fixed
+
+- **Screen readers no longer announce «clickable» on table rows, sortable headers and list items.** Measured with NVDA
+  in browse mode, each was announced as «clickable»: it carried a click listener on the element. The handlers are now
+  heard on the shadow root; clicking and Enter/Space work as before.
+
 ## [0.45.0] - 2026-10-31
 
 ### Added

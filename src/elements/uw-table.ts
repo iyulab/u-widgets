@@ -9,6 +9,7 @@ import { formatTemplate } from '../core/locale.js';
 import { matchesSearch, searchesWhileComposing } from '../core/search.js';
 import { isDateLikeString } from '../core/utils.js';
 import { checkMediaUrl } from '../core/media.js';
+import { delegate } from './delegate.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
@@ -615,7 +616,7 @@ export class UwTable extends LitElement {
                   data-align=${col.align ?? 'left'}
                   ?data-sortable=${sortable}
                   tabindex=${sortable ? '0' : nothing}
-                  @click=${sortable ? () => this._onSort(col.field) : undefined}
+                  ${delegate('click', sortable ? () => this._onSort(col.field) : undefined)}
                   @keydown=${sortable ? (e: KeyboardEvent) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
@@ -646,7 +647,7 @@ export class UwTable extends LitElement {
                 ? html`
                 <tr part="tr" data-tone=${rowTone ?? nothing}
                   tabindex=${idx === this._focusedIdx ? '0' : '-1'}
-                  @click=${() => this._onRowClick(row, sourceIndex.get(row) ?? idx)}
+                  ${delegate('click', () => this._onRowClick(row, sourceIndex.get(row) ?? idx))}
                   @keydown=${(e: KeyboardEvent) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
@@ -889,7 +890,7 @@ export class UwTable extends LitElement {
             return html`
             <div class="list-item" part="list-item" data-tone=${tone ?? nothing}
               tabindex=${idx === this._focusedIdx ? '0' : '-1'}
-              @click=${() => this._onRowClick(item, idx)}
+              ${delegate('click', () => this._onRowClick(item, idx))}
               @keydown=${(e: KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
