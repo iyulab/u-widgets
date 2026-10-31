@@ -2,14 +2,16 @@
 
 ## [Unreleased]
 
-## [0.45.0] - 2026-10-31
-
 ### Added
 
 - With `@iyulab/u-widgets/components` imported, a searchable `table` matches its search box as the `@iyulab/components`
   select and table filters do — case and diacritics folded (`zoe` finds `Zoë`), Korean initials (`ㅂㅅ` finds `부산`), and
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
   unchanged.
+
+## [0.45.0] - 2026-10-31
+
+### Added
 
 - `status-grid` cells take an `emphasis` — `invert` (a cell filled with its tone), `hatch`, `blink`, or `stamp` (a heavy frame; a cell
   is too small for a stamp's text) — the second channel besides colour that `status-card`, `stat-list` and the other state-coloured
