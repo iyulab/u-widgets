@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-10-31
+
 ### Added
 
 - `status-grid` cells take an `emphasis` — `invert` (a cell filled with its tone), `hatch`, `blink`, or `stamp` (a heavy frame; a cell
