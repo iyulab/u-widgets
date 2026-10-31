@@ -343,6 +343,24 @@ describe('formatValue — spreadsheet number-format codes', () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
+  it('a reader that throws shows the plain value, with one warning — a format never stops a widget drawing', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    setNumberCodeReader(() => {
+      throw new RangeError('minimumIntegerDigits value is out of range.');
+    });
+    expect(formatValue(1234, '0'.repeat(30), 'en')).toBe('1234');
+    expect(formatValue(7, '0'.repeat(30), 'en')).toBe('7');
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('the shared engine, given more integer placeholders than the platform writes, shows the plain value', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { applyNumberFormat } = await import('@iyulab/components/dist/utilities/numberFormat.js');
+    setNumberCodeReader((value, code, locale) => applyNumberFormat(value, code, locale));
+    expect(formatValue(1234.5, '0'.repeat(31), 'en')).toBe('1234.5');
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
   it('null stays the em-dash — no reader is asked', () => {
     const read = vi.fn(() => ({ text: 'read' }));
     setNumberCodeReader(read);

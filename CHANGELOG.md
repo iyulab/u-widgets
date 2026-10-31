@@ -47,6 +47,9 @@
   in the widget locale too. The locale default for value axes and the tooltip ran before the passthrough was merged,
   so an axis or a tooltip only the passthrough declared wrote `10,000` and `0.5` on a German page. It now also runs on
   the merged option — still only where no formatter is set, so one given through `options.echarts` keeps winning.
+- A spreadsheet number-format code the shared engine cannot write no longer stops a widget drawing. A code with more integer digit
+  placeholders than the platform's number formatter takes (about twenty) made the engine throw a `RangeError` out of the render; the
+  value is now shown as it is, with the console warning an unsupported code already gets.
 - `gauge`: a band label cut with «…» to fit the arc keeps its full text on the page — the subtitle now sits in a group
   whose `<title>` carries the whole label, shown on hover. A short label gets no title. (A screen reader already read
   the whole label from the meter's `aria-valuetext`.)
