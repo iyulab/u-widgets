@@ -6,6 +6,7 @@ import { getLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import { normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
+import { matchesSearch, searchesWhileComposing } from '../core/search.js';
 import { isDateLikeString } from '../core/utils.js';
 import { checkMediaUrl } from '../core/media.js';
 
@@ -513,6 +514,11 @@ export class UwTable extends LitElement {
   @state()
   private _searchQuery = '';
 
+  /** 검색어의 마지막 음절이 아직 조합 중인가 — 검색 일치가 그 음절을 자모 앞부분으로 견준다. 상태다: 확정은 글자를 바꾸지 않고
+   *  이것만 바꾼다(«서» 조합 → «서» 확정). */
+  @state()
+  private _searchComposing = false;
+
   @state()
   private _focusedIdx = 0;
 
@@ -522,6 +528,7 @@ export class UwTable extends LitElement {
       this._sortDir = null;
       this._page = 0;
       this._searchQuery = '';
+      this._searchComposing = false;
       this._focusedIdx = 0;
     }
   }
@@ -782,21 +789,24 @@ export class UwTable extends LitElement {
   }
 
   /**
-   * IME 조합 중인 음절(«서울» 의 가는 길 «ㅅ» · «성»)로는 거르지 않는다 — 찾는 행을 숨기고 빈 표를 보인다. 조합 중 `input` 은
-   * 건너뛰고(상자의 글자는 그대로 둔다 — 바인딩 값이 바뀌지 않으면 다시 쓰지 않는다), 조합이 끝나면 확정 글자로 거른다.
+   * IME 조합 중인 음절(«서울» 의 가는 길 «ㅅ» · «성»)을 글자 그대로 견주면 찾는 행을 숨기고 빈 표를 보인다. 조합 중을 읽는
+   * 검색 일치(`./components` — 자모 앞부분)가 있으면 그것으로 치는 도중에도 좁히고, 없으면 조합 중 `input` 은 건너뛰고(상자의
+   * 글자는 그대로 둔다 — 바인딩 값이 바뀌지 않으면 다시 쓰지 않는다) 조합이 끝나면 확정 글자로 거른다.
    */
   private _onSearch = (e: Event) => {
-    if ((e as InputEvent).isComposing) return;
+    const composing = !!(e as InputEvent).isComposing;
+    if (composing && !searchesWhileComposing()) return;
+    this._searchComposing = composing;
     this._searchQuery = (e.target as HTMLInputElement).value;
     this._page = 0;
   };
 
   private filterData(data: Record<string, unknown>[], columns: UWidgetColumnDefinition[]): Record<string, unknown>[] {
-    const q = this._searchQuery.toLowerCase();
+    const q = this._searchQuery;
     const fields = columns.map((c) => c.field);
-    return data.filter((row) =>
-      fields.some((f) => String(row[f] ?? '').toLowerCase().includes(q)),
-    );
+    const locale = typeof this.spec?.options?.locale === 'string' ? this.spec.options.locale : undefined;
+    const options = { composing: this._searchComposing, locale };
+    return data.filter((row) => fields.some((f) => matchesSearch(String(row[f] ?? ''), q, options)));
   }
 
   private _onSort(field: string) {

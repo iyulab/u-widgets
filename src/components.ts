@@ -7,6 +7,9 @@
  * written as a spreadsheet number-format code (`"#,##0.00"`, `"0.0%"`, `"#,##0;[Red](#,##0)"`) is read with
  * the engine `@iyulab/components` shares with its table and sheet — the same code writes the same text in
  * all three. Without this import such a `format` is shown as the plain value, with a console warning.
+ * A table's search box matches as the components select and table filters do — case and diacritics folded, Korean
+ * initials (`ㅅㅇ` finds `서울`), and rows narrowing while a Korean syllable is still being typed; without this import it
+ * matches the text case-insensitively and waits for the syllable.
  * Requires `@iyulab/components` 2.36 or later (optional peer). Without this import u-widgets stays native and
  * runs without it.
  *
@@ -29,6 +32,7 @@ import { Locale } from '@iyulab/components/dist/utilities/Locale.js';
 import { getDefaultExtensionManager, type Field } from '@formdown/core';
 import { applyNumberFormat } from '@iyulab/components/dist/utilities/numberFormat.js';
 import { setNumberCodeReader } from './core/format.js';
+import { setSearchMatcher } from './core/search.js';
 import { setDefaultLocale } from './core/locale.js';
 
 const escapeAttr = (text: string) =>
@@ -64,6 +68,10 @@ if (!fieldTypes.has('datetime-local')) fieldTypes.register({ type: 'datetime-loc
 // One number-format vocabulary for the app: a `format` written as a spreadsheet code (`#,##0.00`, `0.0%`) is read by the
 // engine the `@iyulab/components` table and sheet read their column `format` with, so one code writes one text everywhere.
 setNumberCodeReader((value, code, locale) => applyNumberFormat(value, code, locale));
+
+// One search match for the app: a table's search box finds what the components select and table filters find — case and
+// diacritics folded, Korean initials, and a syllable still being composed matched by its keystrokes (the rows narrow while typing).
+setSearchMatcher((text, query, options) => Locale.matchesSearch(text, query, options));
 
 // One language for the app: u-widgets' default locale is the components locale, now and after every switch.
 setDefaultLocale(Locale.get());

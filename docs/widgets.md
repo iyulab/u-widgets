@@ -714,6 +714,14 @@ The same import makes u-widgets follow the components locale: its default locale
 and moves with every `Locale.set()`, so one call switches the whole app. A widget's own `locale`
 still wins.
 
+### Table search
+
+With the same import, a searchable table's search box matches as the `@iyulab/components` select and table filters do:
+case and diacritics are folded (`zoe` finds `Zoë`), Korean consonants find by initials (`ㅂㅅ` finds `부산`), and the rows
+narrow while a Korean syllable is still being typed (`성` on the way to `서울` keeps `서울`). A language registered with
+`Locale.registerSearch()` uses its own rule. Without the import the search matches the text case-insensitively and waits
+for a syllable to be finished before it filters.
+
 ### Number-format codes
 
 With the same import, a `format` can be a spreadsheet number-format code — `"#,##0.00"`, `"0.0%"`, `"#,##0;[Red](#,##0)"`,
