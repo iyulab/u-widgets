@@ -3,7 +3,9 @@
     "target": "ES2021",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    // ES2023.Intl: the components number-format engine (`./components`) writes `signDisplay: 'negative'` — read from
+    // the workspace source, that type is checked under this lib.
+    "lib": ["ES2021", "ES2023.Intl", "DOM", "DOM.Iterable"],
 
     "strict": true,
     "noUnusedLocals": true,
