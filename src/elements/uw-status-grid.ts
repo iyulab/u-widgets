@@ -84,7 +84,7 @@ export class UwStatusGrid extends LitElement {
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: the cell title carries label, value and tone (hover) */
     }
     .cell-value {
       font-family: var(--u-widget-font-numeric);

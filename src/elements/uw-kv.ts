@@ -81,7 +81,7 @@ export class UwKv extends LitElement {
       color: var(--u-widget-text, #1a1a2e);
       text-align: right;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: title carries the full value (hover) */
       white-space: nowrap;
     }
 
@@ -166,7 +166,7 @@ export class UwKv extends LitElement {
         ${pairs.map(p => html`
           <div class="kv-pair" part="kv-pair" role="listitem" data-tone=${p.tone ?? nothing}>
             <span class="kv-key" part="kv-key">${p.label}</span>
-            <span class="kv-value" part="kv-value">${p.tone ? html`<span class="kv-mark" aria-hidden="true">${toneMark(p.tone, p.glyph)}</span>` : nothing}${p.value}</span>
+            <span class="kv-value" part="kv-value" title=${p.value || nothing}>${p.tone ? html`<span class="kv-mark" aria-hidden="true">${toneMark(p.tone, p.glyph)}</span>` : nothing}${p.value}</span>
             ${p.note ? html`<span class="kv-note" part="kv-note">${p.note}</span>` : nothing}
           </div>
         `)}

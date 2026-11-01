@@ -17,6 +17,10 @@
 
 ### Fixed
 
+- **Text cut with «…» can be read in full on hover.** The `bar-list` label, the `kv` value, the `status-card` badge and
+  reading names, the horizontal `steps` labels and the secondary line of one-line `table` list rows ended in an ellipsis
+  with the full text nowhere — they now carry it as a `title` (the `table` primary line and `status-grid` cells already
+  did), like the gauge band names in 0.45.0.
 - The widget catalog lists `total` among a waterfall chart's mapping keys and `opacity` among a scatter plot's. The charts read them (a per-row total flag, a point
   opacity field) but the catalog named only `x` and `y` for the waterfall and `x`, `y`, `color` and `size` for the scatter, so anything that offers a chart its
   mapping from the catalog could not name them.

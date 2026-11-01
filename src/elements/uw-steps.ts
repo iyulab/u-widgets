@@ -184,7 +184,7 @@ export class UwSteps extends LitElement {
       margin-top: 6px;
       max-width: 100%;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: title carries the full label (hover) */
       white-space: nowrap;
     }
 
@@ -312,7 +312,7 @@ export class UwSteps extends LitElement {
               <div class="step-line"></div>
             </div>
             <div class="step-body">
-              <div class="step-label" part="step-label">${item.label}</div>
+              <div class="step-label" part="step-label" title=${item.label || nothing}>${item.label}</div>
               ${item.description ? html`<div class="step-desc" part="step-desc">${item.description}</div>` : nothing}
             </div>
           </div>
@@ -335,7 +335,7 @@ export class UwSteps extends LitElement {
                 <span class="step-icon" part="step-icon" aria-hidden="true">${statusIcon(item.status, item.icon)}</span>
                 <div class="step-h-line" ?data-done=${isDone}></div>
               </div>
-              <div class="step-label" part="step-label">${item.label}</div>
+              <div class="step-label" part="step-label" title=${item.label || nothing}>${item.label}</div>
             </div>
           `;
         })}

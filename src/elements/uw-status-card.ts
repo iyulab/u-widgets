@@ -143,7 +143,7 @@ export class UwStatusCard extends LitElement {
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: title carries the full status (hover) */
     }
     .badge .glyph { flex: none; }
     [data-emphasis='stamp'] .badge { display: none; }
@@ -180,7 +180,7 @@ export class UwStatusCard extends LitElement {
       font-size: var(--u-widget-font-size-overline, 0.6875rem);
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: title carries the full label (hover) */
     }
     .reading dd {
       margin: 0;
@@ -233,14 +233,14 @@ export class UwStatusCard extends LitElement {
             ${card.subtitle ? html`<div class="subtitle" part="subtitle">${card.subtitle}</div>` : nothing}
           </div>
           </div>
-          ${status ? html`<span class="badge" part="badge">${card.tone ? html`<span class="glyph" aria-hidden="true">${toneMark(card.tone, card.glyph)}</span>` : nothing}${status}</span>` : nothing}
+          ${status ? html`<span class="badge" part="badge" title=${status}>${card.tone ? html`<span class="glyph" aria-hidden="true">${toneMark(card.tone, card.glyph)}</span>` : nothing}${status}</span>` : nothing}
         </div>
         <div class="body">
           ${card.readings.length > 0 ? html`
             <dl class="readings" part="readings">
               ${card.readings.map(r => html`
                 <div class="reading" part="reading" data-tone=${r.tone ?? nothing}>
-                  <dt>${r.label}</dt><dd>${r.value}</dd>
+                  <dt title=${r.label || nothing}>${r.label}</dt><dd>${r.value}</dd>
                 </div>`)}
             </dl>` : nothing}
           ${card.meter ? renderMeter(card.meter, undefined, undefined, true, (t) => formatTemplate(strings.metricTarget, { target: t })) : nothing}

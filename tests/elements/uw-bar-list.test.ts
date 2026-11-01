@@ -29,6 +29,11 @@ describe('uw-bar-list', () => {
     expect(root.querySelector('[part="rows"]')?.getAttribute('aria-label')).toBe('Stock');
   });
 
+  it('gives a label that may be cut with an ellipsis its full text as a title', async () => {
+    const root = await bars([{ label: 'Warehouse capacity reserved for returns', value: 4 }]);
+    expect(root.querySelector('[part="label"]')?.getAttribute('title')).toBe('Warehouse capacity reserved for returns');
+  });
+
   it('puts every bar on options.max, an item on its own max', async () => {
     const root = await bars([{ label: 'A', value: 25 }, { label: 'B', value: 9, max: 30 }, { label: 'C', value: 80 }], { max: 50 });
     expect(widths(root)).toEqual(['50.0%', '30.0%', '100.0%']);

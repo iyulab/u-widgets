@@ -316,7 +316,7 @@ export class UwTable extends LitElement {
       overflow-wrap: normal;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: one-line rows by design; title carries the full text (hover) */
     }
     @container uw-table (max-width: 260px) {
       .list-item, .list-head { gap: 8px; }
@@ -908,7 +908,7 @@ export class UwTable extends LitElement {
               <div class="list-content">
                 <div class="list-primary" part="primary" title=${item[primaryKey] == null ? nothing : String(item[primaryKey])}>${item[primaryKey] ?? ''}</div>
                 ${secondaryKey
-                  ? html`<div class="list-secondary" part="secondary">${item[secondaryKey] ?? ''}</div>`
+                  ? html`<div class="list-secondary" part="secondary" title=${item[secondaryKey] == null ? nothing : String(item[secondaryKey])}>${item[secondaryKey] ?? ''}</div>`
                   : nothing}
               </div>
               ${badgeKey && item[badgeKey] != null

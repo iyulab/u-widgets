@@ -61,7 +61,7 @@ export class UwBarList extends LitElement {
     }
     .row { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .head { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-    .label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* ellipsis-ok: title carries the full label (hover) */ }
     .value {
       flex: none;
       font-family: var(--u-widget-font-numeric);
@@ -128,7 +128,7 @@ export class UwBarList extends LitElement {
           return html`
             <li class="row" part="row" data-tone=${r.tone ?? nothing} aria-label=${`${r.label}: ${r.text}`}>
               <div class="head" aria-hidden="true">
-                <span class="label" part="label">${r.label}</span><span class="value" part="value">${r.text}</span>
+                <span class="label" part="label" title=${r.label || nothing}>${r.label}</span><span class="value" part="value">${r.text}</span>
               </div>
               ${asGlyphs
                 ? html`<div class="glyphs" part="glyphs" aria-hidden="true">${glyph.repeat(on)}<span class="rest">${glyph.repeat(all - on)}</span></div>`
