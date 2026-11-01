@@ -16,6 +16,11 @@
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
   unchanged.
 
+- **`options.frame` takes `none`, and a `status-card` takes `options.frame`.** `none` is no frame at all — not the panel, and not the panel's
+  padding; `card`, `flat` and the rest are as before. A small `status-card` under a host that frames its boxes itself (a board's skin)
+  can now say `frame: "none"` and keep the whole box for its name and readings; `compose` takes `none` for a child as well. A card that
+  names no frame is unchanged.
+
 ### Changed
 
 - The optional peer `@iyulab/components` is `>=2.38.0` (was `>=2.36.0`). From 2.38.0 its number-format engine answers `null` for a

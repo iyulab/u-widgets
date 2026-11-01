@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { FRAMES, normalizeFrame } from '../../src/core/frame.js';
+import { checkSpec } from '../../src/core/check-spec.js';
 import { frameStyles } from '../../src/styles/frames.js';
 import { themeStyles } from '../../src/styles/tokens.js';
 import '../../src/elements/u-widget.js';
@@ -20,6 +21,24 @@ describe('frames', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(String(warn.mock.calls[0][0])).toContain('card, flat, glow, plate, ticket, postage, tape');
     warn.mockRestore();
+  });
+
+  it('read none as no frame, quietly — and a status-card takes it, drawn with no panel around it', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(normalizeFrame('none', 'f')).toBeUndefined();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    const spec = { widget: 'status-card', title: 'Pump', data: { title: 'Pump', tone: 'ok' }, options: { frame: 'none' } };
+    expect(checkSpec(spec)).toMatchObject({ valid: true, errors: [], warnings: [] });
+    const el = document.createElement('u-widget') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = spec;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('[part="card"][data-frame]')).toBeNull();
+    el.spec = { ...spec, options: { frame: 'flat' } };
+    await el.updateComplete;
+    expect(el.shadowRoot!.querySelector('[part="card"]')?.getAttribute('data-frame')).toBe('flat');
+    el.remove();
   });
 
   it('draw a widget with its title inside the frame options.frame names', async () => {

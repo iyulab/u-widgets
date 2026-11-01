@@ -183,7 +183,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   live: 'Whether the box is announced to assistive technology as it appears: auto (default; warn and alarm assertively, the other tones politely) or off (for content already written — a saved report, an earlier conversation)',
-  frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape (compose: each child)',
+  frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape — or none, for no frame and none of its padding (compose: each child)',
 };
 
 /**
@@ -259,7 +259,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   columns: { type: 'number' },
   widths: { type: '(number | "auto" | "stretch")[]' },
   spacing: choice(['small', 'default', 'large'], 'default'),
-  frame: choice(FRAMES),
+  frame: choice([...FRAMES, 'none']),
   overflow: choice(['clip', 'fade', 'scroll'], 'clip'),
   live: choice(['auto', 'off'], 'auto'),
   maxItems: { type: 'number' },
@@ -386,7 +386,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'code': ['lineNumbers', 'highlight', 'maxHeight', 'wrap'],
   'citation': ['compact', 'numbered'],
   'status': [],
-  'status-card': ['overflow', 'compact'],
+  'status-card': ['overflow', 'compact', 'frame'],
   'status-grid': ['columns', 'cell', 'counts'],
   'steps': ['layout', 'compact'],
   'rating': ['max', 'interactive', 'icon', 'label'],

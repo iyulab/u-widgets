@@ -9,6 +9,9 @@
  * - `postage` — perforated all round, like a stamp.
  * - `tape` — a sheet stuck on slightly askew.
  *
+ * `none` is the word for no frame at all: not even the panel's padding is taken from the box, which is how a small widget
+ * is drawn edge to edge under a host that frames the rest.
+ *
  * Every frame reads the palette tokens — `--u-widget-bg` (the paper), `--u-widget-text` (the ink),
  * `--u-widget-border` (the rules) — so a page that sets them on the widget sets its frames too.
  */
@@ -28,6 +31,7 @@ const warned = new Set<string>();
 export function normalizeFrame(value: unknown, widget: string): Frame | undefined {
   if (value == null || value === '' || value === false) return undefined;
   if (isFrame(value)) return value;
+  if (value === 'none') return undefined;
   const key = `${widget}:${String(value)}`;
   if (!warned.has(key)) {
     warned.add(key);
