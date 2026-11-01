@@ -201,11 +201,17 @@ export class UwStatusCard extends LitElement {
 
     /* compact: the name and the badge share one line and each reading is its label and value side by side — a card of
        a dozen on one board stays readable at about 50px tall. */
-    .card[data-compact] { padding: 6px 8px 6px 10px; gap: 3px; }
+    .card[data-compact] { padding: 4px 8px 4px 10px; gap: 2px; }
     .card[data-compact] .head { flex-wrap: nowrap; align-items: center; gap: 6px; }
     .card[data-compact] .ident { flex: 1 1 auto; align-items: center; }
     .card[data-compact] .picture { width: 24px; height: 24px; font-size: 1rem; }
     .card[data-compact] .subtitle { display: none; }
+    .card[data-compact] .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* ellipsis-ok: title carries the full name (hover) */ }
+    .card[data-compact] .body { overflow: visible; }
+    /* A tile too narrow for the badge's words keeps its mark; the words stay in the title and the spoken label. */
+    @container uw-status-card (max-width: 150px) {
+      .card[data-compact] .badge .words { display: none; }
+    }
     .card[data-compact] .badge { padding: 0 6px; }
     .card[data-compact] .body { gap: 3px; }
     .card[data-compact] .readings { display: flex; flex-wrap: wrap; gap: 2px 10px; }
@@ -243,11 +249,11 @@ export class UwStatusCard extends LitElement {
             ? html`<div class="picture" part="picture"><img src=${card.image} alt="" /></div>`
             : card.icon ? html`<div class="picture" part="picture" aria-hidden="true">${card.icon}</div>` : nothing}
           <div class="names">
-            <div class="title" part="title">${card.title}</div>
+            <div class="title" part="title" title=${this.spec?.options?.compact === true ? card.title : nothing}>${card.title}</div>
             ${card.subtitle ? html`<div class="subtitle" part="subtitle">${card.subtitle}</div>` : nothing}
           </div>
           </div>
-          ${status ? html`<span class="badge" part="badge" title=${status}>${card.tone ? html`<span class="glyph" aria-hidden="true">${toneMark(card.tone, card.glyph)}</span>` : nothing}${status}</span>` : nothing}
+          ${status ? html`<span class="badge" part="badge" title=${status}>${card.tone ? html`<span class="glyph" aria-hidden="true">${toneMark(card.tone, card.glyph)}</span>` : nothing}${html`<span class="words">${status}</span>`}</span>` : nothing}
         </div>
         <div class="body">
           ${card.readings.length > 0 ? html`
