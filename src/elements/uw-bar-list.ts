@@ -91,6 +91,22 @@ export class UwBarList extends LitElement {
       font-size: var(--u-widget-font-size-caption, 0.75rem);
       line-height: 1.3;
     }
+    /* compact: a row is one line — label, bar, value — so a list of a dozen fits a small box. */
+    .rows[data-compact] { gap: 4px; }
+    .rows[data-compact] .row {
+      display: grid;
+      grid-template-columns: minmax(3em, 38%) minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 8px;
+      row-gap: 0;
+    }
+    .rows[data-compact] .head { display: contents; }
+    .rows[data-compact] .label { grid-column: 1; grid-row: 1; }
+    .rows[data-compact] .bar,
+    .rows[data-compact] .glyphs { grid-column: 2; grid-row: 1; }
+    .rows[data-compact] .bar { height: 6px; border-radius: 3px; }
+    .rows[data-compact] .value { grid-column: 3; grid-row: 1; }
+    .rows[data-compact] .note { grid-column: 1 / -1; }
     .more {
       flex: none;
       margin-top: 6px;
@@ -118,7 +134,7 @@ export class UwBarList extends LitElement {
     const strings = localeStringsOf(this.spec);
 
     return html`
-      <ul class="rows" part="rows" role="list" aria-label=${this.spec?.title ?? nothing}>
+      <ul class="rows" part="rows" role="list" aria-label=${this.spec?.title ?? nothing} ?data-compact=${options.compact === true}>
         ${shown.map(r => {
           const max = r.max ?? scale;
           const fraction = max > 0 ? Math.min(1, Math.max(0, r.value / max)) : 0;

@@ -4,6 +4,10 @@
 
 ### Added
 
+- **`options.compact` for `status-card` and `bar-list`** (`list`, `table`, `steps` and `citation` already had it). A compact
+  `status-card` puts the name and the badge on one line, leaves out the subtitle, shrinks the picture and shows each reading as
+  its label and value side by side, so a card with a reading or two stays readable at about 50px tall; a compact `bar-list` puts
+  each row on one line — label, bar, value. Without the option nothing changes.
 - With `@iyulab/u-widgets/components` imported, a searchable `table` matches its search box as the `@iyulab/components`
   select and table filters do — case and diacritics folded (`zoe` finds `Zoë`), Korean initials (`ㅂㅅ` finds `부산`), and
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is

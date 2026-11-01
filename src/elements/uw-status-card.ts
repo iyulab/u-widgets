@@ -199,6 +199,19 @@ export class UwStatusCard extends LitElement {
       overflow-wrap: anywhere;
     }
 
+    /* compact: the name and the badge share one line and each reading is its label and value side by side — a card of
+       a dozen on one board stays readable at about 50px tall. */
+    .card[data-compact] { padding: 6px 8px 6px 10px; gap: 3px; }
+    .card[data-compact] .head { flex-wrap: nowrap; align-items: center; gap: 6px; }
+    .card[data-compact] .ident { flex: 1 1 auto; align-items: center; }
+    .card[data-compact] .picture { width: 24px; height: 24px; font-size: 1rem; }
+    .card[data-compact] .subtitle { display: none; }
+    .card[data-compact] .badge { padding: 0 6px; }
+    .card[data-compact] .body { gap: 3px; }
+    .card[data-compact] .readings { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+    .card[data-compact] .reading { display: flex; align-items: baseline; flex: none; gap: 4px; }
+    .card[data-compact] .reading dt { overflow: visible; text-overflow: clip; }
+
     /* A small box: tighter, the picture shrinks, the readings stack. */
     @container uw-status-card (max-width: 180px) {
       .card { padding: 8px 8px 8px 10px; gap: 6px; }
@@ -222,6 +235,7 @@ export class UwStatusCard extends LitElement {
     return html`
       <div class="card" part="card" role="group" aria-label=${status ? `${card.title}: ${status}` : card.title}
         data-tone=${card.tone ?? nothing} data-emphasis=${card.emphasis ?? nothing}
+        ?data-compact=${this.spec?.options?.compact === true}
         data-overflow=${typeof overflow === 'string' && OVERFLOWS.has(overflow) ? overflow : 'clip'}>
         <div class="head">
           <div class="ident">

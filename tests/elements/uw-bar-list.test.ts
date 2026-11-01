@@ -34,6 +34,14 @@ describe('uw-bar-list', () => {
     expect(root.querySelector('[part="label"]')?.getAttribute('title')).toBe('Warehouse capacity reserved for returns');
   });
 
+  it('is a one-line-per-row list only when options.compact is true — the same rows and bars', async () => {
+    const data = [{ label: 'A', value: 25 }, { label: 'B', value: 50 }];
+    expect((await bars(data)).querySelector('[part="rows"]')!.hasAttribute('data-compact')).toBe(false);
+    const root = await bars(data, { compact: true });
+    expect(root.querySelector('[part="rows"]')!.hasAttribute('data-compact')).toBe(true);
+    expect(widths(root)).toEqual(['50.0%', '100.0%']);
+  });
+
   it('puts every bar on options.max, an item on its own max', async () => {
     const root = await bars([{ label: 'A', value: 25 }, { label: 'B', value: 9, max: 30 }, { label: 'C', value: 80 }], { max: 50 });
     expect(widths(root)).toEqual(['50.0%', '30.0%', '100.0%']);

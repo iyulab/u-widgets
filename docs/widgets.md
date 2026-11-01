@@ -271,8 +271,8 @@ is `[{ label, value, max?, unit?, format?, tone?, note? }]`: each row its label,
 scale — `options.max`, else the largest value — unless an item has its own `max` (a stock against its own shelf).
 `options.form: "pictogram"` draws each value as a row of glyphs instead: `options.glyph` (default `●`), one for each
 `options.glyphValue` (default 1), the rest of the item's scale as faint glyphs; a row that would need more than sixty
-glyphs is drawn as a bar. `options.maxItems` shows that many rows and a line saying how many more. Each row is spoken as
-its label and value.
+glyphs is drawn as a bar. `options.maxItems` shows that many rows and a line saying how many more. `options.compact: true` puts each row on one
+line — label, bar, value — so a dozen rows fit a small box. Each row is spoken as its label and value.
 
 ```json
 { "widget": "bar-list", "title": "Vaccine stock",
@@ -316,7 +316,9 @@ colouring its value), `meter` (a value against its range — [Meters](#meters)),
 
 It fits small boxes, from about 130px wide: under 180px the badge moves below the name, the picture shrinks and the
 readings stack one per line. What still does not fit is clipped — or, with `options.overflow`, faded out (`fade`) or
-scrolled (`scroll`).
+scrolled (`scroll`). `options.compact: true` is the card for a board of many: the name and the badge share one line, the
+subtitle is left out, the picture shrinks, and each reading is its label and value side by side — a card with one or two
+readings is readable at about 50px tall.
 
 ## Metric Data
 

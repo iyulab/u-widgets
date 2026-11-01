@@ -43,6 +43,16 @@ describe('uw-status-card', () => {
     expect(root.querySelector('.card')!.getAttribute('data-tone')).toBe('warn');
   });
 
+  it('is a compact card only when options.compact is true — the same words and readings, in a tighter layout', async () => {
+    const data = { title: 'Seoul', tone: 'ok', status: 'On track', readings: [{ label: 'Rate', value: 104, unit: '%' }] };
+    expect((await card(data)).querySelector('.card')!.hasAttribute('data-compact')).toBe(false);
+    expect((await card(data, { compact: false })).querySelector('.card')!.hasAttribute('data-compact')).toBe(false);
+    const root = await card(data, { compact: true });
+    expect(root.querySelector('.card')!.hasAttribute('data-compact')).toBe(true);
+    expect(root.querySelector('[part="badge"]')?.textContent).toBe('✓On track');
+    expect(root.querySelector('.reading dd')?.textContent).toMatch(/^104\s%$/);
+  });
+
   it('draws a meter against its range, kept within the bar', async () => {
     const root = await card({ title: 'Tank', meter: { value: 150, min: 0, max: 120, unit: 'L' } });
     expect((root.querySelector('.meter-fill') as HTMLElement).style.width).toBe('100.0%');
