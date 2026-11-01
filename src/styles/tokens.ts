@@ -11,6 +11,8 @@ import { css } from 'lit';
  *   (a 4-tier rem-based scale — kept local to this package rather than referencing
  *   @iyulab/components' --u-text-* tokens, since u-widgets is designed to be usable
  *   standalone without that package installed)
+ * - Figures: figure-scale (a multiplier on the headline figure of `metric` and `stat-group`, 1 when unset) and figure-weight (its
+ *   font weight, 700 when unset) — neither is declared here, so a host that sets nothing gets the figure as it was
  * - Chart: chart-height, chart-color-1..10
  * - Motion: duration-fast/slow — every transition reads these; they drop to 0ms under
  *   `prefers-reduced-motion: reduce`

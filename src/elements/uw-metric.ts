@@ -158,8 +158,9 @@ export class UwMetric extends LitElement {
     .metric-value {
       font-family: var(--u-widget-font-numeric);
       font-variant-numeric: tabular-nums;
-      font-size: 2rem;
-      font-weight: 700;
+      /* the headline figure: its size and weight follow the host's --u-widget-figure-scale (1 = as drawn) and --u-widget-figure-weight */
+      font-size: calc(2rem * var(--u-widget-figure-scale, 1));
+      font-weight: var(--u-widget-figure-weight, 700);
       line-height: 1.1;
       color: var(--u-widget-text, #1a1a2e);
       /* 큰 수치(예: 통화 억/조 단위)가 천단위 그룹 중간에서 줄바꿈되면 가독성이 크게 떨어진다.
@@ -169,19 +170,19 @@ export class UwMetric extends LitElement {
 
     @container uw-metric (max-width: 30rem) {
       .metric-value {
-        font-size: 1.5rem;
+        font-size: calc(1.5rem * var(--u-widget-figure-scale, 1));
       }
     }
 
     @container uw-metric (max-width: 16rem) {
       .metric-value {
-        font-size: 1.25rem;
+        font-size: calc(1.25rem * var(--u-widget-figure-scale, 1));
       }
     }
 
     @container uw-metric (max-width: 12rem) {
       .metric-value {
-        font-size: 1.05rem;
+        font-size: calc(1.05rem * var(--u-widget-figure-scale, 1));
       }
     }
 

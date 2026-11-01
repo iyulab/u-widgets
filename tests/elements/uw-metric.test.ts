@@ -577,4 +577,19 @@ describe('uw-metric', () => {
       expect(plain.querySelector('.meter')!.getAttribute('aria-valuetext')).toBe('72');
     });
   });
+
+  describe('the headline figure', () => {
+    // jsdom does not lay out, so what the host's tokens do is read from the stylesheet the figure is drawn with
+    const styles = (customElements.get('uw-metric') as unknown as { styles: { cssText?: string }[] }).styles;
+    const css = styles.map(x => x.cssText ?? '').join(' ');
+
+    it('follows --u-widget-figure-scale at every size it is drawn in, and unscaled when unset', () => {
+      for (const size of ['2rem', '1.5rem', '1.25rem', '1.05rem']) expect(css).toContain(`calc(${size} * var(--u-widget-figure-scale, 1))`);
+      expect(css).not.toMatch(/\.metric-value\s*\{[^}]*font-size:\s*\d/);
+    });
+
+    it('takes its weight from --u-widget-figure-weight, 700 when unset', () => {
+      expect(css).toContain('font-weight: var(--u-widget-figure-weight, 700)');
+    });
+  });
 });

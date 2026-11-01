@@ -15,11 +15,14 @@
   select and table filters do — case and diacritics folded (`zoe` finds `Zoë`), Korean initials (`ㅂㅅ` finds `부산`), and
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
   unchanged.
-
 - **`options.frame` takes `none`, and a `status-card` takes `options.frame`.** `none` is no frame at all — not the panel, and not the panel's
   padding; `card`, `flat` and the rest are as before. A small `status-card` under a host that frames its boxes itself (a board's skin)
   can now say `frame: "none"` and keep the whole box for its name and readings; `compose` takes `none` for a child as well. A card that
   names no frame is unchanged.
+- **The headline figure of `metric` and `stat-group` follows two tokens a host may set: `--u-widget-figure-scale` and `--u-widget-figure-weight`.**
+  The figure was fixed at 2rem (smaller in a narrow card) and weight 700, so a page that wanted a large light number, or a small one, had to
+  restyle the widget from outside. The scale multiplies the size at every width the figure is drawn in; the weight is the font weight.
+  Neither token is declared, so a host that sets nothing gets the figure exactly as before.
 
 ### Changed
 
