@@ -90,7 +90,7 @@ export class UwCitation extends LitElement {
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: the citation links to the source, which carries the full title */
       white-space: nowrap;
     }
     .cite-item[data-link] .cite-title {
@@ -101,7 +101,7 @@ export class UwCitation extends LitElement {
       font-size: var(--u-widget-font-size-overline, 0.6875rem);
       color: var(--u-widget-text-secondary, #94a3b8);
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: ellipsis; /* ellipsis-ok: the domain of the link target; the link opens it */
       white-space: nowrap;
       margin-top: 1px;
     }
