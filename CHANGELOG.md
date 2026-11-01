@@ -17,6 +17,9 @@
 
 ### Fixed
 
+- The widget catalog lists `total` among a waterfall chart's mapping keys and `opacity` among a scatter plot's. The charts read them (a per-row total flag, a point
+  opacity field) but the catalog named only `x` and `y` for the waterfall and `x`, `y`, `color` and `size` for the scatter, so anything that offers a chart its
+  mapping from the catalog could not name them.
 - **Screen readers no longer announce «clickable» on table rows, sortable headers and list items.** Measured with NVDA
   in browse mode, each was announced as «clickable»: it carried a click listener on the element. The handlers are now
   heard on the shadow root; clicking and Enter/Space work as before.
