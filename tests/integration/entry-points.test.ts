@@ -108,7 +108,7 @@ describe('entry point: u-widgets/charts', () => {
     }));
     vi.doMock('echarts/components', () => ({
       GridComponent: {}, TooltipComponent: {}, LegendComponent: {},
-      RadarComponent: {}, MarkLineComponent: {}, VisualMapComponent: {},
+      RadarComponent: {}, MarkLineComponent: {}, MarkPointComponent: {}, VisualMapComponent: {},
     }));
     vi.doMock('echarts/renderers', () => ({
       CanvasRenderer: {},

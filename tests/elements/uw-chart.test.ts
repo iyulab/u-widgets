@@ -44,6 +44,7 @@ vi.mock('echarts/components', () => ({
   LegendComponent: {},
   RadarComponent: {},
   MarkLineComponent: {},
+  MarkPointComponent: {},
   VisualMapComponent: {},
 }));
 

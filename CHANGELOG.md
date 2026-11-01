@@ -4,6 +4,9 @@
 
 ### Added
 
+- **`markPoint` in `options.echarts` is drawn.** A series's `markPoint` (the lowest or the highest point, or a value at a coordinate, with a label) was merged
+  onto the chart's option but never drawn, because the component that draws it was not registered — `markLine` was. It is now, so a chart can mark its
+  lowest point or call out its last value through the `echarts` option. A chart that names no `markPoint` is unchanged.
 - **`options.compact` for `status-card` and `bar-list`** (`list`, `table`, `steps` and `citation` already had it). A compact
   `status-card` puts the name and the badge on one line, leaves out the subtitle, shrinks the picture and shows each reading as
   its label and value side by side, so a card with a reading or two stays readable at about 50px tall; a compact `bar-list` puts

@@ -14,6 +14,7 @@ import {
   LegendComponent,
   RadarComponent,
   MarkLineComponent,
+  MarkPointComponent,
   VisualMapComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -34,6 +35,7 @@ echarts.use([
   LegendComponent,
   RadarComponent,
   MarkLineComponent,
+  MarkPointComponent,
   VisualMapComponent,
   CanvasRenderer,
 ]);

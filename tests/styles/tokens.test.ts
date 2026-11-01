@@ -9,7 +9,7 @@ vi.mock('echarts/charts', () => ({
   HeatmapChart: {}, BoxplotChart: {}, FunnelChart: {}, TreemapChart: {}, CustomChart: {},
 }));
 vi.mock('echarts/components', () => ({
-  GridComponent: {}, TooltipComponent: {}, LegendComponent: {}, RadarComponent: {}, MarkLineComponent: {}, VisualMapComponent: {},
+  GridComponent: {}, TooltipComponent: {}, LegendComponent: {}, RadarComponent: {}, MarkLineComponent: {}, MarkPointComponent: {}, VisualMapComponent: {},
 }));
 vi.mock('echarts/renderers', () => ({ CanvasRenderer: {} }));
 
