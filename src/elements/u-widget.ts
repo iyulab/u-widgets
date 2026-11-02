@@ -9,6 +9,7 @@ import { widgetEntry, type WidgetEntry } from '../core/entries.js';
 import { resolveLocale, onLocaleChange, getLocaleRevision, getLocaleStrings, formatTemplate, splitTemplate } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
 import { normalizeFrame } from '../core/frame.js';
+import { isTone, toneStyles } from '../core/tone.js';
 import { frameStyles } from '../styles/frames.js';
 import { trackShadowWidget, untrackShadowWidget } from '../theme-sync.js';
 import './uw-metric.js';
@@ -52,6 +53,7 @@ export class UWidget extends LitElement {
   static styles = [
     themeStyles,
     frameStyles,
+    toneStyles,
     css`
       /* 세로 flex 인 이유: 이 엘리먼트는 라우터라 실제 위젯을 shadow 안에 «위임»하는데,
          display:block 이면 그 자식이 flex item 이 아니어서 호스트 높이가 위젯에 닿지 않는다.
@@ -449,7 +451,11 @@ export class UWidget extends LitElement {
     const frame = normalizeFrame((resolved.options as Record<string, unknown>)?.frame, 'u-widget');
     if (frame) {
       const compact = (resolved.options as Record<string, unknown>)?.compact === true;
-      widgetHtml = html`<div class="card-container" part="card" data-frame=${frame} data-compact=${compact ? '' : nothing}>${titleHtml}${widgetHtml}</div>`;
+      // The glow frame takes the widget's tone, but the tone lives inside the widget's own shadow — so the frame is told it here,
+      // from the data a single widget names its state in (`tone`), the same word the widget reads it by.
+      const data = resolved.data as Record<string, unknown> | unknown[] | null | undefined;
+      const tone = data && typeof data === 'object' && !Array.isArray(data) && isTone(data.tone) ? data.tone : undefined;
+      widgetHtml = html`<div class="card-container" part="card" data-frame=${frame} data-compact=${compact ? '' : nothing} data-tone=${tone ?? nothing}>${titleHtml}${widgetHtml}</div>`;
     } else if (titleHtml !== nothing) {
       widgetHtml = html`${titleHtml}${widgetHtml}`;
     }

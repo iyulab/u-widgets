@@ -36,6 +36,10 @@
 
 ### Fixed
 
+- **A `glow` frame follows the widget's tone.** The frame is documented as taking the widget's tone for its border and halo, but the tone lives
+  inside the widget and the frame around it never saw it, so cards in different states all glowed in the accent. The frame now takes the `tone`
+  the widget's data names (a `status-card`'s state), so an alarming card glows in the alarm colour and a quiet one in the ok colour; a widget that
+  names no tone glows in the accent as before, and the other frames are unchanged.
 - **Text cut with «…» can be read in full on hover.** The `bar-list` label, the `kv` value, the `status-card` badge and
   reading names, the horizontal `steps` labels and the secondary line of one-line `table` list rows ended in an ellipsis
   with the full text nowhere — they now carry it as a `title` (the `table` primary line and `status-grid` cells already
