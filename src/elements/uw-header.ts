@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec } from '../core/types.js';
 import { localeStringsOf } from '../core/locale.js';
-import { formatValue } from '../core/format.js';
+import { formatValue, parseDateText } from '../core/format.js';
 import { normalizeTone, toneLabel, toneMark, toneStyles, type Tone } from '../core/tone.js';
 import { themeStyles } from '../styles/tokens.js';
 
@@ -16,13 +16,50 @@ function text(value: unknown): string | undefined {
   return value === undefined || value === null || value === '' ? undefined : String(value);
 }
 
+/** A date-time written with an offset (`…T14:10:00+09:00`, `…Z`) — the only kind that names one moment for every viewer. */
+const WITH_OFFSET = /[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?\s*(?:Z|[+-]\d{2}(?::?\d{2})?)$/i;
+
+/**
+ * A date-time that carries an offset, written on the clock of `timeZone` (an IANA name) instead of the viewer's —
+ * `undefined` when there is no zone, the text carries no offset (it is already a wall clock, written where it was made), or
+ * the zone is not one.
+ */
+function inZone(value: unknown, parts: Intl.DateTimeFormatOptions, locale: string | undefined, timeZone: string | undefined): string | undefined {
+  if (!timeZone || typeof value !== 'string' || !WITH_OFFSET.test(value.trim())) return undefined;
+  const when = parseDateText(value);
+  if (!when) return undefined;
+  try {
+    return new Intl.DateTimeFormat(locale, { ...parts, timeZone }).format(when);
+  } catch {
+    return undefined;
+  }
+}
+
+/** How long before `now` a date-time was, in the words of `locale` ("now", "3 minutes ago", "2 hours ago", "yesterday"). */
+function ago(value: unknown, locale: string | undefined, now: number): string | undefined {
+  const when = typeof value === 'string' ? parseDateText(value) : null;
+  if (!when) return undefined;
+  // a time a little ahead of the viewer's clock is "now", not "in a few seconds"
+  const seconds = Math.max(0, Math.floor((now - when.getTime()) / 1000));
+  try {
+    const words = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (seconds < 60) return words.format(0, 'second');
+    if (seconds < 3600) return words.format(-Math.floor(seconds / 60), 'minute');
+    if (seconds < 86_400) return words.format(-Math.floor(seconds / 3600), 'hour');
+    return words.format(-Math.floor(seconds / 86_400), 'day');
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * <uw-header> — a board's or a section's title block.
  *
  * The heading (`text`, at `level` 1–3) with what usually stands around it: a `kicker` above (a series, a site), a
- * `subtitle` under it, and on the other side the `date` and `time` it is for — or a running `clock` — a few `aside`
- * label · value pairs, and the state of the whole as a `tone` with its `status` words. Narrow, the far side wraps under
- * the heading.
+ * `subtitle` under it, and on the other side the `date` and `time` it is for — or a running `clock` — and how long ago
+ * (`since`, refreshed while on the page), a few `aside` label · value pairs, and the state of the whole as a `tone` with
+ * its `status` words. A `date` or `time` that carries an offset is shown on `options.timeZone`'s clock when one is
+ * given, else on the viewer's. Narrow, the far side wraps under the heading.
  */
 @customElement('uw-header')
 export class UwHeader extends LitElement {
@@ -119,7 +156,7 @@ export class UwHeader extends LitElement {
   @property({ type: String, reflect: true })
   theme: string | null = null;
 
-  /** The time the clock shows, refreshed while the header is on the page. */
+  /** The time the clock shows and `since` is counted from, refreshed while the header is on the page. */
   @state() private _now = Date.now();
   private _timer?: ReturnType<typeof setInterval>;
 
@@ -138,9 +175,10 @@ export class UwHeader extends LitElement {
     if (changed.has('spec')) this._syncClock();
   }
 
-  /** A clock ticks every 15 s — the minute it shows turns within that of the real one — and only while asked for. */
+  /** A clock, or a time since, ticks every 15 s — the minute it shows turns within that of the real one — and only while asked for. */
   private _syncClock() {
-    const wants = this._data()?.clock === true && this.isConnected;
+    const data = this._data();
+    const wants = (data?.clock === true || text(data?.since) !== undefined) && this.isConnected;
     if (wants && !this._timer) {
       this._now = Date.now();
       this._timer = setInterval(() => { this._now = Date.now(); }, 15_000);
@@ -163,10 +201,13 @@ export class UwHeader extends LitElement {
     const locale = typeof this.spec?.options?.locale === 'string' ? this.spec.options.locale : undefined;
     const tone = normalizeTone(d.tone, 'uw-header');
     const status = text(d.status) ?? (tone ? toneLabel(tone, localeStringsOf(this.spec)) : undefined);
-    const dateText = text(d.date) && formatValue(d.date, 'date', locale);
+    const zone = typeof this.spec?.options?.timeZone === 'string' && this.spec.options.timeZone ? this.spec.options.timeZone : undefined;
+    const dateText = text(d.date) && (inZone(d.date, { year: 'numeric', month: '2-digit', day: '2-digit' }, locale, zone) ?? formatValue(d.date, 'date', locale));
     const timeText = d.clock === true
       ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(this._now)
-      : text(d.time) && (String(d.time).includes('T') ? formatValue(d.time, 'time', locale) : String(d.time));
+      : text(d.time) && (inZone(d.time, { hour: '2-digit', minute: '2-digit' }, locale, zone)
+        ?? (String(d.time).includes('T') ? formatValue(d.time, 'time', locale) : String(d.time)));
+    const sinceText = text(d.since) && ago(d.since, locale, this._now);
     const asides: Aside[] = (Array.isArray(d.aside) ? d.aside : [])
       .filter((a): a is Record<string, unknown> => a != null && typeof a === 'object' && text((a as Record<string, unknown>).label) !== undefined)
       .map(a => ({
@@ -174,7 +215,7 @@ export class UwHeader extends LitElement {
         value: `${typeof a.format === 'string' ? formatValue(a.value, a.format, locale) : a.value == null ? '—' : String(a.value)}${text(a.unit) ? ` ${a.unit}` : ''}`,
         ...(a.tone != null && { tone: normalizeTone(a.tone, 'uw-header') }),
       }));
-    const hasSide = dateText || timeText || asides.length > 0 || status;
+    const hasSide = dateText || timeText || sinceText || asides.length > 0 || status;
 
     return html`
       <div class="header" part="header-block">
@@ -188,10 +229,11 @@ export class UwHeader extends LitElement {
             ${asides.length > 0 ? html`<dl class="asides" part="aside">${asides.map(a => html`
               <div class="aside" data-tone=${a.tone ?? nothing}><dt>${a.label}</dt><dd>${a.value}</dd></div>`)}</dl>` : nothing}
             ${status ? html`<span class="status" part="status" data-tone=${tone ?? nothing}>${tone ? html`<span aria-hidden="true">${toneMark(tone, d.glyph)}</span>` : nothing}${status}</span>` : nothing}
-            ${dateText || timeText ? html`
+            ${dateText || timeText || sinceText ? html`
               <div class="when" part="when">
                 ${dateText ? html`<div class="date" part="date">${dateText}</div>` : nothing}
                 ${timeText ? html`<div class="time" part="time" role=${d.clock === true ? 'timer' : nothing} aria-live="off">${timeText}</div>` : nothing}
+                ${sinceText ? html`<div class="date since" part="since" aria-live="off">${sinceText}</div>` : nothing}
               </div>` : nothing}
           </div>` : nothing}
       </div>

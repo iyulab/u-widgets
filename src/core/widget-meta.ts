@@ -150,6 +150,8 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   compact: 'Compact display mode',
   searchable: 'Enable search filter',
   locale: 'Locale for formatting/validation',
+  // header
+  timeZone: 'IANA time zone (e.g. "Asia/Seoul") a date-time that carries an offset is shown on — the source\'s clock instead of the viewer\'s',
   // code
   lineNumbers: 'Show/hide line numbers (default true)',
   highlight: 'Line numbers to highlight (array)',
@@ -242,6 +244,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   compact: { type: 'boolean', default: false },
   searchable: { type: 'boolean', default: false },
   locale: { type: 'string' },
+  timeZone: { type: 'string' },
   lineNumbers: { type: 'boolean', default: true },
   highlight: { type: 'number[]' },
   maxHeight: { type: 'string' },
@@ -397,7 +400,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'math': ['displayMode'],
   'actions': ['layout'],
   'divider': ['label', 'spacing'],
-  'header': [],
+  'header': ['timeZone'],
 };
 
 /**
@@ -486,6 +489,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'date', type: 'string', desc: 'The date it is for, shown in the widget locale' },
     { key: 'time', type: 'string', desc: 'The time it is for — a date-time shows its time of day' },
     { key: 'clock', type: 'boolean', desc: 'Show a running clock (hours and minutes) instead of a time' },
+    { key: 'since', type: 'string', desc: 'A date-time shown as how long ago it was — "now", "3 minutes ago" — in the widget locale, refreshed while on the page' },
     { key: 'aside', type: 'Array<{ label, value, unit?, format?, tone? }>', desc: 'A few label · value pairs beside the heading' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'The state of the whole, as a badge' },
     { key: 'status', type: 'string', desc: 'The badge\'s words (default: the tone\'s name)' },
@@ -596,7 +600,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'math': 'No mapping. data is {expression}. Renders LaTeX via KaTeX. displayMode in options.',
   'actions': 'No data. Uses actions[] array. layout in options (wrap/column).',
   'divider': 'No data. label/spacing in options.',
-  'header': 'data is {text, level?, kicker?, subtitle?, date?, time? | clock: true, aside?: [{label, value, unit?}], tone?, status?, glyph?}. level defaults to 2.',
+  'header': 'data is {text, level?, kicker?, subtitle?, date?, time? | clock: true, since?, aside?: [{label, value, unit?}], tone?, status?, glyph?}. level defaults to 2. options: timeZone.',
 };
 
 /** Events emitted per widget category. */

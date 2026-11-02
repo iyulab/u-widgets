@@ -243,9 +243,13 @@ values), `horizontal` (pairs in a row) or `grid` (`options.columns` to a row).
 
 `header` is a heading — `text` at `level` 1–3 — with what usually stands around a board's or a section's title:
 a `kicker` above it (a series, a site), a `subtitle` under it, and on the far side the `date` and `time` it is for
-(a date-time shows its time of day) or a running `clock: true` (hours and minutes, refreshed while on the page), a few
-`aside` pairs (`[{ label, value, unit?, format?, tone? }]`) and the state of the whole as a `tone` badge with its
-`status` words. Narrow, the far side wraps under the heading.
+(a date-time shows its time of day) or a running `clock: true` (hours and minutes, refreshed while on the page), and
+`since` — a date-time written as how long ago it was ("now", "3 minutes ago", "2 hours ago", in `options.locale`'s words,
+refreshed while on the page, never announced), a few `aside` pairs (`[{ label, value, unit?, format?, tone? }]`) and the
+state of the whole as a `tone` badge with its `status` words. A `date` or `time` that carries an offset
+(`2026-10-23T05:10:00Z`, `…+09:00`) is shown on the clock of `options.timeZone` (an IANA name such as `Asia/Seoul`) when one
+is given, so a source's 14:10 reads 14:10 wherever it is opened, and on the viewer's clock otherwise; a time written without
+an offset is a wall clock where it was made and no zone moves it. Narrow, the far side wraps under the heading.
 
 ```json
 { "widget": "header", "data": { "kicker": "Port of Incheon", "text": "Harbour cranes", "level": 1, "clock": true,

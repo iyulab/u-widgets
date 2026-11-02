@@ -104,7 +104,9 @@ describe('bundle size budget', () => {
     // Re-baselined from 20.5 KB for the bar list and the gauge's forms, band and marks: 20.67 KB measured — the bar
     // list's fields, options, template and two examples, three gauge options and two examples, their names in English
     // and Korean.
-    expect(size).toBeLessThan(22 * 1024);
+    // Re-baselined from 22 KB for the header's `since` field and `timeZone` option, their descriptions and names in English
+    // and Korean: 22.06 KB measured.
+    expect(size).toBeLessThan(22.5 * 1024);
   });
 
   it('math bundle is under 2 KB gzip', () => {

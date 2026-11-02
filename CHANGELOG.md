@@ -4,6 +4,13 @@
 
 ### Added
 
+- **`header` takes `data.since` and `options.timeZone`.** A header could show the date and time a thing is for, but not how fresh it is ("last updated 3 minutes
+  ago") and not the source's own clock: a `time` that carries an offset was shown on the viewer's clock, so a source's 14:10 in Seoul read 05:10 anywhere on UTC.
+  `data.since` is a date-time written as how long ago it was — "now", "3 minutes ago", "2 hours ago", "2 days ago" — in `options.locale`'s words (a time a little
+  ahead of the viewer's clock reads "now"; a text that is no date-time shows nothing), refreshed every 15 s while the header is on the page and never announced.
+  `options.timeZone` (an IANA name) is the clock a `date` or `time` that carries an offset is shown on; a time written without an offset is a wall clock where it was
+  made and stays as written, and a name that is no zone changes nothing. A header without them is unchanged.
+
 - **A `list` row's badge takes the row's tone, and `status` takes `options.face: "pill"`.** A word that names a state — a stage, a status — reads at a
   glance when it is a rounded fill of the state's colour, but the list's badge was always grey and `status` drew only the
   mark and the text in colour. Now a `list` row that names a tone (`mapping.tone`) gives its `mapping.badge` a tinted fill

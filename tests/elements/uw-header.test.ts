@@ -51,6 +51,52 @@ describe('uw-header', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('says how long ago a time was in the locale\'s words, refreshed while on the page, and stops when taken off it', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-23T09:00:20Z'));
+    const { el, root } = await header({ text: 'Ops', since: '2026-10-23T09:00:00Z' });
+    const since = () => root.querySelector('[part="since"]')?.textContent;
+    expect(since()).toBe('now');
+    vi.setSystemTime(new Date('2026-10-23T09:03:10Z'));
+    vi.advanceTimersByTime(15_000);
+    await el.updateComplete;
+    expect(since()).toBe('3 minutes ago');
+    vi.setSystemTime(new Date('2026-10-23T11:30:00Z'));
+    vi.advanceTimersByTime(15_000);
+    await el.updateComplete;
+    expect(since()).toBe('2 hours ago');
+    vi.setSystemTime(new Date('2026-10-25T09:00:00Z'));
+    vi.advanceTimersByTime(15_000);
+    await el.updateComplete;
+    expect(since()).toBe('2 days ago');
+    expect(root.querySelector('[part="since"]')?.getAttribute('aria-live')).toBe('off');
+    el.remove();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('reads a time ahead of the viewer\'s clock as now, a text that is no time as nothing, and a locale in its own words', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-23T09:00:00Z'));
+    expect((await header({ text: 'A', since: '2026-10-23T09:00:40Z' })).root.querySelector('[part="since"]')?.textContent).toBe('now');
+    expect((await header({ text: 'B', since: 'yesterday-ish' })).root.querySelector('[part="since"]')).toBeNull();
+    const korean = await header({ text: 'C', since: '2026-10-23T08:56:00Z' }, { locale: 'ko-KR' });
+    expect(korean.root.querySelector('[part="since"]')?.textContent).toBe('4분 전');
+  });
+
+  it('shows a date and a time that carry an offset on the clock of options.timeZone, and leaves a wall clock as written', async () => {
+    const shown = async (data: Record<string, unknown>, timeZone?: string) =>
+      (await header({ text: 'Plant', ...data }, { locale: 'en-GB', ...(timeZone ? { timeZone } : {}) })).root;
+    // 05:10 UTC is 14:10 in Seoul — the source's clock, not the viewer's
+    expect((await shown({ time: '2026-10-23T05:10:00Z' }, 'Asia/Seoul')).querySelector('[part="time"]')?.textContent).toBe('14:10');
+    expect((await shown({ time: '2026-10-23T05:10:00Z' }, 'UTC')).querySelector('[part="time"]')?.textContent).toBe('05:10');
+    // the date follows the zone across midnight
+    expect((await shown({ date: '2026-10-22T20:00:00Z' }, 'Asia/Seoul')).querySelector('[part="date"]')?.textContent).toBe('23/10/2026');
+    // a time written without an offset is a wall clock where it was made: no zone moves it
+    expect((await shown({ time: '2026-10-23T14:10:00' }, 'America/New_York')).querySelector('[part="time"]')?.textContent).toBe('14:10');
+    // a name that is no zone changes nothing and breaks nothing
+    expect((await shown({ time: '2026-10-23T14:10:00+09:00' }, 'Mars/Base')).querySelector('[part="time"]')?.textContent).toMatch(/\d\d:\d\d/);
+  });
+
   it('draws nothing without a heading', async () => {
     const { root } = await header({ kicker: 'only' });
     expect(root.querySelector('[part="header-block"]')).toBeNull();
