@@ -130,6 +130,7 @@ const EN: ToolLabels = {
     form: 'Drawn as',
     glyph: 'Glyph',
     glyphValue: 'Per glyph',
+    face: 'Face',
     band: 'Acceptable band',
     marks: 'Marks',
   },

@@ -318,3 +318,43 @@ describe('uw-status emphasis', () => {
     el.remove();
   });
 });
+
+describe('uw-status face', () => {
+  const data = [{ label: 'Oven', value: 'Late', tone: 'alarm' }, { value: 'Idle' }];
+  const listOf = async (options?: Record<string, unknown>) => {
+    const el = document.createElement('uw-status') as HTMLElement & { spec: unknown; updateComplete: Promise<unknown> };
+    el.spec = { widget: 'status', data, ...(options && { options }) };
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const list = el.shadowRoot!.querySelector('.status-list')!;
+    return { el, list };
+  };
+
+  it('draws an item as it always was when no face is named — the list carries no face', async () => {
+    const { el, list } = await listOf();
+    expect(list.hasAttribute('data-face')).toBe(false);
+    el.remove();
+  });
+
+  it('marks the list a pill when face is "pill" and leaves the items\' own tone and words alone', async () => {
+    const { el, list } = await listOf({ face: 'pill' });
+    expect(list.getAttribute('data-face')).toBe('pill');
+    const items = [...list.querySelectorAll('.status-item')];
+    expect(items.map(i => i.getAttribute('data-tone'))).toEqual(['alarm', null]);
+    expect(items[0].querySelector('.status-value')!.textContent).toBe('Late');
+    el.remove();
+  });
+
+  it('ignores a face it does not know', async () => {
+    const { el, list } = await listOf({ face: 'oval' });
+    expect(list.hasAttribute('data-face')).toBe(false);
+    el.remove();
+  });
+
+  it('styles the pill as a rounded fill of the item\'s tone', () => {
+    const styles = (customElements.get('uw-status') as any).styles;
+    const css = (Array.isArray(styles) ? styles : [styles]).map((s: any) => s.cssText ?? '').join(' ');
+    expect(css).toMatch(/\[data-face='pill'\][^{]*\.status-item[^{]*\{[^}]*border-radius:\s*999px/);
+    expect(css).toMatch(/\[data-face='pill'\][^{]*\.status-item\[data-tone\][^{]*\{[^}]*color-mix\(in srgb, var\(--tone\) 14%/);
+  });
+});

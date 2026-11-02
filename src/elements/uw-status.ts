@@ -83,6 +83,19 @@ export class UwStatus extends LitElement {
       border-radius: 3px;
     }
 
+    /* face "pill": each item is a rounded fill of its tone around the mark, the label and the words. An inverted or hatched
+       item keeps its own fill and only takes the shape. */
+    .status-list[data-face='pill'] .status-item {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--u-widget-surface, #f1f5f9);
+    }
+    .status-list[data-face='pill'] .status-item[data-tone]:not([data-emphasis]) {
+      background: color-mix(in srgb, var(--tone) 14%, transparent);
+    }
+    .status-list[data-face='pill'] .status-item[data-emphasis='invert'] { background: var(--tone, var(--u-widget-text)); }
+    .status-list[data-face='pill'] .status-item[data-emphasis='hatch'] { background-color: transparent; }
+
     @container uw-status (max-width: 20rem) {
       .status-list { gap: 8px 16px; }
       .status-item { font-size: var(--u-widget-font-size-label, 0.8125rem); }
@@ -100,9 +113,10 @@ export class UwStatus extends LitElement {
 
     const items = this._extractItems();
     if (items.length === 0) return nothing;
+    const pill = this.spec.options?.face === 'pill';
 
     return html`
-      <div class="status-list" part="status" role="list" aria-label=${this.spec.title ?? localeStringsOf(this.spec).status}>
+      <div class="status-list" part="status" role="list" data-face=${pill ? 'pill' : nothing} aria-label=${this.spec.title ?? localeStringsOf(this.spec).status}>
         ${items.map(item => html`
           <div class="status-item" part="status-item" role="listitem" data-tone=${item.tone ?? nothing} data-emphasis=${item.emphasis ?? nothing}>
             ${item.tone ? html`<span class="status-icon" part="status-icon" aria-hidden="true">${toneMark(item.tone, item.glyph)}</span>` : nothing}

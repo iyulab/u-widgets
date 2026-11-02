@@ -4,6 +4,13 @@
 
 ### Added
 
+- **A `list` row's badge takes the row's tone, and `status` takes `options.face: "pill"`.** A word that names a state — a stage, a status — reads at a
+  glance when it is a rounded fill of the state's colour, but the list's badge was always grey and `status` drew only the
+  mark and the text in colour. Now a `list` row that names a tone (`mapping.tone`) gives its `mapping.badge` a tinted fill
+  and the tone's colour, as the status card's badge has; a row without a tone keeps the grey badge. And `status` takes
+  `options.face`: `"pill"` draws each item as a rounded fill of its tone around the mark, the label and the words (an
+  item without a tone gets a neutral fill; an `invert` or `hatch` item keeps its own fill). A list with no tone, and a
+  `status` without the option, are unchanged.
 - **`markPoint` in `options.echarts` is drawn.** A series's `markPoint` (the lowest or the highest point, or a value at a coordinate, with a label) was merged
   onto the chart's option but never drawn, because the component that draws it was not registered — `markLine` was. It is now, so a chart can mark its
   lowest point or call out its last value through the `echarts` option. A chart that names no `markPoint` is unchanged.

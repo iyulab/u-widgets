@@ -995,6 +995,28 @@ describe('uw-table', () => {
       const shadow = await render(el);
       expect(shadow.querySelector('.list-badge')).toBeNull();
     });
+
+    it('sits in a row that carries the row\'s tone, so the badge can take it; a row without a tone carries none', async () => {
+      const el = createElement({
+        widget: 'list',
+        data: [
+          { name: 'Order 1', stage: 'Late', tone: 'alarm' },
+          { name: 'Order 2', stage: 'Baking' },
+        ],
+        mapping: { primary: 'name', badge: 'stage', tone: 'tone' },
+      });
+      const shadow = await render(el);
+      const rows = [...shadow.querySelectorAll('.list-item')];
+      expect(rows.map(r => r.getAttribute('data-tone'))).toEqual(['alarm', null]);
+      expect(rows.map(r => r.querySelector('.list-badge')!.textContent)).toEqual(['Late', 'Baking']);
+    });
+
+    it('gives a toned row\'s badge the tone as a tinted fill, and leaves the plain badge\'s rule alone', () => {
+      const styles = (customElements.get('uw-table') as any).styles;
+      const css = (Array.isArray(styles) ? styles : [styles]).map((s: any) => s.cssText ?? '').join(' ');
+      expect(css).toMatch(/\.list-item\[data-tone\] \.list-badge\s*\{[^}]*color-mix\(in srgb, var\(--tone\) 14%[^}]*color:\s*var\(--tone\)/);
+      expect(css).toMatch(/\.list-badge\s*\{[^}]*background:\s*var\(--u-widget-surface, #f1f5f9\)/);
+    });
   });
 
   describe('list keyboard navigation', () => {

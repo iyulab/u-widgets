@@ -356,6 +356,12 @@ export class UwTable extends LitElement {
       color: var(--u-widget-text-secondary, #5b6777);
       white-space: nowrap;
     }
+    /* A row that names a tone gives its badge the tone: a tinted fill and the tone's own colour (as the status card's badge). */
+    .list-item[data-tone] .list-badge {
+      background: color-mix(in srgb, var(--tone) 14%, transparent);
+      color: var(--tone);
+      font-weight: 600;
+    }
 
     /* ── search ── */
     .search-box {

@@ -190,6 +190,11 @@ shows the tone's name in the widget's locale («Alarm», «경보»).
 { "widget": "status", "data": [{ "label": "Pump A", "value": "Running", "tone": "ok" }, { "label": "Pump B", "tone": "alarm" }] }
 ```
 
+`status` draws an item as its mark and text in the tone's colour. `options.face: "pill"` draws each item as a rounded fill of
+its tone around the mark, the label and the words — a word to be read at a glance, such as a stage or a state in a row of
+many; an item without a tone gets a neutral fill, and an `invert` or `hatch` item keeps its own fill and takes the shape.
+Without the option nothing changes.
+
 The colours are the tokens `--u-widget-tone-ok` … `--u-widget-tone-next` (light and dark — see Theming); `ok`,
 `alarm` and `accent` follow `--u-widget-positive`, `--u-widget-negative` and `--u-widget-primary`. `warn` has a
 colour of its own (`#b45309`, dark `#fbbf24`) so it reads as text on the page; the components bridge takes it from
@@ -205,7 +210,8 @@ and keeps the look of its tone. The default is `"auto"`.
 
 A `list` row can say more than its text. `mapping.tone` names the field holding each row's tone ([Tones](#tones)): the
 row shows the tone's mark and its text the tone's colour — and in a sequence, `past` dims the row, `now` picks it out
-and `next` is plain. `mapping.time` shows a time first in each row (a date-time as its time of day, in the widget's
+and `next` is plain. A row's `mapping.badge` (a short word beside the text) takes the row's tone too — a tinted fill and the
+tone's colour; a row without a tone keeps the grey badge. `mapping.time` shows a time first in each row (a date-time as its time of day, in the widget's
 locale). `mapping.columns` (`[{ field, label?, format?, align?, tone? }]`, as in a table) adds values after the text,
 each formatted, under a caption row when any column has a `label`.
 

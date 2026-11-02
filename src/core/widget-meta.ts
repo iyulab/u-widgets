@@ -180,6 +180,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   form: 'How each value is drawn: bar (default) or pictogram (a row of glyphs)',
   glyph: 'The glyph a pictogram repeats (default ●)',
   glyphValue: 'How much one glyph stands for (default 1)',
+  face: 'How each item is drawn: plain (default) or pill (a rounded fill of its tone around the mark and words)',
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   live: 'Whether the box is announced to assistive technology as it appears: auto (default; warn and alarm assertively, the other tones politely) or off (for content already written — a saved report, an earlier conversation)',
@@ -268,6 +269,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   form: choice(['bar', 'pictogram'], 'bar'),
   glyph: { type: 'string' },
   glyphValue: { type: 'number', default: 1 },
+  face: choice(['plain', 'pill'], 'plain'),
 };
 
 /** Where an option's type, choices, default or meaning differ for one widget. */
@@ -385,7 +387,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'kv': ['layout', 'columns'],
   'code': ['lineNumbers', 'highlight', 'maxHeight', 'wrap'],
   'citation': ['compact', 'numbered'],
-  'status': [],
+  'status': ['face'],
   'status-card': ['overflow', 'compact', 'frame'],
   'status-grid': ['columns', 'cell', 'counts'],
   'steps': ['layout', 'compact'],
