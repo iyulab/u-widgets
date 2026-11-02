@@ -56,3 +56,18 @@ describe('uw-header', () => {
     expect(root.querySelector('[part="header-block"]')).toBeNull();
   });
 });
+
+describe('uw-header: what a host may set', () => {
+    // jsdom does not lay out, so what the host's tokens do is read from the stylesheet the element is drawn with
+    const styles = (customElements.get('uw-header') as unknown as { styles: unknown }).styles;
+    const css = [styles].flat(Infinity).map(x => (x as { cssText?: string }).cssText ?? '').join(' ');
+
+  it('draws the heading at its level times --u-widget-title-scale, unscaled when unset', () => {
+    for (const size of ['1.5rem', '1.25rem', '1.1rem']) expect(css).toContain(`calc(${size} * var(--u-widget-title-scale, 1))`);
+    expect(css).not.toMatch(/\.header-widget\[data-level='\d'\]\s*\{\s*font-size:\s*\d/);
+  });
+
+  it('takes the colour of the kicker from --u-widget-kicker-color, the secondary text colour when unset', () => {
+    expect(css).toContain('color: var(--u-widget-kicker-color, var(--u-widget-text-secondary, #5b6777))');
+  });
+});

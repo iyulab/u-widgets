@@ -98,3 +98,18 @@ describe('uw-status-card', () => {
     warn.mockRestore();
   });
 });
+
+describe('uw-status-card: what a host may set', () => {
+    // jsdom does not lay out, so what the host's tokens do is read from the stylesheet the element is drawn with
+    const styles = (customElements.get('uw-status-card') as unknown as { styles: unknown }).styles;
+    const css = [styles].flat(Infinity).map(x => (x as { cssText?: string }).cssText ?? '').join(' ');
+
+  it('draws a reading at its size times --u-widget-value-scale and in --u-widget-value-weight, as before when unset', () => {
+    expect(css).toContain('calc(var(--u-widget-font-size, 0.875rem) * var(--u-widget-value-scale, 1))');
+    expect(css).toContain('font-weight: var(--u-widget-value-weight, 600)');
+  });
+
+  it('does not read the headline-figure tokens a skin sets for metric', () => {
+    expect(css).not.toContain('--u-widget-figure-');
+  });
+});

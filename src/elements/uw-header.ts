@@ -46,7 +46,8 @@ export class UwHeader extends LitElement {
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--u-widget-text-secondary, #5b6777);
+      /* the host's --u-widget-kicker-color; the secondary text colour when unset */
+      color: var(--u-widget-kicker-color, var(--u-widget-text-secondary, #5b6777));
     }
     .header-widget {
       font-family: var(--u-widget-font-display);
@@ -56,9 +57,10 @@ export class UwHeader extends LitElement {
       line-height: 1.2;
       overflow-wrap: anywhere;
     }
-    .header-widget[data-level='1'] { font-size: 1.5rem; }
-    .header-widget[data-level='2'] { font-size: 1.25rem; }
-    .header-widget[data-level='3'] { font-size: 1.1rem; }
+    /* the heading's size follows the host's --u-widget-title-scale (1 = as drawn) */
+    .header-widget[data-level='1'] { font-size: calc(1.5rem * var(--u-widget-title-scale, 1)); }
+    .header-widget[data-level='2'] { font-size: calc(1.25rem * var(--u-widget-title-scale, 1)); }
+    .header-widget[data-level='3'] { font-size: calc(1.1rem * var(--u-widget-title-scale, 1)); }
     .subtitle {
       margin-top: 2px;
       font-size: var(--u-widget-font-size-label, 0.8125rem);

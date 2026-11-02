@@ -13,6 +13,11 @@ import { css } from 'lit';
  *   standalone without that package installed)
  * - Figures: figure-scale (a multiplier on the headline figure of `metric` and `stat-group`, 1 when unset) and figure-weight (its
  *   font weight, 700 when unset) — neither is declared here, so a host that sets nothing gets the figure as it was
+ * - Values: value-scale (a multiplier on the figures inside a card or a row — a `status-card` reading, a `list` row's trailing value and
+ *   time, 1 when unset) and value-weight (their font weight; as drawn when unset). Apart from the figure tokens on purpose: a host that
+ *   enlarges the headline figure does not thereby enlarge a row's value.
+ * - Header: title-scale (a multiplier on the heading of `header`, 1 when unset) and kicker-color (the line above it; the secondary text
+ *   colour when unset)
  * - Chart: chart-height, chart-color-1..10
  * - Motion: duration-fast/slow — every transition reads these; they drop to 0ms under
  *   `prefers-reduced-motion: reduce`

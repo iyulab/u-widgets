@@ -249,8 +249,9 @@ export class UwTable extends LitElement {
 
     .list-trailing {
       flex-shrink: 0;
-      font-size: var(--u-widget-font-size-label, 0.8125rem);
-      font-weight: 500;
+      /* the host's --u-widget-value-scale / -weight (1 and 500 when unset) */
+      font-size: calc(var(--u-widget-font-size-label, 0.8125rem) * var(--u-widget-value-scale, 1));
+      font-weight: var(--u-widget-value-weight, 500);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -276,7 +277,8 @@ export class UwTable extends LitElement {
       min-width: 3.2em;
       font-family: var(--u-widget-font-numeric);
       font-variant-numeric: tabular-nums;
-      font-size: var(--u-widget-font-size-label, 0.8125rem);
+      font-size: calc(var(--u-widget-font-size-label, 0.8125rem) * var(--u-widget-value-scale, 1));
+      font-weight: var(--u-widget-value-weight, inherit);
       color: var(--u-widget-text-secondary, #5b6777);
     }
 
@@ -457,7 +459,7 @@ export class UwTable extends LitElement {
     }
 
     .compact .list-trailing {
-      font-size: var(--u-widget-font-size-overline, 0.6875rem);
+      font-size: calc(var(--u-widget-font-size-overline, 0.6875rem) * var(--u-widget-value-scale, 1));
     }
 
     /* ── container-query responsive ── */
@@ -496,9 +498,11 @@ export class UwTable extends LitElement {
         font-size: var(--u-widget-font-size-caption, 0.75rem);
       }
 
-      .list-secondary,
-      .list-trailing {
+      .list-secondary {
         font-size: var(--u-widget-font-size-overline, 0.6875rem);
+      }
+      .list-trailing {
+        font-size: calc(var(--u-widget-font-size-overline, 0.6875rem) * var(--u-widget-value-scale, 1));
       }
     }
   `];

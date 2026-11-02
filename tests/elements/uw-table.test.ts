@@ -1311,3 +1311,26 @@ describe('uw-table — tones, bar cells, units and a table to look at', () => {
     expect(cells.slice(0, 2).map(c => [c.textContent?.trim(), c.getAttribute('data-tone')])).toEqual([['41 %', 'ok'], ['✓OK', 'ok']]);
   });
 });
+
+describe('uw-table list: what a host may set', () => {
+    // jsdom does not lay out, so what the host's tokens do is read from the stylesheet the element is drawn with
+    const styles = (customElements.get('uw-table') as unknown as { styles: unknown }).styles;
+    const css = [styles].flat(Infinity).map(x => (x as { cssText?: string }).cssText ?? '').join(' ');
+
+  it('draws a row\'s trailing value and time at their size times --u-widget-value-scale, as before when unset', () => {
+    const scaled = 'calc(var(--u-widget-font-size-label, 0.8125rem) * var(--u-widget-value-scale, 1))';
+    expect(css.split(scaled).length - 1).toBe(2);
+    // the compact list and a narrow one draw the trailing value smaller — and still follow the host's scale
+    const smaller = 'calc(var(--u-widget-font-size-overline, 0.6875rem) * var(--u-widget-value-scale, 1))';
+    expect(css.split(smaller).length - 1).toBe(2);
+  });
+
+  it('takes the weight of the trailing value from --u-widget-value-weight (500 when unset) and leaves the time\'s as it was', () => {
+    expect(css).toContain('font-weight: var(--u-widget-value-weight, 500)');
+    expect(css).toContain('font-weight: var(--u-widget-value-weight, inherit)');
+  });
+
+  it('does not read the headline-figure tokens a skin sets for metric', () => {
+    expect(css).not.toContain('--u-widget-figure-');
+  });
+});

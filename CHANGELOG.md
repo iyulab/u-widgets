@@ -34,6 +34,11 @@
   The figure was fixed at 2rem (smaller in a narrow card) and weight 700, so a page that wanted a large light number, or a small one, had to
   restyle the widget from outside. The scale multiplies the size at every width the figure is drawn in; the weight is the font weight.
   Neither token is declared, so a host that sets nothing gets the figure exactly as before.
+- **A `status-card` reading and a `list` row's trailing value and time follow `--u-widget-value-scale` and `--u-widget-value-weight`; a `header`'s heading follows
+  `--u-widget-title-scale` and its kicker `--u-widget-kicker-color`.** These were fixed (a reading 600 at 0.875rem, a trailing value 500 at 0.8125rem, the heading
+  1.5 / 1.25 / 1.1rem by level, the kicker in the secondary text colour), so a page that wanted a large light amount in a row, or a heading that carries a page, had to
+  restyle the widget from outside. The value tokens are apart from the figure tokens on purpose: a host that enlarges the headline figure of a `metric` does not thereby
+  enlarge every value in a row. None of the four is declared, so a host that sets nothing gets every widget exactly as before.
 
 ### Changed
 

@@ -186,8 +186,9 @@ export class UwStatusCard extends LitElement {
       margin: 0;
       font-family: var(--u-widget-font-numeric);
       font-variant-numeric: tabular-nums;
-      font-weight: 600;
-      font-size: var(--u-widget-font-size, 0.875rem);
+      /* the host's --u-widget-value-scale / -weight (1 and 600 when unset) */
+      font-weight: var(--u-widget-value-weight, 600);
+      font-size: calc(var(--u-widget-font-size, 0.875rem) * var(--u-widget-value-scale, 1));
       overflow-wrap: anywhere;
     }
     .reading[data-tone] dd { color: var(--tone); }
