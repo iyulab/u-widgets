@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-11-02
+
 ### Added
 
 - **`header` takes `data.since` and `options.timeZone`.** A header could show the date and time a thing is for, but not how fresh it is ("last updated 3 minutes
