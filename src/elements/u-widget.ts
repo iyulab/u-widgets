@@ -448,7 +448,8 @@ export class UWidget extends LitElement {
     // Draw the widget in its frame (core/frame.ts) when options.frame names one
     const frame = normalizeFrame((resolved.options as Record<string, unknown>)?.frame, 'u-widget');
     if (frame) {
-      widgetHtml = html`<div class="card-container" part="card" data-frame=${frame}>${titleHtml}${widgetHtml}</div>`;
+      const compact = (resolved.options as Record<string, unknown>)?.compact === true;
+      widgetHtml = html`<div class="card-container" part="card" data-frame=${frame} data-compact=${compact ? '' : nothing}>${titleHtml}${widgetHtml}</div>`;
     } else if (titleHtml !== nothing) {
       widgetHtml = html`${titleHtml}${widgetHtml}`;
     }

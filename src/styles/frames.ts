@@ -54,4 +54,15 @@ export const frameStyles = css`
     transform: rotate(-0.6deg);
     box-shadow: var(--u-widget-shadow);
   }
+  /* compact: the frame keeps its surface and edge but gives the widget most of its padding back — a small card stays a card.
+     The masked frames (ticket, postage) keep enough to clear their notches. */
+  [data-frame][data-compact] {
+    padding: 6px 10px;
+  }
+  [data-frame='ticket'][data-compact] {
+    padding-block: 12px;
+  }
+  [data-frame='postage'][data-compact] {
+    padding: 10px;
+  }
 `;

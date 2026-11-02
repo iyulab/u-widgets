@@ -11,6 +11,10 @@
   `status-card` puts the name and the badge on one line, leaves out the subtitle, shrinks the picture and shows each reading as
   its label and value side by side, so a card with a reading or two stays readable at about 50px tall; a compact `bar-list` puts
   each row on one line — label, bar, value. Without the option nothing changes.
+- **`options.compact` also gives a frame's padding back.** A widget drawn in a frame (`options.frame`, or a host's skin frame) took 16px × 20px of its box
+  for the frame's padding whatever its size, so a small compact card in a frame had its name and readings squeezed into what was left. With `compact` the frame
+  keeps its surface and edge and pads 6px × 10px (the masked `ticket` and `postage` frames keep enough to clear their notches). A widget without
+  `compact`, or without a frame, is unchanged.
 - With `@iyulab/u-widgets/components` imported, a searchable `table` matches its search box as the `@iyulab/components`
   select and table filters do — case and diacritics folded (`zoe` finds `Zoë`), Korean initials (`ㅂㅅ` finds `부산`), and
   rows narrowing while a Korean syllable is still being typed, instead of waiting for it. Without the import the search is
