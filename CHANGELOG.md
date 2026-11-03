@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Four more frames: `bevel`, `well`, `block` and `double`.** The frames could be a card, a plate, a ticket, a stamp or a sheet of tape, but not the edges that
+  make a window of an older desktop (a raised and a sunken panel), a panel of a printed page (a thick rule with a hard offset shadow) or a form (a double rule),
+  so a board that wanted them drew its panels by hand. `bevel` and `well` take their light and dark edges from the paper's own colour; `block` and `double` take the
+  ink's. A frame you did not name is unchanged.
+
 ## [0.46.0] - 2026-11-02
 
 ### Added

@@ -8,6 +8,10 @@
  * - `ticket` — scalloped top and bottom edges, like a torn ticket stub.
  * - `postage` — perforated all round, like a stamp.
  * - `tape` — a sheet stuck on slightly askew.
+ * - `bevel` — raised: a light edge above and left, a dark one below and right, square corners.
+ * - `well` — sunken: the same edges the other way round, as a field set into the surface.
+ * - `block` — a thick rule all round and a hard offset shadow of the same ink, like a panel of a printed page.
+ * - `double` — a double rule, like a printed form's border.
  *
  * `none` is the word for no frame at all: not even the panel's padding is taken from the box, which is how a small widget
  * is drawn edge to edge under a host that frames the rest.
@@ -15,7 +19,7 @@
  * Every frame reads the palette tokens — `--u-widget-bg` (the paper), `--u-widget-text` (the ink),
  * `--u-widget-border` (the rules) — so a page that sets them on the widget sets its frames too.
  */
-export const FRAMES = ['card', 'flat', 'glow', 'plate', 'ticket', 'postage', 'tape'] as const;
+export const FRAMES = ['card', 'flat', 'glow', 'plate', 'ticket', 'postage', 'tape', 'bevel', 'well', 'block', 'double'] as const;
 
 export type Frame = (typeof FRAMES)[number];
 

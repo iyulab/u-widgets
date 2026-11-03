@@ -54,6 +54,37 @@ export const frameStyles = css`
     transform: rotate(-0.6deg);
     box-shadow: var(--u-widget-shadow);
   }
+  /* Raised and sunken: a light edge on one side and a dark one on the other, both made from the paper's own colour, so the pair
+     reads on any paper. Square — an edge cut at a corner would show the join. */
+  [data-frame='bevel'] {
+    border-radius: 0;
+    border: 2px solid;
+    border-color:
+      color-mix(in srgb, #fff 85%, var(--u-widget-bg, #fff)) color-mix(in srgb, #000 55%, var(--u-widget-bg, #fff))
+      color-mix(in srgb, #000 55%, var(--u-widget-bg, #fff)) color-mix(in srgb, #fff 85%, var(--u-widget-bg, #fff));
+    box-shadow:
+      inset -1px -1px 0 color-mix(in srgb, #000 22%, var(--u-widget-bg, #fff)),
+      inset 1px 1px 0 color-mix(in srgb, #fff 60%, var(--u-widget-bg, #fff));
+  }
+  [data-frame='well'] {
+    border-radius: 0;
+    border: 2px solid;
+    border-color:
+      color-mix(in srgb, #000 55%, var(--u-widget-bg, #fff)) color-mix(in srgb, #fff 85%, var(--u-widget-bg, #fff))
+      color-mix(in srgb, #fff 85%, var(--u-widget-bg, #fff)) color-mix(in srgb, #000 55%, var(--u-widget-bg, #fff));
+    box-shadow:
+      inset 1px 1px 0 color-mix(in srgb, #000 22%, var(--u-widget-bg, #fff)),
+      inset -1px -1px 0 color-mix(in srgb, #fff 60%, var(--u-widget-bg, #fff));
+  }
+  [data-frame='block'] {
+    border-radius: 0;
+    border: 3px solid var(--u-widget-text, #1a1a2e);
+    box-shadow: 4px 4px 0 var(--u-widget-text, #1a1a2e);
+  }
+  [data-frame='double'] {
+    border-radius: 0;
+    border: 4px double var(--u-widget-text, #1a1a2e);
+  }
   /* compact: the frame keeps its surface and edge but gives the widget most of its padding back — a small card stays a card.
      The masked frames (ticket, postage) keep enough to clear their notches. */
   [data-frame][data-compact] {

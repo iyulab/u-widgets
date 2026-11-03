@@ -830,6 +830,10 @@ page — `theme="light"` on a light paper in a dark page — so the tone colours
 | `ticket` | scalloped top and bottom edges — a ticket stub |
 | `postage` | perforated all round — a stamp |
 | `tape` | a sheet stuck on slightly askew |
+| `bevel` | raised — a light edge above and left, a dark one below and right, square |
+| `well` | sunken — the same edges the other way round, a field set into the surface |
+| `block` | a thick rule and a hard offset shadow of the ink — a panel of a printed page |
+| `double` | a double rule — a printed form's border |
 
 ```html
 <u-widget style="--u-widget-bg:#f4ecd8; --u-widget-text:#2b2118; --u-widget-font-display:'Playfair Display', serif"

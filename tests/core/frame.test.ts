@@ -7,8 +7,8 @@ import '../../src/elements/u-widget.js';
 import '../../src/elements/uw-metric.js';
 
 describe('frames', () => {
-  it('are the seven, each with a rule that reads the palette tokens', () => {
-    expect(FRAMES).toEqual(['card', 'flat', 'glow', 'plate', 'ticket', 'postage', 'tape']);
+  it('are the eleven, each with a rule that reads the palette tokens', () => {
+    expect(FRAMES).toEqual(['card', 'flat', 'glow', 'plate', 'ticket', 'postage', 'tape', 'bevel', 'well', 'block', 'double']);
     for (const f of FRAMES.filter(f => f !== 'flat')) expect(frameStyles.cssText).toContain(`[data-frame='${f}']`);
     expect(frameStyles.cssText).toContain('background: var(--u-widget-bg');
   });
@@ -19,7 +19,7 @@ describe('frames', () => {
     expect(normalizeFrame(true, 'f')).toBeUndefined();
     expect(normalizeFrame(true, 'f')).toBeUndefined();
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(String(warn.mock.calls[0][0])).toContain('card, flat, glow, plate, ticket, postage, tape');
+    expect(String(warn.mock.calls[0][0])).toContain('card, flat, glow, plate, ticket, postage, tape, bevel, well, block, double');
     warn.mockRestore();
   });
 

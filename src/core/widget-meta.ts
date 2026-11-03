@@ -186,7 +186,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   maxItems: 'Show at most this many rows, then a line saying how many more',
   overflow: 'What a box too small does with the rest: clip (default), fade or scroll',
   live: 'Whether the box is announced to assistive technology as it appears: auto (default; warn and alarm assertively, the other tones politely) or off (for content already written — a saved report, an earlier conversation)',
-  frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage or tape — or none, for no frame and none of its padding (compose: each child)',
+  frame: 'Draw inside a frame: card, flat, glow, plate, ticket, postage, tape, bevel, well, block or double — or none, for no frame and none of its padding (compose: each child)',
 };
 
 /**
