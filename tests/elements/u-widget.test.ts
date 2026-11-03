@@ -369,6 +369,13 @@ describe('u-widget', () => {
     expect(el.getAttribute('theme')).toBe('light');
   });
 
+  it("draws the title from the title tokens, plain when a host sets none", () => {
+    const css = ((customElements.get('u-widget') as any).styles as Array<{ cssText: string }>).map(s => s.cssText).join('');
+    for (const token of ['title-display', 'title-width', 'title-bg', 'title-ink', 'title-pad', 'title-radius']) expect(css).toContain(`--u-widget-${token}`);
+    expect(css).toContain('var(--u-widget-title-bg, transparent)');
+    expect(css).toContain('var(--u-widget-title-pad, 0)');
+  });
+
   it('has themeStyles in static styles', () => {
     // Verify the styles array includes theme tokens
     const styles = (customElements.get('u-widget') as any).styles;

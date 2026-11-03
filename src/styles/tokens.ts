@@ -18,6 +18,9 @@ import { css } from 'lit';
  *   enlarges the headline figure does not thereby enlarge a row's value.
  * - Header: title-scale (a multiplier on the heading of `header`, 1 when unset) and kicker-color (the line above it; the secondary text
  *   colour when unset)
+ * - Title: title-bg and title-ink (the fill and the ink of the title above a widget — transparent and the text colour when unset),
+ *   title-pad, title-radius, title-display and title-width (`inline-block` and `max-content` make it a tab rather than a strip) — none is declared here, so a host
+ *   that sets nothing gets the plain title it always had
  * - Chart: chart-height, chart-color-1..10
  * - Motion: duration-fast/slow — every transition reads these; they drop to 0ms under
  *   `prefers-reduced-motion: reduce`

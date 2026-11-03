@@ -4,6 +4,10 @@
 
 ### Added
 
+- **The title above a widget can be a band or a tab: `--u-widget-title-bg`, `-ink`, `-pad`, `-radius`, `-display` and `-width`.** The title was plain text over the
+  widget. A host that sets the fill and the ink (and `inline-block` and `max-content` for a tab) draws it as a filled strip or tab, as a panel of a printed page or a window of an
+  older desktop has one; none of the tokens is declared, so a host that sets nothing gets the plain title it had.
+
 - **Four more frames: `bevel`, `well`, `block` and `double`.** The frames could be a card, a plate, a ticket, a stamp or a sheet of tape, but not the edges that
   make a window of an older desktop (a raised and a sunken panel), a panel of a printed page (a thick rule with a hard offset shadow) or a form (a double rule),
   so a board that wanted them drew its panels by hand. `bevel` and `well` take their light and dark edges from the paper's own colour; `block` and `double` take the

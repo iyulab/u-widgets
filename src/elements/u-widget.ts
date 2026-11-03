@@ -168,7 +168,15 @@ export class UWidget extends LitElement {
         font-family: var(--u-widget-font-display);
         font-size: var(--u-widget-font-size, 0.875rem);
         font-weight: 600;
-        color: var(--u-widget-text, #1a1a2e);
+        /* A host that sets the title tokens draws the title as a filled strip (a band) or a filled tab; unset, it is plain text. */
+        display: var(--u-widget-title-display, block);
+        width: var(--u-widget-title-width, auto);
+        max-width: 100%;
+        box-sizing: border-box;
+        background: var(--u-widget-title-bg, transparent);
+        color: var(--u-widget-title-ink, var(--u-widget-text, #1a1a2e));
+        padding: var(--u-widget-title-pad, 0);
+        border-radius: var(--u-widget-title-radius, 0);
         margin: 0 0 8px 0;
       }
 
