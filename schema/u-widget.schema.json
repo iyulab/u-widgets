@@ -221,6 +221,10 @@
           "type": "string",
           "description": "Color grouping field"
         },
+        "texture": {
+          "type": "string",
+          "description": "Texture words per interval (gantt): hatch, dashed"
+        },
         "size": {
           "type": "string",
           "description": "Size encoding field (scatter)"

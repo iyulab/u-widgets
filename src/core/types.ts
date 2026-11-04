@@ -127,8 +127,14 @@ export interface UWidgetMapping {
   label?: string;
   /** Value field (pie/funnel/heatmap). */
   value?: string;
-  /** Color grouping field (scatter). */
-  color?: string;
+  /** Color grouping field (scatter). */
+  color?: string;
+  /**
+   * Texture field (gantt charts): words per interval — `hatch` draws it with diagonal lines, `dashed` with a dashed outline and no
+   * fill, both together as a hatched box with a dashed outline. A texture says what colour does not (an interval whose value was
+   * estimated, or lost), so a reader who cannot tell colours apart still can. Other words, and no field, draw a plain bar.
+   */
+  texture?: string;
   /** Size encoding field (scatter bubble). */
   size?: string;
   /** Opacity encoding field (scatter). Maps data values to point opacity (0.1–1.0). */

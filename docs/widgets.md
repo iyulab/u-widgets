@@ -38,7 +38,7 @@ Only `widget` is required. Everything else is optional or auto-inferred.
 | `chart.waterfall` | 폭포 차트 | `x`, `y`, `total?` |
 | `chart.treemap` | 트리맵 | — (uses `name`, `value`, `children` in the data) |
 | `chart.histogram` | Histogram (auto-binning) | `value` (or a flat `number[]`) |
-| `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` (bars of a group share a colour) |
+| `chart.gantt` | Gantt / interval chart | `y`, `start`, `end`, `label?`, `color?` (bars of a group share a colour), `texture?` (words per interval: `hatch` — diagonal lines, `dashed` — a dashed outline, no fill; both together are lines inside a dashed outline) |
 | `metric` | Single KPI value | — (uses data shape) |
 | `stat-group` | Multiple KPIs in a row — cells never shrink below their value; overflow wraps to new rows | — (uses data shape) |
 | `gauge` | A reading against its scale — an arc, a column, a tank or a thermometer ([Gauge](#gauge)) | — (uses `data.value`, and `data.min` / `data.max` for the scale when given; the shown value is `options.format`, default `number`, in the widget's locale) |

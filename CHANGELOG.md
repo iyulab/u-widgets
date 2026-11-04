@@ -4,6 +4,11 @@
 
 ### Added
 
+- **A gantt interval can have a texture: the `texture` mapping field.** An interval was a bar in a colour, so a bar standing for a value that was estimated, or lost, 
+  could say so only by colour. `texture` names a field whose words say it otherwise: `hatch` fills the interval with diagonal lines, `dashed` draws a dashed outline 
+  and no fill, both together lines inside a dashed outline; a label on one is drawn in the interval's colour (with a halo over lines). Other words, and no field, draw the plain 
+  bar. The charts bundle's budget goes from 11.5 to 11.75 KB gzip for it (measured 11.60 KB).
+
 - **The title above a widget can be a band or a tab: `--u-widget-title-bg`, `-ink`, `-pad`, `-radius`, `-display` and `-width`.** The title was plain text over the
   widget. A host that sets the fill and the ink (and `inline-block` and `max-content` for a tab) draws it as a filled strip or tab, as a panel of a printed page or a window of an
   older desktop has one; none of the tokens is declared, so a host that sets nothing gets the plain title it had.

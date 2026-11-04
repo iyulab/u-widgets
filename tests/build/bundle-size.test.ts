@@ -53,7 +53,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('charts bundle is under 11.5 KB gzip', () => {
+  it('charts bundle is under 11.75 KB gzip', () => {
     const size = gzipSize(resolve(DIST, 'u-widgets-charts.js'));
     // includes format.ts for axis label formatting. Re-baselined from 7 KB when the host became a
     // flex column so a constrained host reaches the chart area (0.18.2) — that is real CSS, and it
@@ -77,7 +77,9 @@ describe('bundle size budget', () => {
     // (10.64 KB before) — the fitted grid, the legend placed on top and its room following a legend moved to the foot.
     // Re-baselined from 11 KB for a page's skin and readable times: measured 11.16 KB (10.86 KB before) — the body face
     // read from the tokens, ISO times on the category axis labelled in the locale, the value format in the tooltip.
-    expect(size).toBeLessThan(11.5 * 1024);
+    // Re-baselined from 11.5 KB for the texture of a gantt interval (hatch lines, a dashed outline): measured 11.60 KB with it
+    // (11.26 KB before) — the line pattern drawn once per colour, the words read per row and the segment's style.
+    expect(size).toBeLessThan(11.75 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 22 KB gzip', () => {

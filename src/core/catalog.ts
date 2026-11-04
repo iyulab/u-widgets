@@ -70,7 +70,7 @@ const CATALOG: readonly WidgetInfo[] = withLabels([
   { widget: 'chart.waterfall', category: 'chart', description: 'Waterfall chart for cumulative values', mappingKeys: ['x', 'y', 'total'], dataShape: 'array' },
   { widget: 'chart.treemap', category: 'chart', description: 'Treemap for hierarchical data', mappingKeys: [], dataShape: 'array' },
   { widget: 'chart.histogram', category: 'chart', description: 'Histogram for frequency distribution with auto-binning', mappingKeys: ['value'], dataShape: 'array' },
-  { widget: 'chart.gantt', category: 'chart', description: 'Gantt / interval chart — rows × [start, end] segments on a value or time axis', mappingKeys: ['y', 'start', 'end', 'label', 'color'], dataShape: 'array' },
+  { widget: 'chart.gantt', category: 'chart', description: 'Gantt / interval chart — rows × [start, end] segments on a value or time axis', mappingKeys: ['y', 'start', 'end', 'label', 'color', 'texture'], dataShape: 'array' },
   // Display
   { widget: 'metric', category: 'display', description: 'Single KPI value with optional trend', mappingKeys: [], dataShape: 'object' },
   { widget: 'stat-group', category: 'display', description: 'Multiple KPI values in a row', mappingKeys: [], dataShape: 'array' },

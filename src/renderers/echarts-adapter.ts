@@ -1288,6 +1288,36 @@ function buildHistogram(
 }
 
 /** Gap between adjacent segments on one row, and the narrowest drawn segment (px). */
+/** One diagonal-line pattern per colour, drawn once: a canvas cannot be had without a document, and a chart is only drawn in one. */
+const hatchPatterns = new Map<string, { image: HTMLCanvasElement; repeat: 'repeat' }>();
+function hatchPattern(color: string): { image: HTMLCanvasElement; repeat: 'repeat' } | undefined {
+  if (typeof document === 'undefined') return undefined;
+  let pattern = hatchPatterns.get(color);
+  if (pattern === undefined) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 8;
+    const ctx = canvas.getContext('2d');
+    if (ctx === null) return undefined;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (const [a, b] of [[-1, 9], [-1, 5], [3, 9]] as const) { ctx.moveTo(a, b); ctx.lineTo(b, a); }
+    ctx.stroke();
+    pattern = { image: canvas, repeat: 'repeat' };
+    hatchPatterns.set(color, pattern);
+  }
+  return pattern;
+}
+
+/** A segment's look: the colour filled — diagonal lines for `hatch`, an outline of dashes over no fill for `dashed` (lines inside the dashes when both). */
+function ganttStyle(color: string, texture: GanttItem['texture']): Record<string, unknown> {
+  if (texture === undefined) return { fill: color };
+  return {
+    fill: texture.hatch ? (hatchPattern(color) ?? color) : 'transparent',
+    ...(texture.dashed && { stroke: color, lineWidth: 1.5, lineDash: [4, 3] }),
+  };
+}
+
 const GANTT_SEGMENT_GAP = 1;
 const GANTT_MIN_WIDTH = 2;
 /** Fraction of the row band a segment fills, and the narrowest bar that still gets an in-bar label (px). */
@@ -1295,9 +1325,11 @@ const GANTT_BAR_FILL = 0.6;
 const GANTT_LABEL_MIN_WIDTH = 24;
 const GANTT_LABEL_PADDING = 4;
 
-interface GanttItem {
-  row: string;
-  label?: string;
+interface GanttItem {
+  row: string;
+  label?: string;
+  /** Words of the interval's texture: `hatch` (diagonal lines), `dashed` (a dashed outline). */
+  texture?: { hatch: boolean; dashed: boolean };
   rawStart: unknown;
   rawEnd: unknown;
 }
@@ -1331,8 +1363,9 @@ function buildGantt(
   const endField = m?.end;
   if (!rowField || !startField || !endField) return {};
   const labelField = m?.label;
-  const colorField = m?.color;
-
+  const colorField = m?.color;
+  const textureField = m?.texture;
+
   // Time axis when the first present start value is a Date or a date-like string.
   const firstStart = records.map((r) => r[startField]).find((v) => v != null && v !== '');
   const isTime = firstStart instanceof Date || (typeof firstStart === 'string' && isDateLikeString(firstStart));
@@ -1378,7 +1411,9 @@ function buildGantt(
       value: [rowPosition.get(name)!, Math.min(a, b), Math.max(a, b)],
       rowIndex: sourceIndex,
     });
-    bucket.items.push({ row: name, label, rawStart: row[startField], rawEnd: row[endField] });
+    const words = textureField != null ? String(row[textureField] ?? '').toLowerCase().split(/[\s,]+/) : [];
+    const texture = { hatch: words.includes('hatch'), dashed: words.includes('dashed') };
+    bucket.items.push({ row: name, label, ...(texture.hatch || texture.dashed ? { texture } : {}), rawStart: row[startField], rawEnd: row[endField] });
   });
 
   const showLabel = options.showLabel !== false;
@@ -1408,15 +1443,20 @@ function buildGantt(
           x = (from[0] + to[0]) / 2 - GANTT_MIN_WIDTH / 2;
           width = GANTT_MIN_WIDTH;
         }
-        const el: Record<string, unknown> = {
-          type: 'rect',
-          shape: { x, y: from[1] - height / 2, width, height },
-          style: { fill: api.visual('color') },
+        const color = api.visual('color') as string;
+        const el: Record<string, unknown> = {
+          type: 'rect',
+          shape: { x, y: from[1] - height / 2, width, height },
+          style: ganttStyle(color, bucket.items[params.dataIndex]?.texture),
         };
-        const label = bucket.items[params.dataIndex]?.label;
+        const { label, texture } = bucket.items[params.dataIndex] ?? {};
         if (showLabel && label && width >= GANTT_LABEL_MIN_WIDTH) {
           el.textContent = {
-            style: { text: label, overflow: 'truncate', width: width - GANTT_LABEL_PADDING * 2 },
+            style: {
+              text: label, overflow: 'truncate', width: width - GANTT_LABEL_PADDING * 2,
+              // On a fill the bar does not have (an outline, or lines), the default white would vanish: the colour itself, with a halo over the lines.
+              ...(texture !== undefined && { fill: color, ...(texture.hatch && { stroke: '#ffffffd9', lineWidth: 3 }) }),
+            },
           };
           el.textConfig = { position: 'inside' };
         }

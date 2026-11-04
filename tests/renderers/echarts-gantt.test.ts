@@ -32,6 +32,43 @@ const SCHEDULE = [
   { machine: 'M2', job: 'J3', start: 3, end: 7 },
 ];
 
+describe('chart.gantt texture', () => {
+  const TIMELINE = [
+    { row: 'A', start: 0, end: 3, how: '' },
+    { row: 'A', start: 3, end: 5, how: 'hatch' },
+    { row: 'A', start: 5, end: 8, how: 'Hatch, dashed' },
+    { row: 'B', start: 0, end: 4, how: 'dashed' },
+    { row: 'B', start: 4, end: 8, how: 'glow' },
+  ];
+  const style = (result: Obj, i: number) => (render((result.series as ObjArray)[0]!, i).style as Obj);
+
+  it('draws an interval with no texture, or a word it does not know, as a plain bar — the colour filled', () => {
+    const result = gantt({ data: TIMELINE, mapping: { y: 'row', start: 'start', end: 'end', texture: 'how' } });
+    expect(style(result, 0)).toEqual({ fill: '#123456' });
+    expect(style(result, 4)).toEqual({ fill: '#123456' });
+    const none = gantt({ data: TIMELINE, mapping: { y: 'row', start: 'start', end: 'end' } });
+    expect(style(none, 3)).toEqual({ fill: '#123456' });
+  });
+
+  it('draws `dashed` as a dashed outline in the colour with no fill — and `hatch` as lines (the plain colour where no page can draw them)', () => {
+    const result = gantt({ data: TIMELINE, mapping: { y: 'row', start: 'start', end: 'end', texture: 'how' } });
+    expect(style(result, 3)).toEqual({ fill: 'transparent', stroke: '#123456', lineWidth: 1.5, lineDash: [4, 3] });
+    // (this test runs with no document, so the line pattern is its fallback: the plain colour)
+    expect(style(result, 1)).toEqual({ fill: '#123456' });
+  });
+
+  it('draws both words as a hatched interval with a dashed outline, whatever the case and the separator', () => {
+    const result = gantt({ data: TIMELINE, mapping: { y: 'row', start: 'start', end: 'end', texture: 'how' } });
+    expect(style(result, 2)).toEqual({ fill: '#123456', stroke: '#123456', lineWidth: 1.5, lineDash: [4, 3] });
+  });
+
+  it('says the texture in the tooltip is not needed — the row, label and endpoints are what it names', () => {
+    const result = gantt({ data: TIMELINE, mapping: { y: 'row', start: 'start', end: 'end', texture: 'how' } });
+    const formatter = (result.tooltip as Obj).formatter as (p: Obj) => string;
+    expect(formatter({ seriesIndex: 0, dataIndex: 1 })).toBe('A<br/>3 → 5');
+  });
+});
+
 describe('chart.gantt', () => {
   it('draws one custom series of [row, start, end] intervals on a value axis', () => {
     const result = gantt({ data: SCHEDULE, mapping: { y: 'machine', start: 'start', end: 'end', label: 'job' } });

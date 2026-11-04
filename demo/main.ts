@@ -223,13 +223,13 @@ const specs = {
     widget: 'chart.gantt',
     data: [
       { machine: 'M1', job: 'J1', start: 0, end: 3 },
-      { machine: 'M2', job: 'J1', start: 3, end: 5 },
+      { machine: 'M2', job: 'J1', start: 3, end: 5, texture: 'dashed' },
       { machine: 'M2', job: 'J2', start: 0, end: 3 },
-      { machine: 'M3', job: 'J2', start: 3, end: 7 },
+      { machine: 'M3', job: 'J2', start: 3, end: 7, texture: 'hatch' },
       { machine: 'M1', job: 'J3', start: 3, end: 6 },
       { machine: 'M3', job: 'J3', start: 7, end: 12 },
     ],
-    mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job' },
+    mapping: { y: 'machine', start: 'start', end: 'end', label: 'job', color: 'job', texture: 'texture' },
     options: {
       categories: ['M1', 'M2', 'M3', 'M4'],
       referenceLines: [{ axis: 'x', value: 12, label: 'Makespan', style: 'dashed' }],

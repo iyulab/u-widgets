@@ -314,6 +314,25 @@ test.describe('Chart Widgets', () => {
     expect(errors).toEqual([]);
   });
 
+  test('gantt draws an interval’s texture: a hatch as a line pattern filling it, a dashed one as a dashed outline with no fill', async ({ page }) => {
+    await page.waitForTimeout(1000);
+    const drawn = await page.evaluate(() => {
+      const host = document.getElementById('demo-chart-gantt');
+      const chartEl = [...(host?.shadowRoot?.querySelectorAll('*') ?? [])]
+        .find((el) => el.shadowRoot?.querySelector('canvas')) as unknown as { _chart?: any } | undefined;
+      const display = chartEl?._chart?.getZr().storage.getDisplayList() ?? [];
+      const rects = display.filter((el: any) => el.type === 'rect' && el.shape && el.shape.width > 0 && el.shape.height > 0);
+      const kind = (el: any) => ({
+        patterned: typeof el.style.fill === 'object' && el.style.fill !== null && 'image' in el.style.fill,
+        dashed: Array.isArray(el.style.lineDash) && el.style.lineDash.length > 0,
+        solid: typeof el.style.fill === 'string' && el.style.fill !== 'transparent' && !el.style.lineDash,
+      });
+      return { patterned: rects.filter((r: any) => kind(r).patterned).length, dashed: rects.filter((r: any) => kind(r).dashed).length, dashedFill: rects.filter((r: any) => kind(r).dashed).map((r: any) => r.style.fill) };
+    });
+    // M3's J2 is hatched, M2's J1 dashed — and nothing else is (the legend's swatches are plain).
+    expect(drawn).toEqual({ patterned: 1, dashed: 1, dashedFill: ['transparent'] });
+  });
+
   test('clicking a gantt segment reports its spec.data row (_index), not only the series-local index', async ({ page }) => {
     // 좌표 클릭은 뷰포트 밖이면 아무것에도 닿지 않는다 — 카드를 먼저 화면에 들인다.
     await page.locator('#demo-chart-gantt').scrollIntoViewIfNeeded();
