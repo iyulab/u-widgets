@@ -2,6 +2,10 @@ import { help } from './catalog.js';
 import { result, validate, type ValidationIssue, type ValidationResult } from './schema.js';
 import { WIDGET_OPTIONS, getWidgetOptions } from './widget-meta.js';
 import { checkMediaUrl, getMediaOrigins } from './media.js';
+import { FRAMES, isFrame } from './frame.js';
+
+/** The options every widget reads, whatever its own list says: the frame it is drawn in (`u-widget` applies it to any widget). */
+const UNIVERSAL_OPTIONS = new Set(['frame']);
 
 /** The top-level keys a spec may carry, besides `widget` — anything else is not read by any widget. */
 const SPEC_KEYS = new Set([
@@ -50,6 +54,10 @@ export function checkSpec(spec: unknown): ValidationResult {
     const allowed = new Map(getWidgetOptions(widget).map((info) => [info.key, info]));
     for (const [key, value] of Object.entries(options as Record<string, unknown>)) {
       const info = allowed.get(key);
+      if (!info && UNIVERSAL_OPTIONS.has(key)) {
+        if (!isFrame(value) && value !== 'none') warnings.push(`options.frame ${JSON.stringify(value)} is not a frame — ${[...FRAMES, 'none'].join(', ')}`);
+        continue;
+      }
       if (!info) {
         warnings.push(allowed.size
           ? `options.${key} is not an option of ${widget} — it takes ${[...allowed.keys()].join(', ')}`

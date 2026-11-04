@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `checkSpec` takes `options.frame` for any widget — every widget reads it, though only `status-card` and `compose` list it — and warns of a word that is not a frame (or `none`).
+
 ## [0.47.0] - 2026-11-04
 
 ### Added

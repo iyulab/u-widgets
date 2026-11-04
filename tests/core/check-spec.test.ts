@@ -29,6 +29,16 @@ describe('checkSpec', () => {
     expect(warnings).toEqual([expect.stringMatching(/^"rows" is not read by any widget — a spec takes id, title, .*data, mapping/)]);
   });
 
+  it('takes a frame for any widget, as every widget reads it — and warns of a word that is not one', () => {
+    const base = { widget: 'header', data: { title: 'Plant' } };
+    expect(checkSpec({ ...base, options: { frame: 'block' } }).warnings).toEqual([]);
+    expect(checkSpec({ ...base, options: { frame: 'none' } }).warnings).toEqual([]);
+    expect(checkSpec({ widget: 'chart.line', data: [{ x: 1, y: 2 }], options: { frame: 'double' } }).warnings).toEqual([]);
+    expect(checkSpec({ ...base, options: { frame: 'frilly' } }).warnings).toEqual([expect.stringContaining('options.frame "frilly" is not a frame — card, flat, glow')]);
+    // other options a widget does not have still warn
+    expect(checkSpec({ ...base, options: { frame: 'card', bogus: 1 } }).warnings).toEqual([expect.stringContaining('options.bogus is not an option of header')]);
+  });
+
   it('says to move an option of the widget written at the top level into options', () => {
     const { warnings } = checkSpec({ widget: 'list', data: [{ a: 1 }], compact: true });
     expect(warnings).toEqual(['"compact" is an option of list — put it in options: { "compact": … }']);
