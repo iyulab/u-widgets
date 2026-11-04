@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-04
+
 ### Added
 
 - **A gantt interval can have a texture: the `texture` mapping field.** An interval was a bar in a colour, so a bar standing for a value that was estimated, or lost, 
