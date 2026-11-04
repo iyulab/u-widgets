@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-05
+
 ### Added
 
 - A table row takes an emphasis beside its tone: `mapping.emphasis` names the field holding it, and the row is drawn `invert` (the tone as the row's ground), `hatch` (lines of the tone) or `blink` (its mark blinks; steady for a reader who asks for less motion) — the second channel besides colour that the status card and list already have, so a table row can say it without colour.
