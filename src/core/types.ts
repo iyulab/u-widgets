@@ -169,6 +169,8 @@ export interface UWidgetMapping {
   tone?: string;
   /** The field holding each row's mark, in place of its tone's (list and table widgets). */
   glyph?: string;
+  /** The field holding each row's emphasis — `invert`, `hatch`, `blink` — a second channel besides its tone (table widget). */
+  emphasis?: string;
 }
 
 /**

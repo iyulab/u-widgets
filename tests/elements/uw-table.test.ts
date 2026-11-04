@@ -1019,6 +1019,40 @@ describe('uw-table', () => {
     });
   });
 
+  describe('table row emphasis', () => {
+    const data = [
+      { name: 'Pump 1', tone: 'ok' },
+      { name: 'Pump 2', tone: 'alarm', emphasis: 'invert' },
+      { name: 'Pump 3', tone: 'warn', emphasis: 'hatch' },
+      { name: 'Pump 4', tone: 'alarm', emphasis: 'blink' },
+      { name: 'Pump 5', emphasis: 'invert' },
+      { name: 'Pump 6', tone: 'ok', emphasis: 'sparkle' },
+    ];
+
+    it('carries the emphasis a row names on the row, beside its tone — only a known word, only on a toned row', async () => {
+      const el = createElement({ widget: 'table', data, mapping: { columns: [{ field: 'name' }], tone: 'tone', emphasis: 'emphasis' } });
+      const shadow = await render(el);
+      const rows = [...shadow.querySelectorAll('tbody tr')];
+      expect(rows.map(r => r.getAttribute('data-emphasis'))).toEqual([null, 'invert', 'hatch', 'blink', null, null]);
+      expect(rows.map(r => r.getAttribute('data-tone'))).toEqual(['ok', 'alarm', 'warn', 'alarm', null, 'ok']);
+    });
+
+    it('is not drawn without the mapping', async () => {
+      const el = createElement({ widget: 'table', data, mapping: { columns: [{ field: 'name' }], tone: 'tone' } });
+      const shadow = await render(el);
+      expect([...shadow.querySelectorAll('tbody tr')].every(r => !r.hasAttribute('data-emphasis'))).toBe(true);
+    });
+
+    it('draws an inverted row on the tone, a hatched one in lines of it, and a blinking one in its mark — steady under reduced motion', () => {
+      const styles = (customElements.get('uw-table') as any).styles;
+      const css = (Array.isArray(styles) ? styles : [styles]).map((s: any) => s.cssText ?? '').join(' ');
+      expect(css).toMatch(/data-emphasis='invert'\] td \{ background: var\(--tone\)/);
+      expect(css).toMatch(/data-emphasis='hatch'\] td \{ background: repeating-linear-gradient/);
+      expect(css).toMatch(/data-emphasis='blink'\] \.row-mark \{ animation: row-blink/);
+      expect(css).toMatch(/prefers-reduced-motion: reduce\) \{ tbody tr\[data-emphasis='blink'\] \.row-mark \{ animation: none/);
+    });
+  });
+
   describe('list keyboard navigation', () => {
     it('first list item has tabindex 0, others have -1', async () => {
       const el = createElement({

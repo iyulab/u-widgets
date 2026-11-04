@@ -4,7 +4,7 @@ import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core
 import { formatValue } from '../core/format.js';
 import { getLocaleStrings } from '../core/locale.js';
 import { themeStyles } from '../styles/tokens.js';
-import { normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
+import { isEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
 import { matchesSearch, searchesWhileComposing } from '../core/search.js';
 import { isDateLikeString } from '../core/utils.js';
@@ -139,6 +139,14 @@ export class UwTable extends LitElement {
     tbody tr[data-tone='past'] td { opacity: 0.6; }
     tbody tr[data-tone='now'] td { font-weight: 700; }
     .row-mark { color: var(--tone); margin-right: 6px; }
+    /* A row's emphasis, a second channel besides the tone (as the status card draws it): inverted — the tone as the row's ground — hatched,
+       or its mark blinking (steady for a reader who asks for less motion). */
+    tbody tr[data-emphasis='invert'] td { background: var(--tone); color: var(--u-widget-bg, #fff); box-shadow: none; }
+    tbody tr[data-emphasis='invert'] .row-mark, tbody tr[data-emphasis='invert'] td[data-tone] { color: inherit; }
+    tbody tr[data-emphasis='hatch'] td { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--tone) 24%, transparent) 0 5px, transparent 5px 10px); }
+    @keyframes row-blink { to { visibility: hidden; } }
+    tbody tr[data-emphasis='blink'] .row-mark { animation: row-blink 1.2s steps(2, start) infinite; }
+    @media (prefers-reduced-motion: reduce) { tbody tr[data-emphasis='blink'] .row-mark { animation: none; font-weight: 700; } }
     .cell-mark { margin-right: 4px; }
 
     /* A bar cell: the value against its column's scale, written beside it. */
@@ -576,6 +584,7 @@ export class UwTable extends LitElement {
     const maxItems = pageSize === 0 && typeof rawMaxItems === 'number' && rawMaxItems > 0 ? Math.floor(rawMaxItems) : undefined;
     const rowToneKey = this.spec!.mapping?.tone;
     const rowGlyphKey = this.spec!.mapping?.glyph;
+    const rowEmphasisKey = this.spec!.mapping?.emphasis;
     const localeName = typeof this.spec!.options?.locale === 'string' ? this.spec!.options.locale : undefined;
     const cell = this.cellRenderer(columns, data, localeName);
 
@@ -646,6 +655,7 @@ export class UwTable extends LitElement {
           <tbody @keydown=${this._onTableKeydown}>
             ${visible.map((row, idx) => {
               const rowTone = rowToneKey ? normalizeTone(row[rowToneKey], 'uw-table') : undefined;
+              const rowEmphasis = rowTone && rowEmphasisKey && isEmphasis(row[rowEmphasisKey]) ? row[rowEmphasisKey] : undefined;
               const mark = rowTone
                 ? html`<span class="row-mark" part="mark" role="img" aria-label=${toneLabel(rowTone, locale)}>${toneMark(rowTone, rowGlyphKey ? row[rowGlyphKey] : undefined)}</span>`
                 : nothing;
@@ -655,7 +665,7 @@ export class UwTable extends LitElement {
               });
               return interactive
                 ? html`
-                <tr part="tr" data-tone=${rowTone ?? nothing}
+                <tr part="tr" data-tone=${rowTone ?? nothing} data-emphasis=${rowEmphasis ?? nothing}
                   tabindex=${idx === this._focusedIdx ? '0' : '-1'}
                   ${delegate('click', () => this._onRowClick(row, sourceIndex.get(row) ?? idx))}
                   @keydown=${(e: KeyboardEvent) => {
@@ -665,7 +675,7 @@ export class UwTable extends LitElement {
                     }
                   }}
                 >${cells}</tr>`
-                : html`<tr part="tr" data-tone=${rowTone ?? nothing}>${cells}</tr>`;
+                : html`<tr part="tr" data-tone=${rowTone ?? nothing} data-emphasis=${rowEmphasis ?? nothing}>${cells}</tr>`;
             })}
           </tbody>
         </table>

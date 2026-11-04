@@ -580,7 +580,7 @@ export const WIDGET_INFERENCE: Readonly<Record<string, string>> = {
   'gauge': 'No mapping needed. data is {value, tone?, min?, max?} — a scale the data gives wins over options. Set min/max/unit, form (arc/vertical/tank/thermometer), band {lo, hi} and marks [{at, label}] in options.',
   'progress': 'No mapping needed. data is {value, max?}. Set label in options.',
   'bar-list': 'No mapping. data is [{label, value, max?, unit?, format?, tone?, note?}]. max (shared scale), form (bar/pictogram), glyph, glyphValue and maxItems in options.',
-  'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone, mapping.glyph one with its mark (default: the tone’s).',
+  'table': 'mapping.columns omittable — auto-inferred from data keys. A column is {field, label?, format?, align?, unit?, tone?, toneField? (a field with this cell’s tone), cell? (text/bar/tone), max? (a bar column’s scale)}; mapping.tone names a field with each row’s tone, mapping.glyph one with its mark (default: the tone’s), mapping.emphasis one with the row’s second channel — invert (the tone as the row’s ground), hatch, blink (its mark).',
   'list': 'mapping omittable if data has primary/secondary keys. Otherwise set mapping.',
   'form': 'Uses fields[] or formdown, not data/mapping. data provides defaults. fieldStates (by field name: suggestions, note, decline) offers values to pick.',
   'confirm': 'Uses title, description, actions. data is optional.',
