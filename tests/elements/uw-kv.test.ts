@@ -270,4 +270,13 @@ describe('uw-kv as a stat list', () => {
     expect(el.shadowRoot!.querySelector('.kv-pair')).toBeNull();
     el.remove();
   });
+
+  it('sets its values at the scale and the weight a host asks for, as the list and the status card do', () => {
+    const styles = (customElements.get('uw-kv') as any).styles;
+    const css = (Array.isArray(styles) ? styles : [styles]).map((s: any) => s.cssText ?? '').join(' ');
+    expect(css).toMatch(/\.kv-value \{[^}]*font-size: calc\(var\(--u-widget-font-size, 0\.875rem\) \* var\(--u-widget-value-scale, 1\)\)/);
+    expect(css).toMatch(/\.kv-value \{[^}]*font-weight: var\(--u-widget-value-weight, 600\)/);
+    // The narrow-container rule sets the size again: it takes the scale too.
+    expect(css).toMatch(/\.kv-value \{\s*font-size: calc\(var\(--u-widget-font-size-label, 0\.8125rem\) \* var\(--u-widget-value-scale, 1\)\)/);
+  });
 });

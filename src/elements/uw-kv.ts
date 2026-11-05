@@ -76,8 +76,8 @@ export class UwKv extends LitElement {
     }
 
     .kv-value {
-      font-size: var(--u-widget-font-size, 0.875rem);
-      font-weight: 600;
+      font-size: calc(var(--u-widget-font-size, 0.875rem) * var(--u-widget-value-scale, 1));
+      font-weight: var(--u-widget-value-weight, 600);
       color: var(--u-widget-text, #1a1a2e);
       text-align: right;
       overflow: hidden;
@@ -130,7 +130,7 @@ export class UwKv extends LitElement {
       }
 
       .kv-value {
-        font-size: var(--u-widget-font-size-label, 0.8125rem);
+        font-size: calc(var(--u-widget-font-size-label, 0.8125rem) * var(--u-widget-value-scale, 1));
       }
     }
   `];
