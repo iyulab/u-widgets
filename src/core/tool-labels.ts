@@ -112,6 +112,7 @@ const EN: ToolLabels = {
     numbered: 'Numbered',
     interactive: 'Interactive',
     sortable: 'Sortable',
+    sort: 'Order',
     icon: 'Icon',
     autoplay: 'Autoplay',
     controls: 'Playback controls',

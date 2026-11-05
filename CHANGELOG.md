@@ -8,6 +8,7 @@
 
 ### Added
 
+- `bar-list` takes `options.sort` (`"desc"` or `"asc"`): the rows are ordered by value before `maxItems` cuts them, so a list of the highest three or the lowest three can be drawn — it showed the first rows in the data's order, which made a title like "highest" false. Ties keep the data's order; the bars still share the scale of all the rows.
 - `options.header: false` on a `table` draws the rows alone, with no column headers on screen — a list of rows under a heading of the page's own. The headers stay in the page for a screen reader; a column cannot then be sorted by clicking its header.
 - A `kv` value takes the scale and the weight of the figures a host asks for (`--u-widget-value-scale`, `--u-widget-value-weight`), as a `list` row and a `status-card` reading do; with neither set it is drawn as it was.
 - `strike` joins the emphasis words (`invert`, `hatch`, `stamp`, `blink`): the item's words are struck through in the colour of its tone — a cancelled flight, a withdrawn order, a retired machine — on a table row, a status cell, a status card, a metric, a status item. Where a widget reads an emphasis it reads this one; an older library draws the item with no emphasis and warns of the word.

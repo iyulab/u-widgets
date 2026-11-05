@@ -281,7 +281,7 @@ is `[{ label, value, max?, unit?, format?, tone?, note? }]`: each row its label,
 scale — `options.max`, else the largest value — unless an item has its own `max` (a stock against its own shelf).
 `options.form: "pictogram"` draws each value as a row of glyphs instead: `options.glyph` (default `●`), one for each
 `options.glyphValue` (default 1), the rest of the item's scale as faint glyphs; a row that would need more than sixty
-glyphs is drawn as a bar. `options.maxItems` shows that many rows and a line saying how many more. `options.compact: true` puts each row on one
+glyphs is drawn as a bar. `options.maxItems` shows that many rows and a line saying how many more; `options.sort` (`"desc"` or `"asc"`) orders the rows by value before that cut, so `maxItems` shows the largest or the smallest ones — a top three — while the bars keep the scale of all the rows. `options.compact: true` puts each row on one
 line — label, bar, value — so a dozen rows fit a small box. Each row is spoken as its label and value.
 
 ```json

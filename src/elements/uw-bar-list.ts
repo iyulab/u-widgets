@@ -35,7 +35,8 @@ function positive(value: unknown): number | undefined {
  * the largest value — unless an item has its own `max` (a stock against its own shelf). A tone colours an item's bar.
  * `options.form: "pictogram"` draws each value as glyphs (`options.glyph`, one per `options.glyphValue`), with the rest
  * of the item's scale as faint glyphs; a row that would need more than sixty glyphs is a bar. `options.maxItems` shows
- * the first rows and says how many more.
+ * the first rows and says how many more; `options.sort` (`desc` or `asc`) orders the rows by value first, so the first rows
+ * are the largest or the smallest — a top three — while the bars still share the scale of all of them.
  */
 @customElement('uw-bar-list')
 export class UwBarList extends LitElement {
@@ -130,7 +131,10 @@ export class UwBarList extends LitElement {
     const glyph = text(options.glyph) ?? '●';
     const per = positive(options.glyphValue) ?? 1;
     const limit = typeof options.maxItems === 'number' && options.maxItems > 0 ? Math.floor(options.maxItems) : undefined;
-    const shown = limit !== undefined && rows.length > limit ? rows.slice(0, limit) : rows;
+    // Ties keep the order the data came in (the sort is stable).
+    const sign = options.sort === 'desc' ? -1 : options.sort === 'asc' ? 1 : 0;
+    const ordered = sign === 0 ? rows : [...rows].sort((a, b) => sign * (a.value - b.value));
+    const shown = limit !== undefined && ordered.length > limit ? ordered.slice(0, limit) : ordered;
     const strings = localeStringsOf(this.spec);
 
     return html`

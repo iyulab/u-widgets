@@ -164,6 +164,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   // rating
   interactive: 'Allow user input (default false)',
   sortable: 'Sort by a column when its header is clicked (default true)',
+  sort: 'Order the rows by value before `maxItems` cuts them: "desc" largest first, "asc" smallest first (default: the order the data came in)',
   icon: 'Icon type (star, heart, thumb)',
   // video
   autoplay: 'Auto-play on load (default false)',
@@ -255,6 +256,7 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   numbered: { type: 'boolean', default: true },
   interactive: { type: 'boolean', default: false },
   sortable: { type: 'boolean', default: true },
+  sort: choice(['asc', 'desc']),
   icon: choice(['star', 'heart', 'thumb'], 'star'),
   autoplay: { type: 'boolean', default: false },
   controls: { type: 'boolean', default: true },
@@ -380,7 +382,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'stat-group': ['format'],
   'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format', 'form', 'band', 'marks'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
-  'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems', 'compact'],
+  'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems', 'sort', 'compact'],
   'table': ['pageSize', 'compact', 'searchable', 'sortable', 'interactive', 'maxItems', 'header'],
   'list': ['compact', 'layout', 'maxItems'],
   'form': ['locale'],

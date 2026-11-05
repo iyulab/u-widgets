@@ -92,6 +92,7 @@ export const toolLabelsKo: ToolLabels = {
     numbered: '번호 표시',
     interactive: '직접 입력',
     sortable: '정렬',
+    sort: '순서',
     icon: '아이콘',
     autoplay: '자동 재생',
     controls: '재생 컨트롤',

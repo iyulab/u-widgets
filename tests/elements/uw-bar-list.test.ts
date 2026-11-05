@@ -79,6 +79,18 @@ describe('uw-bar-list', () => {
     expect(root.querySelector('[part="more"]')?.textContent).toBe('+2 more');
   });
 
+  it('orders the rows by value with options.sort — and a cut by maxItems then keeps the largest or the smallest', async () => {
+    const data = [{ label: 'B', value: 5 }, { label: 'A', value: 9 }, { label: 'C', value: 1 }, { label: 'D', value: 5 }];
+    const labels = (root: ParentNode) => [...root.querySelectorAll('[part="label"]')].map(l => l.textContent);
+    expect(labels(await bars(data, { sort: 'desc' }))).toEqual(['A', 'B', 'D', 'C']); // ties keep the data's order
+    expect(labels(await bars(data, { sort: 'asc' }))).toEqual(['C', 'B', 'D', 'A']);
+    expect(labels(await bars(data, {}))).toEqual(['B', 'A', 'C', 'D']); // left out: as the data came
+    expect(labels(await bars(data, { sort: 'desc', maxItems: 2 }))).toEqual(['A', 'B']);
+    // The bars still share the scale of every row, not of the ones shown.
+    const lowest = await bars(data, { sort: 'asc', maxItems: 2 });
+    expect([...lowest.querySelectorAll('.fill')].map(f => f.getAttribute('style'))).toEqual(['width:11.1%', 'width:55.6%']); // 1 and 5 of 9, not of 5
+  });
+
   it('is drawn by <u-widget>', async () => {
     const el = document.createElement('u-widget') as El;
     el.spec = { widget: 'bar-list', data: [{ label: 'A', value: 1 }] };
