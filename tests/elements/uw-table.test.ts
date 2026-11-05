@@ -1037,6 +1037,15 @@ describe('uw-table', () => {
       expect(rows.map(r => r.getAttribute('data-tone'))).toEqual(['ok', 'alarm', 'warn', 'alarm', null, 'ok']);
     });
 
+    it('carries a struck row’s emphasis and strikes its words through in the row’s tone', async () => {
+      const el = createElement({ widget: 'table', data: [{ name: 'Flight 1', tone: 'alarm', emphasis: 'strike' }], mapping: { columns: [{ field: 'name' }], tone: 'tone', emphasis: 'emphasis' } });
+      const shadow = await render(el);
+      expect(shadow.querySelector('tbody tr')?.getAttribute('data-emphasis')).toBe('strike');
+      const styles = (customElements.get('uw-table') as any).styles;
+      const css = (Array.isArray(styles) ? styles : [styles]).map((s: any) => s.cssText ?? '').join(' ');
+      expect(css).toMatch(/data-emphasis='strike'\] td \{ text-decoration: line-through; text-decoration-color: var\(--tone\)/);
+    });
+
     it('is not drawn without the mapping', async () => {
       const el = createElement({ widget: 'table', data, mapping: { columns: [{ field: 'name' }], tone: 'tone' } });
       const shadow = await render(el);

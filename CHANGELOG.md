@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `strike` joins the emphasis words (`invert`, `hatch`, `stamp`, `blink`): the item's words are struck through in the colour of its tone — a cancelled flight, a withdrawn order, a retired machine — on a table row, a status cell, a status card, a metric, a status item. Where a widget reads an emphasis it reads this one; an older library draws the item with no emphasis and warns of the word.
+
 ## [0.48.0] - 2026-11-05
 
 ### Added

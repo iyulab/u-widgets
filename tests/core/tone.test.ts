@@ -36,6 +36,7 @@ describe('tones', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(isTone('danger')).toBe(false);
     expect(normalizeEmphasis('stamp', 't1')).toBe('stamp');
+    expect(normalizeEmphasis('strike', 't1')).toBe('strike');
     expect(normalizeEmphasis('glow', 't1')).toBeUndefined();
     expect(warn).toHaveBeenCalledTimes(2);
     warn.mockRestore();

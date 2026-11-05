@@ -27,6 +27,13 @@ describe('uw-status-grid — a cell’s emphasis', () => {
     expect(getComputedStyle(plain).backgroundColor).not.toBe('rgb(208, 0, 0)');
   });
 
+  it('strikes the words of a struck cell through in its tone', async () => {
+    const [plain, struck] = await cells([{ label: '1', tone: 'alarm' }, { label: '2', tone: 'alarm', emphasis: 'strike' }]);
+    expect(getComputedStyle(struck).textDecorationLine).toBe('line-through');
+    expect(getComputedStyle(struck).textDecorationColor).toBe('rgb(208, 0, 0)');
+    expect(getComputedStyle(plain).textDecorationLine).toBe('none');
+  });
+
   it('hatches a hatched cell and blinks a blinking one', async () => {
     const [hatched, blinking] = await cells([{ label: '1', tone: 'alarm', emphasis: 'hatch' }, { label: '2', tone: 'alarm', emphasis: 'blink' }]);
     expect(getComputedStyle(hatched).backgroundImage).toContain('repeating-linear-gradient');

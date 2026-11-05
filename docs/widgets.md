@@ -297,7 +297,7 @@ line — label, bar, value — so a dozen rows fit a small box. Each row is spok
 `status-grid` is many small cells, each with a state — the seats of a hall, the beds of a ward, the bays of a rack,
 the lamps of an annunciator. Its data is `[{ label?, tone, emphasis?, value?, unit?, format? }]`: each cell in its tone, with its
 label (and value) inside and the whole spoken as its name. A cell's `emphasis` is the second channel besides colour — `invert`
-(filled with its tone), `hatch`, `blink`, or `stamp` (a heavy frame; a cell is too small for a stamp's text). `options.columns` fixes how many go to a row (otherwise as
+(filled with its tone), `hatch`, `blink`, `strike` (its words struck through in the tone — cancelled, withdrawn), or `stamp` (a heavy frame; a cell is too small for a stamp's text). `options.columns` fixes how many go to a row (otherwise as
 many as fit); `options.cell` is `square` (default), `chip` (a wider pill) or `dot` (the tone alone — the label stays its
 name); `options.counts: true` adds a key with how many cells are in each tone.
 

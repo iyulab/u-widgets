@@ -140,10 +140,11 @@ export class UwTable extends LitElement {
     tbody tr[data-tone='now'] td { font-weight: 700; }
     .row-mark { color: var(--tone); margin-right: 6px; }
     /* A row's emphasis, a second channel besides the tone (as the status card draws it): inverted — the tone as the row's ground — hatched,
-       or its mark blinking (steady for a reader who asks for less motion). */
+       its mark blinking (steady for a reader who asks for less motion), or struck through. */
     tbody tr[data-emphasis='invert'] td { background: var(--tone); color: var(--u-widget-bg, #fff); box-shadow: none; }
     tbody tr[data-emphasis='invert'] .row-mark, tbody tr[data-emphasis='invert'] td[data-tone] { color: inherit; }
     tbody tr[data-emphasis='hatch'] td { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--tone) 24%, transparent) 0 5px, transparent 5px 10px); }
+    tbody tr[data-emphasis='strike'] td { text-decoration: line-through; text-decoration-color: var(--tone); text-decoration-thickness: 2px; }
     @keyframes row-blink { to { visibility: hidden; } }
     tbody tr[data-emphasis='blink'] .row-mark { animation: row-blink 1.2s steps(2, start) infinite; }
     @media (prefers-reduced-motion: reduce) { tbody tr[data-emphasis='blink'] .row-mark { animation: none; font-weight: 700; } }

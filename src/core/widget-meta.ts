@@ -425,7 +425,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'meter', type: '{ value, min?, max?, unit?, format?, tone?, form?, target? }', desc: 'A value against its range, as a bar or a ring (form: "ring"; min 0, max 100 unless given); target marks the bar' },
     { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone of the value' },
-    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink" | "strike"', desc: 'A second channel besides colour' },
   ],
   'stat-group': [
     { key: 'label', type: 'string', desc: 'Display label', required: true },
@@ -443,7 +443,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'meter', type: '{ value, min?, max?, unit?, format?, tone?, form?, target? }', desc: 'A value against its range, as a bar or a ring (form: "ring"; min 0, max 100 unless given); target marks the bar' },
     { key: 'sparkline', type: 'number[]', desc: 'Recent values, oldest first, drawn as a small line under the value' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone of the value' },
-    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink" | "strike"', desc: 'A second channel besides colour' },
   ],
   'gauge': [
     { key: 'value', type: 'number', desc: 'The reading', required: true },
@@ -528,7 +528,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
   'status-grid': [
     { key: 'label', type: 'string', desc: 'The cell\'s name — a seat, a bed, a bay' },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state' },
-    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour (stamp: a heavy frame)' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink" | "strike"', desc: 'A second channel besides colour (stamp: a heavy frame)' },
     { key: 'value', type: 'string | number', desc: 'A value under the name' },
     { key: 'unit', type: 'string', desc: 'The value\'s unit' },
     { key: 'format', type: 'string', desc: 'The value\'s format (number:1, percent, …)' },
@@ -539,7 +539,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'Its state: stripe, badge colour and mark' },
     { key: 'status', type: 'string', desc: 'The badge\'s words (default: the tone\'s name)' },
     { key: 'glyph', type: 'string', desc: 'The badge\'s mark (default: the tone\'s — ✓ ▲ ✕ …)' },
-    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour (stamp: the badge as a stamp)' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink" | "strike"', desc: 'A second channel besides colour (stamp: the badge as a stamp)' },
     { key: 'readings', type: 'Array<{ label, value, unit?, format?, tone? }>', desc: 'A few label · value pairs' },
     { key: 'meter', type: '{ value, min?, max?, unit?, format?, tone?, form?, target? }', desc: 'A value against its range, as a bar or a ring (form: "ring"; min 0, max 100 unless given); target marks the bar' },
     { key: 'image', type: 'string', desc: 'The card\'s picture: a URL or an inline image (data:image/…)' },
@@ -551,7 +551,7 @@ export const WIDGET_DATA_FIELDS: Readonly<Record<string, readonly DataFieldInfo[
     { key: 'value', type: 'string', desc: 'Status value', required: true },
     { key: 'tone', type: '"ok" | "info" | "watch" | "warn" | "alarm" | "off" | "idle" | "accent" | "past" | "now" | "next"', desc: 'State tone: colour and mark; without a value the tone\'s name is shown' },
     { key: 'glyph', type: 'string', desc: 'Its mark (default: the tone\'s — ✓ ▲ ✕ …)' },
-    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink"', desc: 'A second channel besides colour' },
+    { key: 'emphasis', type: '"invert" | "hatch" | "stamp" | "blink" | "strike"', desc: 'A second channel besides colour' },
   ],
 });
 

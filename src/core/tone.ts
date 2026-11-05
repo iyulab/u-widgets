@@ -17,8 +17,8 @@ export const TONES = ['ok', 'info', 'watch', 'warn', 'alarm', 'off', 'idle', 'ac
 
 export type Tone = (typeof TONES)[number];
 
-/** A second channel besides colour, for a state that must not be missed: the whole item inverted, hatched, stamped with its name, or blinking. */
-export const EMPHASES = ['invert', 'hatch', 'stamp', 'blink'] as const;
+/** A second channel besides colour, for a state that must not be missed: the whole item inverted, hatched, stamped with its name, blinking, or struck through (cancelled, withdrawn). */
+export const EMPHASES = ['invert', 'hatch', 'stamp', 'blink', 'strike'] as const;
 
 export type Emphasis = (typeof EMPHASES)[number];
 
@@ -133,6 +133,12 @@ export const toneStyles = css`
     letter-spacing: 0.05em;
     text-transform: uppercase;
     transform: rotate(-6deg);
+  }
+  /* Struck through, the item's words are cancelled or withdrawn: a line through them in the tone's colour. */
+  [data-emphasis='strike'] {
+    text-decoration: line-through;
+    text-decoration-color: var(--tone, currentColor);
+    text-decoration-thickness: 2px;
   }
   [data-emphasis='blink'] {
     animation: uw-tone-blink 1.2s steps(2, start) infinite;
