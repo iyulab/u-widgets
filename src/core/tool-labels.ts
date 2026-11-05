@@ -102,6 +102,7 @@ const EN: ToolLabels = {
     pageSize: 'Rows per page',
     compact: 'Compact',
     searchable: 'Search box',
+    header: 'Column headers',
     locale: 'Locale',
     timeZone: 'Time zone',
     lineNumbers: 'Line numbers',

@@ -139,6 +139,7 @@ export class UwTable extends LitElement {
     tbody tr[data-tone='past'] td { opacity: 0.6; }
     tbody tr[data-tone='now'] td { font-weight: 700; }
     .row-mark { color: var(--tone); margin-right: 6px; }
+    thead.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     /* A row's emphasis, a second channel besides the tone (as the status card draws it): inverted — the tone as the row's ground — hatched,
        its mark blinking (steady for a reader who asks for less motion), or struck through. */
     tbody tr[data-emphasis='invert'] td { background: var(--tone); color: var(--u-widget-bg, #fff); box-shadow: none; }
@@ -576,6 +577,8 @@ export class UwTable extends LitElement {
     const interactive = this.spec!.options?.interactive !== false;
     const sortable = interactive && this.spec!.options?.sortable !== false;
     const searchable = interactive && !!this.spec!.options?.searchable;
+    // Headers off: the rows alone on screen — the headers stay in the page for a screen reader, the table's column names.
+    const header = this.spec!.options?.header !== false;
     const compact = !!this.spec!.options?.compact;
     const rawPageSize = this.spec!.options?.pageSize;
     const pageSize = !interactive ? 0 : rawPageSize != null
@@ -628,7 +631,7 @@ export class UwTable extends LitElement {
       ${searchBox}
       <div class="table-wrapper" part="table">
         <table aria-label=${this.spec!.title ?? locale.dataTable}>
-          <thead>
+          <thead class=${header ? nothing : 'sr-only'}>
             <tr>
               ${columns.map(
                 (col) => html`<th

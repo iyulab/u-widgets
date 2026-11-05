@@ -1062,6 +1062,19 @@ describe('uw-table', () => {
     });
   });
 
+  describe('options.header', () => {
+    const data = [{ name: 'Pump 1' }, { name: 'Pump 2' }];
+
+    it('draws the column headers by default, and keeps them in the page for a screen reader when it is false', async () => {
+      const shown = await render(createElement({ widget: 'table', data, mapping: { columns: [{ field: 'name', label: 'Name' }] } }));
+      expect(shown.querySelector('thead')?.classList.contains('sr-only')).toBe(false);
+      const hidden = await render(createElement({ widget: 'table', data, options: { header: false }, mapping: { columns: [{ field: 'name', label: 'Name' }] } }));
+      expect(hidden.querySelector('thead')?.classList.contains('sr-only')).toBe(true);
+      expect(hidden.querySelector('thead th')?.textContent).toContain('Name');
+      expect(hidden.querySelectorAll('tbody tr')).toHaveLength(2);
+    });
+  });
+
   describe('list keyboard navigation', () => {
     it('first list item has tabindex 0, others have -1', async () => {
       const el = createElement({

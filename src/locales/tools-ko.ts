@@ -82,6 +82,7 @@ export const toolLabelsKo: ToolLabels = {
     pageSize: '페이지당 행 수',
     compact: '간결하게',
     searchable: '검색 상자',
+    header: '열 머리줄',
     locale: '로케일',
     timeZone: '시간대',
     lineNumbers: '줄 번호',

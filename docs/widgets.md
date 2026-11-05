@@ -379,6 +379,7 @@ the figure itself takes the metric's `target` when it has none of its own.
 |---|---|---|
 | `pageSize` | `number` | 페이지당 행 수. 설정 시 하단 페이지 컨트롤 표시 |
 | `searchable` | `boolean` | 검색 입력 필드 표시 (기본: false) |
+| `header` | `boolean` | `false` — draws the rows alone, with no column headers on screen (they stay in the page for a screen reader, and a column cannot be sorted by clicking one); default true |
 | `sortable` | `boolean` | 컬럼 헤더 클릭으로 정렬 (기본: true) |
 | `interactive` | `boolean` | `false` — a table only to be looked at (a wall, a board): no search, sorting, pages, row focus or picking a row (default: true) |
 | `maxItems` | `number` | Show at most this many rows when the table is not paged, then a line saying how many more |
