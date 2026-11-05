@@ -69,10 +69,20 @@ export function flattenRow(row: Record<string, unknown>): Record<string, unknown
 }
 
 /**
+ * A list of records a source cuts or pads holds `null` where a record would be (`[{...}, null, {...}]`): there is no record, so no row —
+ * a widget that read it would fail on the first one. A list of values keeps its `null`s: a gap in a series is a value.
+ */
+function withoutHoles(data: unknown): unknown {
+  if (!Array.isArray(data) || !data.some(isPlainObject)) return data;
+  return data.some((row) => row === null || row === undefined) ? data.filter((row) => row !== null && row !== undefined) : data;
+}
+
+/**
  * `data` in the shape `widget` reads: columns become rows for a widget that takes an array, and a
  * chart's or table's nested rows read by dotted path. Anything else is returned as it is.
  */
 export function toRows(widget: string, data: unknown): unknown {
+  data = withoutHoles(data);
   if (!ARRAY_DATA.has(widget)) return data;
   const rows = isColumnar(data) ? columnsToRows(data) : data;
   if (!Array.isArray(rows) || !readsFieldsByPath(widget)) return rows;

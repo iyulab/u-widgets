@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A list of records that holds `null` where a record would be — what a source answers when it cuts or pads a list — no longer breaks the widget that reads it: a `bar-list` or a histogram drew nothing and logged "Cannot convert undefined or null to object". The `null` is no record, so it is no row; a list of values keeps its `null`s (a gap in a series).
+
 ### Added
 
 - `options.header: false` on a `table` draws the rows alone, with no column headers on screen — a list of rows under a heading of the page's own. The headers stay in the page for a screen reader; a column cannot then be sorted by clicking its header.

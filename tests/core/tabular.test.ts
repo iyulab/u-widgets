@@ -16,6 +16,21 @@ const features = [
   { type: 'Feature', id: 'b', properties: { mag: 5.1, place: 'Inland' }, geometry: { type: 'Point', coordinates: [120.5, 23.9] } },
 ];
 
+describe('a list of records with holes', () => {
+  const holey = [{ label: 'A', value: 1 }, null, { label: 'B', value: 2 }, undefined];
+
+  it('has no row where a source left a null — for every widget that reads rows, listed or not', () => {
+    for (const widget of ['bar-list', 'chart.histogram', 'chart.bar', 'table', 'list']) {
+      expect(toRows(widget, holey)).toEqual([{ label: 'A', value: 1 }, { label: 'B', value: 2 }]);
+    }
+  });
+
+  it('keeps the nulls of a series of values — a gap is a value — and a list with none is read as it was', () => {
+    expect(toRows('chart.line', [1, null, 3])).toEqual([1, null, 3]);
+    expect(toRows('table', [{ a: 1 }])).toEqual([{ a: 1 }]);
+  });
+});
+
 describe('columns', () => {
   it('recognizes an object of equal-length arrays', () => {
     expect(isColumnar(hourly)).toBe(true);
