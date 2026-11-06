@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- A `status-card` reading with an empty label (`label: ""`) draws its value, with no words beside it, instead of vanishing — a reading with no `label` at all is still left out.
 - A list of records that holds `null` where a record would be — what a source answers when it cuts or pads a list — no longer breaks the widget that reads it: a `bar-list` or a histogram drew nothing and logged "Cannot convert undefined or null to object". The `null` is no record, so it is no row; a list of values keeps its `null`s (a gap in a series).
 
 ### Added

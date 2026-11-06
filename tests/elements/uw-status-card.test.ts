@@ -31,6 +31,14 @@ describe('uw-status-card', () => {
     expect(readings[1].getAttribute('data-tone')).toBe('alarm');
   });
 
+  it('draws a reading whose label is empty — the value alone — and still leaves out one with no label at all', async () => {
+    const root = await card({
+      title: 'Pump P-3', tone: 'ok',
+      readings: [{ label: '', value: 7 }, { value: 9 }, { label: 'Flow', value: 12 }],
+    }, { locale: 'en-US' });
+    expect([...root.querySelectorAll('.reading')].map(r => r.querySelector('dd')?.textContent)).toEqual(['7', '12']);
+  });
+
   it('names the state with the tone’s name in the widget’s locale when it has no words of its own', async () => {
     registerLocale('ko', ko);
     const root = await card({ title: '펌프', tone: 'alarm' }, { locale: 'ko' });

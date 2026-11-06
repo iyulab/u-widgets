@@ -282,7 +282,7 @@ export class UwStatusCard extends LitElement {
     const value = (v: unknown, format?: unknown, unit?: unknown) =>
       `${typeof format === 'string' ? formatValue(v, format, locale) : v == null ? '—' : String(v)}${text(unit) ? ` ${unit}` : ''}`;
     const readings = (Array.isArray(d.readings) ? d.readings : [])
-      .filter((r): r is Record<string, unknown> => r != null && typeof r === 'object' && text((r as Record<string, unknown>).label) !== undefined)
+      .filter((r): r is Record<string, unknown> => r != null && typeof r === 'object' && (r as Record<string, unknown>).label != null)
       .map(r => ({
         label: String(r.label),
         value: value(r.value, r.format, r.unit),
