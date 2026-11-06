@@ -156,6 +156,9 @@ export function toEChartsOption(spec: UWidgetSpec, size?: ChartSize): Record<str
   // A value format the spec gives its value axis — and its unit — is also how the tooltip writes the values.
   if (isCartesian && valueFormat) applyTooltipValueFormat(result, valueFormat, locale, unit);
 
+  // showLabel: true — each bar, point or area step writes its value, in the value format and unit the tooltip uses.
+  if (isCartesian && options.showLabel === true) applyValueLabels(result, widget, options, valueFormat, locale, unit);
+
   // valueAxisZero: false — the value axis spans the data instead of always reaching zero, for a series that
   // moves far from zero (a control chart around its centre line, a process temperature). ECharts calls it `scale`.
   if (isCartesian && options.valueAxisZero === false) {
@@ -1593,6 +1596,35 @@ function applyTooltipValueFormat(result: Record<string, unknown>, fmt: string, l
   if (!tooltip || tooltip.formatter !== undefined) return;
   const format = buildAxisFormatter(fmt, locale, false, unit);
   result.tooltip = { ...tooltip, valueFormatter: (value: unknown) => (typeof value === 'number' ? format(value) : String(value ?? '')) };
+}
+
+/**
+ * Data labels on a bar, line or area chart's series: the value, written in the value axis's format and unit. A bar
+ * writes it above (to the right when horizontal, inside when stacked, where a label above would sit on the next
+ * segment); a line writes it above its point. A series the spec gave its own `label` keeps it.
+ */
+function applyValueLabels(
+  result: Record<string, unknown>,
+  widget: string,
+  options: Record<string, unknown>,
+  fmt: string | undefined,
+  locale?: string,
+  unit?: string,
+): void {
+  if (!Array.isArray(result.series)) return;
+  const format = fmt ? buildAxisFormatter(fmt, locale, false, unit) : undefined;
+  const position = widget === 'chart.bar' ? (options.stack ? 'inside' : options.horizontal ? 'right' : 'top') : 'top';
+  result.series = (result.series as Record<string, unknown>[]).map((s) => {
+    if (s.label !== undefined) return s;
+    const label: Record<string, unknown> = { show: true, position };
+    if (format) {
+      label.formatter = (params: { value?: unknown }) => {
+        const raw = Array.isArray(params.value) ? params.value[params.value.length - 1] : params.value;
+        return typeof raw === 'number' ? format(raw) : String(raw ?? '');
+      };
+    }
+    return { ...s, label };
+  });
 }
 
 /** A timestamp as a local wall-clock ISO string (`YYYY-MM-DDTHH:mm:ss.sss`) — no UTC shift. */

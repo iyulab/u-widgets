@@ -429,7 +429,7 @@ with each row's tone — a stripe, a tint and the tone's mark in the first cell 
 | `referenceLines` | `object[]` | bar, line, area, scatter, histogram, gantt | Lines at a value — a limit, a target: `axis` (`'y'` the value axis of an upright chart, `'x'` the category or time axis; on a `horizontal` bar chart the values run along `'x'`), `value`, `label`, `color`, `style` (`'solid'`, `'dashed'`, `'dotted'`). A value-axis line past the data widens the axis to reach it |
 | `series` | `object[]` | bar, line, area | Per-series settings, in `mapping.y` order: `label` (the name in the legend and tooltip — the field name otherwise, which is often a source's code such as `PM`), `color`, `lineStyle` (`'solid'`, `'dashed'` or `'dotted'` as in `referenceLines`, or an ECharts `lineStyle` object such as `{ "type": "dashed", "width": 2 }`), `symbol`, `type`, `yAxisIndex` |
 | `donut` | `boolean` | pie | Donut chart |
-| `showLabel` | `boolean` | pie, gantt | Show data labels (gantt: in-bar segment labels, default on) |
+| `showLabel` | `boolean` | bar, line, area, pie, gantt | Show data labels (bar, line, area: the value, in the value format and unit — off unless `true`; gantt: in-bar segment labels, default on) |
 | `categories` | `string[]` | gantt | Row order top to bottom; listed rows stay on the axis without intervals |
 | `echarts` | `object` | all charts | Raw ECharts option passthrough (recursively deep-merged; `series`, `xAxis` and `yAxis` arrays merge element by element; see below) |
 | `colorRange` | `[string, string]` | heatmap | 색상 범위 `["#e0f2fe","#0c4a6e"]` |

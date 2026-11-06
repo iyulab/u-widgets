@@ -369,7 +369,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.line': ['smooth', 'stack', 'step', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'unit', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.area': ['smooth', 'stack', 'colors', 'series', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'unit', 'valueAxisZero', 'xAxisType', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.pie': ['donut', 'colors', 'legend', 'animate', 'showLabel', 'echarts'],
-  'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
+  'chart.scatter': ['colors', 'referenceLines', 'conditionalStyles', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'echarts'],
   'chart.radar': ['colors', 'legend', 'animate', 'showLabel', 'echarts'],
   'chart.heatmap': ['colorRange', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.box': ['colors', 'legend', 'grid', 'animate', 'echarts'],

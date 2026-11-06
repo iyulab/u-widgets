@@ -512,6 +512,41 @@ describe('toEChartsOption', () => {
       const series = result.series as ObjArray;
       expect(series[0].label).toEqual({ show: false });
     });
+
+    it('writes the value on every bar when showLabel is true, above it — inside when stacked, to the right when horizontal', () => {
+      const data = [{ k: 'x', v: 3 }, { k: 'y', v: 5 }];
+      const bar = (options: Obj) => (toEChartsOption(spec({ widget: 'chart.bar', data, mapping: { x: 'k', y: 'v' }, options })).series as ObjArray)[0].label as Obj;
+      expect(bar({ showLabel: true })).toMatchObject({ show: true, position: 'top' });
+      expect(bar({ showLabel: true, stack: true })).toMatchObject({ position: 'inside' });
+      expect(bar({ showLabel: true, horizontal: true })).toMatchObject({ position: 'right' });
+    });
+
+    it('draws no data label on a bar, a line or an area unless showLabel is true', () => {
+      const data = [{ k: 'x', v: 3 }];
+      for (const widget of ['chart.bar', 'chart.line', 'chart.area']) {
+        const series = toEChartsOption(spec({ widget, data, mapping: { x: 'k', y: 'v' }, options: {} })).series as ObjArray;
+        expect(series[0].label).toBeUndefined();
+        const shown = toEChartsOption(spec({ widget, data, mapping: { x: 'k', y: 'v' }, options: { showLabel: true } })).series as ObjArray;
+        expect((shown[0].label as Obj).show).toBe(true);
+      }
+    });
+
+    it('writes the label in the value format and unit the chart gives its value axis', () => {
+      const series = toEChartsOption(spec({
+        widget: 'chart.bar', data: [{ k: 'x', v: 1234.5 }], mapping: { x: 'k', y: 'v' },
+        options: { showLabel: true, yFormat: 'number:1', unit: 'kg' },
+      })).series as ObjArray;
+      const formatter = (series[0].label as Obj).formatter as (p: { value: unknown }) => string;
+      expect(formatter({ value: 1234.5 })).toMatch(/1,?234\.5\s*kg/);
+    });
+
+    it('keeps a label the spec gave a series, and the echarts passthrough still wins', () => {
+      const own = toEChartsOption(spec({
+        widget: 'chart.bar', data: [{ k: 'x', v: 3 }], mapping: { x: 'k', y: 'v' },
+        options: { showLabel: true, echarts: { series: [{ label: { show: true, position: 'inside' } }] } },
+      })).series as ObjArray;
+      expect(own[0].label).toMatchObject({ position: 'inside' });
+    });
   });
 
   describe('options: echarts passthrough', () => {
