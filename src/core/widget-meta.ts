@@ -374,7 +374,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.heatmap': ['colorRange', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'chart.box': ['colors', 'legend', 'grid', 'animate', 'echarts'],
   'chart.funnel': ['colors', 'legend', 'animate', 'showLabel', 'echarts'],
-  'chart.waterfall': ['colors', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
+  'chart.waterfall': ['colors', 'legend', 'grid', 'animate', 'echarts'],
   'chart.treemap': ['colors', 'animate', 'showLabel', 'echarts'],
   'chart.histogram': ['bins', 'colors', 'referenceLines', 'xFormat', 'yFormat', 'legend', 'grid', 'animate', 'echarts'],
   'chart.gantt': ['categories', 'colors', 'referenceLines', 'xFormat', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],

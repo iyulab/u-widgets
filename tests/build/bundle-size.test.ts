@@ -79,7 +79,9 @@ describe('bundle size budget', () => {
     // read from the tokens, ISO times on the category axis labelled in the locale, the value format in the tooltip.
     // Re-baselined from 11.5 KB for the texture of a gantt interval (hatch lines, a dashed outline): measured 11.60 KB with it
     // (11.26 KB before) — the line pattern drawn once per colour, the words read per row and the segment's style.
-    expect(size).toBeLessThan(11.75 * 1024);
+    // Re-baselined from 11.75 KB for the values a bar, a line and an area write on request (`showLabel`) and the labels
+    // a radar, a funnel and a treemap now take: measured 11.79 KB with them — the label formatter in the value format.
+    expect(size).toBeLessThan(12 * 1024);
   });
 
   it('tools bundle (with its names chunk) is under 22 KB gzip', () => {

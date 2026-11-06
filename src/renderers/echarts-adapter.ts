@@ -839,7 +839,7 @@ function buildPie(
 function buildRadar(
   data: unknown,
   mapping: NormalizedMapping | undefined,
-  _options: Record<string, unknown>,
+  options: Record<string, unknown>,
 ): Record<string, unknown> {
   if (!Array.isArray(data)) return {};
 
@@ -865,6 +865,8 @@ function buildRadar(
       {
         type: 'radar',
         data: series,
+        // showLabel: true writes each value at its point on the web.
+        ...(options.showLabel === true && { label: { show: true } }),
       },
     ],
   };
@@ -1035,7 +1037,7 @@ const FUNNEL_LABEL_INSIDE_MIN = 0.3;
 function buildFunnel(
   data: unknown,
   mapping: NormalizedMapping | undefined,
-  _options: Record<string, unknown>,
+  options: Record<string, unknown>,
 ): Record<string, unknown> {
   if (!Array.isArray(data)) return {};
 
@@ -1062,7 +1064,7 @@ function buildFunnel(
       data: seriesData,
       sort: 'descending',
       gap: 2,
-      label: { show: true, position: 'inside' },
+      label: { show: options.showLabel !== false, position: 'inside' },
     }],
   };
 }
@@ -1165,7 +1167,7 @@ function buildWaterfall(
 
 function buildTreemap(
   data: unknown,
-  _options: Record<string, unknown>,
+  options: Record<string, unknown>,
 ): Record<string, unknown> {
   if (!Array.isArray(data)) return {};
 
@@ -1179,7 +1181,7 @@ function buildTreemap(
       data: seriesData,
       leafDepth: 1,
       roam: false,
-      label: { show: true, formatter: '{b}' },
+      label: { show: options.showLabel !== false, formatter: '{b}' },
     }],
   };
 }
