@@ -5,6 +5,7 @@
 ### Fixed
 
 - A `status-card` reading with an empty label (`label: ""`) draws its value, with no words beside it, instead of vanishing — a reading with no `label` at all is still left out.
+- The CDN script (`u-widgets.global.js`) draws charts again on a page that loads the full `echarts` build: it threw while loading (`Cannot read properties of undefined (reading 'install')`) because the named charts it registers are not exports of that global, and every `chart.*` widget stayed a "module not loaded" notice.
 - A `progress` bar reads the `min` and `unit` it lists: the bar runs from `min` to `max` (it always ran from 0, and `aria-valuemin` said 0), and the unit is written after the value in the label (and in a `{value}` of the label template). Both were listed and did nothing. A `gauge` no longer lists `label` — it was never read; the gauge's words under the value are `subtitle`, and `label` is the `progress` template.
 - A list of records that holds `null` where a record would be — what a source answers when it cuts or pads a list — no longer breaks the widget that reads it: a `bar-list` or a histogram drew nothing and logged "Cannot convert undefined or null to object". The `null` is no record, so it is no row; a list of values keeps its `null`s (a gap in a series).
 

@@ -19,7 +19,9 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([
+// The CDN script maps these imports onto the page's `echarts` global, a full build that has every chart and
+// component registered already and exports none of them by name — `use` is then given nothing to install.
+echartsUse([
   BarChart,
   LineChart,
   PieChart,
@@ -39,6 +41,10 @@ echarts.use([
   VisualMapComponent,
   CanvasRenderer,
 ]);
+
+function echartsUse(modules: unknown[]): void {
+  echarts.use(modules.filter(Boolean) as Parameters<typeof echarts.use>[0]);
+}
 
 @customElement('uw-chart')
 export class UwChart extends LitElement {
