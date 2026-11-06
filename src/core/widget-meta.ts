@@ -380,7 +380,7 @@ export const WIDGET_OPTIONS: Readonly<Record<string, readonly string[]>> = {
   'chart.gantt': ['categories', 'colors', 'referenceLines', 'xFormat', 'legend', 'grid', 'animate', 'showLabel', 'echarts'],
   'metric': ['format'],
   'stat-group': ['format'],
-  'gauge': ['min', 'max', 'unit', 'thresholds', 'label', 'subtitle', 'format', 'form', 'band', 'marks'],
+  'gauge': ['min', 'max', 'unit', 'thresholds', 'subtitle', 'format', 'form', 'band', 'marks'],
   'progress': ['min', 'max', 'unit', 'thresholds', 'label', 'format'],
   'bar-list': ['max', 'form', 'glyph', 'glyphValue', 'maxItems', 'sort', 'compact'],
   'table': ['pageSize', 'compact', 'searchable', 'sortable', 'interactive', 'maxItems', 'header'],

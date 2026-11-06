@@ -495,8 +495,9 @@ export class UwGauge extends LitElement {
     const data = this.spec!.data as Record<string, unknown>;
     const value = Number(data.value ?? 0);
     const opts = this.getOptions();
-    const max = opts.max;
-    const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
+    const { min, max } = opts;
+    const range = max - min;
+    const pct = range > 0 ? Math.max(0, Math.min(100, ((value - min) / range) * 100)) : 0;
     const color = this.getThresholdColor(value, opts);
     const label = this.formatLabel(value, pct);
 
@@ -506,7 +507,7 @@ export class UwGauge extends LitElement {
       <div class="progress-container" part="progress"
         role="progressbar"
         aria-valuenow=${value}
-        aria-valuemin=${0}
+        aria-valuemin=${min}
         aria-valuemax=${max}
         aria-label=${ariaLabel}
       >
@@ -532,7 +533,7 @@ export class UwGauge extends LitElement {
 
   private formatLabel(value: number, pct: number): string {
     const opts = this.getOptions();
-    const shown = this.formatShown(value, opts);
+    const shown = `${this.formatShown(value, opts)}${opts.unit}`;
     const template = (this.spec!.options as Record<string, unknown> | undefined)?.label;
     if (template) {
       return String(template)

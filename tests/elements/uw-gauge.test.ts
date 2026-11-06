@@ -301,6 +301,25 @@ describe('uw-gauge', () => {
       expect(info?.textContent).toContain('65%');
     });
 
+    it('runs the bar from options.min, and says so to a screen reader', async () => {
+      const el = createElement({
+        widget: 'progress',
+        data: { value: 60 },
+        options: { min: 20, max: 100 },
+      });
+      const shadow = await render(el);
+      const fill = shadow.querySelector('.progress-bar-fill') as HTMLElement;
+      expect(fill.style.width).toBe('50%');
+      expect(shadow.querySelector('[role="progressbar"]')?.getAttribute('aria-valuemin')).toBe('20');
+    });
+
+    it('writes options.unit after the value, also in a {value} label template', async () => {
+      const plain = await render(createElement({ widget: 'progress', data: { value: 65 }, options: { unit: 'kg' } }));
+      expect(plain.querySelector('.progress-info span')?.textContent).toBe('65kg');
+      const templated = await render(createElement({ widget: 'progress', data: { value: 65 }, options: { unit: 'kg', label: 'now {value}' } }));
+      expect(templated.querySelector('.progress-info span')?.textContent).toBe('now 65kg');
+    });
+
     it('clamps percentage to 0-100', async () => {
       const el = createElement({
         widget: 'progress',
