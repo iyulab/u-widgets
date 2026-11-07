@@ -127,3 +127,34 @@ the element that uses them, so they only take effect on that specific tag:
 |----------|---------|---------|
 | `--u-widget-chart-height-narrow` | `200px` | `uw-chart` (inside a `max-width: 20rem` container query) |
 | `--u-widget-gauge-size` | `160px` | `uw-gauge` (`max-width`) |
+
+## Type and title knobs a host may set (none declared)
+
+These are read with a fallback and **declared nowhere** — a host that sets nothing gets every widget exactly as drawn
+before. Set them on the widget, a wrapper or `:root` (they inherit into the shadow tree).
+
+| Property | Default | Effect |
+|----------|---------|--------|
+| `--u-widget-figure-scale` | `1` | Multiplies the size of the headline figure of `metric` and `stat-group`, at every width it is drawn in |
+| `--u-widget-figure-weight` | `700` | Font weight of that figure |
+| `--u-widget-value-scale` | `1` | Multiplies the size of a value: a `status-card` reading, a `list` row's trailing value and time, a `kv` value, a `table` row's trailing value |
+| `--u-widget-value-weight` | `600` (`status-card`, `kv`) · `500` (`list` trailing value) · inherited (`table` row) | Font weight of those values |
+| `--u-widget-title-scale` | `1` | Multiplies the size of a `header`'s heading (1.5 / 1.25 / 1.1rem by level) |
+| `--u-widget-kicker-color` | `--u-widget-text-secondary` | Colour of a `header`'s kicker |
+
+The value knobs are apart from the figure knobs on purpose: enlarging the headline figure of a `metric` does not enlarge
+every value in a row.
+
+### The title above a widget as a band or a tab
+
+The title is plain text unless a host sets these; with a fill and an ink it is drawn as a filled strip, and with
+`inline-block` and `max-content` as a tab.
+
+| Property | Default | Effect |
+|----------|---------|--------|
+| `--u-widget-title-bg` | `transparent` | Fill of the title |
+| `--u-widget-title-ink` | `--u-widget-text` | Text colour of the title |
+| `--u-widget-title-pad` | `0` | Padding of the title |
+| `--u-widget-title-radius` | `0` | Corner radius of the title |
+| `--u-widget-title-display` | `block` | `inline-block` (with a width below) makes a tab |
+| `--u-widget-title-width` | `auto` | `max-content` shrinks the title to its text |

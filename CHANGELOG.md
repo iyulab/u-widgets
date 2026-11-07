@@ -9,6 +9,10 @@
 - A `progress` bar reads the `min` and `unit` it lists: the bar runs from `min` to `max` (it always ran from 0, and `aria-valuemin` said 0), and the unit is written after the value in the label (and in a `{value}` of the label template). Both were listed and did nothing. A `gauge` no longer lists `label` — it was never read; the gauge's words under the value are `subtitle`, and `label` is the `progress` template.
 - A list of records that holds `null` where a record would be — what a source answers when it cuts or pads a list — no longer breaks the widget that reads it: a `bar-list` or a histogram drew nothing and logged "Cannot convert undefined or null to object". The `null` is no record, so it is no row; a list of values keeps its `null`s (a gap in a series).
 
+### Documentation
+
+- The skill's custom-properties reference lists the knobs a host may set and that are declared nowhere: the figure, value and heading scales and weights, the kicker colour, and the title band/tab tokens (`--u-widget-title-bg`, `-ink`, `-pad`, `-radius`, `-display`, `-width`).
+
 ### Added
 
 - `showLabel: true` on a `bar`, `line` or `area` chart writes each value on its bar or point, in the format and unit the value axis uses (above the bar; inside it when stacked; to its right when horizontal). The option was listed for these charts, the scatter, the waterfall, the radar, the funnel and the treemap and changed nothing on any of them. A radar now writes its values with `true`; a funnel and a treemap hide their labels with `false` (they showed them always); the scatter and the waterfall no longer list it. The `echarts` passthrough still sets a series' own label.
