@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-08
+
 ### Fixed
 
 - A `status-card` reading with an empty label (`label: ""`) draws its value, with no words beside it, instead of vanishing — a reading with no `label` at all is still left out.
