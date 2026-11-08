@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `@formdown/core` and `@formdown/ui` are taken at 0.26.0 (they were pinned at 0.24.0); the form widget is drawn as before — the unit, end-to-end and MCP suites pass unchanged.
+
 ## [0.49.0] - 2026-11-08
 
 ### Fixed
