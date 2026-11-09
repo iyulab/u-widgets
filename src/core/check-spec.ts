@@ -1,6 +1,6 @@
 import { help } from './catalog.js';
 import { result, validate, type ValidationIssue, type ValidationResult } from './schema.js';
-import { WIDGET_OPTIONS, getWidgetOptions } from './widget-meta.js';
+import { OPTION_TYPES, WIDGET_OPTIONS, getWidgetOptions } from './widget-meta.js';
 import { checkMediaUrl, getMediaOrigins } from './media.js';
 import { FRAMES, isFrame } from './frame.js';
 
@@ -66,7 +66,7 @@ export function checkSpec(spec: unknown): ValidationResult {
       }
       const problem = typeProblem(value, info.type, info.enum);
       if (problem) warnings.push(`options.${key} ${problem}`);
-      else if (key in ITEM_FIELDS && Array.isArray(value)) warnings.push(...itemProblems(key, value));
+      else if (info.items && Array.isArray(value)) warnings.push(...itemProblems(key, value));
     }
   }
 
@@ -101,51 +101,20 @@ function mediaWarnings(widget: string, data: unknown): string[] {
   return out;
 }
 
-type FieldCheck = (value: unknown) => string | undefined;
-
-const ofType = (type: 'string' | 'number'): FieldCheck => (value) => (typeof value === type ? undefined : `should be a ${type}, not ${JSON.stringify(value)}`);
-const oneOf = (values: readonly string[]): FieldCheck => (value) =>
-  values.includes(value as string) ? undefined : `should be one of ${values.map((v) => `"${v}"`).join(', ')}, not ${JSON.stringify(value)}`;
-const LINE_STYLES = ['solid', 'dashed', 'dotted'] as const;
-
-/**
- * The fields of each item of the options that are lists of settings — a misspelt field there (`lineStyle` on a
- * reference line, which takes `style`) is dropped by the chart without a sign, so it is named here.
- */
-const ITEM_FIELDS: Record<string, { name: string; fields: Record<string, FieldCheck> }> = {
-  referenceLines: {
-    name: 'a reference line',
-    fields: {
-      axis: oneOf(['x', 'y']),
-      value: (v) => (typeof v === 'number' || typeof v === 'string' ? undefined : `should be a number or a string, not ${JSON.stringify(v)}`),
-      label: ofType('string'),
-      color: ofType('string'),
-      style: oneOf(LINE_STYLES),
-    },
-  },
-  series: {
-    name: 'a series',
-    fields: {
-      label: ofType('string'),
-      color: ofType('string'),
-      lineStyle: (v) => (v !== null && typeof v === 'object' && !Array.isArray(v) ? undefined : oneOf(LINE_STYLES)(v)),
-      symbol: ofType('string'),
-      type: ofType('string'),
-      yAxisIndex: ofType('number'),
-    },
-  },
-};
+/** What a list of settings is called where the check names it — the fields each item takes are in `OPTION_TYPES[key].items`. */
+const ITEM_NAMES: Readonly<Record<string, string>> = { referenceLines: 'a reference line', series: 'a series' };
 
 /** What is wrong with the items of the list option `key` — fields it does not have, values of the wrong kind. */
 function itemProblems(key: string, items: unknown[]): string[] {
-  const { name, fields } = ITEM_FIELDS[key];
+  const fields = OPTION_TYPES[key]?.items ?? {};
+  const name = ITEM_NAMES[key] ?? 'an item';
   return items.flatMap((item, i) => {
     const at = `options.${key}[${i}]`;
     if (item === null || typeof item !== 'object' || Array.isArray(item)) return [`${at} should be an object`];
     return Object.entries(item as Record<string, unknown>).flatMap(([field, value]) => {
-      const check = fields[field];
-      if (!check) return [`${at}.${field} is not a field of ${name} — it takes ${Object.keys(fields).join(', ')}`];
-      const problem = check(value);
+      const info = fields[field];
+      if (!info) return [`${at}.${field} is not a field of ${name} — it takes ${Object.keys(fields).join(', ')}`];
+      const problem = typeProblem(value, info.type, info.enum);
       return problem ? [`${at}.${field} ${problem}`] : [];
     });
   });
@@ -169,12 +138,21 @@ function oneEditApart(target: string, typed: string): boolean {
 
 /** What is wrong with `value` for an option of `type` — only the simple types are judged; a structured one passes. */
 function typeProblem(value: unknown, type: string, values?: readonly string[]): string | undefined {
+  // A setting that is a word of a list or a settings object (a series' `lineStyle`): an object is taken, anything else is held to the words.
+  if (values && type.endsWith(' | object') && value !== null && typeof value === 'object' && !Array.isArray(value)) return undefined;
   if (values) return values.includes(value as string) ? undefined : `should be one of ${values.map((v) => `"${v}"`).join(', ')}, not ${JSON.stringify(value)}`;
   if (type === 'number' || type === 'string' || type === 'boolean') {
     return typeof value === type ? undefined : `should be a ${type}, not ${JSON.stringify(value)}`;
   }
   if (type === 'string[]') {
     return Array.isArray(value) && value.every((v) => typeof v === 'string') ? undefined : `should be a list of strings, not ${JSON.stringify(value)}`;
+  }
+  if (type === 'number | string') {
+    return typeof value === 'number' || typeof value === 'string' ? undefined : `should be a number or a string, not ${JSON.stringify(value)}`;
+  }
+  // A list of settings is a list: an object where the list goes is read as a list by nothing (a chart's code calls a list's method on it and stops).
+  if (type === 'object[]') {
+    return Array.isArray(value) ? undefined : `should be a list of objects, not ${JSON.stringify(value)}`;
   }
   return undefined;
 }

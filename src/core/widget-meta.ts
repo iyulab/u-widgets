@@ -132,7 +132,7 @@ export const OPTION_DOCS: Readonly<Record<string, string>> = {
   echarts: 'Raw ECharts option, deep-merged onto the generated one — what the other options do not say',
   histogram: 'Histogram mode (bar)',
   bins: 'Number of histogram bins (auto: Sturges rule)',
-  referenceLines: 'Reference/threshold lines',
+  referenceLines: 'Reference/threshold lines [{value, axis?: "x"|"y", label?, color?, style?: "solid"|"dashed"|"dotted"}]',
   categories: 'Row order top to bottom; listed rows show even without intervals (gantt)',
   series: "Per-series overrides in mapping.y order [{label?, color?, lineStyle?: 'solid'|'dashed'|'dotted'|{ECharts lineStyle}, symbol?, type?, yAxisIndex?}]",
   conditionalStyles: 'Per-point conditional styling rules [{field, above?, below?, color, symbol?, symbolSize?}]',
@@ -202,7 +202,15 @@ export interface OptionTypeInfo {
   readonly type: string;
   readonly enum?: readonly string[];
   readonly default?: unknown;
+  /**
+   * A list of settings (`object[]`): what each item may carry, by field — an item field not named here is read by no chart
+   * (`checkSpec` says so), and its value has the type given. Present only on the options that are lists of settings.
+   */
+  readonly items?: Readonly<Record<string, OptionTypeInfo>>;
 }
+
+/** The line styles a reference line (`style`) and a series (`lineStyle`) take. */
+export const LINE_STYLE_WORDS: readonly string[] = ['solid', 'dashed', 'dotted'];
 
 const choice = (values: readonly string[], defaultValue?: string): OptionTypeInfo => ({
   type: values.map(v => `"${v}"`).join(' | '),
@@ -228,9 +236,28 @@ export const OPTION_TYPES: Readonly<Record<string, OptionTypeInfo>> = {
   echarts: { type: 'object' },
   histogram: { type: 'boolean', default: false },
   bins: { type: 'number' },
-  referenceLines: { type: 'object[]' },
+  referenceLines: {
+    type: 'object[]',
+    items: {
+      axis: choice(['x', 'y']),
+      value: { type: 'number | string' },
+      label: { type: 'string' },
+      color: { type: 'string' },
+      style: choice(LINE_STYLE_WORDS),
+    },
+  },
   categories: { type: 'string[]' },
-  series: { type: 'object[]' },
+  series: {
+    type: 'object[]',
+    items: {
+      label: { type: 'string' },
+      color: { type: 'string' },
+      lineStyle: { type: '"solid" | "dashed" | "dotted" | object', enum: LINE_STYLE_WORDS },
+      symbol: { type: 'string' },
+      type: { type: 'string' },
+      yAxisIndex: { type: 'number' },
+    },
+  },
   conditionalStyles: { type: 'object[]' },
   subtitle: { type: 'string' },
   format: { type: 'string' },

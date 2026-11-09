@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { checkSpec } from '../../src/core/check-spec.js';
 import { help } from '../../src/core/catalog.js';
+import { getWidgetOptions } from '../../src/core/widget-meta.js';
 import { specErrorMessage } from '../../src/core/schema.js';
 import type { WidgetDetail } from '../../src/core/catalog.js';
 
@@ -78,6 +79,35 @@ describe('checkSpec', () => {
       'options.referenceLines[1].axis should be one of "x", "y", not "z"',
       'options.series[0].lineStyle should be one of "solid", "dashed", "dotted", not "dash"',
     ]);
+  });
+
+  it('names what a chart option that is a list of settings takes — a list, and the fields each item has', () => {
+    const warn = (options: Record<string, unknown>) => checkSpec({ widget: 'chart.line', data: [{ x: 'a', y: 1 }], options }).warnings;
+    // the ECharts shape a reference line is often written in: none of its words are the ones a reference line takes
+    expect(warn({ referenceLines: [{ type: 'line', yAxis: 20, lineStyle: { type: 'dashed' }, label: { formatter: '20' } }] })).toEqual([
+      'options.referenceLines[0].type is not a field of a reference line — it takes axis, value, label, color, style',
+      'options.referenceLines[0].yAxis is not a field of a reference line — it takes axis, value, label, color, style',
+      'options.referenceLines[0].lineStyle is not a field of a reference line — it takes axis, value, label, color, style',
+      'options.referenceLines[0].label should be a string, not {"formatter":"20"}',
+    ]);
+    // an object where the list goes: the chart calls a list's method on it and draws nothing
+    expect(warn({ referenceLines: { y: [{ value: 20 }] } })).toEqual(['options.referenceLines should be a list of objects, not {"y":[{"value":20}]}']);
+    expect(warn({ series: 'x' })).toEqual(['options.series should be a list of objects, not "x"']);
+    // what a reference line takes is taken, a series' lineStyle is a word or an ECharts lineStyle object
+    expect(warn({ referenceLines: [{ value: 20, label: 'Target', axis: 'y', color: '#c00', style: 'dashed' }, { value: '2026-04-06', axis: 'x' }] })).toEqual([]);
+    expect(warn({ series: [{ lineStyle: 'dotted' }, { lineStyle: { type: 'dashed' }, yAxisIndex: 1 }] })).toEqual([]);
+  });
+
+  it('says the fields of a list option in the metadata the catalog and the tools read', () => {
+    const referenceLines = getWidgetOptions('chart.line').find((o) => o.key === 'referenceLines')!;
+    expect(referenceLines.type).toBe('object[]');
+    expect(Object.keys(referenceLines.items ?? {})).toEqual(['axis', 'value', 'label', 'color', 'style']);
+    expect(referenceLines.items!.axis!.enum).toEqual(['x', 'y']);
+    // the description a model reads says the shape of an item, as the other list options' do
+    expect(referenceLines.desc).toContain('{value, axis?');
+    expect(getWidgetOptions('chart.line').find((o) => o.key === 'series')!.items).toHaveProperty('lineStyle');
+    // an option that is not a list of settings carries none
+    expect(getWidgetOptions('chart.line').find((o) => o.key === 'smooth')!.items).toBeUndefined();
   });
 
   it('answers as validate does when the structure itself is wrong', () => {

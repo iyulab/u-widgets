@@ -5,6 +5,12 @@
 ### Changed
 
 - `@formdown/core` and `@formdown/ui` are taken at 0.26.0 (they were pinned at 0.24.0); the form widget is drawn as before — the unit, end-to-end and MCP suites pass unchanged.
+- The description of the `referenceLines` option says the shape of an item — `[{value, axis?, label?, color?, style?}]` — as `series` and `conditionalStyles` already did. A tool that lists a chart's options had no word for it, and a reference line written in ECharts' own shape (`yAxis`, `lineStyle`, a `label` object) was dropped by the chart without a sign.
+- `checkSpec` refuses an object where a list of settings goes (`referenceLines: { y: [...] }`, `series: "x"`): the chart calls a list's method on it and draws nothing, and the check had let it through. It says it wants a list of objects.
+
+### Added
+
+- `getWidgetOptions` carries, on an option that is a list of settings (`referenceLines`, `series`), the fields an item takes and the type of each (`items`), from the same table `checkSpec` holds items to — one source, so a tool that reads the options and the check that refuses a misspelt field cannot disagree.
 
 ## [0.49.0] - 2026-11-08
 
