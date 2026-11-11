@@ -90,7 +90,7 @@ export class UWidget extends LitElement {
       }
 
       .error-header { font-weight: 600; color: var(--u-widget-negative, #dc2626); margin-bottom: 4px; }
-      .error-list { margin: 0; padding-left: 20px; color: var(--u-widget-text-secondary, #5b6777); }
+      .error-list { margin: 0; padding-inline-start: 20px; color: var(--u-widget-text-secondary, #5b6777); }
 
       .fallback-card {
         padding: 10px 14px;

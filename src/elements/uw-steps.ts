@@ -270,7 +270,7 @@ export class UwSteps extends LitElement {
       }
 
       .step-h .step-label {
-        text-align: left;
+        text-align: start;
         white-space: normal;
         margin-top: 0;
         line-height: 24px;

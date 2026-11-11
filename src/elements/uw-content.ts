@@ -80,13 +80,13 @@ export class UwContent extends LitElement {
 
     .markdown ul,
     .markdown ol {
-      padding-left: 1.5em;
+      padding-inline-start: 1.5em;
       margin: 0.5em 0;
     }
 
     .markdown blockquote {
-      border-left: 3px solid var(--u-widget-border, #e2e8f0);
-      padding-left: 12px;
+      border-inline-start: 3px solid var(--u-widget-border, #e2e8f0);
+      padding-inline-start: 12px;
       margin: 0.5em 0;
       color: var(--u-widget-text-secondary, #5b6777);
     }
@@ -116,7 +116,7 @@ export class UwContent extends LitElement {
     .markdown th {
       background: var(--u-widget-surface, #f1f5f9);
       font-weight: 600;
-      text-align: left;
+      text-align: start;
     }
 
     .markdown hr {
@@ -163,14 +163,14 @@ export class UwContent extends LitElement {
       overflow-y: auto;
       padding: 12px 16px;
       border-radius: 6px;
-      border-left: 4px solid;
+      border-inline-start: 4px solid;
       font-size: var(--u-widget-font-size, 0.875rem);
       line-height: 1.5;
     }
 
     .callout {
       background: color-mix(in srgb, var(--tone) 12%, var(--u-widget-bg, #fff));
-      border-left-color: var(--tone);
+      border-inline-start-color: var(--tone);
       color: var(--u-widget-text, #1a1a2e);
     }
 

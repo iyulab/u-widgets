@@ -110,7 +110,7 @@ export class UwHeader extends LitElement {
       align-items: flex-end;
       gap: 6px 16px;
     }
-    .when { text-align: right; margin-left: auto; }
+    .when { text-align: end; margin-inline-start: auto; }
     .date {
       font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);

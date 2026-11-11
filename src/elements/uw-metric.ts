@@ -190,7 +190,7 @@ export class UwMetric extends LitElement {
       font-size: var(--u-widget-font-size, 0.875rem);
       font-weight: 400;
       color: var(--u-widget-text-secondary, #5b6777);
-      margin-left: 4px;
+      margin-inline-start: 4px;
     }
 
     .metric-change {
@@ -268,29 +268,29 @@ export class UwMetric extends LitElement {
       flex-wrap: wrap;
       gap: 1rem 1.5rem;
       /* 모든 셀이 구분선+패딩을 가지므로 행 선두 셀 몫을 왼쪽 바깥으로 밀어낸다 */
-      margin-left: calc(-1.5rem - 1px);
+      margin-inline-start: calc(-1.5rem - 1px);
     }
 
     .stat-group .metric {
       flex: 1 1 auto;
       /* 값보다 좁아지지 않게 — 겹침 대신 wrap. 위젯 전체보다 긴 극단값은 100%로 캡 */
       min-width: min(100%, max-content);
-      border-left: 1px solid var(--u-widget-border, #e2e8f0);
-      padding-left: 1.5rem;
+      border-inline-start: 1px solid var(--u-widget-border, #e2e8f0);
+      padding-inline-start: 1.5rem;
     }
 
     @container uw-metric (max-width: 30rem) {
       .stat-group {
         flex-direction: column;
         gap: 1rem;
-        margin-left: 0;
+        margin-inline-start: 0;
       }
 
       .stat-group .metric {
         flex: none;
         min-width: 0;
-        border-left: none;
-        padding-left: 0;
+        border-inline-start: none;
+        padding-inline-start: 0;
       }
 
       .stat-group .metric + .metric {

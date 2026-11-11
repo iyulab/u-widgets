@@ -55,7 +55,7 @@ export class UwTable extends LitElement {
     }
 
     th {
-      text-align: left;
+      text-align: start;
       font-weight: 600;
       color: var(--u-widget-text-secondary, #5b6777);
       padding: 8px 12px;
@@ -79,7 +79,7 @@ export class UwTable extends LitElement {
     }
 
     .sort-arrow {
-      margin-left: 4px;
+      margin-inline-start: 4px;
       font-size: var(--u-widget-font-size-overline, 0.6875rem);
     }
 
@@ -118,7 +118,7 @@ export class UwTable extends LitElement {
 
     th[data-align='right'],
     td[data-align='right'] {
-      text-align: right;
+      text-align: end;
     }
 
     /* A right-aligned column is a column of figures: set in the figure face, digits of one width. */
@@ -138,7 +138,7 @@ export class UwTable extends LitElement {
     tbody tr[data-tone]:not([data-tone='past']):not([data-tone='next']) td { background: color-mix(in srgb, var(--tone) 9%, transparent); }
     tbody tr[data-tone='past'] td { opacity: 0.6; }
     tbody tr[data-tone='now'] td { font-weight: 700; }
-    .row-mark { color: var(--tone); margin-right: 6px; }
+    .row-mark { color: var(--tone); margin-inline-end: 6px; }
     thead.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     /* A row's emphasis, a second channel besides the tone (as the status card draws it): inverted — the tone as the row's ground — hatched,
        its mark blinking (steady for a reader who asks for less motion), or struck through. */
@@ -149,7 +149,7 @@ export class UwTable extends LitElement {
     @keyframes row-blink { to { visibility: hidden; } }
     tbody tr[data-emphasis='blink'] .row-mark { animation: row-blink 1.2s steps(2, start) infinite; }
     @media (prefers-reduced-motion: reduce) { tbody tr[data-emphasis='blink'] .row-mark { animation: none; font-weight: 700; } }
-    .cell-mark { margin-right: 4px; }
+    .cell-mark { margin-inline-end: 4px; }
 
     /* A bar cell: the value against its column's scale, written beside it. */
     .cell-bar { display: inline-flex; align-items: center; gap: 8px; width: 100%; min-width: 80px; }
@@ -194,7 +194,7 @@ export class UwTable extends LitElement {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 0 10px 8px;
+      padding-block: 10px; padding-inline: 8px 0;
       border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
       cursor: pointer;
       outline: none;
@@ -295,19 +295,19 @@ export class UwTable extends LitElement {
     .list-cell {
       flex: none;
       min-width: 3em;
-      text-align: right;
+      text-align: end;
       font-family: var(--u-widget-font-numeric);
       font-variant-numeric: tabular-nums;
       font-size: var(--u-widget-font-size-label, 0.8125rem);
     }
-    .list-cell[data-align='left'] { text-align: left; }
+    .list-cell[data-align='left'] { text-align: start; }
     .list-cell[data-align='center'] { text-align: center; }
     .list-cell[data-tone] { color: var(--tone); font-weight: 600; }
 
     .list-head {
       display: flex;
       gap: 12px;
-      padding: 0 0 4px 8px;
+      padding-block: 0 4px; padding-inline: 8px 0;
       border-bottom: 1px solid var(--u-widget-border, #e2e8f0);
       color: var(--u-widget-text-secondary, #5b6777);
       font-size: var(--u-widget-font-size-overline, 0.6875rem);
@@ -317,7 +317,7 @@ export class UwTable extends LitElement {
 
     .list-more {
       flex: none;
-      padding: 6px 0 2px 8px;
+      padding-block: 6px 2px; padding-inline: 8px 0;
       color: var(--u-widget-text-secondary, #5b6777);
       font-size: var(--u-widget-font-size-caption, 0.75rem);
     }
@@ -349,12 +349,12 @@ export class UwTable extends LitElement {
       gap: 4px;
       padding: 8px 10px;
       border: 1px solid var(--u-widget-border, #e2e8f0);
-      border-left: 3px solid var(--tone, var(--u-widget-border, #e2e8f0));
+      border-inline-start: 3px solid var(--tone, var(--u-widget-border, #e2e8f0));
       border-radius: var(--u-widget-radius, 6px);
     }
     .tiles .list-item:last-child { border-bottom: 1px solid var(--u-widget-border, #e2e8f0); }
     .tiles .list-content { width: 100%; }
-    .tiles .list-cell { text-align: left; }
+    .tiles .list-cell { text-align: start; }
 
     .list-badge {
       flex-shrink: 0;
@@ -445,7 +445,7 @@ export class UwTable extends LitElement {
     }
 
     .compact .list-item {
-      padding: 6px 0 6px 8px;
+      padding-block: 6px; padding-inline: 8px 0;
       gap: 8px;
     }
 
@@ -494,7 +494,7 @@ export class UwTable extends LitElement {
       }
 
       .list-item {
-        padding: 6px 0 6px 8px;
+        padding-block: 6px; padding-inline: 8px 0;
         gap: 8px;
       }
 

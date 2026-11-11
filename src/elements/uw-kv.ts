@@ -61,11 +61,11 @@ export class UwKv extends LitElement {
     }
 
     .kv-vertical .kv-key {
-      text-align: right;
+      text-align: end;
     }
 
     .kv-vertical .kv-value {
-      text-align: left;
+      text-align: start;
     }
 
     .kv-key {
@@ -79,7 +79,7 @@ export class UwKv extends LitElement {
       font-size: calc(var(--u-widget-font-size, 0.875rem) * var(--u-widget-value-scale, 1));
       font-weight: var(--u-widget-value-weight, 600);
       color: var(--u-widget-text, #1a1a2e);
-      text-align: right;
+      text-align: end;
       overflow: hidden;
       text-overflow: ellipsis; /* ellipsis-ok: title carries the full value (hover) */
       white-space: nowrap;
@@ -90,7 +90,7 @@ export class UwKv extends LitElement {
       font-variant-numeric: tabular-nums;
     }
     .kv-pair[data-tone] .kv-value { color: var(--tone); }
-    .kv-mark { margin-right: 3px; font-size: 0.85em; }
+    .kv-mark { margin-inline-end: 3px; font-size: 0.85em; }
     .kv-note {
       font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
@@ -107,7 +107,7 @@ export class UwKv extends LitElement {
     }
 
     .kv-horizontal .kv-value {
-      text-align: left;
+      text-align: start;
     }
 
     .kv-grid .kv-pair {
@@ -116,7 +116,7 @@ export class UwKv extends LitElement {
     }
 
     .kv-grid .kv-value {
-      text-align: left;
+      text-align: start;
     }
 
     @container uw-kv (max-width: 20rem) {

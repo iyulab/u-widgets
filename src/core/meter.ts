@@ -110,7 +110,7 @@ export const meterStyles = css`
     top: -3px;
     bottom: -3px;
     width: 2px;
-    margin-left: -1px;
+    margin-inline-start: -1px;
     background: var(--u-widget-text, #1a1a2e);
   }
   .meter-ring { flex: none; width: 2.25em; height: 2.25em; transform: rotate(-90deg); }

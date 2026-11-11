@@ -72,8 +72,8 @@ export class UwStatusCard extends LitElement {
       gap: 8px;
       flex: 1 1 auto;
       min-height: 0;
-      padding: 10px 12px 10px 14px;
-      border-left: 4px solid var(--tone, var(--u-widget-border, #e2e8f0));
+      padding-block: 10px; padding-inline: 14px 12px;
+      border-inline-start: 4px solid var(--tone, var(--u-widget-border, #e2e8f0));
       box-sizing: border-box;
       overflow: hidden;
     }
@@ -149,7 +149,7 @@ export class UwStatusCard extends LitElement {
     [data-emphasis='stamp'] .badge { display: none; }
     .card > .tone-stamp {
       position: absolute;
-      right: 10px;
+      inset-inline-end: 10px;
       bottom: 10px;
       font-size: var(--u-widget-font-size-label, 0.8125rem);
     }
@@ -202,7 +202,7 @@ export class UwStatusCard extends LitElement {
 
     /* compact: the name and the badge share one line and each reading is its label and value side by side — a card of
        a dozen on one board stays readable at about 50px tall. */
-    .card[data-compact] { padding: 4px 8px 4px 10px; gap: 2px; }
+    .card[data-compact] { padding-block: 4px; padding-inline: 10px 8px; gap: 2px; }
     .card[data-compact] .head { flex-wrap: nowrap; align-items: center; gap: 6px; }
     .card[data-compact] .ident { flex: 1 1 auto; align-items: center; }
     .card[data-compact] .picture { width: 24px; height: 24px; font-size: 1rem; }
@@ -221,7 +221,7 @@ export class UwStatusCard extends LitElement {
 
     /* A small box: tighter, the picture shrinks, the readings stack. */
     @container uw-status-card (max-width: 180px) {
-      .card { padding: 8px 8px 8px 10px; gap: 6px; }
+      .card { padding-block: 8px; padding-inline: 10px 8px; gap: 6px; }
       .picture { width: 28px; height: 28px; font-size: 1.1rem; }
       .readings { grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); gap: 4px 8px; }
     }

@@ -8,6 +8,10 @@
 - The description of the `referenceLines` option says the shape of an item — `[{value, axis?, label?, color?, style?}]` — as `series` and `conditionalStyles` already did. A tool that lists a chart's options had no word for it, and a reference line written in ECharts' own shape (`yAxis`, `lineStyle`, a `label` object) was dropped by the chart without a sign.
 - `checkSpec` refuses an object where a list of settings goes (`referenceLines: { y: [...] }`, `series: "x"`): the chart calls a list's method on it and draws nothing, and the check had let it through. It says it wants a list of objects.
 
+### Fixed
+
+- **The widgets mirror in a right-to-left page.** Their stylesheets named screen sides (`padding-left`, `border-left`, `margin-right`, `text-align: left|right`, `right: 10px`, four-value `padding`), so in a page with `dir="rtl"` a markdown list's indent, a quote's bar, a status card's tone bar, a key–value list's label axis, a table's text and number columns, the marks beside a value and a stat group's divider stayed on the left. They now use the logical forms (`padding-inline-start`, `border-inline-start`, `text-align: start|end`, `inset-inline-end`, `padding-block` + `padding-inline`), which draw exactly as before in a left-to-right page. A table column's `align: 'left' | 'right'` in a spec reads as the start or end of the line (it flips in a right-to-left page). The `bevel` and `well` frames keep their lit upper-left edge on both directions — a light source is a screen side, not a reading direction.
+
 ### Added
 
 - `getWidgetOptions` carries, on an option that is a list of settings (`referenceLines`, `series`), the fields an item takes and the type of each (`items`), from the same table `checkSpec` holds items to — one source, so a tool that reads the options and the check that refuses a misspelt field cannot disagree.

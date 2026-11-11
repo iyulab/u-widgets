@@ -328,8 +328,8 @@ export class UwCode extends LitElement {
     .line-no {
       display: inline-block;
       width: 3ch;
-      text-align: right;
-      margin-right: 1.5ch;
+      text-align: end;
+      margin-inline-end: 1.5ch;
       color: var(--u-widget-text-secondary, #94a3b8);
       user-select: none;
       opacity: 0.5;
@@ -352,7 +352,7 @@ export class UwCode extends LitElement {
     @container uw-code (max-width: 20rem) {
       pre { font-size: var(--u-widget-font-size-caption, 0.75rem); padding: 8px; }
       .code-header { padding: 4px 8px; }
-      .line-no { width: 2.5ch; margin-right: 1ch; }
+      .line-no { width: 2.5ch; margin-inline-end: 1ch; }
     }
   `];
 

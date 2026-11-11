@@ -55,7 +55,9 @@ export const frameStyles = css`
     box-shadow: var(--u-widget-shadow);
   }
   /* Raised and sunken: a light edge on one side and a dark one on the other, both made from the paper's own colour, so the pair
-     reads on any paper. Square — an edge cut at a corner would show the join. */
+     reads on any paper. Square — an edge cut at a corner would show the join.
+     physical-ok: the light comes from the upper left — the pair of edges names screen sides (a lit and a shaded one), not a reading
+     direction, so it stays the same in a right-to-left page. */
   [data-frame='bevel'] {
     border-radius: 0;
     border: 2px solid;

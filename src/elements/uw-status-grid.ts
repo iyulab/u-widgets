@@ -103,13 +103,13 @@ export class UwStatusGrid extends LitElement {
       font-size: var(--u-widget-font-size-caption, 0.75rem);
       color: var(--u-widget-text-secondary, #5b6777);
     }
-    .count-mark { color: var(--tone); margin-right: 3px; }
+    .count-mark { color: var(--tone); margin-inline-end: 3px; }
     .count-n {
       font-family: var(--u-widget-font-numeric);
       font-variant-numeric: tabular-nums;
       font-weight: 600;
       color: var(--u-widget-text, #1a1a2e);
-      margin-left: 4px;
+      margin-inline-start: 4px;
     }
   `];
 
