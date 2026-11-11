@@ -253,6 +253,45 @@ describe('formatValue', () => {
       expect(formatValue(12345, 'date')).toBe('12345');
     });
 
+    describe('an epoch timestamp, when the format names its unit', () => {
+      const at = new Date(2025, 0, 15, 14, 30, 5);
+
+      it('reads milliseconds as the local wall-clock time', () => {
+        expect(formatValue(at.getTime(), 'date:ms')).toBe('2025-01-15');
+        expect(formatValue(at.getTime(), 'datetime:ms')).toBe('2025-01-15 14:30');
+        expect(formatValue(at.getTime(), 'time:ms')).toBe('14:30');
+      });
+
+      it('reads seconds', () => {
+        expect(formatValue(Math.floor(at.getTime() / 1000), 'datetime:s')).toBe('2025-01-15 14:30');
+      });
+
+      it('follows the locale as a date string does', () => {
+        expect(formatValue(at.getTime(), 'date:ms', 'en-US')).toBe(
+          new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(at)
+        );
+      });
+
+      it('NEGATIVE: a number with no unit is still not a date — 20250115 may be a compact date', () => {
+        expect(formatValue(at.getTime(), 'date')).toBe(String(at.getTime()));
+        expect(formatValue(20250115, 'date')).toBe('20250115');
+      });
+
+      it('NEGATIVE: a value that is not a finite number is shown as it is', () => {
+        expect(formatValue(NaN, 'date:ms')).toBe('NaN');
+        expect(formatValue(Infinity, 'date:ms')).toBe('Infinity');
+        expect(formatValue(String(at.getTime()), 'date:ms')).toBe(String(at.getTime()));
+      });
+
+      it('NEGATIVE: an unknown unit is no unit', () => {
+        expect(formatValue(at.getTime(), 'date:us')).toBe(String(at.getTime()));
+      });
+
+      it('NEGATIVE: a timestamp beyond the year 9999 is left as it is', () => {
+        expect(formatValue(8.64e15, 'date:ms')).toBe('8640000000000000');
+      });
+    });
+
     it('handles zero for number format', () => {
       expect(formatValue(0, 'number')).toBe('0');
     });

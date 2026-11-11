@@ -14,6 +14,7 @@
 
 ### Added
 
+- **`date:ms` · `datetime:ms` · `time:ms` (and `:s`) read an epoch timestamp.** The date formats read strings; a number passed through as it was (`formatValue(12345, 'date')` is `'12345'`, and still is — `20250115` could as well be a compact date), so a table cell or a metric holding epoch milliseconds showed the raw number. Naming the unit makes it a date: the moment is written as local wall-clock time, as a date string without an offset is. No parameter, an unknown one, or a value that is not a finite number behaves as before.
 - `getWidgetOptions` carries, on an option that is a list of settings (`referenceLines`, `series`), the fields an item takes and the type of each (`items`), from the same table `checkSpec` holds items to — one source, so a tool that reads the options and the check that refuses a misspelt field cannot disagree.
 
 ## [0.49.0] - 2026-11-08

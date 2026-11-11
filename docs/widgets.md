@@ -131,6 +131,10 @@ its parts (`2025-01-15 14:30`, `2025.01.15`), or as compact digits (`20250115`, 
 `20250115 1430`) — the forms public APIs often use. A time without an offset is shown as the wall-clock time
 it writes; a value that is not a valid date is shown as it is.
 
+A number is not read as a date by itself — `20250115` may be a compact date, `12345` is nothing — so epoch timestamps name their unit:
+`date:ms`, `datetime:ms`, `time:ms` for milliseconds and `date:s`, `datetime:s`, `time:s` for seconds since 1970. The moment is written as local wall-clock
+time, as a date string without an offset is. A timestamp on a chart's time axis needs no unit — the axis already knows it is one.
+
 ## Sizing
 
 Every widget grows to fit its content, so a widget in normal page flow needs no height at all.

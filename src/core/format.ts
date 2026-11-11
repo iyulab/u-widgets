@@ -56,7 +56,9 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * Supported formats: `"number"` (a value too small for three fraction digits keeps four significant digits, in
  * scientific notation — `7.729E-8`), `"number:2"` (fixed fraction digits), `"compact"`, `"compact:2"` (`1.2K`, `3.4M` — up to
  * that many fraction digits, one by default), `"compact:KRW"` (a currency, compact — `₩1.2억`), `"currency"`,
- * `"currency:EUR"`, `"percent"`, `"percent:1"`, `"date"`, `"datetime"`, `"time"`, `"bytes"`. Returns `String(value)` for
+ * `"currency:EUR"`, `"percent"`, `"percent:1"`, `"date"`, `"datetime"`, `"time"` (`"date:ms"` · `"datetime:s"` — the value is an epoch
+ * timestamp in milliseconds / seconds, written as local wall-clock time; without `:ms` / `:s` a number is not read as a date, since digits
+ * such as `20250115` are as likely a compact date), `"bytes"`. Returns `String(value)` for
  * unknown formats, except a spreadsheet number-format code (`"#,##0.00"`, `"0.0%"`), which `@iyulab/u-widgets/components`
  * reads with the engine `@iyulab/components` shares with its table and sheet. It is the one grammar a format is written in — a value's `format`, a column's, a chart axis's.
  *
@@ -76,6 +78,7 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
  * formatValue(1234.5, 'currency:EUR') // "€1,234.50"
  * formatValue(73, 'percent')          // "73%"
  * formatValue(1536000, 'bytes')       // "1.5 MB"
+ * formatValue(new Date(2025, 0, 15, 14, 30).getTime(), 'datetime:ms') // "2025-01-15 14:30" — the local wall clock
  * formatValue(null, 'currency:KRW')   // "—"
  * ```
  */
@@ -95,11 +98,11 @@ export function formatValue(value: unknown, format?: string, locale?: string): s
     case 'percent':
       return formatPercent(value, locale, digits(param));
     case 'date':
-      return formatDate(value, locale);
+      return formatDate(epochText(value, param), locale);
     case 'datetime':
-      return formatDatetime(value, locale);
+      return formatDatetime(epochText(value, param), locale);
     case 'time':
-      return formatTime(value, locale);
+      return formatTime(epochText(value, param), locale);
     case 'bytes':
       return formatBytes(value);
     default:
@@ -207,6 +210,27 @@ function formatPercent(value: unknown, locale?: string, fractionDigits?: number)
   }
   const text = fractionDigits === undefined ? String(num) : num.toFixed(fractionDigits);
   return (Number(text) === 0 ? text.replace(/^-/, '') : text) + '%';
+}
+
+/** A timestamp as a local wall-clock ISO string (`YYYY-MM-DDTHH:mm:ss.sss`) — no UTC shift. */
+export function localIsoString(ms: number): string {
+  const offset = new Date(ms).getTimezoneOffset() * 60_000;
+  return new Date(ms - offset).toISOString().slice(0, 23);
+}
+
+/**
+ * `date:ms` · `date:s` (and `datetime` · `time`) — a finite number is an epoch timestamp in milliseconds or seconds and becomes the local
+ * wall-clock text the date formats read. Any other parameter, no parameter, or a value that is not a finite number is returned as it
+ * came: a number is not a date by itself (`12345` stays `12345`; `20250115` could be a compact date), only the host that says
+ * the unit makes it one. A timestamp beyond the years 0000–9999 is left as it is too.
+ */
+function epochText(value: unknown, unit: string | undefined): unknown {
+  if ((unit !== 'ms' && unit !== 's') || typeof value !== 'number' || !Number.isFinite(value)) return value;
+  const ms = unit === 's' ? value * 1000 : value;
+  const date = new Date(ms);
+  const year = date.getFullYear();
+  if (Number.isNaN(date.getTime()) || year < 0 || year > 9999) return value;
+  return localIsoString(ms);
 }
 
 /** A date (and time) as a string writes it: ISO 8601 (`2025-01-15T14:30:00Z`) and the variations APIs use —

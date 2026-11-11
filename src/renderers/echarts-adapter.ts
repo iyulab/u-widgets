@@ -1,6 +1,6 @@
 import type { UWidgetSpec, NormalizedMapping, ReferenceLineOption, ChartSeriesOption, LineStyleKeyword } from '../core/types.js';
 import { escapeHtml } from '../core/escape.js';
-import { formatValue, parseDateText } from '../core/format.js';
+import { formatValue, localIsoString, parseDateText } from '../core/format.js';
 import { normalizeMapping } from '../core/normalize.js';
 import { isDateLikeString } from '../core/utils.js';
 import { infer } from '../core/infer.js';
@@ -1627,12 +1627,6 @@ function applyValueLabels(
     }
     return { ...s, label };
   });
-}
-
-/** A timestamp as a local wall-clock ISO string (`YYYY-MM-DDTHH:mm:ss.sss`) — no UTC shift. */
-function localIsoString(ms: number): string {
-  const offset = new Date(ms).getTimezoneOffset() * 60_000;
-  return new Date(ms - offset).toISOString().slice(0, 23);
 }
 
 /**
