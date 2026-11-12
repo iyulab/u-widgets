@@ -666,7 +666,7 @@ export class UwTable extends LitElement {
                 : nothing;
               const cells = columns.map((col, c) => {
                 const { tone, content } = cell(col, row);
-                return html`<td data-align=${col.align ?? 'left'} data-tone=${tone ?? nothing} part="td">${c === 0 ? mark : nothing}${content}</td>`;
+                return html`<td data-align=${col.align ?? 'left'} data-tone=${tone ?? nothing} part="td">${c === 0 ? mark : nothing}<bdi>${content}</bdi></td>`;
               });
               return interactive
                 ? html`
