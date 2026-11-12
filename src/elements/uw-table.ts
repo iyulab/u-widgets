@@ -2,7 +2,8 @@ import { LitElement, html, css, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { UWidgetSpec, UWidgetColumnDefinition, UWidgetEvent } from '../core/types.js';
 import { formatValue } from '../core/format.js';
-import { getLocaleStrings } from '../core/locale.js';
+import { getLocaleStrings, resolveLocale } from '../core/locale.js';
+import { compareText } from '../core/compare.js';
 import { themeStyles } from '../styles/tokens.js';
 import { isEmphasis, normalizeTone, toneLabel, toneMark, toneStyles, TONE_GLYPHS, type Tone } from '../core/tone.js';
 import { formatTemplate } from '../core/locale.js';
@@ -852,6 +853,7 @@ export class UwTable extends LitElement {
   private sortData(data: Record<string, unknown>[]): Record<string, unknown>[] {
     const field = this._sortField!;
     const dir = this._sortDir!;
+    const widgetLocale = typeof this.spec?.options?.locale === 'string' ? this.spec.options.locale : undefined;
     return [...data].sort((a, b) => {
       const av = a[field];
       const bv = b[field];
@@ -867,7 +869,7 @@ export class UwTable extends LitElement {
         const an = Number(av), bn = Number(bv);
         cmp = (String(av) !== '' && String(bv) !== '' && !isNaN(an) && !isNaN(bn))
           ? an - bn
-          : String(av).localeCompare(String(bv));
+          : compareText(String(av), String(bv), resolveLocale(widgetLocale));
       }
       return dir === 'asc' ? cmp : -cmp;
     });

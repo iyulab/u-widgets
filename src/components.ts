@@ -9,8 +9,10 @@
  * all three. Without this import such a `format` is shown as the plain value, with a console warning.
  * A table's search box matches as the components select and table filters do — case and diacritics folded, Korean
  * initials (`ㅅㅇ` finds `서울`), and rows narrowing while a Korean syllable is still being typed; without this import it
- * matches the text case-insensitively and waits for the syllable.
- * Requires `@iyulab/components` 2.38 or later (optional peer). Without this import u-widgets stays native and
+ * matches the text case-insensitively and waits for the syllable. A table orders its text columns as the components tables do
+ * — digit runs as numbers (`A-2` before `A-10`), in the app's locale; without this import the order is the same but follows the
+ * widget's own locale, then the page's `lang`.
+ * Requires `@iyulab/components` 3.1 or later (optional peer). Without this import u-widgets stays native and
  * runs without it.
  *
  * u-widgets also follows the `@iyulab/components` locale: its default locale becomes `Locale.get()` and moves with
@@ -33,6 +35,8 @@ import { getDefaultExtensionManager, type Field } from '@formdown/core';
 import { applyNumberFormat } from '@iyulab/components/dist/utilities/numberFormat.js';
 import { setNumberCodeReader } from './core/format.js';
 import { setSearchMatcher } from './core/search.js';
+import { compareText as componentsCompareText } from '@iyulab/components/dist/utilities/collation.js';
+import { setTextComparer } from './core/compare.js';
 import { setDefaultLocale } from './core/locale.js';
 
 const escapeAttr = (text: string) =>
@@ -72,6 +76,10 @@ setNumberCodeReader((value, code, locale) => applyNumberFormat(value, code, loca
 // One search match for the app: a table's search box finds what the components select and table filters find — case and
 // diacritics folded, Korean initials, and a syllable still being composed matched by its keystrokes (the rows narrow while typing).
 setSearchMatcher((text, query, options) => Locale.matchesSearch(text, query, options));
+
+// One text order for the app: a table here orders its rows as the components tables do — digit runs as numbers (`A-2` before
+// `A-10`), the locale the widget resolved (its own, else the app's `Locale.get()`), not the browser's language.
+setTextComparer((a, b, locale) => componentsCompareText(a, b, locale));
 
 // One language for the app: u-widgets' default locale is the components locale, now and after every switch.
 setDefaultLocale(Locale.get());

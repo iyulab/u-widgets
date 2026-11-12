@@ -165,6 +165,9 @@ describe('bundle size budget', () => {
     // object): 10.15 KB measured.
     // Re-baselined from 11 KB for the spreadsheet-code reader point (`setNumberCodeReader`, its two one-time warnings):
     // 11.07 KB measured. The engine itself is not here — it stays in `@iyulab/components`, imported only by `./components`.
-    expect(totalGzip).toBeLessThan(11.5 * 1024);
+    // Re-baselined from 11.5 KB for the text-order reader point (`setTextComparer` and the native collator a table falls
+    // back on): 11.6 KB measured. The components order itself is not here — it stays in `@iyulab/components`, imported only by
+    // `./components`.
+    expect(totalGzip).toBeLessThan(11.75 * 1024);
   });
 });

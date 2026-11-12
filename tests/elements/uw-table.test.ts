@@ -285,6 +285,23 @@ describe('uw-table', () => {
       expect(rows[2].querySelectorAll('td')[0].textContent).toBe('Charlie');
     });
 
+    it('orders digit runs inside text as numbers, and Hangul by the widget locale', async () => {
+      const names = async (locale: string) => {
+        document.body.innerHTML = '';
+        const el = createElement({
+          widget: 'table',
+          options: { locale },
+          data: [{ code: 'A-10' }, { code: 'A-2' }, { code: 'banana' }, { code: '가나다' }, { code: 'A-1' }],
+        });
+        const shadow = await render(el);
+        (shadow.querySelectorAll('th')[0] as HTMLElement).click();
+        await el.updateComplete;
+        return [...shadow.querySelectorAll('tbody tr')].map((r) => r.querySelectorAll('td')[0].textContent);
+      };
+      expect(await names('en')).toEqual(['A-1', 'A-2', 'A-10', 'banana', '가나다']);
+      expect(await names('ko')).toEqual(['가나다', 'A-1', 'A-2', 'A-10', 'banana']);
+    });
+
     it('sorts descending on second header click', async () => {
       const el = createElement({
         widget: 'table',
