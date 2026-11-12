@@ -27,6 +27,9 @@ export default defineConfig({
           include: ['tests/**/*.{test,spec}.ts'],
           exclude: ['tests/browser/**'],
           environment: 'happy-dom',
+          // The first dynamic import (or one test that draws many widgets) in a parallel worker can take longer than the 5 s
+          // default while the other workers load — the full run failed a different test each time and each passed alone.
+          testTimeout: 20_000,
         },
       },
       {
