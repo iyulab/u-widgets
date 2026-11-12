@@ -22,10 +22,10 @@ function collatorFor(locale: string | undefined): Intl.Collator {
   if (!collator) {
     const options: Intl.CollatorOptions = { numeric: true, sensitivity: 'base' };
     try {
-      collator = new Intl.Collator(locale || 'en', options);
+      collator = new Intl.Collator(locale || 'en', options); // compare-ok: the native default; `@iyulab/components` is an optional peer, so the core cannot import its order
     } catch {
       // A malformed tag (`ko_KR`) compares as English rather than throwing in the middle of a sort.
-      collator = new Intl.Collator('en', options);
+      collator = new Intl.Collator('en', options); // compare-ok: the same default, English fallback for a malformed tag
     }
     collators.set(key, collator);
   }
