@@ -319,6 +319,10 @@ export class UwCode extends LitElement {
       font-size: var(--u-widget-font-size-label, 0.8125rem);
       line-height: 1.5;
       tab-size: 2;
+      /* Code reads left to right whatever the page's direction is — a right-to-left paragraph direction moved the closing
+         punctuation of a line to the far end and put the line numbers on the right. */
+      direction: ltr;
+      unicode-bidi: isolate;
       white-space: pre;
     }
     pre[data-wrap="true"] { white-space: pre-wrap; word-break: break-all; }
