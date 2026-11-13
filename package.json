@@ -5,6 +5,7 @@
   "type": "module",
   "module": "./dist/u-widgets.js",
   "types": "./dist/u-widgets.d.ts",
+  "customElements": "./dist/custom-elements.json",
   "unpkg": "./dist/u-widgets.global.js",
   "jsdelivr": "./dist/u-widgets.global.js",
   "exports": {
@@ -65,7 +66,8 @@
   "scripts": {
     "preversion": "node -e \"if(require('fs').existsSync('../../scripts/preversion-check.mjs'))require('child_process').execFileSync('node',['../../scripts/preversion-check.mjs'],{stdio:'inherit'})\"",
     "dev": "vite",
-    "build": "npm run typecheck && vite build",
+    "build": "npm run typecheck && vite build && npm run analyze",
+    "analyze": "cem analyze",
     "postbuild": "node -e \"const fs=require('fs');fs.mkdirSync('dist/themes',{recursive:true});for(const f of fs.readdirSync('src/themes'))fs.copyFileSync('src/themes/'+f,'dist/themes/'+f)\"",
     "build:cdn": "vite build --config vite.cdn.config.ts",
     "build:demo": "vite build --config vite.demo.config.ts",
@@ -127,6 +129,7 @@
     }
   },
   "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
     "@iyulab/components": "^3.0.0",
     "@lit/react": "^1.0.8",
     "@microsoft/api-extractor": "^7.58.8",

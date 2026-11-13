@@ -136,3 +136,7 @@ See [Widget Reference](../../docs/widgets.md#sizing) for the per-widget table.
 - `locale` attribute (e.g. `locale="ko"`) propagates to sub-components for validation messages
   and formatted values — see `registerLocale`/`resolveLocale` in the core module. `setDefaultLocale()` and
   `registerLocale()` re-render widgets on screen at once (form input is kept); listen with `onLocaleChange()`.
+
+## Machine-readable reference
+
+The element surface is also published as a Custom Elements Manifest: the file named by the `customElements` field of this package's `package.json` (`dist/custom-elements.json`). It lists every element's attributes, properties, events (with the type of their `detail`), slots, CSS parts and CSS custom properties, generated from the source at build time. Read it instead of parsing the source when you need the exact surface of an element.

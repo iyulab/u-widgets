@@ -8,6 +8,12 @@ import { getLocaleStrings } from '../core/locale.js';
 import { checkMediaUrl } from '../core/media.js';
 import { mediaBlocked, mediaBlockedStyles } from '../styles/media-blocked.js';
 
+/**
+ * <uw-content> — Content widget: `markdown`, `image` and `callout`.
+ *
+ * Markdown is rendered with its HTML escaped; an image address is checked before it is loaded; a callout is a toned notice
+ * with an optional title and a body.
+ */
 @customElement('uw-content')
 export class UwContent extends LitElement {
   static styles = [themeStyles, toneStyles, mediaBlockedStyles, css`

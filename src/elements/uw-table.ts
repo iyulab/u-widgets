@@ -14,6 +14,13 @@ import { delegate } from './delegate.js';
 
 type SortDir = 'asc' | 'desc' | null;
 
+/**
+ * <uw-table> — Data table widget.
+ *
+ * Columns are the spec's `columns`, or inferred from the data. A sortable header orders the rows — text with digit runs read
+ * as numbers in the widget's locale, a number by value — and the table can be searched. Clicking a row reports it as a
+ * `select` event of the widget.
+ */
 @customElement('uw-table')
 export class UwTable extends LitElement {
   static styles = [themeStyles, toneStyles, css`
