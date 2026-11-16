@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-16
+
 ### Changed
 
 - **A table orders its text columns with digit runs read as numbers, in the widget's locale.** Sorting a column of text used the browser's default string comparison: `A-10` stood before `A-2`, and whether Hangul came before or after Latin followed each user's browser language. A table now compares `A-2` before `A-10`, takes case and diacritics as the same letter (equal rows keep their order), and uses the widget's `options.locale`, then the app default (`setDefaultLocale`), then the page's `lang`. With `@iyulab/u-widgets/components` imported it uses the `@iyulab/components` text order (`compareText`), so the table orders rows as the components tables do; that import now needs `@iyulab/components` 3.1 or later (the optional peer range moves with it). A value that reads as a number still sorts by value.
