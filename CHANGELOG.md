@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **A header with a clock no longer draws a second time when its spec is given after it is on the page.** The clock sets the time it shows
+  when it starts, and it started in `updated()`, so a header that got its spec after being attached was drawn again and, in a development
+  build of Lit, logged «scheduled an update after an update completed» in the console of the app. The clock now starts before the draw.
+
 ## [0.50.0] - 2026-11-16
 
 ### Changed
