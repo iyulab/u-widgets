@@ -171,7 +171,12 @@ export class UwHeader extends LitElement {
     this._timer = undefined;
   }
 
-  protected updated(changed: Map<string, unknown>) {
+  /**
+   * The clock starts (and `_now` is set) before the draw, not after it: `_now` follows from the spec, so setting it in `updated()` drew
+   * the header a second time — and a development build of Lit logged «scheduled an update after an update completed» — whenever the
+   * spec was given after the element was on the page. The timer is guarded by `isConnected`, so a server render starts none.
+   */
+  protected willUpdate(changed: Map<string, unknown>) {
     if (changed.has('spec')) this._syncClock();
   }
 
