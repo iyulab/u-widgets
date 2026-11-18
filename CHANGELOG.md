@@ -8,7 +8,7 @@
 
 ### Changed
 
-- `@formdown/core` and `@formdown/ui` are taken at 0.27.0 (they were at 0.26.0): a number field shows its sign at the end it belongs to in a right-to-left page, and number inputs expose their own part. The form widget is drawn as before in a left-to-right page — the unit suite passes unchanged.
+- `@formdown/core` and `@formdown/ui` are taken at 0.28.0 (they were at 0.26.0): a number field shows its sign at the end it belongs to in a right-to-left page, and number inputs expose their own part. The form widget is drawn as before in a left-to-right page — the unit, end-to-end and MCP suites pass unchanged.
 
 ### Fixed
 
