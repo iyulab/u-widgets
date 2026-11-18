@@ -46,6 +46,12 @@ function echartsUse(modules: unknown[]): void {
   echarts.use(modules.filter(Boolean) as Parameters<typeof echarts.use>[0]);
 }
 
+/**
+ * <uw-chart> — Chart widget (`chart.bar` · `chart.line` · `chart.area` · `chart.pie` · `chart.scatter` · `chart.radar` ·
+ * `chart.heatmap` · `chart.box` · `chart.funnel` · `chart.waterfall` · `chart.treemap` · `chart.histogram` · `chart.gantt`).
+ *
+ * Draws the spec's data with ECharts; the chart type comes from the widget name (`chart.bar` …), the series from the spec's mapping.
+ */
 @customElement('uw-chart')
 export class UwChart extends LitElement {
   static styles = [

@@ -86,6 +86,12 @@ function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg
   return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
 }
 
+/**
+ * <uw-gauge> — Gauge widget: a reading against its scale.
+ *
+ * Drawn as an arc, or as a level that rises — a column, a tank or a thermometer. The scale runs from `data.min` to
+ * `data.max`; thresholds and marks colour and label points along it.
+ */
 @customElement('uw-gauge')
 export class UwGauge extends LitElement {
   static styles = [themeStyles, css`

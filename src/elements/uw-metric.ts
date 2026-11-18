@@ -133,6 +133,12 @@ function toMetricData(
   };
 }
 
+/**
+ * <uw-metric> — Metric widget: a single KPI value, or a row of them (`stat-group`).
+ *
+ * A value is formatted with its unit and format hint, coloured by its tone, and may carry a change against a previous
+ * value, a sparkline, or a meter.
+ */
 @customElement('uw-metric')
 export class UwMetric extends LitElement {
   static styles = [themeStyles, toneStyles, meterStyles, css`

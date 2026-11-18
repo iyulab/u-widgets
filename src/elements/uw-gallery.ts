@@ -14,6 +14,12 @@ interface GalleryItem {
   caption?: string;
 }
 
+/**
+ * <uw-gallery> — Image gallery widget: a grid of images.
+ *
+ * Data is an array of `{ src, alt?, caption? }`; an item without a `src` is left out, and one whose address the media check
+ * refuses is drawn as a blocked placeholder.
+ */
 @customElement('uw-gallery')
 export class UwGallery extends LitElement {
   static styles = [themeStyles, mediaBlockedStyles, css`

@@ -5,6 +5,11 @@ import { themeStyles } from '../styles/tokens.js';
 import { normalizeFrame } from '../core/frame.js';
 import { frameStyles } from '../styles/frames.js';
 
+/**
+ * <uw-compose> — Composition widget: several widgets combined into one card.
+ *
+ * The spec's `children` are drawn in a `stack`, a `row` or a `grid` of `columns`, under an optional title.
+ */
 @customElement('uw-compose')
 export class UwCompose extends LitElement {
   static styles = [themeStyles, frameStyles, css`

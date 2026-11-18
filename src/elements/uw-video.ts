@@ -13,6 +13,12 @@ interface VideoTrack {
   default: boolean;
 }
 
+/**
+ * <uw-video> — Video widget: an HTML5 video player.
+ *
+ * Plays `data.src` with the browser's controls; subtitle and caption tracks come from `data.tracks` (WebVTT). The address
+ * is checked before it is loaded.
+ */
 @customElement('uw-video')
 export class UwVideo extends LitElement {
   static styles = [themeStyles, mediaBlockedStyles, css`
