@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The MCP server (`@iyulab/u-widgets-mcp` 0.7.14) follows `^0.51.0`.
+
 ## [0.51.0] - 2026-11-19
 
 ### Added
