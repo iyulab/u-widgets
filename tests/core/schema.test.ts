@@ -404,6 +404,13 @@ describe('validate — status data', () => {
     expect(validate({ widget: 'chart.bar', data: [{ a: 1 }], options: { yFormat: 'number:1' } }).warnings).toEqual([]);
   });
 
+  it('warns when an axis format is a word the format grammar does not have — it would show the plain value — and takes every word it has', () => {
+    const warnings = (xFormat: string) => validate({ widget: 'chart.bar', data: [{ a: 1 }], options: { xFormat } }).warnings;
+    expect(warnings('month')).toEqual([expect.stringContaining('options.xFormat "month" is not a format')]);
+    expect(validate({ widget: 'chart.line', data: [{ a: 1 }], options: { yFormat: 'monthly' } }).warnings).toEqual([expect.stringContaining('options.yFormat "monthly"')]);
+    for (const ok of ['number', 'number:1', 'compact', 'currency:KRW', 'percent', 'date', 'datetime:ms', 'time', 'bytes', '#,##0.00', '0.0%']) expect(warnings(ok)).toEqual([]);
+  });
+
   it('accepts an item with a value and no label', () => {
     expect(validate({ widget: 'status', data: { value: 'Running' } }).warnings).toEqual([]);
   });

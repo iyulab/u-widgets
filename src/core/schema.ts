@@ -2,6 +2,7 @@ import type { UWidgetSpec, FieldType } from './types.js';
 import { parseFormdown } from './formdown.js';
 import { formatTemplate, getDefaultLocale, type UWidgetLocaleStrings } from './locale.js';
 import { ARRAY_DATA, isColumnar, toRows } from './tabular.js';
+import { FORMAT_WORDS, isKnownFormat } from './format.js';
 
 /** What a validation error is about — stable for code to branch on, while its text follows the locale. */
 export type SpecErrorCode =
@@ -229,6 +230,10 @@ export function validate(spec: unknown, _depth = 0): ValidationResult {
       const value = (obj.options as Record<string, unknown>)[key];
       if (value != null && typeof value === 'object') {
         warnings.push(`options.${key} is a format string now — "number:1", "currency:KRW", "compact", "time" (a unit is options.unit); the object is not read`);
+      }
+      // A word that is not one of the format grammar's is shown as the plain value — said, so the one who wrote it knows it did nothing.
+      if (typeof value === 'string' && value !== '' && !isKnownFormat(value)) {
+        warnings.push(`options.${key} "${value}" is not a format — use ${FORMAT_WORDS.join(', ')} (with a ":" parameter) or a spreadsheet number-format code; the value is shown as is`);
       }
     }
   }

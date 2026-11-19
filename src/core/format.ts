@@ -20,6 +20,14 @@ export function setNumberCodeReader(reader: NumberCodeReader | undefined): void 
   codeReader = reader;
 }
 
+/** The words a format string begins with — `formatValue`'s own list. */
+export const FORMAT_WORDS: readonly string[] = ['number', 'compact', 'currency', 'percent', 'date', 'datetime', 'time', 'bytes'] satisfies FormatType[];
+
+/** Whether `format` is written in the grammar `formatValue` reads: one of its words (with its `:` parameter) or a spreadsheet number-format code. */
+export function isKnownFormat(format: string): boolean {
+  return FORMAT_WORDS.includes(format.split(':')[0]!) || isNumberCode(format);
+}
+
 /** A `format` that is none of u-widgets' words but carries a digit placeholder (`0` `#` `?`) is a spreadsheet code. */
 function isNumberCode(format: string | undefined): format is string {
   return format !== undefined && /[0#?]/.test(format);

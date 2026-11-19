@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **`validate` says when an axis format is a word the format grammar does not have.** `options.xFormat`, `yFormat`, `valueAxisFormat` and `categoryAxisFormat` given a string such as `"month"` were shown as the plain value without a word; `validate` now warns that it is not a format and lists the words (`number`, `compact`, `currency`, `percent`, `date`, `datetime`, `time`, `bytes`, a spreadsheet number-format code).
+
 ## [0.51.0] - 2026-11-19
 
 ### Added
