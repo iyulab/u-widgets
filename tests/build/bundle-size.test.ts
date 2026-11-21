@@ -139,7 +139,7 @@ describe('bundle size budget', () => {
     expect(size).toBeGreaterThan(0);
   });
 
-  it('shared chunks total is under 11 KB gzip', () => {
+  it('shared chunks total is under 11.9 KB gzip', () => {
     const { readdirSync } = require('fs');
     const files = readdirSync(DIST) as string[];
     // The editor names chunk is loaded only by `./tools` and its locales — counted in the tools budget.
@@ -168,6 +168,9 @@ describe('bundle size budget', () => {
     // Re-baselined from 11.5 KB for the text-order reader point (`setTextComparer` and the native collator a table falls
     // back on): 11.6 KB measured. The components order itself is not here — it stays in `@iyulab/components`, imported only by
     // `./components`.
-    expect(totalGzip).toBeLessThan(11.75 * 1024);
+    // Re-baselined from 11.75 KB for validate's note on a format word the grammar does not have (an axis `xFormat: "month"`
+    // was shown as the plain value, silently): the message and the check, with the word list read from `formatValue`'s own
+    // list rather than written twice — 11.77 KB measured.
+    expect(totalGzip).toBeLessThan(11.9 * 1024);
   });
 });
