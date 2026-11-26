@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **`@iyulab/u-widgets/tools` exports the format grammar** — `FORMAT_WORDS` and `isKnownFormat(format)`, the test `validate` warns by, for a checker that holds a format string to it without loading the elements.
+
 ### Fixed
 
 - **The value of a reference line without a label is no longer cut off.** In bar, line, area, scatter, histogram and gantt charts such a line's value was left at the chart library's default place, past the plot's right end, where the layout kept no room for it — on a wide chart `26` showed as `2`. It is now placed as a labelled line's words are: inside the plot above the line's end, or, when the data reaches the line at both ends, past the right end with room kept for it.

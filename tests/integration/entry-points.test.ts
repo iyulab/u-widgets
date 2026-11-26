@@ -65,6 +65,13 @@ describe('entry point: u-widgets/tools', () => {
     expect(typeof mod.autoSpec).toBe('function');
   });
 
+  // A checker that holds a format string to the grammar reads it from here, without the elements.
+  it('exports the format grammar', () => {
+    expect(tools.FORMAT_WORDS).toContain('percent');
+    expect(['percent', 'datetime:HH:mm', '#,##0.0'].every((f) => tools.isKnownFormat(f))).toBe(true);
+    expect(tools.isKnownFormat('month')).toBe(false);
+  });
+
   it('help() returns widget catalog', () => {
     const mod = tools;
     const result = mod.help();

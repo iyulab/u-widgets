@@ -920,6 +920,18 @@ checkSpec({ widget: 'list', data: [], options: { compact: 'yes', dense: true } }
 // → ['options.compact should be a boolean, not "yes"', 'options.dense is not an option of list — it takes compact']
 ```
 
+### 포맷 문법
+
+`xFormat` · `yFormat` · `format` 에 쓰는 문자열이 문법에 맞는지는 같은 진입점의 `isKnownFormat(format)` 이 답한다 — 첫 낱말이
+`FORMAT_WORDS` 중 하나이거나(`:` 매개변수 포함) 스프레드시트 숫자 서식 코드면 참이다.
+
+```ts
+import { FORMAT_WORDS, isKnownFormat } from '@iyulab/u-widgets/tools';
+
+isKnownFormat('datetime:HH:mm'); // true
+isKnownFormat('month');          // false — FORMAT_WORDS 에 없다
+```
+
 ### 속성 편집기용 메타데이터
 
 위젯 spec을 사람이 고치는 편집기(속성 패널, 디자이너)는 위젯 지식을 복제하지 않고 이 메타데이터로 컨트롤을 만든다.

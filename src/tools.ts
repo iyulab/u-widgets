@@ -20,6 +20,7 @@
 
 export { help, template } from './core/catalog.js';
 export { checkSpec } from './core/check-spec.js';
+export { FORMAT_WORDS, isKnownFormat } from './core/format.js';
 export type { WidgetInfo, WidgetDetail } from './core/catalog.js';
 export { suggestMapping, autoSpec } from './core/suggest-mapping.js';
 export type { MappingSuggestion } from './core/suggest-mapping.js';
