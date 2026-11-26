@@ -950,6 +950,34 @@ describe('toEChartsOption', () => {
       expect((result.yAxis as Obj).inverse).toBe(true);
     });
 
+    // A line without a label shows its value. Left to ECharts it was written past the plot's right end, where the
+    // layout leaves no room, and «26» was cut to «2».
+    it('places the value of a line without a label by the same rule as a label', () => {
+      const placed = (options: Record<string, unknown>) => {
+        const result = toEChartsOption(spec({
+          widget: 'chart.bar',
+          data: [{ name: 'a', v: 40 }, { name: 'b', v: 20 }],
+          mapping: { x: 'name', y: 'v' },
+          options,
+        }));
+        return (((result.series as ObjArray)[0].markLine as Obj).data as ObjArray).map((line) => line.label as Obj);
+      };
+      const [named, bare] = placed({ referenceLines: [{ value: 30, label: 'Target' }, { value: 35 }] });
+      expect(bare.position).toBe('insideEndTop');
+      expect(bare.position).toBe(named.position);
+      expect(bare.formatter).toBeUndefined(); // ECharts writes the line's value
+      expect(placed({ horizontal: true, referenceLines: [{ axis: 'x', value: 30 }] })[0].position).toBe('start');
+      // The data reaches the line at both ends: the value goes past the plot's right end, where room is kept for it.
+      const beside = toEChartsOption(spec({
+        widget: 'chart.bar',
+        data: [{ name: 'a', v: 4000 }, { name: 'b', v: 4000 }],
+        mapping: { x: 'name', y: 'v' },
+        options: { referenceLines: [{ value: 2500 }] },
+      }));
+      expect(((((beside.series as ObjArray)[0].markLine as Obj).data as ObjArray)[0].label as Obj).position).toBe('end');
+      expect((beside.grid as Obj).right).toBeGreaterThanOrEqual(20 + '2500'.length * 12);
+    });
+
     it('draws them on an area chart as on a line chart', () => {
       const result = toEChartsOption(spec({
         widget: 'chart.area',

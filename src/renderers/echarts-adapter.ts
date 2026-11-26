@@ -202,7 +202,8 @@ function markLineRoom(result: Record<string, unknown>): { markLineLabel: number;
   const markLines = ((result.series as Record<string, unknown>[] | undefined) ?? []).flatMap((s) => ((s.markLine as { data?: Record<string, unknown>[] } | undefined)?.data ?? []));
   const besideRight = Math.max(0, ...markLines
     .filter((m) => m.yAxis !== undefined && (m.label as { position?: string } | undefined)?.position === 'end')
-    .map((m) => String((m.label as { formatter?: unknown }).formatter ?? '').length * 12 + 8));
+    // Without a formatter the words are the line's value.
+    .map((m) => String((m.label as { formatter?: unknown }).formatter ?? m.yAxis).length * 12 + 8));
   return { markLineLabel: markLines.length > 0 ? 14 : 0, besideRight };
 }
 
@@ -522,14 +523,18 @@ function buildMarkLine(
     symbol: 'none',
     data: refLines.map((rl) => {
       const item: Record<string, unknown> = rl.axis === 'x' ? { xAxis: toX(rl.value) } : { yAxis: rl.value };
-      if (rl.label) {
-        item.name = rl.label;
-        // A y line's label goes inside the plot, above the line's right end: at 'end' it sits outside the plot's
-        // right edge, which the grid leaves no room for, and a label longer than the margin was cut off.
-        // No outline: ECharts strokes a label set inside the plot with a contrasting border, which on a dark board drew
-        // the words doubled. In the line's colour when it has one; otherwise the theme's (uw-chart sets it).
-        item.label = { formatter: rl.label, position: rl.axis === 'x' ? xLabelPosition : yLabelPosition(rl.value), textBorderWidth: 0, ...(rl.color && { color: rl.color }) };
-      }
+      if (rl.label) item.name = rl.label;
+      // What a line says — its label, or without one its value, which ECharts writes — is placed here. A y line's goes
+      // inside the plot, above the line's right end: at 'end', ECharts' default, it sits outside the plot's right edge,
+      // which the grid leaves no room for, and was cut off. No outline: ECharts strokes a label set inside the plot with
+      // a contrasting border, which on a dark board drew the words doubled. In the line's colour when it has one;
+      // otherwise the theme's (uw-chart sets it).
+      item.label = {
+        ...(rl.label && { formatter: rl.label }),
+        position: rl.axis === 'x' ? xLabelPosition : yLabelPosition(rl.value),
+        textBorderWidth: 0,
+        ...(rl.color && { color: rl.color }),
+      };
       const lineStyle: Record<string, unknown> = {};
       if (rl.color) lineStyle.color = rl.color;
       if (rl.style) lineStyle.type = rl.style;
