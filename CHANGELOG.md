@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-27
+
 ### Added
 
 - **`@iyulab/u-widgets/tools` exports the format grammar** — `FORMAT_WORDS` and `isKnownFormat(format)`, the test `validate` warns by, for a checker that holds a format string to it without loading the elements.
