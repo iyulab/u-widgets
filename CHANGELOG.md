@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Requires `@formdown/core` and `@formdown/ui` 0.29.0.** A form field's outline can now be coloured apart from section and table lines with `--formdown-input-border-color`; unset, a form looks as before.
+
 ## [0.53.0] - 2026-11-27
 
 ### Added
